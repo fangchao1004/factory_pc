@@ -44,25 +44,34 @@ class MainView extends Component {
                             position: 'relative'
                         }}
                     >
+                        /> : (
+                     {this.state.collapsed ? ( <img
+                            src={logopng}
+                            alt=""
+                            width="96"
+                            height="60"
+                            style={{ position: 'absolute', left: 0, top: 0 }}
+                        />) : (
                         <img
                             src={logopng}
                             alt=""
-                            width="32"
-                            height="32"
-                            style={{ position: 'absolute', left: 24, top: 16 }}
+                            width="96"
+                            height="60"
+                            style={{ position: 'absolute', left: 24, top: 0 }}
                         />
+                         )}
                         {this.state.collapsed ? null : (
                             <span
                                 style={{
                                     position: 'absolute',
                                     top: 18,
-                                    left: 60,
+                                    left: 120,
                                     width: 180,
                                     color: '#fff',
                                     fontSize: 20
                                 }}
                             >
-                                工厂管理平台
+                                管理平台
               </span>
                         )}
                     </div>
