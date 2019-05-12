@@ -12,39 +12,51 @@ export default class SampleViewTool {
         let renderInput = (element) => {
             return <div key={element.key}>
                 <List>
-                    <InputItem style={{ width: 200 }} key={element.key} value={element.default_value} >{element.title}</InputItem>
+                    <InputItem style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title}</InputItem>
                 </List>
             </div>
         }
         let renderInputNumber = (element) => {
             return <div key={element.key}>
                 <List>
-                    <InputItem style={{ width: 200 }} key={element.key} value={element.default_value} >{element.title}</InputItem>
+                    <InputItem style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title}</InputItem>
                 </List>
             </div>
         }
         let renderRadio = (element) => {
-            let optionsData = element.default_value.split('/')
+            if (element.default_values === '') {
+                return (<div key={element.key}>
+                    <span>{element.title}</span>
+                    <div style={{ textAlign: 'center', fontSize: 20, border: true, color: "#F5232C" }}>请配置选项</div>
+                </div>)
+            }
+            let optionsData = element.default_values.split('/')
             let a = optionsData.map((i, index) => (
                 <RadioItem key={i} checked={index === 0} onChange={() => { }}>
                     {i}
                 </RadioItem>
             ))
             return (
-                <div>
+                <div key={element.key}>
                     <span>{element.title}</span>
                     {a}
                 </div>)
         }
         let renderCheckBox = (element) => {
-            let optionsData = element.default_value.split('/')
+            if (element.default_values === '') {
+                return (<div key={element.key}>
+                    <span>{element.title}</span>
+                    <div style={{ textAlign: 'center', fontSize: 20, border: true, color: "#F5232C" }}>请配置选项</div>
+                </div>)
+            }
+            let optionsData = element.default_values.split('/')
             let a = optionsData.map((i, index) => (
-                <CheckboxItem key={i} checked={index === 0 || index === 1} onChange={() => { }}>
+                <CheckboxItem key={i} checked={index === 0} onChange={() => { }}>
                     {i}
                 </CheckboxItem>
             ))
             return (
-                <div>
+                <div key={element.key}>
                     <span>{element.title}</span>
                     {a}
                 </div>)
@@ -54,7 +66,7 @@ export default class SampleViewTool {
                 <span>{element.title}</span>
                 <List>
                     <TextareaItem
-                        value={element.default_value}
+                        value={element.default_values}
                         rows={3}
                     />
                 </List>
@@ -65,9 +77,16 @@ export default class SampleViewTool {
                 <span>{element.title}</span>
                 <List>
                     <ImagePicker
-                    onAddImageClick={()=>{}}
+                        onAddImageClick={() => { }}
                     />
                 </List>
+            </div>
+        }
+        let renderTitle = (element) => {
+            return <div style={{ marginBottom: 40, textAlign: 'center' }} key={element.key} >
+                <span style={{ fontSize: 20, border: true, color: element.extra_value ? "#888888" : "#F5232C" }}>
+                    {element.extra_value ? element.extra_value : '请选择表单类型'}
+                </span>
             </div>
         }
 
@@ -87,6 +106,8 @@ export default class SampleViewTool {
                     viewArr.push(renderTextArea(element))
                 } else if (element.type_id === "6") {
                     viewArr.push(renderImagePicker(element))
+                } else if (element.type_id === "7") {
+                    viewArr.push(renderTitle(element))
                 }
             });
         }
