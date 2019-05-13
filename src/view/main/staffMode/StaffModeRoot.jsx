@@ -1,14 +1,19 @@
 import React, { Component } from 'react';
 import { Card } from 'antd';
-import StaffView from './StaffView'
+import StaffView from './StaffView';
+import StaffTypeView from './StaffTypeView'
 
 const tabListNoTitle = [{
     key: 'StaffView',
     tab: '员工概况',
+}, {
+    key: 'StaffTypeView',
+    tab: '员工类型管理'
 }];
 
 const contentListNoTitle = {
     StaffView: <StaffView />,
+    StaffTypeView: <StaffTypeView />
 };
 
 class StaffModeRoot extends Component {

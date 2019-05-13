@@ -92,7 +92,7 @@ class MainView extends Component {
                             <span>表单</span>
                             <Link to={`${this.props.match.url}/table`} />
                         </Menu.Item>
-                        <SubMenu
+                        {/* <SubMenu
                             key="设置"
                             title={
                                 <span>
@@ -113,7 +113,7 @@ class MainView extends Component {
                                 表单设置
                 <Link to={`${this.props.match.url}/setting/tableModeRoot`} />
                             </Menu.Item>
-                        </SubMenu>
+                        </SubMenu> */}
                     </Menu>
                 </Sider>
                 <Layout>

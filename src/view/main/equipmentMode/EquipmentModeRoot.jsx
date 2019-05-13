@@ -1,14 +1,19 @@
 import React, { Component } from 'react';
 import { Card } from 'antd';
 import EquipmentView from './EquipmentView'
+import EquipmentTypeView from './EquipmentTypeView'
 
 const tabListNoTitle = [{
     key: 'EquipmentView',
-    tab: '设备概况',
+    tab: '设备管理',
+}, {
+    key: 'EquipmentTypeView',
+    tab: '设备类型管理',
 }];
 
 const contentListNoTitle = {
     EquipmentView: <EquipmentView />,
+    EquipmentTypeView: <EquipmentTypeView />,
 };
 
 class EquipmentModeRoot extends Component {

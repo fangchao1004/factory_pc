@@ -30,6 +30,32 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
+    /**
+     * 获取NFC表
+     * @param {*} params 
+     * @param {*} f1 
+     * @param {*} f2 
+     */
+    static getNFCInfo(params, f1, f2) {
+        Axios.post(Testuri + 'find_nfc', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+     /**
+     * 获取Area表
+     * @param {*} params 
+     * @param {*} f1 
+     * @param {*} f2 
+     */
+    static getAreainfo(params, f1, f2) {
+        Axios.post(Testuri + 'find_area', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
 
     /**
      * 获取设备类型表
