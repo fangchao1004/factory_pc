@@ -7,15 +7,15 @@ const tabListNoTitle = [{
     key: 'createTale',
     tab: '创建表单模板',
 }, 
-// {
-//     key: 'tableType',
-//     tab: '表单类型',
-// }
+{
+    key: 'tableType',
+    tab: '表单类型',
+}
 ];
 
 const contentListNoTitle = {
     createTale: <EditableTable />,
-    // tableType: <TableTypeView />,
+    tableType: <TableTypeView />,
 };
 
 class SettingTableModeRoot extends Component {

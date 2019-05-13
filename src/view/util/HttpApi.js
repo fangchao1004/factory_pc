@@ -18,6 +18,33 @@ class HttpApi {
         })
     }
     /**
+     * 获取的模版
+     * @param {*} params 
+     * @param {*} f1 
+     * @param {*} f2 
+     */
+    static getSampleInfo(params, f1, f2) {
+        Axios.post(Testuri + 'find_sample', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    /**
+     * 删除的模版
+     * @param {*} params 
+     * @param {*} f1 
+     * @param {*} f2 
+     */
+    static removeSampleInfo(params, f1, f2) {
+        Axios.post(Testuri + 'remove_sample', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+
+    /**
      * 获取设备表
      * @param {*} params 
      * @param {*} f1 
