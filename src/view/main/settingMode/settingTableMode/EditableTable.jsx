@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, Input, Button, Popconfirm, Select, Modal, message } from 'antd';
+import { Table, Input, Button, Popconfirm, Select, Modal, message, Row, Col } from 'antd';
 import SampleViewTool from '../../../util/SampleViewTool';
 // import { View } from 'antd-mobile';
 import HttpApi from '../../../util/HttpApi'
@@ -18,7 +18,7 @@ export default class EditableTable extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      titleData:[],
+      titleData: [],
       uploadLoading: false,
       // sample_type_title:'1',////模板所对应的设备类型
       dataSource: [{
@@ -42,17 +42,17 @@ export default class EditableTable extends Component {
     this.getTitleData();
   }
 
-  getTitleData=()=>{
+  getTitleData = () => {
     HttpApi.getDeviceTypeInfo({}, (res) => {
       if (res.data.code === 0) {
         // console.log(res.data.data);
         let copyArrData = JSON.parse(JSON.stringify(res.data.data))
         let titleDataArr = [];
         copyArrData.forEach(element => {
-          titleDataArr.push({"value":element.id+"","text":element.sample_name})
+          titleDataArr.push({ "value": element.id + "", "text": element.sample_name })
         });
         this.setState({
-          titleData:titleDataArr
+          titleData: titleDataArr
         })
       }
     })
@@ -147,12 +147,20 @@ export default class EditableTable extends Component {
 
     return (
       <div>
-        <Button onClick={this.handleAdd} type="primary" style={{ marginBottom: 16 }}>
-          添加表格项目
+        <Row>
+          <Col span={6}>
+            <Button onClick={this.handleAdd} type="primary" style={{ marginBottom: 16 }}>
+              添加表格项目
           </Button>
-        <Button onClick={this.readyHandler} type="primary" style={{ marginBottom: 16, marginLeft: 800 }}>
-          预览
-          </Button>
+          </Col>
+          <Col span={18} >
+            <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
+              <Button onClick={this.readyHandler} type="primary" style={{ marginBottom: 16}}>
+                预览
+              </Button>
+            </div>
+          </Col>
+        </Row>
         <Table
           size={'small'}
           rowClassName={() => 'editable-row'}
@@ -293,16 +301,16 @@ export default class EditableTable extends Component {
     sample_data.device_type_id = device_type_id;
     sample_data.table_name = table_name;
     sample_data.content = JSON.stringify(contentArr);
-    
+
     // console.log("模版数据L：",sample_data);
-    HttpApi.uploadSample(sample_data,(res)=>{
+    HttpApi.uploadSample(sample_data, (res) => {
       // console.log(res);
-      if(res.data.code===0){
+      if (res.data.code === 0) {
         // console.log('模版上传成功');
         message.success('模版上传成功');
         this.setState({
-          uploadLoading:false,
-          modalvisible:false
+          uploadLoading: false,
+          modalvisible: false
         })
       }
     })
