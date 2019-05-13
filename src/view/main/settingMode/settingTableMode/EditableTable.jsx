@@ -150,7 +150,7 @@ export default class EditableTable extends Component {
         <Row>
           <Col span={6}>
             <Button onClick={this.handleAdd} type="primary" style={{ marginBottom: 16 }}>
-              添加表格项目
+              添加表单项目
           </Button>
           </Col>
           <Col span={18} >
@@ -245,7 +245,7 @@ export default class EditableTable extends Component {
   }
 
   onConfirmHandler = () => {
-    console.log('确定上传？？？');
+    // console.log('确定上传');
     this.checkDataConstruct()
   }
 
@@ -265,11 +265,11 @@ export default class EditableTable extends Component {
       }
     });
     if (isCompleteFlag) {
-      console.log('格式正确');
+      // console.log('格式正确');
       this.transFromDataConstruct();
     } else {
-      console.log('格式有问题');
-      message.error('请检查表单类型或选项，是否为空');
+      // console.log('格式有问题');
+      message.error('请检查表单类型或选项，不能为空');
     }
   }
 

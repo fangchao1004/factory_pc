@@ -3,12 +3,13 @@ import { Layout, Menu, Icon, Row, Col } from 'antd'
 import { Route, Link } from 'react-router-dom'
 import logopng from '../../assets/logo.png'
 import HomePageViewRoot from './homePageMode/HomePageViewRoot';
-import EquipmentViewRoot from './equipmentMode/EquipmentViewRoot'
-import StaffViewRoot from './staffMode/StaffViewRoot'
+import EquipmentModeRoot from './equipmentMode/EquipmentModeRoot'
+import StaffModeRoot from './staffMode/StaffModeRoot'
+import TableModeRoot from './tableMode/TableModeRoot';
 import SettingEquipmentModeRoot from './settingMode/settingEquipmentMode/SettingEquipmentModeRoot';
 import SettingStaffModeRoot from './settingMode/settingStaffMode/SettingStaffModeRoot';
 import SettingTableModeRoot from './settingMode/settingTableMode/SettingTableModeRoot';
-import TableMode from './tableMode/TableMode';
+
 
 const { SubMenu } = Menu;
 const { Header, Content, Sider } = Layout;
@@ -151,17 +152,17 @@ class MainView extends Component {
                             <Route
                                 exact
                                 path={`${this.props.match.path}/equipment`}
-                                component={EquipmentViewRoot}
+                                component={EquipmentModeRoot}
                             />
                             <Route
                                 exact
                                 path={`${this.props.match.path}/staff`}
-                                component={StaffViewRoot}
+                                component={StaffModeRoot}
                             />
                             <Route
                                 exact
                                 path={`${this.props.match.path}/table`}
-                                component={TableMode}
+                                component={TableModeRoot}
                             />
                             <Route
                                 exact

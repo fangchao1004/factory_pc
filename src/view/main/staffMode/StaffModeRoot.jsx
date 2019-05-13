@@ -1,27 +1,20 @@
 import React, { Component } from 'react';
 import { Card } from 'antd';
-import EditableTable from './EditableTable'
-import TableTypeView from './TableTypeView'
+import StaffView from './StaffView'
 
 const tabListNoTitle = [{
-    key: 'createTale',
-    tab: '创建表单模板',
-}, 
-// {
-//     key: 'tableType',
-//     tab: '表单类型',
-// }
-];
+    key: 'StaffView',
+    tab: '员工概况',
+}];
 
 const contentListNoTitle = {
-    createTale: <EditableTable />,
-    // tableType: <TableTypeView />,
+    StaffView: <StaffView />,
 };
 
-class SettingTableModeRoot extends Component {
+class StaffModeRoot extends Component {
     state = {
-        key: 'createTale',
-        noTitleKey: 'createTale',
+        key: 'StaffView',
+        noTitleKey: 'StaffView',
     }
 
     onTabChange = (key) => {
@@ -44,4 +37,4 @@ class SettingTableModeRoot extends Component {
     }
 }
 
-export default SettingTableModeRoot;
+export default StaffModeRoot;

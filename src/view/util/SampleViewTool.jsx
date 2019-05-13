@@ -90,7 +90,7 @@ export default class SampleViewTool {
             </div>
         }
 
-        console.log('待渲染数据：', dataSource);
+        // console.log('待渲染数据：', dataSource);
         let viewArr = [];
         if (dataSource.length > 0) {
             dataSource.forEach(element => {

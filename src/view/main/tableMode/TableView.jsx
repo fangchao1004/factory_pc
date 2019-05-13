@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 
-class EquipmentViewRoot extends Component {
+class TableView extends Component {
     render() {
         return (
             <div>
-                设备根界面
+                表单界面1
             </div>
         );
     }
 }
 
-export default EquipmentViewRoot;
+export default TableView;
