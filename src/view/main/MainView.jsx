@@ -45,8 +45,27 @@ class MainView extends Component {
                             position: 'relative'
                         }}
                     >
-                        <img src={logopng} alt="" width="96" height="60" />
-                        {this.state.collapsed ? null : <span style={{ color: '#fff', fontSize: 20 }}> 管理平台 </span>}
+                        <img
+                            src={logopng}
+                            alt=""
+                            width="50"
+                            height="50"
+                            style={{ position: 'absolute', left: 20, top: 10 }}
+                        />
+                        {this.state.collapsed ? null : (
+                            <span
+                                style={{
+                                    position: 'absolute',
+                                    top: 25,
+                                    left: 90,
+                                    width: 180,
+                                    color: '#fff',
+                                    fontSize: 20
+                                }}
+                            >
+                                管理平台
+              </span>
+                        )}
                     </div>
                     <Menu
                         theme="dark"
