@@ -252,7 +252,7 @@ export default class EditableTable extends Component {
   }
 
   readyHandler = () => {
-    console.log('数据：', this.state.dataSource);
+    // console.log('数据：', this.state.dataSource);
     this.setState({
       modalvisible: true
     })
