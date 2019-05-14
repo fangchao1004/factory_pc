@@ -1,4 +1,5 @@
 import { List, InputItem, Radio, Checkbox, TextareaItem, ImagePicker, Button } from 'antd-mobile';
+import { Empty } from 'antd'
 import React from "react";
 const RadioItem = Radio.RadioItem;
 const CheckboxItem = Checkbox.CheckboxItem;
@@ -13,20 +14,17 @@ export default class RecordViewTool {
 
     static renderTable(allData) {
         var dataSource = allData.tableData;
-        console.log("记录表渲染器:", dataSource, allData.username, allData.devicename);
-
-
-        let renderInput = (element) => {
+        let renderInputText = (element) => {
             return <div key={element.key}>
                 <List>
-                    <InputItem style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title_name}</InputItem>
+                    <InputItem style={{ width: 200 }} key={element.key} value={element.value} >{element.title_name}</InputItem>
                 </List>
             </div>
         }
         let renderInputNumber = (element) => {
             return <div key={element.key}>
                 <List>
-                    <InputItem style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title_name}</InputItem>
+                    <InputItem style={{ width: 200 }} key={element.key} value={element.value} >{element.title_name}</InputItem>
                 </List>
             </div>
         }
@@ -39,7 +37,7 @@ export default class RecordViewTool {
             }
             let optionsData = element.default_values.split('/')
             let a = optionsData.map((i, index) => (
-                <RadioItem key={i} checked={index === 0} onChange={() => { }}>
+                <RadioItem key={i} checked={i === element.value}>
                     {i}
                 </RadioItem>
             ))
@@ -57,8 +55,9 @@ export default class RecordViewTool {
                 </div>)
             }
             let optionsData = element.default_values.split('/')
+            let selectedValues = element.value.split('/')
             let a = optionsData.map((i, index) => (
-                <CheckboxItem key={i} checked={index === 0} onChange={() => { }}>
+                <CheckboxItem key={i} checked={selectedValues.indexOf(i) !== -1} >
                     {i}
                 </CheckboxItem>
             ))
@@ -73,20 +72,25 @@ export default class RecordViewTool {
                 <span>{element.title_name}</span>
                 <List>
                     <TextareaItem
-                        value={element.default_values}
+                        value={element.value}
                         rows={3}
                     />
                 </List>
             </div>
         }
         let renderImagePicker = (element) => {
+            let imgsArr = [];
+            if (element.value.length > 0) {
+                element.value.forEach((element, index) => {
+                    imgsArr.push(<img key={index} style={{ marginTop: 20, width: 300, height: 200 }} alt='' src='https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=2489492398,1961915359&fm=26&gp=0.jpg' />
+                    )
+                });
+            }
             return <div key={element.key}>
                 <span>{element.title_name}</span>
                 <List>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <img style={{ marginTop: 20,width: 300, height: 200 }} alt='' src='https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=2489492398,1961915359&fm=26&gp=0.jpg'  />
-                        <img style={{ marginTop: 20,width: 300, height: 200 }} alt='' src='https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=2489492398,1961915359&fm=26&gp=0.jpg'  />
-                        <img style={{ marginTop: 20,width: 300, height: 200 }} alt='' src='https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=2489492398,1961915359&fm=26&gp=0.jpg'  />
+                        {imgsArr.length > 0 ? imgsArr : <Empty />}
                     </div>
                 </List>
             </div>
@@ -108,7 +112,7 @@ export default class RecordViewTool {
         if (dataSource.length > 0) {
             dataSource.forEach(element => {
                 if (element.type_id === "1") {
-                    viewArr.push(renderInput(element))
+                    viewArr.push(renderInputText(element))
                 } else if (element.type_id === "2") {
                     viewArr.push(renderInputNumber(element))
                 } else if (element.type_id === "3") {
@@ -124,7 +128,7 @@ export default class RecordViewTool {
                 }
             });
         }
-        return <div style={{ width: 400, alignItems: 'center',marginLeft:20 }}>{viewArr}</div>
+        return <div style={{ width: 400, alignItems: 'center', marginLeft: 20 }}>{viewArr}</div>
     }
 
 }
