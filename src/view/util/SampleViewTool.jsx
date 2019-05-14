@@ -12,7 +12,7 @@ const CheckboxItem = Checkbox.CheckboxItem;
 export default class SampleViewTool {
 
     static renderTable(dataSource) {
-        let renderInput = (element) => {
+        let renderInputText = (element) => {
             return <div key={element.key}>
                 <List>
                     <InputItem style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title_name}</InputItem>
@@ -35,7 +35,7 @@ export default class SampleViewTool {
             }
             let optionsData = element.default_values.split('/')
             let a = optionsData.map((i, index) => (
-                <RadioItem key={i} checked={index === 0} onChange={() => { }}>
+                <RadioItem key={i} checked={index === 0}>
                     {i}
                 </RadioItem>
             ))
@@ -54,7 +54,7 @@ export default class SampleViewTool {
             }
             let optionsData = element.default_values.split('/')
             let a = optionsData.map((i, index) => (
-                <CheckboxItem key={i} checked={index === 0} onChange={() => { }}>
+                <CheckboxItem key={i} checked={index === 0}>
                     {i}
                 </CheckboxItem>
             ))
@@ -71,6 +71,7 @@ export default class SampleViewTool {
                     <TextareaItem
                         value={element.default_values}
                         rows={3}
+                        placeholder={'此处输入备注'}
                     />
                 </List>
             </div>
@@ -92,7 +93,7 @@ export default class SampleViewTool {
                 <span style={{ fontSize: 20, border: true, color: element.extra_value ? "#888888" : "#F5232C" }}>
                     {element.extra_value ? element.extra_value : '请选择表单类型'}
                 </span>
-                <div style={{ marginTop: 30 ,marginBottom:20,display:"flex",justifyContent:'space-between'}} >
+                <div style={{ marginTop: 30, marginBottom: 20, display: "flex", justifyContent: 'space-between' }} >
                     <span>设备名:xxxxxxx</span>
                     <span>用户名:xxxxxxx</span>
                 </div>
@@ -104,7 +105,7 @@ export default class SampleViewTool {
         if (dataSource.length > 0) {
             dataSource.forEach(element => {
                 if (element.type_id === "1") {
-                    viewArr.push(renderInput(element))
+                    viewArr.push(renderInputText(element))
                 } else if (element.type_id === "2") {
                     viewArr.push(renderInputNumber(element))
                 } else if (element.type_id === "3") {
@@ -121,7 +122,7 @@ export default class SampleViewTool {
             });
         }
 
-        viewArr.push(<Button type='primary' style={{ marginTop: 20 }}>确定上传</Button>)
+        viewArr.push(<Button key={"btn0"} type='primary' style={{ marginTop: 20 }}>确定上传</Button>)
         return <div style={{ width: 400, alignItems: 'center' }}>{viewArr}</div>
     }
 

@@ -101,8 +101,8 @@ export default class RecordViewTool {
                     {element.extra_value ? element.extra_value : '请选择表单类型'}
                 </span>
                 <div style={{ marginTop: 30, marginBottom: 20, display: "flex", justifyContent: 'space-between' }} >
-                    <span>设备名:{allData.username}</span>
-                    <span>用户名:{allData.devicename}</span>
+                    <span>设备名:{allData.devicename}</span>
+                    <span>用户名:{allData.username}</span>
                 </div>
             </div>
         }
