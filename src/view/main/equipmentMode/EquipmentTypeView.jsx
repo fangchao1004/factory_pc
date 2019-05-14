@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { Table, Button } from 'antd'
-import HttpApi from '../../../util/HttpApi';
+import { Table, Button, Row, Col } from 'antd'
+import HttpApi from '../../util/HttpApi';
 
-class TableTypeView extends Component {
+class EquipmentTypeView extends Component {
     constructor(props) {
         super(props)
         this.state = {
@@ -16,7 +16,6 @@ class TableTypeView extends Component {
 
     getDeviceTypeData = () => {
         HttpApi.getDeviceTypeInfo({}, (res) => {
-            // console.log(res);
             if (res.data.code === 0) {
                 res.data.data.map((item) => (
                     item.key = item.id + ""
@@ -71,7 +70,13 @@ class TableTypeView extends Component {
 
         return (
             <div>
-                表单类型管理界面
+                <Row>
+                    <Col span={6}>
+                        <Button onClick={this.handleAdd} type="primary" style={{ marginBottom: 16 }}>
+                            添加设备类型
+                         </Button>
+                    </Col>
+                </Row>
                 <Table
                     size={'small'}
                     rowClassName={() => 'editable-row'}
@@ -84,4 +89,4 @@ class TableTypeView extends Component {
     }
 }
 
-export default TableTypeView;
+export default EquipmentTypeView;

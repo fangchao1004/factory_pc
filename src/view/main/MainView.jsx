@@ -3,12 +3,13 @@ import { Layout, Menu, Icon, Row, Col } from 'antd'
 import { Route, Link } from 'react-router-dom'
 import logopng from '../../assets/logo.png'
 import HomePageViewRoot from './homePageMode/HomePageViewRoot';
-import EquipmentViewRoot from './equipmentMode/EquipmentViewRoot'
-import StaffViewRoot from './staffMode/StaffViewRoot'
+import EquipmentModeRoot from './equipmentMode/EquipmentModeRoot'
+import StaffModeRoot from './staffMode/StaffModeRoot'
+import TableModeRoot from './tableMode/TableModeRoot';
 import SettingEquipmentModeRoot from './settingMode/settingEquipmentMode/SettingEquipmentModeRoot';
 import SettingStaffModeRoot from './settingMode/settingStaffMode/SettingStaffModeRoot';
 import SettingTableModeRoot from './settingMode/settingTableMode/SettingTableModeRoot';
-import TableMode from './tableMode/TableMode';
+
 
 const { SubMenu } = Menu;
 const { Header, Content, Sider } = Layout;
@@ -34,7 +35,7 @@ class MainView extends Component {
                     collapsed={this.state.collapsed}
                     onCollapse={this.onCollapse}
                     trigger={null}
-                    width="254"
+                    width="200"
                 >
                     <div
                         style={{
@@ -44,36 +45,8 @@ class MainView extends Component {
                             position: 'relative'
                         }}
                     >
-                        /> : (
-                     {this.state.collapsed ? ( <img
-                            src={logopng}
-                            alt=""
-                            width="96"
-                            height="60"
-                            style={{ position: 'absolute', left: 0, top: 0 }}
-                        />) : (
-                        <img
-                            src={logopng}
-                            alt=""
-                            width="96"
-                            height="60"
-                            style={{ position: 'absolute', left: 24, top: 0 }}
-                        />
-                         )}
-                        {this.state.collapsed ? null : (
-                            <span
-                                style={{
-                                    position: 'absolute',
-                                    top: 18,
-                                    left: 120,
-                                    width: 180,
-                                    color: '#fff',
-                                    fontSize: 20
-                                }}
-                            >
-                                管理平台
-              </span>
-                        )}
+                        <img src={logopng} alt="" width="96" height="60" />
+                        {this.state.collapsed ? null : <span style={{ color: '#fff', fontSize: 20 }}> 管理平台 </span>}
                     </div>
                     <Menu
                         theme="dark"
@@ -100,7 +73,7 @@ class MainView extends Component {
                             <span>表单</span>
                             <Link to={`${this.props.match.url}/table`} />
                         </Menu.Item>
-                        <SubMenu
+                        {/* <SubMenu
                             key="设置"
                             title={
                                 <span>
@@ -121,7 +94,7 @@ class MainView extends Component {
                                 表单设置
                 <Link to={`${this.props.match.url}/setting/tableModeRoot`} />
                             </Menu.Item>
-                        </SubMenu>
+                        </SubMenu> */}
                     </Menu>
                 </Sider>
                 <Layout>
@@ -160,17 +133,17 @@ class MainView extends Component {
                             <Route
                                 exact
                                 path={`${this.props.match.path}/equipment`}
-                                component={EquipmentViewRoot}
+                                component={EquipmentModeRoot}
                             />
                             <Route
                                 exact
                                 path={`${this.props.match.path}/staff`}
-                                component={StaffViewRoot}
+                                component={StaffModeRoot}
                             />
                             <Route
                                 exact
                                 path={`${this.props.match.path}/table`}
-                                component={TableMode}
+                                component={TableModeRoot}
                             />
                             <Route
                                 exact

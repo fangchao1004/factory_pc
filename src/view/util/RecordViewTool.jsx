@@ -1,4 +1,5 @@
 import { List, InputItem, Radio, Checkbox, TextareaItem, ImagePicker, Button } from 'antd-mobile';
+import { Empty } from 'antd'
 import React from "react";
 const RadioItem = Radio.RadioItem;
 const CheckboxItem = Checkbox.CheckboxItem;
@@ -7,22 +8,23 @@ const CheckboxItem = Checkbox.CheckboxItem;
 // { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" }];
 
 /**
- * 模板表渲染器
+ * 记录表渲染器
  */
-export default class SampleViewTool {
+export default class RecordViewTool {
 
-    static renderTable(dataSource) {
+    static renderTable(allData) {
+        var dataSource = allData.tableData;
         let renderInputText = (element) => {
             return <div key={element.key}>
                 <List>
-                    <InputItem style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title_name}</InputItem>
+                    <InputItem style={{ width: 200 }} key={element.key} value={element.value} >{element.title_name}</InputItem>
                 </List>
             </div>
         }
         let renderInputNumber = (element) => {
             return <div key={element.key}>
                 <List>
-                    <InputItem style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title_name}</InputItem>
+                    <InputItem style={{ width: 200 }} key={element.key} value={element.value} >{element.title_name}</InputItem>
                 </List>
             </div>
         }
@@ -35,7 +37,7 @@ export default class SampleViewTool {
             }
             let optionsData = element.default_values.split('/')
             let a = optionsData.map((i, index) => (
-                <RadioItem key={i} checked={index === 0}>
+                <RadioItem key={i} checked={i === element.value}>
                     {i}
                 </RadioItem>
             ))
@@ -53,8 +55,9 @@ export default class SampleViewTool {
                 </div>)
             }
             let optionsData = element.default_values.split('/')
+            let selectedValues = element.value.split('/')
             let a = optionsData.map((i, index) => (
-                <CheckboxItem key={i} checked={index === 0}>
+                <CheckboxItem key={i} checked={selectedValues.indexOf(i) !== -1} >
                     {i}
                 </CheckboxItem>
             ))
@@ -69,21 +72,25 @@ export default class SampleViewTool {
                 <span>{element.title_name}</span>
                 <List>
                     <TextareaItem
-                        value={element.default_values}
+                        value={element.value}
                         rows={3}
-                        placeholder={'此处输入备注'}
                     />
                 </List>
             </div>
         }
         let renderImagePicker = (element) => {
+            let imgsArr = [];
+            if (element.value.length > 0) {
+                element.value.forEach((element, index) => {
+                    imgsArr.push(<img key={index} style={{ marginTop: 20, width: 300, height: 200 }} alt='' src='https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=2489492398,1961915359&fm=26&gp=0.jpg' />
+                    )
+                });
+            }
             return <div key={element.key}>
                 <span>{element.title_name}</span>
                 <List>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <div style={{ width: '100%', height: 240, backgroundColor: '#DDDDDD', borderRadius: 10 }}>
-                        </div>
-                        <Button style={{ width: 100, margin: 10 }} >添加图片</Button>
+                        {imgsArr.length > 0 ? imgsArr : <Empty />}
                     </div>
                 </List>
             </div>
@@ -94,8 +101,8 @@ export default class SampleViewTool {
                     {element.extra_value ? element.extra_value : '请选择表单类型'}
                 </span>
                 <div style={{ marginTop: 30, marginBottom: 20, display: "flex", justifyContent: 'space-between' }} >
-                    <span>设备名:xxxxxxx</span>
-                    <span>用户名:xxxxxxx</span>
+                    <span>设备名:{allData.devicename}</span>
+                    <span>用户名:{allData.username}</span>
                 </div>
             </div>
         }
@@ -121,9 +128,7 @@ export default class SampleViewTool {
                 }
             });
         }
-
-        viewArr.push(<Button key={"btn0"} type='primary' style={{ marginTop: 20 }}>确定上传</Button>)
-        return <div style={{ width: 400, alignItems: 'center' }}>{viewArr}</div>
+        return <div style={{ width: 400, alignItems: 'center', marginLeft: 20 }}>{viewArr}</div>
     }
 
 }

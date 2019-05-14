@@ -8,7 +8,7 @@ const tabListNoTitle = [{
     tab: '设备管理',
 }, {
     key: 'EquipmentTypeSetting',
-    tab: '设备类型',
+    tab: '设备类型管理',
 }];
 
 const contentListNoTitle = {

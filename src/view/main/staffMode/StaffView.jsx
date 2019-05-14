@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 
-class TableMode extends Component {
+class StaffView extends Component {
     render() {
         return (
             <div>
-                表单根界面
+                员工界面1
             </div>
         );
     }
 }
 
-export default TableMode;
+export default StaffView;

@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 
-class StaffViewRoot extends Component {
+class StaffTypeView extends Component {
     render() {
         return (
             <div>
-                员工根界面
+                员工类型管理界面
             </div>
         );
     }
 }
 
-export default StaffViewRoot;
+export default StaffTypeView;

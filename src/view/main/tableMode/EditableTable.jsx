@@ -1,18 +1,18 @@
 import React, { Component } from 'react';
 import { Table, Input, Button, Popconfirm, Select, Modal, message, Row, Col } from 'antd';
-import SampleViewTool from '../../../util/SampleViewTool';
+import SampleViewTool from '../../util/SampleViewTool';
 // import { View } from 'antd-mobile';
-import HttpApi from '../../../util/HttpApi'
+import HttpApi from '../../util/HttpApi'
 const Option = Select.Option;
 
 const optionsData = [{ "value": "1", "text": "文本输入框" }, { "value": "2", "text": "数字输入框" }, { "value": "3", "text": "单选" },
 { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" }, { "value": "7", "text": "表单类型" }];
-
 ////测试数据， 实际数据要从设备类型表device_type表中获取
 // var titleData = [{ "value": "1", "text": "水表报告单" }, { "value": "2", "text": "电表报告单" }, { "value": "3", "text": "锅炉报告单" }]
 // var titleData = [];
+
 /**
- * 表格创建区
+ * 表格创建区---只用于创建模版
  */
 export default class EditableTable extends Component {
   constructor(props) {
@@ -34,12 +34,14 @@ export default class EditableTable extends Component {
       }],
       count: "2",
       modalvisible: false,
-      sampleView: null
+      sampleView: null,
+      haveExistSampleIDs:[]
     };
   }
 
   componentDidMount() {
     this.getTitleData();
+    this.getSampleData();
   }
 
   getTitleData = () => {
@@ -53,6 +55,21 @@ export default class EditableTable extends Component {
         });
         this.setState({
           titleData: titleDataArr
+        })
+      }
+    })
+  }
+
+  getSampleData = () => {
+    HttpApi.getSampleInfo({}, (res) => {
+      if (res.data.code === 0) {
+        // console.log(res.data.data);
+        let sampleIdArr = [];
+        res.data.data.forEach(element => {
+          sampleIdArr.push(element.device_type_id+"")
+        });
+        this.setState({
+          haveExistSampleIDs:sampleIdArr
         })
       }
     })
@@ -73,12 +90,12 @@ export default class EditableTable extends Component {
         )
       }, {
         title: '标签',
-        dataIndex: 'title',
+        dataIndex: 'title_name',
         width: '15%',
         render: (text, record) => {
           return (
             <Input disabled={(record.type_id === '7' && record.key === '0') || (record.type_id === '3' && record.key === '1')}
-              value={text} onChange={(e) => this.onChangeHandler(record, e.target.value, "title")}></Input>
+              value={text} onChange={(e) => this.onChangeHandler(record, e.target.value, "title_name")}></Input>
           )
         }
       }, {
@@ -110,7 +127,8 @@ export default class EditableTable extends Component {
         render: (text, record) => {
           let Options = [];
           this.state.titleData.forEach((item) => {
-            Options.push(<Option key={item.value} value={item.value}>{item.text}</Option>)
+            // console.log(item);
+            Options.push(<Option key={item.value} disabled={this.state.haveExistSampleIDs.indexOf(item.value)!==-1} value={item.value}>{item.text}</Option>)
           })
           return (
             record.type_id === '7' ? ///标题--不可修改---是个选项
@@ -155,7 +173,7 @@ export default class EditableTable extends Component {
           </Col>
           <Col span={18} >
             <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
-              <Button onClick={this.readyHandler} type="primary" style={{ marginBottom: 16}}>
+              <Button onClick={this.readyHandler} type="primary" style={{ marginBottom: 16 }}>
                 预览
               </Button>
             </div>
