@@ -90,12 +90,12 @@ export default class EditableTable extends Component {
         )
       }, {
         title: '标签',
-        dataIndex: 'title',
+        dataIndex: 'title_name',
         width: '15%',
         render: (text, record) => {
           return (
             <Input disabled={(record.type_id === '7' && record.key === '0') || (record.type_id === '3' && record.key === '1')}
-              value={text} onChange={(e) => this.onChangeHandler(record, e.target.value, "title")}></Input>
+              value={text} onChange={(e) => this.onChangeHandler(record, e.target.value, "title_name")}></Input>
           )
         }
       }, {
@@ -252,7 +252,7 @@ export default class EditableTable extends Component {
   }
 
   readyHandler = () => {
-    // console.log('数据：', this.state.dataSource);
+    console.log('数据：', this.state.dataSource);
     this.setState({
       modalvisible: true
     })

@@ -1,4 +1,4 @@
-import { List, InputItem, Radio, Checkbox, TextareaItem, ImagePicker } from 'antd-mobile';
+import { List, InputItem, Radio, Checkbox, TextareaItem, ImagePicker, Button } from 'antd-mobile';
 import React from "react";
 const RadioItem = Radio.RadioItem;
 const CheckboxItem = Checkbox.CheckboxItem;
@@ -12,21 +12,21 @@ export default class SampleViewTool {
         let renderInput = (element) => {
             return <div key={element.key}>
                 <List>
-                    <InputItem style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title}</InputItem>
+                    <InputItem style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title_name}</InputItem>
                 </List>
             </div>
         }
         let renderInputNumber = (element) => {
             return <div key={element.key}>
                 <List>
-                    <InputItem style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title}</InputItem>
+                    <InputItem style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title_name}</InputItem>
                 </List>
             </div>
         }
         let renderRadio = (element) => {
             if (element.default_values === '') {
                 return (<div key={element.key}>
-                    <span>{element.title}</span>
+                    <span>{element.title_name}</span>
                     <div style={{ textAlign: 'center', fontSize: 20, border: true, color: "#F5232C" }}>请配置选项</div>
                 </div>)
             }
@@ -38,14 +38,14 @@ export default class SampleViewTool {
             ))
             return (
                 <div key={element.key}>
-                    <span>{element.title}</span>
+                    <span>{element.title_name}</span>
                     {a}
                 </div>)
         }
         let renderCheckBox = (element) => {
             if (element.default_values === '') {
                 return (<div key={element.key}>
-                    <span>{element.title}</span>
+                    <span>{element.title_name}</span>
                     <div style={{ textAlign: 'center', fontSize: 20, border: true, color: "#F5232C" }}>请配置选项</div>
                 </div>)
             }
@@ -57,13 +57,13 @@ export default class SampleViewTool {
             ))
             return (
                 <div key={element.key}>
-                    <span>{element.title}</span>
+                    <span>{element.title_name}</span>
                     {a}
                 </div>)
         }
         let renderTextArea = (element) => {
             return <div key={element.key}>
-                <span>{element.title}</span>
+                <span>{element.title_name}</span>
                 <List>
                     <TextareaItem
                         value={element.default_values}
@@ -74,19 +74,25 @@ export default class SampleViewTool {
         }
         let renderImagePicker = (element) => {
             return <div key={element.key}>
-                <span>{element.title}</span>
+                <span>{element.title_name}</span>
                 <List>
-                    <ImagePicker
-                        onAddImageClick={() => { }}
-                    />
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div style={{ width: '100%', height: 240, backgroundColor: '#DDDDDD', borderRadius: 10 }}>
+                        </div>
+                        <Button style={{ width: 100, margin: 10 }} >添加图片</Button>
+                    </div>
                 </List>
             </div>
         }
         let renderTitle = (element) => {
-            return <div style={{ marginBottom: 40, textAlign: 'center' }} key={element.key} >
+            return <div style={{ textAlign: 'center' }} key={element.key} >
                 <span style={{ fontSize: 20, border: true, color: element.extra_value ? "#888888" : "#F5232C" }}>
                     {element.extra_value ? element.extra_value : '请选择表单类型'}
                 </span>
+                <div style={{ marginTop: 30 ,marginBottom:20,display:"flex",justifyContent:'space-between'}} >
+                    <span>设备名:xxxxxxx</span>
+                    <span>用户名:xxxxxxx</span>
+                </div>
             </div>
         }
 
@@ -111,6 +117,8 @@ export default class SampleViewTool {
                 }
             });
         }
+
+        viewArr.push(<Button type='primary' style={{ marginTop: 20 }}>确定上传</Button>)
         return <div style={{ width: 400, alignItems: 'center' }}>{viewArr}</div>
     }
 
