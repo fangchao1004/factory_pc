@@ -98,7 +98,33 @@ class HttpApi {
         })
     }
 
-    
+    /**
+     * 获取设备的报表record
+     * @param {*} params 
+     * @param {*} f1 
+     * @param {*} f2 
+     */
+    static getRecordInfo(params, f1, f2) {
+        Axios.post(Testuri + 'find_record', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+
+    /**
+     * 获取设备的报表record
+     * @param {*} params 
+     * @param {*} f1 
+     * @param {*} f2 
+     */
+    static getUserInfo(params, f1, f2) {
+        Axios.post(Testuri + 'find_user', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
 }
 
 export default HttpApi;

@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
-import { Table, Button, Row, Col } from 'antd'
+import { Table, Button, Row, Col, Drawer, Icon } from 'antd'
 import HttpApi from '../../util/HttpApi';
+import RecordViewTool from '../../util/RecordViewTool';
+import moment from 'moment';
 
 var nfc_data = [];
 var area_data = [];
 var device_type_data = [];
 var device_data = [];
+var user_data = [];
 
 var device_status_filter = [{ text: '正常', value: 1 }, { text: '故障', value: 2 }, { text: '待检', value: 3 }];///用于筛选设备状态的数据 选项
 var device_type_data_filter = []; ///用于筛选设备类型的数据 选项
@@ -15,10 +18,18 @@ class EquipmentView extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            dataSource: []
+            dataSource: [],
+            drawerVisible1: false,
+            drawerVisible2: false,
+            deviceRecords: [],
+            recordView: null
         }
     }
     async componentDidMount() {
+        this.init();
+    }
+
+    init = async () => {
         device_type_data_filter.length = device_type_data_filter.length = area_data_filter.length = 0;
         nfc_data = await this.getNFCData();
         area_data = await this.getAreaData();
@@ -34,8 +45,8 @@ class EquipmentView extends Component {
         this.setState({
             dataSource: newData
         })
+        user_data = await this.getUserData();
     }
-
     getNFCData = () => {
         // console.log("getNFCDatagetNFCDatagetNFCDatagetNFCDatagetNFCData");
         let p = new Promise((resolve, reject) => {
@@ -77,6 +88,16 @@ class EquipmentView extends Component {
         })
         return p;
     }
+    getUserData = () => {
+        let p = new Promise((resolve, reject) => {
+            HttpApi.getUserInfo({}, (res) => {
+                if (res.data.code === 0) {
+                    resolve(res.data.data)
+                }
+            })
+        })
+        return p;
+    }
     transformConstruct = async () => {
         for (const item of device_data) {
             item.key = item.id + ""
@@ -84,7 +105,7 @@ class EquipmentView extends Component {
             item.area_name = await this.findAreaName(item)
             item.nfc_name = await this.findNfcName(item)
         }
-        console.log('处理后的：', device_data);
+        // console.log('处理后的：', device_data);
         return device_data
     }
     findTypeName = (deviceItem) => {
@@ -117,7 +138,26 @@ class EquipmentView extends Component {
         })
         return p;
     }
-
+    findUserName = (recordItem) => {
+        let p = new Promise((resolve, reject) => {
+            user_data.forEach((item) => {
+                if (item.id === recordItem.user_id) {
+                    resolve(item.username)
+                }
+            })
+        })
+        return p;
+    }
+    findDeviceName = (recordItem) => {
+        let p = new Promise((resolve, reject) => {
+            device_data.forEach((item) => {
+                if (item.id === recordItem.device_id) {
+                    resolve(item.name)
+                }
+            })
+        })
+        return p;
+    }
     render() {
         const columns = [
             {
@@ -129,7 +169,7 @@ class EquipmentView extends Component {
                 )
             },
             {
-                title: '状态',
+                title: '当前状态',
                 dataIndex: 'status',
                 width: '12%',
                 filters: device_status_filter,
@@ -187,18 +227,16 @@ class EquipmentView extends Component {
                     <div>{text}</div>
                 )
             },
-
             {
                 title: '操作',
                 dataIndex: 'operation',
                 width: '10%',
                 render: (text, record) => {
                     return (
-                        <Button type='primary'>操作</Button>
+                        <Button type='primary' onClick={() => this.openModalHandler(record)} >详情</Button>
                     )
                 },
             }
-
         ];
 
         return (
@@ -212,13 +250,142 @@ class EquipmentView extends Component {
                 </Row>
                 <Table
                     size={'small'}
-                    rowClassName={() => 'editable-row'}
                     bordered
                     dataSource={this.state.dataSource}
                     columns={columns}
                 />
+                <Drawer
+                    title={(
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>设备状态历史记录</span>
+                            <Icon type="close-circle" theme="twoTone" style={{ fontSize: 20 }}
+                                onClick={() => { this.setState({ drawerVisible1: false }) }}
+                            />
+                        </div>
+                    )}
+                    placement="left"
+                    closable={false}
+                    onClose={this.onCloseDrawer}
+                    visible={this.state.drawerVisible1}
+                    width={600}
+                >
+                    {this.renderDeviceRecordsView()}
+                    <Drawer
+                        title="当次报表"
+                        placement="left"
+                        width={520}
+                        closable={false}
+                        onClose={this.closeDrawer2}
+                        visible={this.state.drawerVisible2}
+                    >
+                        {this.state.recordView}
+                    </Drawer>
+                </Drawer>
             </div>
         );
+    }
+
+    openModalHandler = (record) => {
+        // console.log(record);
+        HttpApi.getRecordInfo({ device_id: record.id }, async (res) => {
+            let resultArr = res.data.data;
+            resultArr.sort(function (a, b) {
+                return b.id - a.id
+            })
+            for (let item of resultArr) {
+                item.key = item.id + '';
+                item.username = await this.findUserName(item);
+                item.devicename = await this.findDeviceName(item)
+            }
+            this.setState({
+                drawerVisible1: true,
+                deviceRecords: resultArr
+            })
+        })
+    }
+
+    onCloseDrawer = () => {
+        this.setState({
+            drawerVisible1: false
+        })
+    }
+    closeDrawer2 = () => {
+        this.setState({
+            drawerVisible2: false
+        })
+    }
+    openDrawer2 = (record) => {
+        console.log(record);
+        let titleObj = {};
+        titleObj.key = '0';
+        titleObj.title_name = '表头';
+        titleObj.type_id = '7';
+        titleObj.default_values = record.device_type_id + ''; ///表头的value值
+        titleObj.extra_value = record.table_name;
+        let dataArr = JSON.parse(record.content);
+        let newArr = [titleObj, ...dataArr];///将数据结构进行转化
+        this.setState({
+            modalvisible: true
+        })
+        let recordViewFinallyData = {
+            devicename:record.devicename,
+            username:record.username,
+            tableData:newArr
+        }
+        let sample = RecordViewTool.renderTable(recordViewFinallyData);
+        this.setState({
+            recordView: sample,
+            drawerVisible2: true
+        })
+    }
+
+    renderDeviceRecordsView = () => {
+        const columns = [
+            {
+                title: '时间',
+                dataIndex: 'createdAt',
+                width: '35%',
+                render: (text, record) => (
+                    <div>{moment(text).format('YYYY-MM-DD HH:mm:ss')}</div>
+                )
+            },
+            {
+                title: '基本状态',
+                dataIndex: 'device_status',
+                width: '18%',
+                render: (text, record) => {
+                    let str = '';
+                    let strColor = '#555555'
+                    if (text === 1) { str = '正常'; strColor = '#66CC00' }
+                    else if (text === 2) { str = '故障'; strColor = '#FF3333' }
+                    else { str = '待检' }
+                    return <div style={{ color: strColor }}>{str}</div>
+                }
+            },
+            {
+                title: '报告人',
+                dataIndex: 'username',
+                render: (text, record) => (
+                    <div>{text}</div>
+                )
+            },
+            {
+                title: '操作',
+                dataIndex: 'operation',
+                width: '20%',
+                render: (text, record) => {
+                    return (
+                        <Button type='primary' onClick={() => this.openDrawer2(record)} >详情</Button>
+                    )
+                },
+            }
+        ]
+        return <Table
+            size={'small'}
+            bordered
+            dataSource={this.state.deviceRecords}
+            columns={columns}
+        />
     }
 }
 

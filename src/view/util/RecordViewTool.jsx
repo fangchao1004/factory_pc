@@ -7,11 +7,15 @@ const CheckboxItem = Checkbox.CheckboxItem;
 // { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" }];
 
 /**
- * 模板表渲染器
+ * 记录表渲染器
  */
-export default class SampleViewTool {
+export default class RecordViewTool {
 
-    static renderTable(dataSource) {
+    static renderTable(allData) {
+        var dataSource = allData.tableData;
+        console.log("记录表渲染器:", dataSource, allData.username, allData.devicename);
+
+
         let renderInput = (element) => {
             return <div key={element.key}>
                 <List>
@@ -80,9 +84,9 @@ export default class SampleViewTool {
                 <span>{element.title_name}</span>
                 <List>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <div style={{ width: '100%', height: 240, backgroundColor: '#DDDDDD', borderRadius: 10 }}>
-                        </div>
-                        <Button style={{ width: 100, margin: 10 }} >添加图片</Button>
+                        <img style={{ marginTop: 20,width: 300, height: 200 }} alt='' src='https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=2489492398,1961915359&fm=26&gp=0.jpg'  />
+                        <img style={{ marginTop: 20,width: 300, height: 200 }} alt='' src='https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=2489492398,1961915359&fm=26&gp=0.jpg'  />
+                        <img style={{ marginTop: 20,width: 300, height: 200 }} alt='' src='https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=2489492398,1961915359&fm=26&gp=0.jpg'  />
                     </div>
                 </List>
             </div>
@@ -92,9 +96,9 @@ export default class SampleViewTool {
                 <span style={{ fontSize: 20, border: true, color: element.extra_value ? "#888888" : "#F5232C" }}>
                     {element.extra_value ? element.extra_value : '请选择表单类型'}
                 </span>
-                <div style={{ marginTop: 30 ,marginBottom:20,display:"flex",justifyContent:'space-between'}} >
-                    <span>设备名:xxxxxxx</span>
-                    <span>用户名:xxxxxxx</span>
+                <div style={{ marginTop: 30, marginBottom: 20, display: "flex", justifyContent: 'space-between' }} >
+                    <span>设备名:{allData.username}</span>
+                    <span>用户名:{allData.devicename}</span>
                 </div>
             </div>
         }
@@ -120,9 +124,7 @@ export default class SampleViewTool {
                 }
             });
         }
-
-        viewArr.push(<Button type='primary' style={{ marginTop: 20 }}>确定上传</Button>)
-        return <div style={{ width: 400, alignItems: 'center' }}>{viewArr}</div>
+        return <div style={{ width: 400, alignItems: 'center',marginLeft:20 }}>{viewArr}</div>
     }
 
 }
