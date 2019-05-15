@@ -1,15 +1,15 @@
 import React, { Component } from 'react'
 import { Row, Col, Table, Button } from 'antd'
 import HttpApi from '../../util/HttpApi'
+import AddStaffView from './AddStaffView';
 
 class StaffView extends Component {
 
-    state = { levels: null, users: null }
+    state = { levels: null, users: null, addStaffVisible: false}
 
     componentDidMount() {
         this.getUsersData()
     }
-
 
     async getUsersData() {
         let levelsData = await this.getUserLevelList()
@@ -41,6 +41,18 @@ class StaffView extends Component {
         })
     }
 
+    addStaff() {
+        this.setState({addStaffVisible: true})
+    }
+
+    addStaffOnOk = () => {
+        this.setState({addStaffVisible: false})
+    }
+    
+    addStaffOnCancel = () => {
+        this.setState({addStaffVisible: false})
+    }
+
     render() {
         const columns = [
             {
@@ -61,6 +73,8 @@ class StaffView extends Component {
                         if (level.id === text) {
                             levelName = level.name
                             return true
+                        } else {
+                            return false
                         }
                     })
                     return <div>{levelName}</div>
@@ -88,7 +102,7 @@ class StaffView extends Component {
             <div>
                 <Row>
                     <Col span={6}>
-                        <Button type="primary" style={{ marginBottom: 16 }}>
+                        <Button type="primary" style={{ marginBottom: 16 }} onClick={this.addStaff.bind(this)}>
                             添加员工
                          </Button>
                     </Col>
@@ -99,6 +113,7 @@ class StaffView extends Component {
                     dataSource={this.state.users}
                     columns={columns}
                 />
+                <AddStaffView onOk={this.addStaffOnOk}  onCancel={this.addStaffOnCancel} visible={this.state.addStaffVisible}/>
             </div>
         )
     }

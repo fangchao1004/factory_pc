@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Row, Col, Table, Button } from 'antd'
+import { Row, Col, Table, Button, Divider } from 'antd'
 import HttpApi from '../../util/HttpApi'
 
 class StaffTypeView extends Component {
@@ -43,9 +43,11 @@ class StaffTypeView extends Component {
             {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 150,
+                width: 200,
                 render: (text) => (
-                    <div style={{ textAlign: 'center' }}><Button type="primary">删除</Button></div>
+                    <div style={{ textAlign: 'center'}}><Button type="danger">删除</Button>
+                    <Divider type="vertical"/>
+                    <Button type="primary">修改</Button></div>
                 )
             }
         ];
