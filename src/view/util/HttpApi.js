@@ -98,6 +98,21 @@ class HttpApi {
         })
     }
 
+        /**
+     * 获取设备类型表
+     * @param {*} params 
+     * @param {*} f1 
+     * @param {*} f2 
+     */
+    static getDeviceAreaInfo(params, f1, f2) {
+        Axios.post(Testuri + 'find_device_Area', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+
+
     /**
      * 获取设备的报表record
      * @param {*} params 

@@ -76,17 +76,17 @@ class MainView extends Component {
                             <Link to={`${this.props.match.url}`} />
                         </Menu.Item>
                         <Menu.Item key="设备">
-                            <Icon type="pay-circle" />
+                            <Icon type="switcher" />
                             <span>设备</span>
                             <Link to={`${this.props.match.url}/equipment`} />
                         </Menu.Item>
                         <Menu.Item key="员工">
-                            <Icon type="read" />
+                            <Icon type="team" />
                             <span>员工</span>
                             <Link to={`${this.props.match.url}/staff`} />
                         </Menu.Item>
                         <Menu.Item key="表单">
-                            <Icon type="idcard" />
+                            <Icon type="file" />
                             <span>表单</span>
                             <Link to={`${this.props.match.url}/table`} />
                         </Menu.Item>
