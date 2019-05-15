@@ -34,7 +34,7 @@ class MainView extends Component {
                     collapsed={this.state.collapsed}
                     onCollapse={this.onCollapse}
                     trigger={null}
-                    width={250}
+                    width={150}
                 >
                     <div
                         style={{
