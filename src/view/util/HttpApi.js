@@ -125,6 +125,19 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
+
+     /**
+     * @param {*} params 
+     * @param {*} f1 
+     * @param {*} f2 
+     */
+    static getUserLevel(params, f1, f2) {
+        Axios.post(Testuri + 'find_level', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
 }
 
 export default HttpApi;

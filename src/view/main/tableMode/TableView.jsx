@@ -81,7 +81,7 @@ class TableView extends Component {
                         </Popconfirm>
 
                     </div>)}
-                        bordered={true} style={{ marginTop: 16, height: 125, borderRadius: 10, borderWidth: 2 }}>
+                        bordered={true} style={{ marginTop: 16, height: 125, borderRadius: 5 }}>
                         <div style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'space-between', width: '102%' }}>
                             <div>
                                 {/* <Button type='primary' onClick={() => { console.log(element); }}>修改</Button> */}

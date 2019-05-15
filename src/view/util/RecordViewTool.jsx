@@ -1,4 +1,4 @@
-import { List, InputItem, Radio, Checkbox, TextareaItem, ImagePicker, Button } from 'antd-mobile';
+import { List, InputItem, Radio, Checkbox, TextareaItem } from 'antd-mobile';
 import { Empty } from 'antd'
 import React from "react";
 const RadioItem = Radio.RadioItem;

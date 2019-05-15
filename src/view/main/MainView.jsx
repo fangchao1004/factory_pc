@@ -10,8 +10,6 @@ import SettingEquipmentModeRoot from './settingMode/settingEquipmentMode/Setting
 import SettingStaffModeRoot from './settingMode/settingStaffMode/SettingStaffModeRoot';
 import SettingTableModeRoot from './settingMode/settingTableMode/SettingTableModeRoot';
 
-
-const { SubMenu } = Menu;
 const { Header, Content, Sider } = Layout;
 
 class MainView extends Component {
