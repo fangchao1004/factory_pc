@@ -29,16 +29,18 @@ class MainView extends Component {
         return (
             <Layout style={{ minHeight: '100vh' }}>
                 <Sider
+                    style={{background: '#464854'}}
                     collapsible
                     collapsed={this.state.collapsed}
                     onCollapse={this.onCollapse}
                     trigger={null}
-                    width="200"
+                    width={250}
                 >
                     <div
                         style={{
                             height: 64,
-                            background: 'rgba(8,32,61,1)',
+                            // background: 'rgba(8,32,61,1)',
+                            backgroundColor: '#464854',
                             padding: '16 24',
                             position: 'relative'
                         }}
@@ -56,9 +58,9 @@ class MainView extends Component {
                                     position: 'absolute',
                                     top: 25,
                                     left: 90,
-                                    width: 180,
+                                    width: 150,
                                     color: '#fff',
-                                    fontSize: 20
+                                    fontSize: 15
                                 }}
                             >
                                 管理平台
@@ -67,6 +69,7 @@ class MainView extends Component {
                     </div>
                     <Menu
                         theme="dark"
+                        style={{background: '#464854'}}
                         mode="inline"
                         onClick={this.onMeunClick}
                     >
@@ -115,12 +118,12 @@ class MainView extends Component {
                     </Menu>
                 </Sider>
                 <Layout>
-                    <Header style={{ background: '#fff', padding: 0 }}>
+                    <Header style={{ background: '#464854', padding: 0 }}>
                         <Row>
                             <Col span={8}>
                                 <Icon
                                     className="trigger"
-                                    style={{ fontSize: 24, marginLeft: 30 }}
+                                    style={{ fontSize: 24, marginLeft: 30 ,color:'#fff'}}
                                     type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'}
                                     onClick={this.toggle}
                                 />
@@ -135,8 +138,7 @@ class MainView extends Component {
                     </Header>
                     <Content
                         style={{
-                            background: '#fff',
-                            margin: 24,
+                            background: '#464854',
                             padding: 24,
                             minHeight: 280
                         }}
