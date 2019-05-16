@@ -72,7 +72,7 @@ export default class PieView extends React.Component {
       }
     };
     return (
-      <div style={{ backgroundColor: '#FFFFFF', height: 280, marginTop: 16,borderRadius:5 }}>
+      <div style={{ backgroundColor: '#F0F2F5', height: 280, marginTop: 16,borderRadius:5 }}>
         <Chart
           height={280}
           data={dv}
