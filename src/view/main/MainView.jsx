@@ -19,7 +19,6 @@ class MainView extends Component {
             collapsed: false
         }
     }
-
     toggle = () => {
         this.setState({
             collapsed: !this.state.collapsed
@@ -29,18 +28,16 @@ class MainView extends Component {
         return (
             <Layout style={{ minHeight: '100vh' }}>
                 <Sider
-                    style={{background: '#464854'}}
                     collapsible
                     collapsed={this.state.collapsed}
                     onCollapse={this.onCollapse}
                     trigger={null}
-                    width={150}
+                    width="200"
                 >
                     <div
                         style={{
                             height: 64,
-                            // background: 'rgba(8,32,61,1)',
-                            backgroundColor: '#464854',
+                            background: 'rgba(8,32,61,1)',
                             padding: '16 24',
                             position: 'relative'
                         }}
@@ -48,28 +45,27 @@ class MainView extends Component {
                         <img
                             src={logopng}
                             alt=""
-                            width="50"
-                            height="50"
-                            style={{ position: 'absolute', left: 20, top: 10 }}
+                            width="32"
+                            height="32"
+                            style={{ position: 'absolute', left: 24, top: 16 }}
                         />
                         {this.state.collapsed ? null : (
                             <span
                                 style={{
                                     position: 'absolute',
-                                    top: 25,
-                                    left: 90,
-                                    width: 150,
+                                    top: 18,
+                                    left: 60,
+                                    width: 180,
                                     color: '#fff',
-                                    fontSize: 15
+                                    fontSize: 20
                                 }}
                             >
-                                管理平台
+                                工厂管理平台
               </span>
                         )}
                     </div>
                     <Menu
                         theme="dark"
-                        style={{background: '#464854'}}
                         mode="inline"
                         onClick={this.onMeunClick}
                     >
@@ -93,37 +89,15 @@ class MainView extends Component {
                             <span>表单</span>
                             <Link to={`${this.props.match.url}/table`} />
                         </Menu.Item>
-                        {/* <SubMenu
-                            key="设置"
-                            title={
-                                <span>
-                                    <Icon type="setting" />
-                                    <span>设置</span>
-                                </span>
-                            }
-                        >
-                            <Menu.Item key="设备设置">
-                                设备设置
-                <Link to={`${this.props.match.url}/setting/equipmentModeRoot`} />
-                            </Menu.Item>
-                            <Menu.Item key="员工设置">
-                                员工设置
-                <Link to={`${this.props.match.url}/setting/staffModeRoot`} />
-                            </Menu.Item>
-                            <Menu.Item key="表单设置">
-                                表单设置
-                <Link to={`${this.props.match.url}/setting/tableModeRoot`} />
-                            </Menu.Item>
-                        </SubMenu> */}
                     </Menu>
                 </Sider>
                 <Layout>
-                    <Header style={{ background: '#464854', padding: 0 }}>
+                    <Header style={{ background: '#fff', padding: 0 }}>
                         <Row>
                             <Col span={8}>
                                 <Icon
                                     className="trigger"
-                                    style={{ fontSize: 24, marginLeft: 30 ,color:'#fff'}}
+                                    style={{ fontSize: 24, marginLeft: 30 }}
                                     type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'}
                                     onClick={this.toggle}
                                 />
@@ -138,8 +112,9 @@ class MainView extends Component {
                     </Header>
                     <Content
                         style={{
-                            background: '#464854',
-                            padding: 24,
+                            background: '#fff',
+                            margin: 14,
+                            padding: 14,
                             minHeight: 280
                         }}
                     >
