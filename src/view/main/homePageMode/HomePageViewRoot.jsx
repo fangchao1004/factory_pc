@@ -3,7 +3,6 @@ import PieView from './PieView'
 import LineChartView from './LineChartView'
 import { Row, Col } from 'antd'
 import HttpApi from '../../util/HttpApi'
-import { Button } from 'antd/lib/radio';
 
 var allDeviceTypes = [];
 class HomePageViewRoot extends Component {

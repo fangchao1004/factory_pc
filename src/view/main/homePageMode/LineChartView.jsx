@@ -1,13 +1,8 @@
-import React from "react";
-import {
-    Chart,
-    Geom,
-    Axis,
-    Tooltip,
-} from "bizcharts";
+import React, { Component } from 'react';
+import { Chart, Geom, Axis, Tooltip, Legend } from "bizcharts";
 import DataSet from "@antv/data-set";
 
-class LineChartView extends React.Component {
+class LineChartView extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -21,9 +16,9 @@ class LineChartView extends React.Component {
         let dataArr = [];
         for (let index = 1; index <= 31; index++) {
             let obj = {};
-            obj.检查 = 100;
-            obj.故障 = (Math.random() * 50).toFixed(0);
-            obj.date = index;
+            obj.检查 = 50;
+            obj.故障 = parseInt((Math.random() * 10).toFixed(0));
+            obj.date = index + "";
             dataArr.push(obj);
         }
         this.setState({
@@ -37,19 +32,22 @@ class LineChartView extends React.Component {
             type: "fold",
             fields: ["检查", "故障"],
             // 展开字段集
-            key: "aaa",
+            key: "status",
             // key字段
             value: "num" // value字段
         });
-        // console.log(dv);
+        console.log(dv);
         const cols = {
             date: {
-                range: [0, 0.9]
+                range: [0, 1]
             }
         };
         return (
-            <div style={{width:'100%',backgroundColor:'#FFFFFF',borderRadius:5}}>
-                <Chart height={400} data={dv} scale={cols} forceFit={true}>
+            <div style={{ backgroundColor: '#ffffff' }}>
+                <div style={{ marginLeft: 20, padding: 20, fontSize: 20 }}>{new Date().getMonth() + 1}月统计</div>
+                <Chart height={400} data={dv} scale={cols} forceFit>
+                    <Legend />
+                    <Axis name="date" />
                     <Axis
                         name="num"
                         label={{
@@ -62,20 +60,18 @@ class LineChartView extends React.Component {
                         }}
                     />
                     <Geom
-                        ///线
                         type="line"
                         position="date*num"
                         size={2}
-                        color={"aaa"}
+                        color={"status"}
                         shape={"smooth"}
                     />
                     <Geom
-                        ///点
                         type="point"
                         position="date*num"
                         size={4}
                         shape={"circle"}
-                        color={"aaa"}
+                        color={"status"}
                         style={{
                             stroke: "#fff",
                             lineWidth: 1
