@@ -128,7 +128,7 @@ class HttpApi {
     }
 
     /**
-     * 获取设备的报表record
+     * 获取用户表
      * @param {*} params 
      * @param {*} f1 
      * @param {*} f2 
@@ -142,6 +142,7 @@ class HttpApi {
     }
 
      /**
+      * 获取用户等级部门表
      * @param {*} params 
      * @param {*} f1 
      * @param {*} f2 
