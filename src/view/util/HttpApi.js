@@ -1,7 +1,7 @@
 import Axios from 'axios';
 
 // const Testuri1 = 'http://192.168.0.106:3009/' ///宿舍无线网络
-const Testuri3 = 'http://192.168.3.119:3009/'///zg609&服务器数据库
+const Testuri3 = 'http://hefeixiaomu.com:3009/'///zg609&服务器数据库
 const Testuri = Testuri3;
 class HttpApi {
     /**
@@ -128,7 +128,7 @@ class HttpApi {
     }
 
     /**
-     * 获取用户表
+     * 获取设备的报表record
      * @param {*} params 
      * @param {*} f1 
      * @param {*} f2 
@@ -140,13 +140,28 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
+    static addUserInfo(params, f1, f2) {
+        Axios.post(Testuri + 'insert_user', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static removeUserInfo(params, f1, f2) {
+        Axios.post(Testuri + 'remove_user', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static updateUserInfo(params, f1, f2) {
+        Axios.post(Testuri + 'update_user', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
 
-     /**
-      * 获取用户等级部门表
-     * @param {*} params 
-     * @param {*} f1 
-     * @param {*} f2 
-     */
     static getUserLevel(params, f1, f2) {
         Axios.post(Testuri + 'find_level', params).then(res => {
             if (f1) { f1(res) }
@@ -156,4 +171,4 @@ class HttpApi {
     }
 }
 
-export default HttpApi;
+export default HttpApi

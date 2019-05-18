@@ -1,26 +1,28 @@
 import React, { Component } from 'react'
-import { Row, Col, Table, Button } from 'antd'
+import { Row, Col, Table, Button, Divider, message, Popconfirm } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import AddStaffView from './AddStaffView';
+import UpdateStaffView from './UpdateStaffView';
 
 class StaffView extends Component {
 
-    state = { levels: null, users: null, addStaffVisible: false}
+    state = { levels: null, nfcs: null, users: null, addStaffVisible: false, updateStaffVisible: false, updateStaffData: null}
 
     componentDidMount() {
         this.getUsersData()
     }
-
     async getUsersData() {
         let levelsData = await this.getUserLevelList()
-        this.setState({levels: levelsData})
+        let nfcsData = await this.getUserNfcList()
+        this.setState({ levels: levelsData, nfcs: nfcsData })
         var usersData = await this.getUserList()
-        this.setState({users: usersData.map(user => {
-            user.key = user.id
-            return user
-        })})
+        this.setState({
+            users: usersData.map(user => {
+                user.key = user.id
+                return user
+            })
+        })
     }
-
     getUserLevelList() {
         return new Promise((resolve, reject) => {
             HttpApi.getUserLevel({}, data => {
@@ -30,7 +32,15 @@ class StaffView extends Component {
             })
         })
     }
-
+    getUserNfcList() {
+        return new Promise((resolve, reject) => {
+            HttpApi.getNFCInfo({ type: 1 }, data => {
+                if (data.data.code === 0) {
+                    resolve(data.data.data)
+                }
+            })
+        })
+    }
     getUserList() {
         return new Promise((resolve, reject) => {
             HttpApi.getUserInfo({}, data => {
@@ -42,15 +52,49 @@ class StaffView extends Component {
     }
 
     addStaff() {
-        this.setState({addStaffVisible: true})
+        this.setState({ addStaffVisible: true })
     }
-
-    addStaffOnOk = () => {
-        this.setState({addStaffVisible: false})
+    addStaffOnOk = (newValues) => {
+        HttpApi.addUserInfo(newValues, data => {
+            if (data.data.code === 0) {
+                this.setState({ addStaffVisible: false })
+                this.getUsersData()
+                message.success('添加成功')
+            } else {
+                message.error(data.data.data)
+            }
+        })
     }
-    
     addStaffOnCancel = () => {
-        this.setState({addStaffVisible: false})
+        this.setState({ updateStaffVisible: false })
+    }
+    updateStaff(record) {
+        console.log('update', record)
+        this.setState({ updateStaffVisible: true, updateStaffData: record})
+    }
+    updateStaffOnOk = (newValues) => {
+        HttpApi.updateUserInfo({query: {id: this.state.updateStaffData.id}, update: newValues}, data => {
+            if (data.data.code === 0) {
+                this.setState({ updateStaffVisible: false })
+                this.getUsersData()
+                message.success('更新成功')
+            } else {
+                message.error(data.data.data)
+            }
+        })
+    }
+    updateStaffOnCancel = () => {
+        this.setState({ updateStaffVisible: false })
+    }
+    deleteStaffConfirm = (record) => {
+        HttpApi.removeUserInfo({ id: record.id }, data => {
+            if (data.data.code === 0) {
+                message.success('删除成功')
+                this.getUsersData()
+            } else {
+                message.error(data.data.data)
+            }
+        })
     }
 
     render() {
@@ -58,7 +102,6 @@ class StaffView extends Component {
             {
                 title: '编号',
                 dataIndex: 'id',
-                width: '8%',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
@@ -66,7 +109,6 @@ class StaffView extends Component {
             {
                 title: '等级',
                 dataIndex: 'level_id',
-                width: '8%',
                 render: (text) => {
                     var levelName
                     this.state.levels.some(level => {
@@ -81,9 +123,31 @@ class StaffView extends Component {
                 }
             },
             {
+                title: 'NFC',
+                dataIndex: 'nfc_id',
+                render: (text) => {
+                    var nfcName
+                    this.state.nfcs.some(nfc => {
+                        if (nfc.id === text) {
+                            nfcName = nfc.name
+                            return true
+                        } else {
+                            return false
+                        }
+                    })
+                    return <div>{nfcName}</div>
+                }
+            },
+            {
                 title: '用户名',
                 dataIndex: 'username',
-                width: '8%',
+                render: (text, record) => (
+                    <div>{text}</div>
+                )
+            },
+            {
+                title: '密码',
+                dataIndex: 'password',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
@@ -91,9 +155,21 @@ class StaffView extends Component {
             {
                 title: '昵称',
                 dataIndex: 'name',
-                width: '8%',
                 render: (text, record) => (
                     <div>{text}</div>
+                )
+            },
+            {
+                title: '操作',
+                dataIndex: 'actions',
+                width: 200,
+                render: (text, record) => (
+                    <div style={{ textAlign: 'center' }}>
+                        <Popconfirm title="确定要删除该员工吗?" onConfirm={this.deleteStaffConfirm.bind(null, record)}>
+                            <Button type="danger">删除</Button>
+                        </Popconfirm>
+                        <Divider type="vertical" />
+                        <Button type="primary" onClick={this.updateStaff.bind(this, record)}>修改</Button></div>
                 )
             }
         ];
@@ -113,7 +189,9 @@ class StaffView extends Component {
                     dataSource={this.state.users}
                     columns={columns}
                 />
-                <AddStaffView onOk={this.addStaffOnOk}  onCancel={this.addStaffOnCancel} visible={this.state.addStaffVisible}/>
+                <AddStaffView onOk={this.addStaffOnOk} onCancel={this.addStaffOnCancel} visible={this.state.addStaffVisible} />
+                <UpdateStaffView staff={this.state.updateStaffData} onOk={this.updateStaffOnOk} 
+                onCancel={this.updateStaffOnCancel} visible={this.state.updateStaffVisible} />
             </div>
         )
     }
