@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { Table, Button, Row, Col, Drawer, Icon } from 'antd'
+import { Table, Button, Row, Col, Drawer, Icon, message, Popconfirm, Divider } from 'antd'
 import HttpApi from '../../util/HttpApi';
 import RecordViewTool from '../../util/RecordViewTool';
 import moment from 'moment';
+import AddEquipmentView from './AddEquipmentView';
 
 var nfc_data = [];
 var area_data = [];
@@ -22,7 +23,8 @@ class EquipmentView extends Component {
             drawerVisible1: false,
             drawerVisible2: false,
             deviceRecords: [],
-            recordView: null
+            recordView: null,
+            addEquipmentVisible: false
         }
     }
     async componentDidMount() {
@@ -132,7 +134,7 @@ class EquipmentView extends Component {
         let p = new Promise((resolve, reject) => {
             nfc_data.forEach((item) => {
                 if (item.id === deviceItem.nfc_id) {
-                    resolve(item.nfcid)
+                    resolve(item.name)
                 }
             })
         })
@@ -158,36 +160,56 @@ class EquipmentView extends Component {
         })
         return p;
     }
+    addEquipment = (newValues) => {
+        this.setState({ addEquipmentVisible: true })
+    }
+    addEquipmentOk = (newValues) => {
+        newValues.status = 3 // 默认设置设备为 待检 状态
+        console.log(newValues)
+        HttpApi.addDeviceInfo(newValues, data => {
+            if (data.data.code === 0) {
+                this.setState({ addEquipmentVisible: false })
+                this.init();
+                message.success('添加成功')
+            } else {
+                message.error(data.data.data)
+            }
+        })
+    }
+    addEquipmentCancel = () => {
+        this.setState({ addEquipmentVisible: false })
+    }
+    deleteEquipmentConfirm(record) {
+        HttpApi.removeDeviceInfo({ id: record.id }, data => {
+            if (data.data.code === 0) {
+                message.success('删除成功')
+                this.init()
+            } else {
+                message.error(data.data.data)
+            }
+        })
+    }
     render() {
         const columns = [
             {
                 title: '编号',
                 dataIndex: 'id',
-                width: '8%',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
             },
             {
-                title: '当前状态',
-                dataIndex: 'status',
-                width: '12%',
-                filters: device_status_filter,
-                onFilter: (value, record) => record.status === value,
-                render: (text, record) => {
-                    // console.log(record);
-                    let str = '';
-                    let strColor = '#555555'
-                    if (text === 1) { str = '正常'; strColor = '#66CC00' }
-                    else if (text === 2) { str = '故障'; strColor = '#FF3333' }
-                    else { str = '待检' }
-                    return <div style={{ color: strColor }}>{str}</div>
-                }
+                title: '区域',
+                dataIndex: 'area_name',
+                filters: area_data_filter,
+                onFilter: (value, record) => record.area_id === value,
+                render: (text, record) => (
+                    <div>{text}</div>
+                )
             },
             {
                 title: '设备类型',
                 dataIndex: 'device_type_name',
-                width: '12%',
                 filters: device_type_data_filter,
                 onFilter: (value, record) => record.type_id === value,
                 render: (text, record) => (
@@ -203,19 +225,23 @@ class EquipmentView extends Component {
                 )
             },
             {
-                title: '设备名',
-                dataIndex: 'name',
-                width: '12%',
-                render: (text, record) => (
-                    <div>{text}</div>
-                )
+                title: '当前状态',
+                dataIndex: 'status',
+                filters: device_status_filter,
+                onFilter: (value, record) => record.status === value,
+                render: (text, record) => {
+                    // console.log(record);
+                    let str = '';
+                    let strColor = '#555555'
+                    if (text === 1) { str = '正常'; strColor = '#66CC00' }
+                    else if (text === 2) { str = '故障'; strColor = '#FF3333' }
+                    else { str = '待检' }
+                    return <div style={{ color: strColor }}>{str}</div>
+                }
             },
             {
-                title: '区域',
-                dataIndex: 'area_name',
-                width: '8%',
-                filters: area_data_filter,
-                onFilter: (value, record) => record.area_id === value,
+                title: '设备名',
+                dataIndex: 'name',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
@@ -229,13 +255,16 @@ class EquipmentView extends Component {
             },
             {
                 title: '操作',
-                dataIndex: 'operation',
-                width: '10%',
-                render: (text, record) => {
-                    return (
-                        <Button type='primary' onClick={() => this.openModalHandler(record)} >详情</Button>
-                    )
-                },
+                dataIndex: 'actions',
+                width: 200,
+                render: (text, record) => (
+                    <div style={{ textAlign: 'center' }}>
+                        <Popconfirm title="确定要删除该设备吗?" onConfirm={this.deleteEquipmentConfirm.bind(null, record)}>
+                            <Button type="danger">删除</Button>
+                        </Popconfirm>
+                        <Divider type="vertical" />
+                        <Button type='primary' onClick={() => this.openModalHandler(record)} >详情</Button></div>
+                )
             }
         ];
 
@@ -243,7 +272,7 @@ class EquipmentView extends Component {
             <div>
                 <Row>
                     <Col span={6}>
-                        <Button onClick={this.handleAdd} type="primary" style={{ marginBottom: 16 }}>
+                        <Button onClick={this.addEquipment} type="primary" style={{ marginBottom: 16 }}>
                             添加设备
                          </Button>
                     </Col>
@@ -281,6 +310,7 @@ class EquipmentView extends Component {
                         {this.state.recordView}
                     </Drawer>
                 </Drawer>
+                <AddEquipmentView visible={this.state.addEquipmentVisible} onOk={this.addEquipmentOk} onCancel={this.addEquipmentCancel} />
             </div>
         );
     }
@@ -328,9 +358,9 @@ class EquipmentView extends Component {
             modalvisible: true
         })
         let recordViewFinallyData = {
-            devicename:record.devicename,
-            username:record.username,
-            tableData:newArr
+            devicename: record.devicename,
+            username: record.username,
+            tableData: newArr
         }
         let sample = RecordViewTool.renderTable(recordViewFinallyData);
         this.setState({

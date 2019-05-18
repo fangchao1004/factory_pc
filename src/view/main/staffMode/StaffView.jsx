@@ -66,7 +66,7 @@ class StaffView extends Component {
         })
     }
     addStaffOnCancel = () => {
-        this.setState({ updateStaffVisible: false })
+        this.setState({ addStaffVisible: false })
     }
     updateStaff(record) {
         console.log('update', record)
