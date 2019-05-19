@@ -66,6 +66,13 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
+    static addDeviceTypeInfo(params, f1, f2) {
+        Axios.post(Testuri + 'insert_device_type', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
     static getDeviceTypeInfo(params, f1, f2) {
         Axios.post(Testuri + 'find_device_type', params).then(res => {
             if (f1) { f1(res) }
@@ -73,8 +80,43 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
+    static removeDeviceTypeInfo(params, f1, f2) {
+        Axios.post(Testuri + 'remove_device_type', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static updateDeviceTypeInfo(params, f1, f2) {
+        Axios.post(Testuri + 'update_device_type', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static addDeviceAreaInfo(params, f1, f2) {
+        Axios.post(Testuri + 'insert_area', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
     static getDeviceAreaInfo(params, f1, f2) {
         Axios.post(Testuri + 'find_area', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static removeDeviceAreaInfo(params, f1, f2) {
+        Axios.post(Testuri + 'remove_area', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static updateDeviceAreaInfo(params, f1, f2) {
+        Axios.post(Testuri + 'update_area', params).then(res => {
             if (f1) { f1(res) }
         }).catch(res => {
             if (f2) { f2(res) }
