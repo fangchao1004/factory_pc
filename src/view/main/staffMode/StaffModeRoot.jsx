@@ -8,7 +8,7 @@ const tabListNoTitle = [{
     tab: '员工概况',
 }, {
     key: 'StaffTypeView',
-    tab: '员工类型管理'
+    tab: '部门管理'
 }];
 
 const contentListNoTitle = {

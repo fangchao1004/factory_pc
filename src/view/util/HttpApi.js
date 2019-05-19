@@ -1,6 +1,6 @@
 import Axios from 'axios';
 
-const Testuri3 = 'http://192.168.3.119:3009/' ///宿舍无线网络
+const Testuri3 = 'http://127.0.0.1:3009/' ///宿舍无线网络
 // const Testuri3 = 'http://hefeixiaomu.com:3009/'///zg609&服务器数据库
 const Testuri = Testuri3;
 class HttpApi {
@@ -116,8 +116,29 @@ class HttpApi {
         })
     }
 
+    static addUserLevel(params, f1, f2) {
+        Axios.post(Testuri + 'insert_level', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
     static getUserLevel(params, f1, f2) {
         Axios.post(Testuri + 'find_level', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static removeUserLevel(params, f1, f2) {
+        Axios.post(Testuri + 'remove_level', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static updateUserLevel(params, f1, f2) {
+        Axios.post(Testuri + 'update_level', params).then(res => {
             if (f1) { f1(res) }
         }).catch(res => {
             if (f2) { f2(res) }

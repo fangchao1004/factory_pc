@@ -107,7 +107,7 @@ class StaffView extends Component {
                 )
             },
             {
-                title: '等级',
+                title: '部门',
                 dataIndex: 'level_id',
                 render: (text) => {
                     var levelName
