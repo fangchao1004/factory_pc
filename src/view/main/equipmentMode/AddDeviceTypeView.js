@@ -28,7 +28,7 @@ export default function AddDeviceTypeView(props) {
             }
         })
     }
-    return <Modal onOk={handlerOk} title="添加设备类型"
+    return <Modal centered onOk={handlerOk} title="添加设备类型"
         onCancel={props.onCancel}
         visible={props.visible}>
         <DeviceTypeForm ref={staffFormRef}></DeviceTypeForm>

@@ -43,7 +43,7 @@ export default function UpdateStaffView(props) {
             }
         })
     }
-    return <Modal onOk={handlerOk} title="修改设备区域"
+    return <Modal centered onOk={handlerOk} title="修改设备区域"
         onCancel={props.onCancel}
         visible={props.visible}>
         <StaffForm ref={staffFormRef} staff={props.staff}></StaffForm>

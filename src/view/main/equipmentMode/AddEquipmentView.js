@@ -81,7 +81,7 @@ export default function AddEquipmentView(props) {
             }
         })
     }
-    return <Modal onOk={handlerOk} title="添加设备"
+    return <Modal centered onOk={handlerOk} title="添加设备"
         onCancel={props.onCancel}
         visible={props.visible}>
         <EquipmentForm ref={staffFormRef} areas={areas} types={types} nfcs={nfcs}></EquipmentForm>

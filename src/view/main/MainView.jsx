@@ -6,6 +6,7 @@ import HomePageViewRoot from './homePageMode/HomePageViewRoot';
 import EquipmentModeRoot from './equipmentMode/EquipmentModeRoot'
 import StaffModeRoot from './staffMode/StaffModeRoot'
 import TableModeRoot from './tableMode/TableModeRoot';
+import UserModeRoot from './usercenter/UserModeRoot'
 import SettingEquipmentModeRoot from './settingMode/settingEquipmentMode/SettingEquipmentModeRoot';
 import SettingStaffModeRoot from './settingMode/settingStaffMode/SettingStaffModeRoot';
 import SettingTableModeRoot from './settingMode/settingTableMode/SettingTableModeRoot';
@@ -89,6 +90,11 @@ class MainView extends Component {
                             <span>表单</span>
                             <Link to={`${this.props.match.url}/table`} />
                         </Menu.Item>
+                        <Menu.Item key="个人中心">
+                            <Icon type="user" />
+                            <span>个人中心</span>
+                            <Link to={`${this.props.match.url}/user`} />
+                        </Menu.Item>
                     </Menu>
                 </Sider>
                 <Layout>
@@ -138,6 +144,11 @@ class MainView extends Component {
                                 exact
                                 path={`${this.props.match.path}/table`}
                                 component={TableModeRoot}
+                            />
+                             <Route
+                                exact
+                                path={`${this.props.match.path}/user`}
+                                component={UserModeRoot}
                             />
                             <Route
                                 exact

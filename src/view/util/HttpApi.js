@@ -186,6 +186,34 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
+    static addTaskInfo(params, f1, f2) {
+        Axios.post(Testuri + 'insert_task', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static getTaskInfo(params, f1, f2) {
+        Axios.post(Testuri + 'find_task', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static removeTaskInfo(params, f1, f2) {
+        Axios.post(Testuri + 'remove_task', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static updateTaskInfo(params, f1, f2) {
+        Axios.post(Testuri + 'update_task', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
 }
 
 export default HttpApi

@@ -140,6 +140,7 @@ class TableView extends Component {
                     </div>}
                 <Modal
                     // confirmLoading={this.state.modalvisible}
+                    centered 
                     width={450}
                     hight={500}
                     title={<div><span>效果预览</span><span style={{ fontSize: 10, color: '#AAAAAA', marginLeft: 40 }}>实际效果以移动端显示为准</span></div>}
