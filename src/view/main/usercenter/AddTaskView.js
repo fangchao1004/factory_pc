@@ -14,13 +14,6 @@ function AddTaskForm(props) {
                 option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
             } optionFilterProp="children" placeholder="请选择执行人">{userOptions}</Select>)}
         </Form.Item>
-        <Form.Item label="抄送人" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('copy', {
-                rules: [{ required: false, message: '请选择抄送人' }]
-            })(<Select showSearch mode="multiple" filterOption={(input, option) =>
-                option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-            } optionFilterProp="children" placeholder="请选择抄送人">{userOptions}</Select>)}
-        </Form.Item>
         <Form.Item label="主题" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('title', {
                 rules: [{ required: true, message: '请输入任务主题' }]

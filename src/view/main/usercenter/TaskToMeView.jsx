@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import { Row, Col, Table, Button, message, Tag, Popconfirm, Divider } from 'antd'
+import { Table, Button, message, Tag } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import AddStaffView from './AddTaskView';
-import UpdateStaffView from './PreviewTaskView'
+import UpdateStaffView from './UpdateTaskView'
 import AppData from '../../util/AppData'
 
 class TaskFromMeView extends Component {
@@ -56,8 +56,8 @@ class TaskFromMeView extends Component {
         console.log('update', record)
         this.setState({ updateStaffVisible: true, updateStaffData: record })
     }
-    updateStaffOnOk = (newValues) => {
-        HttpApi.updateUserInfo({ query: { id: this.state.updateStaffData.id }, update: newValues }, data => {
+    updateStaffOnOk = () => {
+        HttpApi.updateTaskInfo({ query: { id: this.state.updateStaffData.id }, update: { status: 1 } }, data => {
             if (data.data.code === 0) {
                 this.setState({ updateStaffVisible: false })
                 this.getUsersData()
@@ -71,7 +71,7 @@ class TaskFromMeView extends Component {
         this.setState({ updateStaffVisible: false })
     }
     deleteStaffConfirm = (record) => {
-        HttpApi.removeTaskInfo({ id: record.id }, data => {
+        HttpApi.removeUserInfo({ id: record.id }, data => {
             if (data.data.code === 0) {
                 message.success('删除成功')
                 this.getUsersData()
@@ -111,13 +111,9 @@ class TaskFromMeView extends Component {
             {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 200,
+                width: 100,
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
-                        <Popconfirm title="确定要删除该任务吗?" onConfirm={this.deleteStaffConfirm.bind(null, record)}>
-                            <Button type="danger">删除</Button>
-                        </Popconfirm>
-                        <Divider type="vertical" />
                         <Button type="primary" onClick={this.updateStaff.bind(this, record)}>详情</Button>
                     </div>
                 )
@@ -126,13 +122,6 @@ class TaskFromMeView extends Component {
 
         return (
             <div>
-                <Row>
-                    <Col span={6}>
-                        <Button type="primary" style={{ marginBottom: 16 }} onClick={this.addStaff.bind(this)}>
-                            新建任务
-                         </Button>
-                    </Col>
-                </Row>
                 <Table
                     size={'small'}
                     bordered

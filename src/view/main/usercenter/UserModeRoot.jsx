@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Card } from 'antd';
 import StaffView from './TaskFromMeView';
-import StaffTypeView from './StaffTypeView'
+import StaffTypeView from './TaskToMeView'
 
 const tabListNoTitle = [{
     key: 'StaffView',

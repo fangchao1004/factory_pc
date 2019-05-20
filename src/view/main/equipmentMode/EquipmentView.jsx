@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, Button, Row, Col, Drawer, Icon, message, Popconfirm, Divider } from 'antd'
+import { Table, Button, Row, Col, Drawer, Icon, message, Popconfirm, Divider, Tag } from 'antd'
 import HttpApi from '../../util/HttpApi';
 import RecordViewTool from '../../util/RecordViewTool';
 import moment from 'moment';
@@ -228,6 +228,7 @@ class EquipmentView extends Component {
                 title: '当前状态',
                 dataIndex: 'status',
                 filters: device_status_filter,
+                align: 'center',
                 onFilter: (value, record) => record.status === value,
                 render: (text, record) => {
                     // console.log(record);
@@ -236,7 +237,7 @@ class EquipmentView extends Component {
                     if (text === 1) { str = '正常'; strColor = '#66CC00' }
                     else if (text === 2) { str = '故障'; strColor = '#FF3333' }
                     else { str = '待检' }
-                    return <div style={{ color: strColor }}>{str}</div>
+                    return <Tag color={strColor}>{str}</Tag>
                 }
             },
             {

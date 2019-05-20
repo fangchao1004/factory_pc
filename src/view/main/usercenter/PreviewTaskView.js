@@ -44,7 +44,7 @@ function UpdateTaskForm(props) {
 
 const TaskForm = Form.create({ name: 'staffForm' })(UpdateTaskForm)
 
-export default function UpdateTaskView(props) {
+export default function PreviewTaskView(props) {
     const staffFormRef = React.useRef(null)
     const [users, setUsers] = React.useState(null)
     React.useEffect(() => {
@@ -55,12 +55,16 @@ export default function UpdateTaskView(props) {
         })
     }, [])
     const handlerOk = () => {
-        props.onOk()
+        staffFormRef.current.validateFields((error, values) => {
+            if (!error) {
+                props.onOk(values)
+            }
+        })
     }
     return <Modal width={700} centered onOk={handlerOk} title="任务详情"
         onCancel={props.onCancel}
         visible={props.visible}
-        okText="已完成">
+        footer={null}>
         <TaskForm ref={staffFormRef} users={users} task={props.staff}></TaskForm>
     </Modal>
 }
