@@ -43,7 +43,9 @@ class EquipmentView extends Component {
             device_type_data_filter.push({ text: item.name, value: item.id })
         })
         device_data = await this.getDeviceData();
+        console.log('device_data', device_data)
         let newData = await this.transformConstruct();
+        console.log('newData', newData)
         this.setState({
             dataSource: newData
         })
@@ -107,46 +109,55 @@ class EquipmentView extends Component {
             item.area_name = await this.findAreaName(item)
             item.nfc_name = await this.findNfcName(item)
         }
-        // console.log('处理后的：', device_data);
+        console.log('处理后的：', device_data);
         return device_data
     }
     findTypeName = (deviceItem) => {
         let p = new Promise((resolve, reject) => {
+            let result = '';
             device_type_data.forEach((item) => {
                 if (item.id === deviceItem.type_id) {
-                    resolve(item.name)
+                    result = item.name
                 }
             })
+            resolve(result)
         })
         return p;
     }
     findAreaName = (deviceItem) => {
         let p = new Promise((resolve, reject) => {
+            let result = '';
             area_data.forEach((item) => {
                 if (item.id === deviceItem.area_id) {
-                    resolve(item.name)
+                    result = item.name
                 }
             })
+            resolve(result)
         })
         return p;
     }
     findNfcName = (deviceItem) => {
         let p = new Promise((resolve, reject) => {
+            let result = '';
             nfc_data.forEach((item) => {
                 if (item.id === deviceItem.nfc_id) {
-                    resolve(item.name)
+                    result = item.name
                 }
             })
+            resolve(result)
         })
         return p;
     }
     findUserName = (recordItem) => {
         let p = new Promise((resolve, reject) => {
+            let result = '';
             user_data.forEach((item) => {
                 if (item.id === recordItem.user_id) {
                     resolve(item.username)
+                    result = item.username
                 }
             })
+            resolve(result)
         })
         return p;
     }
@@ -231,7 +242,7 @@ class EquipmentView extends Component {
                 align: 'center',
                 onFilter: (value, record) => record.status === value,
                 render: (text, record) => {
-                    // console.log(record);
+                    console.log(record);
                     let str = '';
                     let strColor = '#555555'
                     if (text === 1) { str = '正常'; strColor = '#66CC00' }
