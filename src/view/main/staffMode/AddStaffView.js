@@ -13,32 +13,37 @@ function AddStaffForm(props) {
     const levelOptions = props.levels.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
     const nfcOptions = props.nfcs.map(nfc => <Select.Option value={nfc.id} key={nfc.id}>{nfc.name}</Select.Option>)
 
-    return <Form>
-        <Form.Item label="等级" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('level_id', {
-                rules: [{ required: true, message: '请选择员工等级' }]
-            })(<Select>{levelOptions}</Select>)}
-        </Form.Item> 
-        <Form.Item label="NFC" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('nfc_id', {
-                rules: [{ required: true, message: '请选择员工NFC' }]
-            })(<Select>{nfcOptions}</Select>)}
-        </Form.Item>
-        <Form.Item label="用户名" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+    return <Form>      
+        <Form.Item label="登陆账户" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('username', {
                 rules: [{ required: true, message: '请输入员工用户名' }]
             })(<Input></Input>)}
         </Form.Item>
+        <Form.Item label="姓名" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('name', {
+                rules: [{ required: true, message: '请输入员工昵称' }]
+            })(<Input></Input>)}
+        </Form.Item>
+        <Form.Item label="部门" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('level_id', {
+                rules: [{ required: true, message: '请选择员工部门' }]
+            })(<Select>{levelOptions}</Select>)}
+        </Form.Item> 
+        <Form.Item label="员工工卡" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('nfc_id', {
+                rules: [{ required: true, message: '请选择员工NFC' }]
+            })(<Select>{nfcOptions}</Select>)}
+        </Form.Item>       
         <Form.Item label="密码" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('password', {
                 rules: [{ required: true, message: '请输入员工密码' }]
             })(<Input></Input>)}
         </Form.Item>
-        <Form.Item label="昵称" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('name', {
-                rules: [{ required: true, message: '请输入员工昵称' }]
+        <Form.Item label="联系方式" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('phonenumber', {
+                rules: [{ required: true, message: '请输入员工电话号码' }]
             })(<Input></Input>)}
-        </Form.Item>
+        </Form.Item>        
     </Form>
 }
 

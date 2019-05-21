@@ -45,6 +45,7 @@ export default function UpdateStaffView(props) {
     const handlerOk = () => {
         staffFormRef.current.validateFields((error, values) => {
             if (!error) {
+                values.sample_name = values.name + '表单'  
                 props.onOk(values)
             }
         })

@@ -107,6 +107,20 @@ class StaffView extends Component {
                 )
             },
             {
+                title: '登陆账户',
+                dataIndex: 'username',
+                render: (text, record) => (
+                    <div>{text}</div>
+                )
+            },
+            {
+                title: '姓名',
+                dataIndex: 'name',
+                render: (text, record) => (
+                    <div>{text}</div>
+                )
+            },
+            {
                 title: '部门',
                 dataIndex: 'level_id',
                 render: (text) => {
@@ -123,7 +137,7 @@ class StaffView extends Component {
                 }
             },
             {
-                title: 'NFC',
+                title: '员工工卡',
                 dataIndex: 'nfc_id',
                 render: (text) => {
                     var nfcName
@@ -139,26 +153,19 @@ class StaffView extends Component {
                 }
             },
             {
-                title: '用户名',
-                dataIndex: 'username',
-                render: (text, record) => (
-                    <div>{text}</div>
-                )
-            },
-            {
                 title: '密码',
                 dataIndex: 'password',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
-            },
+            },               
             {
-                title: '昵称',
-                dataIndex: 'name',
+                title: '联系方式',
+                dataIndex: 'phonenumber',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
-            },
+            },              
             {
                 title: '操作',
                 dataIndex: 'actions',
