@@ -10,18 +10,18 @@ import { Modal, Form, Input } from 'antd'
 function UpdateStaffForm(props) {
     const { getFieldDecorator } = props.form
     return <Form>
-        <Form.Item label="设备类型名称" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+        <Form.Item label="设备类型名称" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('name', {
                 initialValue: props.staff.name,
                 rules: [{ required: true, message: '请输入设备类型名称' }]
             })(<Input></Input>)}
         </Form.Item>
-        <Form.Item label="设备类型表单名称" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+        {/* <Form.Item label="设备类型表单名称" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('sample_name', {
                 initialValue: props.staff.sample_name,
                 rules: [{ required: true, message: '请输入设备类型表单名称' }]
             })(<Input></Input>)}
-        </Form.Item>
+        </Form.Item> */}
     </Form>
 }
 

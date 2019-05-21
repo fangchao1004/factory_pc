@@ -210,6 +210,13 @@ class EquipmentView extends Component {
                 )
             },
             {
+                title: '设备名称',
+                dataIndex: 'name',
+                render: (text, record) => (
+                    <div>{text}</div>
+                )
+            },
+            {
                 title: '区域',
                 dataIndex: 'area_name',
                 filters: area_data_filter,
@@ -228,7 +235,7 @@ class EquipmentView extends Component {
                 )
             },
             {
-                title: 'NFC',
+                title: '设备ID',
                 dataIndex: 'nfc_name',
                 width: '20%',
                 render: (text, record) => (
@@ -251,13 +258,7 @@ class EquipmentView extends Component {
                     return <Tag color={strColor}>{str}</Tag>
                 }
             },
-            {
-                title: '设备名',
-                dataIndex: 'name',
-                render: (text, record) => (
-                    <div>{text}</div>
-                )
-            },
+          
             {
                 title: '备注',
                 dataIndex: 'remark',
