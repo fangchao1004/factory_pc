@@ -82,7 +82,7 @@ class EquipmentTypeView extends Component {
                 )
             },
             {
-                title: '设备类型名',
+                title: '设备类型',
                 dataIndex: 'name',
                 render: (text, record) => (
                     <div>{text}</div>

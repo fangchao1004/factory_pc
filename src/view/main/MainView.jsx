@@ -121,7 +121,8 @@ class MainView extends Component {
                             background: '#fff',
                             margin: 14,
                             padding: 14,
-                            minHeight: 280
+                            minHeight: 280,
+                            height: '100%'
                         }}
                     >
                         <section>
