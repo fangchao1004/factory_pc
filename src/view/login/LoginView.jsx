@@ -3,7 +3,6 @@ import { Form, Card, message } from 'antd'
 import LoginFromClass from './LoginForm'
 import HttpApi from '../util/HttpApi'
 import Background from '../../assets/bg.jpg';
-import { SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION } from 'constants';
 
 const LoginFrom = Form.create({ name: 'normal_login' })(LoginFromClass)
 
@@ -31,15 +30,23 @@ export default class LoginView extends React.Component {
           width: '100%',
           height: '100%',
           display: 'flex',
-          justifyContent: 'center',
+          flex: 1,
+          flexDirection: 'row',
           alignItems: 'center',
-          backgroundImage: `url(${Background})`
+          backgroundColor: '#0099FF'
         }}
-        
       >
-        <Card title="登录" style={{ width: 300, height: 210, top: 100 ,left :150}}>
-          <LoginFrom ref="form" onLoginOk={this.onLoginOk} />
-        </Card>
+        <div style={{width:'100%',height:600}}>
+          <div style={{height:100,fontSize:30,padding:40,paddingLeft:150,color:'#FFFFFF',fontWeight:800}}>信息管理平台</div>
+          <div style={{
+            width: '100%', height: 400, backgroundImage: `url(${Background})`,
+            display: 'flex', flexDirection: 'row-reverse', alignItems: 'center'
+          }}>
+            <Card title="登录" style={{ width: 300, height: 260, marginRight: 150 }}>
+              <LoginFrom ref="form" onLoginOk={this.onLoginOk} />
+            </Card>
+          </div>
+        </div>
       </div>
     )
   }
