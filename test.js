@@ -7,11 +7,17 @@ var client = new Core({
   apiVersion: '2017-05-25'
 });
 
+var messageObj = {
+  name:"tom",
+  title:"抓老鼠",
+  time: "2019年05月12日"
+}
+
 var params = {
-  "PhoneNumbers": "18119645092",
-  "SignName": "大鱼测试",
-  "TemplateCode": "SMS_165413828",
-  "TemplateParam": "{\"status\":\"abc\",\"remark\":\"ccc\"}"
+  "PhoneNumbers": "15555105983",
+  "SignName": "中节能合肥",
+  "TemplateCode": "SMS_166096683",
+  "TemplateParam": JSON.stringify(messageObj)
 }
 
 var requestOption = {
