@@ -1,7 +1,9 @@
 import React from 'react'
 import { Modal, Form, Input, Select, Upload, Icon } from 'antd'
 import HttpApi from '../../util/HttpApi'
-
+/**
+ * 添加创建任务界面
+ */
 function AddTaskForm(props) {
     const { getFieldDecorator } = props.form
     const userOptions = props.users.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)

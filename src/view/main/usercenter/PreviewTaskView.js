@@ -2,16 +2,21 @@ import React from 'react'
 import { Modal, Form, Input, Select, Upload, Icon } from 'antd'
 import HttpApi from '../../util/HttpApi'
 
+/**
+ * 我分配给别人的任务 详情界面
+ */
 function UpdateTaskForm(props) {
     const { getFieldDecorator } = props.form
     const userOptions = props.users.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
     const tos = props.task.to.split(',').map(item => parseInt(item))
+    tos.shift()
+    tos.pop();
     return <Form>
         <Form.Item label="执行人" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('to', {
                 initialValue: tos,
                 rules: [{ required: true, message: '请选择执行人' }]
-            })(<Select disabled showSearch mode="multiple" filterOption={(input, option) =>
+            })(<Select disabled showSearch mode="multiple"  filterOption={(input, option) =>
                 option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
             } optionFilterProp="children" placeholder="请选择执行人">{userOptions}</Select>)}
         </Form.Item>

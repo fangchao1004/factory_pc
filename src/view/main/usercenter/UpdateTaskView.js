@@ -2,10 +2,15 @@ import React from 'react'
 import { Modal, Form, Input, Select, Upload, Icon } from 'antd'
 import HttpApi from '../../util/HttpApi'
 
+/**
+ * 分配给我的任务 详情界面
+ */
 function UpdateTaskForm(props) {
     const { getFieldDecorator } = props.form
     const userOptions = props.users.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
     const tos = props.task.to.split(',').map(item => parseInt(item))
+    tos.shift()
+    tos.pop();
     return <Form>
         <Form.Item label="执行人" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('to', {
