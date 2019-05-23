@@ -37,7 +37,7 @@ export default class LoginView extends React.Component {
         }}
       >
         <div style={{width:'100%',height:600}}>
-          <div style={{height:100,fontSize:30,padding:40,paddingLeft:150,color:'#FFFFFF',fontWeight:800}}>信息管理平台</div>
+          <div style={{height:100,fontSize:30,padding:40,paddingLeft:150,color:'#FFFFFF',fontWeight:800}}>中节能（合肥）信息综合管理平台</div>
           <div style={{
             width: '100%', height: 400, backgroundImage: `url(${Background})`,
             display: 'flex', flexDirection: 'row-reverse', alignItems: 'center'
