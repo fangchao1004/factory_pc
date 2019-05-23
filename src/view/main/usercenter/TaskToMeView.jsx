@@ -8,9 +8,9 @@ import AppData from '../../util/AppData'
 var storage = window.localStorage;
 var userinfo;
 /**
- * 给我的任务
+ * 给我的任务界面
  */
-class TaskFromMeView extends Component {
+class TaskToMeView extends Component {
 
     state = { tasks: null, addStaffVisible: false, updateStaffVisible: false, updateStaffData: null }
 
@@ -20,7 +20,7 @@ class TaskFromMeView extends Component {
     async getTasksData() {
         userinfo = JSON.parse(storage.getItem("userinfo"))
         let tasksData = await this.getTaskInfo()
-        console.log("所有发给我的任务",tasksData)
+        console.log("分配给我的任务",tasksData)
         this.setState({
             tasks: tasksData.map(user => {
                 user.key = user.id
@@ -142,4 +142,4 @@ class TaskFromMeView extends Component {
     }
 }
 
-export default TaskFromMeView;
+export default TaskToMeView;

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Form, Input, Select, Upload, Icon } from 'antd'
+import { Modal, Form, Input, Select, Upload, Icon, DatePicker } from 'antd'
 import HttpApi from '../../util/HttpApi'
 /**
  * 添加创建任务界面
@@ -25,6 +25,11 @@ function AddTaskForm(props) {
             {getFieldDecorator('content', {
                 rules: [{ required: true, message: '请输入任务内容' }]
             })(<Input.TextArea style={{ height: 150 }} placeholder="请输入任务内容"></Input.TextArea>)}
+        </Form.Item>
+        <Form.Item label="截止日期" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('overTime', {
+                rules: [{ required: true, message: '请选择截止日期' }]
+            })(<DatePicker />)}
         </Form.Item>
         <Form.Item label="附件" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             <Upload.Dragger name='file'>

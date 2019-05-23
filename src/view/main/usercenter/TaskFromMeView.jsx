@@ -7,7 +7,7 @@ import UpdateStaffView from './PreviewTaskView'
 var storage = window.localStorage;
 var userinfo;
 /**
- * 我发起的任务
+ * 我发起的任务 界面
  */
 class TaskFromMeView extends Component {
 
@@ -19,7 +19,7 @@ class TaskFromMeView extends Component {
     async getTasksData() {
         userinfo = JSON.parse(storage.getItem("userinfo"))
         let tasksData = await this.getTaskInfo()
-        console.log('所有我发起的任务：',tasksData)
+        console.log('我发起的任务：',tasksData)
         this.setState({
             tasks: tasksData.map(user => {
                 user.key = user.id
@@ -41,9 +41,9 @@ class TaskFromMeView extends Component {
         this.setState({ addStaffVisible: true })
     }
     addStaffOnOk = (newValues) => {
-        console.log(newValues)
         newValues.from = userinfo.user_id
         newValues.to = ","+newValues.to.join(',')+","
+        newValues.overTime = newValues.overTime.endOf('day').valueOf()+""
         HttpApi.addTaskInfo(newValues, data => {
             if (data.data.code === 0) {
                 this.setState({ addStaffVisible: false })
