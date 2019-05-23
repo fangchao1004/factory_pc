@@ -41,7 +41,7 @@ class TaskFromMeView extends Component {
         this.setState({ addStaffVisible: true })
     }
     addStaffOnOk = (newValues) => {
-        newValues.status = 2;
+        newValues.status = 0;
         newValues.from = userinfo.user_id
         newValues.to = ","+newValues.to.join(',')+","
         newValues.overTime = newValues.overTime.endOf('day').valueOf()+""
