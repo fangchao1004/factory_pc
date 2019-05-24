@@ -10,7 +10,6 @@ function UpdateTaskForm(props) {
     const { getFieldDecorator } = props.form
     const userOptions = props.users.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
     const tos = props.task.to.split(',').map(item => parseInt(item))
-    console.log('sadasdasd:',props.task);
     tos.shift()
     tos.pop();
     return <Form>

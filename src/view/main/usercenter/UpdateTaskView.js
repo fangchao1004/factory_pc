@@ -10,9 +10,18 @@ function UpdateTaskForm(props) {
     const { getFieldDecorator } = props.form
     const userOptions = props.users.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
     const tos = props.task.to.split(',').map(item => parseInt(item))
+    const from = props.task.from;
     tos.shift()
     tos.pop();
     return <Form>
+        <Form.Item label="任务发起人" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('to', {
+                initialValue: from,
+                rules: [{ required: true, message: '' }]
+            })(<Select disabled showSearch mode="multiple" filterOption={(input, option) =>
+                option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+            } optionFilterProp="children" placeholder="任务发起人">{userOptions}</Select>)}
+        </Form.Item>
         <Form.Item label="执行人" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('to', {
                 initialValue: tos,
