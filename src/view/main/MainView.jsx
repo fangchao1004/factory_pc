@@ -19,8 +19,10 @@ class MainView extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            collapsed: false
+            collapsed: false,
+            isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin
         }
+        console.log(this.state.isAdmin)
     }
     toggle = () => {
         this.setState({
@@ -77,34 +79,34 @@ class MainView extends Component {
                             <span>首页</span>
                             <Link to={`${this.props.match.url}`} />
                         </Menu.Item>
-                        
+
 
                         <SubMenu
-                        key="巡检平台"
-                        title={
-                            <span>
-                            <Icon type="scan" />
-                            <span>巡检平台</span>
-                            </span>
-                        }
+                            key="巡检平台"
+                            title={
+                                <span>
+                                    <Icon type="scan" />
+                                    <span>巡检平台</span>
+                                </span>
+                            }
                         >
-                        <Menu.Item key="设备">
-                            <Icon type="switcher" />
-                            <span>设备</span>
-                            <Link to={`${this.props.match.url}/equipment`} />
-                        </Menu.Item>
-                        <Menu.Item key="表单">
-                            <Icon type="file" />
-                            <span>表单</span>
-                            <Link to={`${this.props.match.url}/table`} />
-                        </Menu.Item>                        
+                            <Menu.Item key="设备">
+                                <Icon type="switcher" />
+                                <span>设备</span>
+                                <Link to={`${this.props.match.url}/equipment`} />
+                            </Menu.Item>
+                            {this.state.isAdmin ? <Menu.Item key="表单">
+                                <Icon type="file" />
+                                <span>表单</span>
+                                <Link to={`${this.props.match.url}/table`} />
+                            </Menu.Item> : null}
+
                         </SubMenu>
-                
-                        <Menu.Item key="员工">
+                        {this.state.isAdmin ? <Menu.Item key="员工">
                             <Icon type="team" />
                             <span>员工</span>
                             <Link to={`${this.props.match.url}/staff`} />
-                        </Menu.Item>
+                        </Menu.Item> : null}
                         <Menu.Item key="个人中心">
                             <Icon type="user" />
                             <span>个人中心</span>
@@ -125,9 +127,9 @@ class MainView extends Component {
 
                             </Col>
                             <Col span={16} style={{ textAlign: 'right', paddingRight: 24 }}>
-                                <Popover width={100} placement="rightBottom" 
-                                title={storage.getItem('userinfo') ? "用户名: " + JSON.parse(storage.getItem('userinfo')).username+"("+JSON.parse(storage.getItem('userinfo')).name+")" : 
-                                "不存在"}
+                                <Popover width={100} placement="rightBottom"
+                                    title={storage.getItem('userinfo') ? "用户名: " + JSON.parse(storage.getItem('userinfo')).username + "(" + JSON.parse(storage.getItem('userinfo')).name + ")" :
+                                        "不存在"}
                                     content={<Button type='primary' style={{ width: "100%" }}
                                         onClick={() => {
                                             storage.clear();

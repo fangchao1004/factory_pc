@@ -26,13 +26,13 @@ export default class LoginView extends React.Component {
             // 登录成功
             AppData.user_id = doc.data.data[0].id
             AppData.username = doc.data.data[0].username;
-            AppData.name = doc.data.data[0].name;
+            AppData.name = doc.data.data[0].name
+            AppData.isadmin = doc.data.data[0].isadmin === 1
             storage.clear();
             storage['userinfo'] = JSON.stringify(AppData);
-            console.log("获取storage",storage.getItem('userinfo'));
+            console.log("获取storage", storage.getItem('userinfo'));
             this.props.history.push('/mainView')
           } else {
-
             message.error("用户名/密码错误")
           }
         })
