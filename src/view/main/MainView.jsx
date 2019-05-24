@@ -13,6 +13,7 @@ import SettingTableModeRoot from './settingMode/settingTableMode/SettingTableMod
 
 var storage = window.localStorage;
 const { Header, Content, Sider } = Layout;
+const SubMenu = Menu.SubMenu
 
 class MainView extends Component {
     constructor(props) {
@@ -76,20 +77,33 @@ class MainView extends Component {
                             <span>首页</span>
                             <Link to={`${this.props.match.url}`} />
                         </Menu.Item>
+                        
+
+                        <SubMenu
+                        key="巡检平台"
+                        title={
+                            <span>
+                            <Icon type="scan" />
+                            <span>巡检平台</span>
+                            </span>
+                        }
+                        >
                         <Menu.Item key="设备">
                             <Icon type="switcher" />
                             <span>设备</span>
                             <Link to={`${this.props.match.url}/equipment`} />
                         </Menu.Item>
-                        <Menu.Item key="员工">
-                            <Icon type="team" />
-                            <span>员工</span>
-                            <Link to={`${this.props.match.url}/staff`} />
-                        </Menu.Item>
                         <Menu.Item key="表单">
                             <Icon type="file" />
                             <span>表单</span>
                             <Link to={`${this.props.match.url}/table`} />
+                        </Menu.Item>                        
+                        </SubMenu>
+                
+                        <Menu.Item key="员工">
+                            <Icon type="team" />
+                            <span>员工</span>
+                            <Link to={`${this.props.match.url}/staff`} />
                         </Menu.Item>
                         <Menu.Item key="个人中心">
                             <Icon type="user" />
