@@ -3,28 +3,34 @@ import { Row, Col, Table, Button, message, Tag, Popconfirm, Divider } from 'antd
 import HttpApi from '../../util/HttpApi'
 import AddStaffView from './AddTaskView';
 import UpdateStaffView from './PreviewTaskView'
-import AppData from '../../util/AppData'
+import moment from 'moment'
 
+var storage = window.localStorage;
+var userinfo;
+/**
+ * 我发起的任务 界面
+ */
 class TaskFromMeView extends Component {
 
     state = { tasks: null, addStaffVisible: false, updateStaffVisible: false, updateStaffData: null }
 
     componentDidMount() {
-        this.getUsersData()
+        this.getTasksData()
     }
-    async getUsersData() {
-        var usersData = await this.getUserList()
-        console.log(usersData)
+    async getTasksData() {
+        userinfo = JSON.parse(storage.getItem("userinfo"))
+        let tasksData = await this.getTaskInfo()
+        // console.log('我发起的任务：', tasksData)
         this.setState({
-            tasks: usersData.map(user => {
+            tasks: tasksData.map(user => {
                 user.key = user.id
                 return user
             })
         })
     }
-    getUserList() {
+    getTaskInfo() {
         return new Promise((resolve, reject) => {
-            HttpApi.getTaskInfo({}, data => {
+            HttpApi.getTaskInfo({ from: userinfo.user_id }, data => {
                 if (data.data.code === 0) {
                     resolve(data.data.data)
                 }
@@ -36,14 +42,18 @@ class TaskFromMeView extends Component {
         this.setState({ addStaffVisible: true })
     }
     addStaffOnOk = (newValues) => {
-        console.log(newValues)
-        newValues.from = AppData.username
-        newValues.to = newValues.to.join(',')
+        let toUsersArr = newValues.to
+        newValues.status = 0;
+        newValues.from = userinfo.user_id
+        newValues.to = "," + newValues.to.join(',') + ","
+        newValues.overTime = newValues.overTime.endOf('day').valueOf() + ""
+
         HttpApi.addTaskInfo(newValues, data => {
             if (data.data.code === 0) {
                 this.setState({ addStaffVisible: false })
-                this.getUsersData()
                 message.success('添加成功')
+                this.getTasksData()
+                this.sendMessageToStaff(toUsersArr, newValues);
             } else {
                 message.error(data.data.data)
             }
@@ -60,7 +70,7 @@ class TaskFromMeView extends Component {
         HttpApi.updateUserInfo({ query: { id: this.state.updateStaffData.id }, update: newValues }, data => {
             if (data.data.code === 0) {
                 this.setState({ updateStaffVisible: false })
-                this.getUsersData()
+                this.getTasksData()
                 message.success('更新成功')
             } else {
                 message.error(data.data.data)
@@ -74,12 +84,29 @@ class TaskFromMeView extends Component {
         HttpApi.removeTaskInfo({ id: record.id }, data => {
             if (data.data.code === 0) {
                 message.success('删除成功')
-                this.getUsersData()
+                this.getTasksData()
             } else {
                 message.error(data.data.data)
             }
         })
     }
+    sendMessageToStaff = async (toUsersArr, data) => {
+        let title = data.title;
+        let overTimeDate = moment(parseInt(data.overTime)).format('YYYY年MM月DD日');
+        HttpApi.getUserInfo({ id: toUsersArr }, (res) => {
+            let userInfo = res.data.data;
+            userInfo.forEach((item)=>{
+                let messageObj = {
+                        phonenumber:item.phonenumber,
+                        name:item.name,
+                        title:title,
+                        time: overTimeDate
+                      }
+                HttpApi.sendMessageToStaffs(messageObj)
+            })
+        })
+    }
+   
 
     render() {
         const columns = [

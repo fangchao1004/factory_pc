@@ -36,7 +36,7 @@ class LineChartView extends Component {
             // key字段
             value: "num" // value字段
         });
-        console.log(dv);
+        // console.log(dv);
         const cols = {
             date: {
                 range: [0, 1]

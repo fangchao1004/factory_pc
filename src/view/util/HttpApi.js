@@ -214,6 +214,13 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
+    static sendMessageToStaffs(params, f1, f2) {
+        Axios.post(Testuri + 'sendMessageToStaffs', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
 }
 
 export default HttpApi

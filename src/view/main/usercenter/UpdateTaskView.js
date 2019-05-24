@@ -1,11 +1,16 @@
 import React from 'react'
-import { Modal, Form, Input, Select, Upload, Icon } from 'antd'
+import { Modal, Form, Input, Select, Upload, Icon,DatePicker } from 'antd'
 import HttpApi from '../../util/HttpApi'
-
+import moment from 'moment'
+/**
+ * 分配给我的任务 详情界面 表单
+ */
 function UpdateTaskForm(props) {
     const { getFieldDecorator } = props.form
     const userOptions = props.users.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
     const tos = props.task.to.split(',').map(item => parseInt(item))
+    tos.shift()
+    tos.pop();
     return <Form>
         <Form.Item label="执行人" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('to', {
@@ -26,6 +31,12 @@ function UpdateTaskForm(props) {
                 initialValue: props.task.content,
                 rules: [{ required: true, message: '请输入任务内容' }]
             })(<Input.TextArea disabled style={{ height: 150 }} placeholder="请输入任务内容"></Input.TextArea>)}
+        </Form.Item>
+        <Form.Item label="截止日期" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('overTime', {
+                initialValue: moment(parseInt(props.task.overTime)),
+                rules: [{ required: true, message: '请选择截止日期' }]
+            })(<DatePicker disabled={true}/>)}
         </Form.Item>
         <Form.Item label="附件" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             <Upload.Dragger disabled name='file'>

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Layout, Menu, Icon, Row, Col } from 'antd'
-import { Route, Link } from 'react-router-dom'
+import { Layout, Menu, Icon, Row, Col, Popover, Button } from 'antd'
+import { Route, Link, Redirect } from 'react-router-dom'
 import logopng from '../../assets/logo.png'
 import HomePageViewRoot from './homePageMode/HomePageViewRoot';
 import EquipmentModeRoot from './equipmentMode/EquipmentModeRoot'
@@ -11,6 +11,7 @@ import SettingEquipmentModeRoot from './settingMode/settingEquipmentMode/Setting
 import SettingStaffModeRoot from './settingMode/settingStaffMode/SettingStaffModeRoot';
 import SettingTableModeRoot from './settingMode/settingTableMode/SettingTableModeRoot';
 
+var storage = window.localStorage;
 const { Header, Content, Sider } = Layout;
 
 class MainView extends Component {
@@ -107,12 +108,17 @@ class MainView extends Component {
                                     type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'}
                                     onClick={this.toggle}
                                 />
-                                <span style={{ fontSize: 20, fontWeight: 'bold' }}>
-                                    {this.state.title}
-                                </span>
+
                             </Col>
                             <Col span={16} style={{ textAlign: 'right', paddingRight: 24 }}>
-
+                                <Popover width={100} placement="rightBottom" title={storage.getItem('userinfo') ? "用户名: " + JSON.parse(storage.getItem('userinfo')).username : "不存在"}
+                                    content={<Button type='primary' style={{ width: 150 }}
+                                        onClick={() => {
+                                            storage.clear();
+                                            window.location.href = "/";
+                                        }}>退出登录</Button>} trigger="click">
+                                    <Icon type="user" style={{ fontSize: 24 }} />
+                                </Popover>
                             </Col>
                         </Row>
                     </Header>
@@ -129,42 +135,50 @@ class MainView extends Component {
                             <Route
                                 exact
                                 path={`${this.props.match.path}`}
-                                component={HomePageViewRoot}
+                                // component={HomePageViewRoot}
+                                component={() => (storage.getItem('userinfo') ? <HomePageViewRoot /> : <Redirect to='/' />)}
                             />
                             <Route
                                 exact
                                 path={`${this.props.match.path}/equipment`}
-                                component={EquipmentModeRoot}
+                                // component={EquipmentModeRoot}
+                                component={() => (storage.getItem('userinfo') ? <EquipmentModeRoot /> : <Redirect to='/' />)}
                             />
                             <Route
                                 exact
                                 path={`${this.props.match.path}/staff`}
-                                component={StaffModeRoot}
+                                // component={StaffModeRoot}
+                                component={() => (storage.getItem('userinfo') ? <StaffModeRoot /> : <Redirect to='/' />)}
                             />
                             <Route
                                 exact
                                 path={`${this.props.match.path}/table`}
-                                component={TableModeRoot}
+                                // component={TableModeRoot}
+                                component={() => (storage.getItem('userinfo') ? <TableModeRoot /> : <Redirect to='/' />)}
                             />
-                             <Route
+                            <Route
                                 exact
                                 path={`${this.props.match.path}/user`}
-                                component={UserModeRoot}
+                                // component={UserModeRoot}
+                                component={() => (storage.getItem('userinfo') ? <UserModeRoot /> : <Redirect to='/' />)}
                             />
                             <Route
                                 exact
                                 path={`${this.props.match.path}/setting/equipmentModeRoot`}
-                                component={SettingEquipmentModeRoot}
+                                // component={SettingEquipmentModeRoot}
+                                component={() => (storage.getItem('userinfo') ? <SettingEquipmentModeRoot /> : <Redirect to='/' />)}
                             />
                             <Route
                                 exact
                                 path={`${this.props.match.path}/setting/staffModeRoot`}
-                                component={SettingStaffModeRoot}
+                                // component={SettingStaffModeRoot}
+                                component={() => (storage.getItem('userinfo') ? <SettingStaffModeRoot /> : <Redirect to='/' />)}
                             />
                             <Route
                                 exact
                                 path={`${this.props.match.path}/setting/tableModeRoot`}
-                                component={SettingTableModeRoot}
+                                // component={SettingTableModeRoot}
+                                component={() => (storage.getItem('userinfo') ? <SettingTableModeRoot /> : <Redirect to='/' />)}
                             />
                         </section>
                     </Content>

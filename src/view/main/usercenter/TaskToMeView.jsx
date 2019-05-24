@@ -5,26 +5,32 @@ import AddStaffView from './AddTaskView';
 import UpdateStaffView from './UpdateTaskView'
 import AppData from '../../util/AppData'
 
-class TaskFromMeView extends Component {
+var storage = window.localStorage;
+var userinfo;
+/**
+ * 给我的任务界面
+ */
+class TaskToMeView extends Component {
 
     state = { tasks: null, addStaffVisible: false, updateStaffVisible: false, updateStaffData: null }
 
     componentDidMount() {
-        this.getUsersData()
+        this.getTasksData()
     }
-    async getUsersData() {
-        var usersData = await this.getUserList()
-        console.log(usersData)
+    async getTasksData() {
+        userinfo = JSON.parse(storage.getItem("userinfo"))
+        let tasksData = await this.getTaskInfo()
+        console.log("分配给我的任务",tasksData)
         this.setState({
-            tasks: usersData.map(user => {
+            tasks: tasksData.map(user => {
                 user.key = user.id
                 return user
             })
         })
     }
-    getUserList() {
+    getTaskInfo() {
         return new Promise((resolve, reject) => {
-            HttpApi.getTaskInfo({}, data => {
+            HttpApi.getTaskInfo({ to: { $like: `%,${userinfo.user_id},%` }}, data => {
                 if (data.data.code === 0) {
                     resolve(data.data.data)
                 }
@@ -42,7 +48,7 @@ class TaskFromMeView extends Component {
         HttpApi.addTaskInfo(newValues, data => {
             if (data.data.code === 0) {
                 this.setState({ addStaffVisible: false })
-                this.getUsersData()
+                this.getTasksData()
                 message.success('添加成功')
             } else {
                 message.error(data.data.data)
@@ -60,7 +66,7 @@ class TaskFromMeView extends Component {
         HttpApi.updateTaskInfo({ query: { id: this.state.updateStaffData.id }, update: { status: 1 } }, data => {
             if (data.data.code === 0) {
                 this.setState({ updateStaffVisible: false })
-                this.getUsersData()
+                this.getTasksData()
                 message.success('更新成功')
             } else {
                 message.error(data.data.data)
@@ -74,7 +80,7 @@ class TaskFromMeView extends Component {
         HttpApi.removeUserInfo({ id: record.id }, data => {
             if (data.data.code === 0) {
                 message.success('删除成功')
-                this.getUsersData()
+                this.getTasksData()
             } else {
                 message.error(data.data.data)
             }
@@ -136,4 +142,4 @@ class TaskFromMeView extends Component {
     }
 }
 
-export default TaskFromMeView;
+export default TaskToMeView;

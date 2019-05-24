@@ -1,25 +1,25 @@
 import React, { Component } from 'react';
 import { Card } from 'antd';
-import StaffView from './TaskFromMeView';
-import StaffTypeView from './TaskToMeView'
+import TaskFromMeView from './TaskFromMeView';
+import TaskToMeView from './TaskToMeView'
 
 const tabListNoTitle = [{
-    key: 'StaffView',
+    key: 'TaskFromMeView',
     tab: '我分配的任务',
 }, {
-    key: 'StaffTypeView',
+    key: 'TaskToMeView',
     tab: '分配我的任务'
 }];
 
 const contentListNoTitle = {
-    StaffView: <StaffView />,
-    StaffTypeView: <StaffTypeView />
+    TaskFromMeView: <TaskFromMeView />,
+    TaskToMeView: <TaskToMeView />
 };
 
 class UserModeRoot extends Component {
     state = {
-        key: 'StaffView',
-        noTitleKey: 'StaffView',
+        key: 'TaskFromMeView',
+        noTitleKey: 'TaskFromMeView',
     }
 
     onTabChange = (key) => {

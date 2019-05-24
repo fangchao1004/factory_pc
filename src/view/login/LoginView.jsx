@@ -3,16 +3,32 @@ import { Form, Card, message } from 'antd'
 import LoginFromClass from './LoginForm'
 import HttpApi from '../util/HttpApi'
 import Background from '../../assets/bg.jpg';
+import AppData from '../util/AppData'
 
 const LoginFrom = Form.create({ name: 'normal_login' })(LoginFromClass)
-
+var storage = window.localStorage;
 export default class LoginView extends React.Component {
+  constructor(props) {
+    super(props);
+    this.init();
+  }
+  init = () => {
+    if (!window.localStorage) {
+      alert("浏览器不支持localstorage");
+    }
+  }
+
   onLoginOk = e => {
     this.refs.form.validateFields((error, values) => {
       if (!error) {
         HttpApi.getUserInfo(values, doc => {
           if (doc.data.code === 0 && doc.data.data.length > 0) {
             // 登录成功
+            AppData.user_id = doc.data.data[0].id
+            AppData.username = doc.data.data[0].username;
+            storage.clear();
+            storage['userinfo'] = JSON.stringify(AppData);
+            console.log("获取storage",storage.getItem('userinfo'));
             this.props.history.push('/mainView')
           } else {
 
@@ -36,8 +52,8 @@ export default class LoginView extends React.Component {
           backgroundColor: '#0099FF'
         }}
       >
-        <div style={{width:'100%',height:600}}>
-          <div style={{height:100,fontSize:30,padding:40,paddingLeft:150,color:'#FFFFFF',fontWeight:800}}>信息管理平台</div>
+        <div style={{ width: '100%', height: 600 }}>
+          <div style={{ height: 100, fontSize: 30, padding: 40, paddingLeft: 150, color: '#FFFFFF', fontWeight: 800 }}>信息管理平台</div>
           <div style={{
             width: '100%', height: 400, backgroundImage: `url(${Background})`,
             display: 'flex', flexDirection: 'row-reverse', alignItems: 'center'
