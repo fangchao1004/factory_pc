@@ -138,14 +138,14 @@ class TaskFromMeView extends Component {
             {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 200,
+                width: 150,
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
                         <Popconfirm title="确定要删除该任务吗?" onConfirm={this.deleteStaffConfirm.bind(null, record)}>
-                            <Button type="danger">删除</Button>
+                            <Button size="small" type="danger">删除</Button>
                         </Popconfirm>
                         <Divider type="vertical" />
-                        <Button type="primary" onClick={this.updateStaff.bind(this, record)}>详情</Button>
+                        <Button size="small" type="primary" onClick={this.updateStaff.bind(this, record)}>详情</Button>
                     </div>
                 )
             }
