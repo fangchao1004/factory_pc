@@ -52,7 +52,7 @@ class TaskFromMeView extends Component {
                 this.setState({ addStaffVisible: false })
                 message.success('添加成功')
                 this.getTasksData()
-                // this.sendMessageToStaff(toUsersArr, newValues);
+                this.sendMessageToStaff(toUsersArr, newValues);
             } else {
                 message.error(data.data.data)
             }
