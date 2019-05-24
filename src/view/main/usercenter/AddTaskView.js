@@ -36,10 +36,9 @@ function AddTaskForm(props) {
                 <p className="ant-upload-drag-icon">
                     <Icon type="inbox" />
                 </p>
-                <p>Click or drag file to this area to upload</p>
+                <p>单击或拖动文件到此区域进行上传</p>
                 <p className="ant-upload-hint">
-                    Support for a single or bulk upload. Strictly prohibit from uploading company data or other
-                    band files
+                    支持单个或批量上传，严禁上传公司涉密或禁止传播的文件。
             </p>
             </Upload.Dragger>
         </Form.Item>
