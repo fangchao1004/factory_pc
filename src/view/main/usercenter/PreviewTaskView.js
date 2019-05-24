@@ -36,7 +36,7 @@ function UpdateTaskForm(props) {
         </Form.Item>
         <Form.Item label="截止日期" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('overTime', {
-                initialValue: moment(parseInt(props.task.overTime)),
+                initialValue: moment(props.task.overTime),
                 rules: [{ required: true, message: '请选择截止日期' }]
             })(<DatePicker disabled={true}/>)}
         </Form.Item>

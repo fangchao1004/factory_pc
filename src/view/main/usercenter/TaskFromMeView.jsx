@@ -46,7 +46,7 @@ class TaskFromMeView extends Component {
         newValues.status = 0;
         newValues.from = userinfo.user_id
         newValues.to = "," + newValues.to.join(',') + ","
-        newValues.overTime = newValues.overTime.endOf('day').valueOf() + ""
+        newValues.overTime = newValues.overTime.endOf('day').valueOf()
         HttpApi.addTaskInfo(newValues, data => {
             if (data.data.code === 0) {
                 this.setState({ addStaffVisible: false })
