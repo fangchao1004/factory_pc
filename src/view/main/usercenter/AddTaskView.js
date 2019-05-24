@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Form, Input, Select, Upload, Icon, DatePicker } from 'antd'
+import { Modal, Form, Input, Select, DatePicker } from 'antd'
 import HttpApi from '../../util/HttpApi'
 /**
  * 添加创建任务界面
@@ -30,17 +30,6 @@ function AddTaskForm(props) {
             {getFieldDecorator('overTime', {
                 rules: [{ required: true, message: '请选择截止日期' }]
             })(<DatePicker />)}
-        </Form.Item>
-        <Form.Item label="附件" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            <Upload.Dragger name='file'>
-                <p className="ant-upload-drag-icon">
-                    <Icon type="inbox" />
-                </p>
-                <p>单击或拖动文件到此区域进行上传</p>
-                <p className="ant-upload-hint">
-                    支持单个或批量上传，严禁上传公司涉密或禁止传播的文件。
-            </p>
-            </Upload.Dragger>
         </Form.Item>
     </Form >
 }

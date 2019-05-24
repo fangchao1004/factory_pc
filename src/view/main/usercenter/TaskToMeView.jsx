@@ -20,7 +20,7 @@ class TaskToMeView extends Component {
     async getTasksData() {
         userinfo = JSON.parse(storage.getItem("userinfo"))
         let tasksData = await this.getTaskInfo()
-        console.log("分配给我的任务",tasksData)
+        // console.log("分配给我的任务", tasksData)
         this.setState({
             tasks: tasksData.map(user => {
                 user.key = user.id
@@ -30,7 +30,7 @@ class TaskToMeView extends Component {
     }
     getTaskInfo() {
         return new Promise((resolve, reject) => {
-            HttpApi.getTaskInfo({ to: { $like: `%,${userinfo.user_id},%` }}, data => {
+            HttpApi.getTaskInfo({ to: { $like: `%,${userinfo.user_id},%` } }, data => {
                 if (data.data.code === 0) {
                     resolve(data.data.data)
                 }
@@ -42,7 +42,7 @@ class TaskToMeView extends Component {
         this.setState({ addStaffVisible: true })
     }
     addStaffOnOk = (newValues) => {
-        console.log(newValues)
+        // console.log(newValues)
         newValues.from = AppData.username
         newValues.to = newValues.to.join(',')
         HttpApi.addTaskInfo(newValues, data => {
@@ -59,15 +59,16 @@ class TaskToMeView extends Component {
         this.setState({ addStaffVisible: false })
     }
     updateStaff(record) {
-        console.log('update', record)
+        // console.log('update', record)
         this.setState({ updateStaffVisible: true, updateStaffData: record })
     }
-    updateStaffOnOk = () => {
+    updateStaffOnOk = (taskInfo) => {
         HttpApi.updateTaskInfo({ query: { id: this.state.updateStaffData.id }, update: { status: 1 } }, data => {
             if (data.data.code === 0) {
                 this.setState({ updateStaffVisible: false })
                 this.getTasksData()
                 message.success('更新成功')
+                this.sendMessageToLeader(taskInfo);
             } else {
                 message.error(data.data.data)
             }
@@ -84,6 +85,21 @@ class TaskToMeView extends Component {
             } else {
                 message.error(data.data.data)
             }
+        })
+    }
+    sendMessageToLeader = async (taskInfo) => {
+        // console.log("数据:", "from:", taskInfo.from, "me:", userinfo.user_id, userinfo.name);
+        let leaderInfo = await this.getUserInfo(taskInfo.from);
+        let param = {phonenumber:leaderInfo.phonenumber,name:leaderInfo.name,name_to:userinfo.name}
+        HttpApi.sendMessageToLeader(param,(res)=>{
+            console.log(res);
+        })
+    }
+    getUserInfo=(userid)=>{
+        return new Promise((resolve,reject)=>{
+            HttpApi.getUserInfo({id:userid},(res)=>{
+                resolve(res.data.data[0]);
+            })
         })
     }
 

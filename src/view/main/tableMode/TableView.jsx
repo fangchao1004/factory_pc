@@ -58,12 +58,14 @@ class TableView extends Component {
         return sample_data
     }
     findTypeName = (deviceItem) => {
+        let result = '类型被删除';
         let p = new Promise((resolve, reject) => {
             device_type_data.forEach((item) => {
                 if (item.id === deviceItem.device_type_id) {
-                    resolve(item.name)
+                    result = item.name
                 }
             })
+            resolve(result)
         })
         return p;
     }
@@ -140,7 +142,7 @@ class TableView extends Component {
                     </div>}
                 <Modal
                     // confirmLoading={this.state.modalvisible}
-                    centered 
+                    centered
                     width={450}
                     hight={500}
                     title={<div><span>效果预览</span><span style={{ fontSize: 10, color: '#AAAAAA', marginLeft: 40 }}>实际效果以移动端显示为准</span></div>}

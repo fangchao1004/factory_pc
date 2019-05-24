@@ -26,6 +26,7 @@ export default class LoginView extends React.Component {
             // 登录成功
             AppData.user_id = doc.data.data[0].id
             AppData.username = doc.data.data[0].username;
+            AppData.name = doc.data.data[0].name;
             storage.clear();
             storage['userinfo'] = JSON.stringify(AppData);
             console.log("获取storage",storage.getItem('userinfo'));

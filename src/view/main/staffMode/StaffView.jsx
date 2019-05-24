@@ -69,7 +69,7 @@ class StaffView extends Component {
         this.setState({ addStaffVisible: false })
     }
     updateStaff(record) {
-        console.log('update', record)
+        // console.log('update', record)
         this.setState({ updateStaffVisible: true, updateStaffData: record})
     }
     updateStaffOnOk = (newValues) => {
