@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Form, Input, Select } from 'antd'
+import { Modal, Form, Input, Select, Switch } from 'antd'
 import HttpApi from '../../util/HttpApi'
 
 /**
@@ -13,7 +13,7 @@ function UpdateStaffForm(props) {
     const levelOptions = props.levels.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
     const nfcOptions = props.nfcs.map(nfc => <Select.Option value={nfc.id} key={nfc.id}>{nfc.name}</Select.Option>)
     return <Form>
-         <Form.Item label="登陆账户" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+        <Form.Item label="登陆账户" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('username', {
                 initialValue: props.staff.username,
                 rules: [{ required: true, message: '请输入员工登陆账户' }]
@@ -36,7 +36,7 @@ function UpdateStaffForm(props) {
                 initialValue: props.staff.nfc_id,
                 rules: [{ required: true, message: '请选择员工工卡' }]
             })(<Select>{nfcOptions}</Select>)}
-        </Form.Item>       
+        </Form.Item>
         <Form.Item label="密码" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('password', {
                 initialValue: props.staff.password,
@@ -48,7 +48,13 @@ function UpdateStaffForm(props) {
                 initialValue: props.staff.phonenumber,
                 rules: [{ required: true, message: '请输入员工联系方式' }]
             })(<Input></Input>)}
-        </Form.Item>    
+        </Form.Item>
+        <Form.Item label="管理员" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('isadmin', {
+                initialValue: props.staff.isadmin === 1,
+                valuePropName: 'checked'
+            })(<Switch checkedChildren="是" unCheckedChildren="否"></Switch>)}
+        </Form.Item>
     </Form>
 }
 
