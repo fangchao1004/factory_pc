@@ -269,14 +269,14 @@ class EquipmentView extends Component {
             {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 200,
+                width: 150,
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
                         <Popconfirm title="确定要删除该设备吗?" onConfirm={this.deleteEquipmentConfirm.bind(null, record)}>
-                            <Button type="danger">删除</Button>
+                            <Button size="small" type="danger">删除</Button>
                         </Popconfirm>
                         <Divider type="vertical" />
-                        <Button type='primary' onClick={() => this.openModalHandler(record)} >详情</Button></div>
+                        <Button size="small" type='primary' onClick={() => this.openModalHandler(record)} >详情</Button></div>
                 )
             }
         ];
@@ -387,7 +387,6 @@ class EquipmentView extends Component {
             {
                 title: '时间',
                 dataIndex: 'createdAt',
-                width: '35%',
                 render: (text, record) => (
                     <div>{moment(text).format('YYYY-MM-DD HH:mm:ss')}</div>
                 )
@@ -395,7 +394,6 @@ class EquipmentView extends Component {
             {
                 title: '基本状态',
                 dataIndex: 'device_status',
-                width: '18%',
                 render: (text, record) => {
                     let str = '';
                     let strColor = '#555555'
@@ -414,11 +412,11 @@ class EquipmentView extends Component {
             },
             {
                 title: '操作',
+                width: 75,
                 dataIndex: 'operation',
-                width: '20%',
                 render: (text, record) => {
                     return (
-                        <Button type='primary' onClick={() => this.openDrawer2(record)} >详情</Button>
+                        <Button style={{marginLeft: 10}} size="small" type='primary' onClick={() => this.openDrawer2(record)} >详情</Button>
                     )
                 },
             }
