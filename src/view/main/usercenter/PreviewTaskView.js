@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Form, Input, Select, Upload, Icon, DatePicker } from 'antd'
+import { Modal, Form, Input, Select, DatePicker } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 
@@ -10,6 +10,7 @@ function UpdateTaskForm(props) {
     const { getFieldDecorator } = props.form
     const userOptions = props.users.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
     const tos = props.task.to.split(',').map(item => parseInt(item))
+    console.log('sadasdasd:',props.task);
     tos.shift()
     tos.pop();
     return <Form>
@@ -39,18 +40,6 @@ function UpdateTaskForm(props) {
                 rules: [{ required: true, message: '请选择截止日期' }]
             })(<DatePicker disabled={true}/>)}
         </Form.Item>
-        <Form.Item label="附件" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            <Upload.Dragger disabled name='file'>
-                <p className="ant-upload-drag-icon">
-                    <Icon type="inbox" />
-                </p>
-                <p>Click or drag file to this area to upload</p>
-                <p className="ant-upload-hint">
-                    Support for a single or bulk upload. Strictly prohibit from uploading company data or other
-                    band files
-            </p>
-            </Upload.Dragger>
-        </Form.Item>
     </Form >
 }
 
@@ -68,6 +57,7 @@ export default function PreviewTaskView(props) {
     }, [])
     const handlerOk = () => {
         staffFormRef.current.validateFields((error, values) => {
+            console.log('zzzz:',values);
             if (!error) {
                 props.onOk(values)
             }

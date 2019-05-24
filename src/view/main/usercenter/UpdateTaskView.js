@@ -1,7 +1,8 @@
 import React from 'react'
-import { Modal, Form, Input, Select, Upload, Icon,DatePicker } from 'antd'
+import { Modal, Form, Input, Select,DatePicker } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
+
 /**
  * 分配给我的任务 详情界面 表单
  */
@@ -38,18 +39,6 @@ function UpdateTaskForm(props) {
                 rules: [{ required: true, message: '请选择截止日期' }]
             })(<DatePicker disabled={true}/>)}
         </Form.Item>
-        <Form.Item label="附件" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            <Upload.Dragger disabled name='file'>
-                <p className="ant-upload-drag-icon">
-                    <Icon type="inbox" />
-                </p>
-                <p>Click or drag file to this area to upload</p>
-                <p className="ant-upload-hint">
-                    Support for a single or bulk upload. Strictly prohibit from uploading company data or other
-                    band files
-            </p>
-            </Upload.Dragger>
-        </Form.Item>
     </Form >
 }
 
@@ -66,7 +55,7 @@ export default function UpdateTaskView(props) {
         })
     }, [])
     const handlerOk = () => {
-        props.onOk()
+        props.onOk(props.staff)
     }
     return <Modal width={700} centered onOk={handlerOk} title="任务详情"
         onCancel={props.onCancel}

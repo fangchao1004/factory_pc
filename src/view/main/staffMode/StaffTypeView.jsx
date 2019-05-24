@@ -43,7 +43,7 @@ class StaffTypeView extends Component {
         this.setState({ addLevelVisible: false })
     }
     updateLevel(record) {
-        console.log('update', record)
+        // console.log('update', record)
         this.setState({ updateLevelVisible: true, updateLevelData: record })
     }
     updateLevelOnOk = (newValues) => {

@@ -1,7 +1,7 @@
 import Axios from 'axios';
 
-// const Testuri3 = 'http://127.0.0.1:3009/' ///宿舍无线网络
-const Testuri3 = 'http://hefeixiaomu.com:3009/'///zg609&服务器数据库
+const Testuri3 = 'http://127.0.0.1:3009/' ///宿舍无线网络
+// const Testuri3 = 'http://hefeixiaomu.com:3009/'///zg609&服务器数据库
 const Testuri = Testuri3;
 class HttpApi {
     /**
@@ -216,6 +216,13 @@ class HttpApi {
     }
     static sendMessageToStaffs(params, f1, f2) {
         Axios.post(Testuri + 'sendMessageToStaffs', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static sendMessageToLeader(params, f1, f2) {
+        Axios.post(Testuri + 'sendMessageToLeader', params).then(res => {
             if (f1) { f1(res) }
         }).catch(res => {
             if (f2) { f2(res) }

@@ -47,13 +47,12 @@ class TaskFromMeView extends Component {
         newValues.from = userinfo.user_id
         newValues.to = "," + newValues.to.join(',') + ","
         newValues.overTime = newValues.overTime.endOf('day').valueOf() + ""
-
         HttpApi.addTaskInfo(newValues, data => {
             if (data.data.code === 0) {
                 this.setState({ addStaffVisible: false })
                 message.success('添加成功')
                 this.getTasksData()
-                this.sendMessageToStaff(toUsersArr, newValues);
+                // this.sendMessageToStaff(toUsersArr, newValues);
             } else {
                 message.error(data.data.data)
             }
@@ -63,7 +62,7 @@ class TaskFromMeView extends Component {
         this.setState({ addStaffVisible: false })
     }
     updateStaff(record) {
-        console.log('update', record)
+        // console.log('update', record)
         this.setState({ updateStaffVisible: true, updateStaffData: record })
     }
     updateStaffOnOk = (newValues) => {
@@ -95,18 +94,20 @@ class TaskFromMeView extends Component {
         let overTimeDate = moment(parseInt(data.overTime)).format('YYYY年MM月DD日');
         HttpApi.getUserInfo({ id: toUsersArr }, (res) => {
             let userInfo = res.data.data;
-            userInfo.forEach((item)=>{
+            let tempArr = [];
+            userInfo.forEach((item) => {
                 let messageObj = {
-                        phonenumber:item.phonenumber,
-                        name:item.name,
-                        title:title,
-                        time: overTimeDate
-                      }
-                HttpApi.sendMessageToStaffs(messageObj)
+                    phonenumber: item.phonenumber,
+                    name: item.name,
+                    title: title,
+                    time: overTimeDate
+                }
+                tempArr.push(messageObj);
             })
+            HttpApi.sendMessageToStaffs(tempArr)
         })
     }
-   
+
 
     render() {
         const columns = [

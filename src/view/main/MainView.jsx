@@ -111,8 +111,10 @@ class MainView extends Component {
 
                             </Col>
                             <Col span={16} style={{ textAlign: 'right', paddingRight: 24 }}>
-                                <Popover width={100} placement="rightBottom" title={storage.getItem('userinfo') ? "用户名: " + JSON.parse(storage.getItem('userinfo')).username : "不存在"}
-                                    content={<Button type='primary' style={{ width: 150 }}
+                                <Popover width={100} placement="rightBottom" 
+                                title={storage.getItem('userinfo') ? "用户名: " + JSON.parse(storage.getItem('userinfo')).username+"("+JSON.parse(storage.getItem('userinfo')).name+")" : 
+                                "不存在"}
+                                    content={<Button type='primary' style={{ width: "100%" }}
                                         onClick={() => {
                                             storage.clear();
                                             window.location.href = "/";
