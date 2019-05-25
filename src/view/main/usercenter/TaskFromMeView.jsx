@@ -48,12 +48,18 @@ class TaskFromMeView extends Component {
         newValues.from = userinfo.user_id
         newValues.to = "," + newValues.to.join(',') + ","
         newValues.overTime = newValues.overTime.endOf('day').valueOf()
+        newValues.isMessage = newValues.isMessage ? 1 : 0;
         HttpApi.addTaskInfo(newValues, data => {
             if (data.data.code === 0) {
                 this.setState({ addStaffVisible: false })
                 message.success('添加成功')
                 this.getTasksData()
-                this.sendMessageToStaff(toUsersArr, newValues);
+                if (newValues.isMessage === 1) {
+                    console.log('短信通知')
+                    this.sendMessageToStaff(toUsersArr, newValues);
+                } else {
+                    console.log('不必短信通知')
+                }
             } else {
                 message.error(data.data.data)
             }
@@ -119,9 +125,9 @@ class TaskFromMeView extends Component {
         // var seconds = my_time / 1000 - (24 * 60 * 60 * daysRound) - (60 * 60 * hoursRound) - (60 * minutesRound);
         // console.log('转换时间:', daysRound + '天', hoursRound + '时', minutesRound + '分', seconds + '秒');
         var time;
-        if(daysRound>0){
+        if (daysRound > 0) {
             time = daysRound + '天 ' + hoursRound + '小时 ' + minutesRound + '分钟'
-        }else{
+        } else {
             time = hoursRound + '小时 ' + minutesRound + '分钟'
         }
         return time;
@@ -168,7 +174,10 @@ class TaskFromMeView extends Component {
                 render: (text, record) => {
                     let remain_time = record.overTime - currentTime; ///剩余时间 ms
                     // console.log('剩余时间ms:', remain_time);
-                    let result = this.getDuration(Math.abs(remain_time));
+                    let result = '/'
+                    if (record.status === 0) {
+                        result = this.getDuration(Math.abs(remain_time));
+                    }
                     return <div>{remain_time > 0 ? result : "超时 " + result}</div>
                 }
             },

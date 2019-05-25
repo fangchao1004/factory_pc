@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Form, Input, Select,DatePicker } from 'antd'
+import { Modal, Form, Input, Select,DatePicker,Switch } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 
@@ -47,6 +47,12 @@ function UpdateTaskForm(props) {
                 initialValue: moment(props.task.overTime),
                 rules: [{ required: true, message: '请选择截止日期' }]
             })(<DatePicker disabled={true}/>)}
+        </Form.Item>
+        <Form.Item label="短信通知" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('overTime', {
+                initialValue: null,
+                rules: [{ required: true, message: '请选择短信通知' }]
+            })(<Switch disabled={true} checkedChildren="开" unCheckedChildren="关" checked={props.task.isMessage===1}/>)}
         </Form.Item>
     </Form >
 }

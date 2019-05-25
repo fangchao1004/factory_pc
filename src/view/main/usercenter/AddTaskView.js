@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Form, Input, Select, DatePicker } from 'antd'
+import { Modal, Form, Input, Select, DatePicker, Switch } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 /**
@@ -32,11 +32,16 @@ function AddTaskForm(props) {
                 rules: [{ required: true, message: '请选择截止日期' }]
             })(<DatePicker disabledDate={disabledDate} />)}
         </Form.Item>
+        <Form.Item label="短信通知" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('isMessage', {
+                rules: [{ required: false, message: '请选择是否短信通知' }]
+            })(<Switch checkedChildren="开" unCheckedChildren="关" defaultChecked={false} />)}
+        </Form.Item>
     </Form >
 }
 
 function disabledDate(current) {
-    return current && current < moment().subtract(1,'day').endOf('day');
+    return current && current < moment().subtract(1, 'day').endOf('day');
 }
 
 const TaskForm = Form.create({ name: 'staffForm' })(AddTaskForm)

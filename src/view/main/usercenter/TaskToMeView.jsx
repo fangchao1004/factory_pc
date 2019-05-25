@@ -70,7 +70,9 @@ class TaskToMeView extends Component {
                 this.setState({ updateStaffVisible: false })
                 this.getTasksData()
                 message.success('更新成功')
-                this.sendMessageToLeader(taskInfo);
+                if (taskInfo.isMessage === 1) {
+                    this.sendMessageToLeader(taskInfo);
+                }
             } else {
                 message.error(data.data.data)
             }
@@ -92,14 +94,14 @@ class TaskToMeView extends Component {
     sendMessageToLeader = async (taskInfo) => {
         // console.log("数据:", "from:", taskInfo.from, "me:", userinfo.user_id, userinfo.name);
         let leaderInfo = await this.getUserInfo(taskInfo.from);
-        let param = {phonenumber:leaderInfo.phonenumber,name:leaderInfo.name,name_to:userinfo.name}
-        HttpApi.sendMessageToLeader(param,(res)=>{
+        let param = { phonenumber: leaderInfo.phonenumber, name: leaderInfo.name, name_to: userinfo.name }
+        HttpApi.sendMessageToLeader(param, (res) => {
             console.log(res);
         })
     }
-    getUserInfo=(userid)=>{
-        return new Promise((resolve,reject)=>{
-            HttpApi.getUserInfo({id:userid},(res)=>{
+    getUserInfo = (userid) => {
+        return new Promise((resolve, reject) => {
+            HttpApi.getUserInfo({ id: userid }, (res) => {
                 resolve(res.data.data[0]);
             })
         })
@@ -114,9 +116,9 @@ class TaskToMeView extends Component {
         // var seconds = my_time / 1000 - (24 * 60 * 60 * daysRound) - (60 * 60 * hoursRound) - (60 * minutesRound);
         // console.log('转换时间:', daysRound + '天', hoursRound + '时', minutesRound + '分', seconds + '秒');
         var time;
-        if(daysRound>0){
+        if (daysRound > 0) {
             time = daysRound + '天 ' + hoursRound + '小时 ' + minutesRound + '分钟'
-        }else{
+        } else {
             time = hoursRound + '小时 ' + minutesRound + '分钟'
         }
         return time;
@@ -162,7 +164,10 @@ class TaskToMeView extends Component {
                 render: (text, record) => {
                     let remain_time = record.overTime - currentTime; ///剩余时间 ms
                     // console.log('剩余时间ms:', remain_time);
-                    let result = this.getDuration(Math.abs(remain_time));
+                    let result = '/'
+                    if (record.status === 0) {
+                        result = this.getDuration(Math.abs(remain_time));
+                    }
                     return <div>{remain_time > 0 ? result : "超时 " + result}</div>
                 }
             },
