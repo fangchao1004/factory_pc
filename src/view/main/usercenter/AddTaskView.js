@@ -1,6 +1,7 @@
 import React from 'react'
 import { Modal, Form, Input, Select, DatePicker } from 'antd'
 import HttpApi from '../../util/HttpApi'
+import moment from 'moment'
 /**
  * 添加创建任务界面
  */
@@ -29,9 +30,13 @@ function AddTaskForm(props) {
         <Form.Item label="截止日期" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('overTime', {
                 rules: [{ required: true, message: '请选择截止日期' }]
-            })(<DatePicker />)}
+            })(<DatePicker disabledDate={disabledDate} />)}
         </Form.Item>
     </Form >
+}
+
+function disabledDate(current) {
+    return current && current < moment().subtract(1,'day').endOf('day');
 }
 
 const TaskForm = Form.create({ name: 'staffForm' })(AddTaskForm)
