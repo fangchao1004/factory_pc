@@ -165,10 +165,10 @@ class TaskToMeView extends Component {
                     let remain_time = record.overTime - currentTime; ///剩余时间 ms
                     // console.log('剩余时间ms:', remain_time);
                     let result = '/'
-                    if (record.status === 0) {
+                    if (record.status === 0) { ///未完成 计算超时
                         result = this.getDuration(Math.abs(remain_time));
                     }
-                    return <div>{remain_time > 0 ? result : "超时 " + result}</div>
+                    return <div>{record.status === 0 ? (remain_time > 0 ? result : "超时 " + result) : result}</div>
                 }
             },
             {
