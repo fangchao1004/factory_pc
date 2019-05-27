@@ -252,9 +252,9 @@ class EquipmentView extends Component {
                     console.log(record);
                     let str = '';
                     let strColor = '#555555'
-                    if (text === 1) { str = '正常'; strColor = 'green' }
-                    else if (text === 2) { str = '故障'; strColor = 'red' }
-                    else { str = '待检'; strColor = 'orange' }
+                    if (text === 1) { str = '正常'; strColor = '#00CC00' }
+                    else if (text === 2) { str = '故障'; strColor = '#FF0000' }
+                    else { str = '待检'; strColor = 'gray' }
                     return <Tag color={strColor}>{str}</Tag>
                 }
             },

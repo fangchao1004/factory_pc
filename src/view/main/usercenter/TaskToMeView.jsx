@@ -178,10 +178,10 @@ class TaskToMeView extends Component {
             {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 100,
+                width: 75,
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
-                        <Button type="primary" onClick={this.updateStaff.bind(this, record)}>详情</Button>
+                        <Button size="small" type="primary" onClick={this.updateStaff.bind(this, record)}>详情</Button>
                     </div>
                 )
             }
