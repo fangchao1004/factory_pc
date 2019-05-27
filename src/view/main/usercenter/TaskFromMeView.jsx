@@ -7,6 +7,7 @@ import moment from 'moment'
 
 var storage = window.localStorage;
 var userinfo;
+var currentTime = moment().toDate().getTime();
 /**
  * 我发起的任务 界面
  */
@@ -46,13 +47,19 @@ class TaskFromMeView extends Component {
         newValues.status = 0;
         newValues.from = userinfo.user_id
         newValues.to = "," + newValues.to.join(',') + ","
-        newValues.overTime = newValues.overTime.endOf('day').valueOf() + ""
+        newValues.overTime = newValues.overTime.endOf('day').valueOf()
+        newValues.isMessage = newValues.isMessage ? 1 : 0;
         HttpApi.addTaskInfo(newValues, data => {
             if (data.data.code === 0) {
                 this.setState({ addStaffVisible: false })
                 message.success('添加成功')
                 this.getTasksData()
-                this.sendMessageToStaff(toUsersArr, newValues);
+                if (newValues.isMessage === 1) {
+                    console.log('短信通知')
+                    this.sendMessageToStaff(toUsersArr, newValues);
+                } else {
+                    console.log('不必短信通知')
+                }
             } else {
                 message.error(data.data.data)
             }
@@ -108,28 +115,70 @@ class TaskFromMeView extends Component {
         })
     }
 
+    getDuration = (my_time) => {
+        var days = my_time / 1000 / 60 / 60 / 24;
+        var daysRound = Math.floor(days);
+        var hours = my_time / 1000 / 60 / 60 - (24 * daysRound);
+        var hoursRound = Math.floor(hours);
+        var minutes = my_time / 1000 / 60 - (24 * 60 * daysRound) - (60 * hoursRound);
+        var minutesRound = Math.floor(minutes);
+        // var seconds = my_time / 1000 - (24 * 60 * 60 * daysRound) - (60 * 60 * hoursRound) - (60 * minutesRound);
+        // console.log('转换时间:', daysRound + '天', hoursRound + '时', minutesRound + '分', seconds + '秒');
+        var time;
+        if (daysRound > 0) {
+            time = daysRound + '天 ' + hoursRound + '小时 ' + minutesRound + '分钟'
+        } else {
+            time = hoursRound + '小时 ' + minutesRound + '分钟'
+        }
+        return time;
+    }
+
 
     render() {
         const columns = [
             {
-                title: '编号',
-                width: 60,
-                align: 'center',
-                dataIndex: 'id',
-                render: (text, record) => (
-                    <div>{text}</div>
-                )
-            },
-            {
                 title: '当前状态',
                 dataIndex: 'status',
                 align: 'center',
-                render: (text) => {
-                    let str = '';
+                render: (text, record) => {
                     let strColor = '#555555'
-                    if (text === 1) { str = '已完成'; strColor = 'green' }
-                    else { str = '未完成'; strColor = 'red' }
+                    let str = '';
+                    let remain_time = record.overTime - currentTime; ///剩余时间 ms
+                    let one_day_time = 24 * 60 * 60 * 1000; ///一天的时间 ms
+                    if (text === 1) { str = '已完成'; strColor = 'blue' }
+                    else {
+                        str = '未完成';
+                        if (remain_time > 0) {
+                            let last_time_day = parseFloat((remain_time / one_day_time).toFixed(5));////剩余天数
+                            // console.log("剩余天数",last_time_day);
+                            if (last_time_day >= 3) {
+                                strColor = 'green'
+                            } else if (last_time_day < 3 && last_time_day >= 1) {
+                                strColor = 'orange'
+                            } else {
+                                strColor = 'magenta'
+                            }
+                        } else {
+                            ///已经超期了
+                            strColor = 'red'
+                            str = '已经超期'
+                        }
+                    }
                     return <Tag color={strColor}>{str}</Tag>
+                }
+            },
+            {
+                title: '倒计时',
+                dataIndex: 'overTime',
+                align: 'center',
+                render: (text, record) => {
+                    let remain_time = record.overTime - currentTime; ///剩余时间 ms
+                    // console.log('剩余时间ms:', remain_time);
+                    let result = '/'
+                    if (record.status === 0) { ///未完成 计算超时
+                        result = this.getDuration(Math.abs(remain_time));
+                    }
+                    return <div>{record.status === 0 ? (remain_time > 0 ? result : "超时 " + result) : result}</div>
                 }
             },
             {
