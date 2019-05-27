@@ -1,8 +1,8 @@
 import Axios from 'axios';
 
-const Testuri3 = 'http://127.0.0.1:3009/' ///宿舍无线网络
-// const Testuri3 = 'http://hefeixiaomu.com:3009/'///zg609&服务器数据库
-const Testuri = Testuri3;
+const Testuri1 = 'http://127.0.0.1:3009/' ///本地服务器
+// const Testuri2 = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
+const Testuri = Testuri1;
 class HttpApi {
     /**
      * 上传的模版

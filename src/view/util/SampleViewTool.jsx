@@ -15,14 +15,14 @@ export default class SampleViewTool {
         let renderInputText = (element) => {
             return <div key={element.key}>
                 <List>
-                    <InputItem style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title_name}</InputItem>
+                    <InputItem labelNumber={6} style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title_name}</InputItem>
                 </List>
             </div>
         }
         let renderInputNumber = (element) => {
             return <div key={element.key}>
                 <List>
-                    <InputItem style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title_name}</InputItem>
+                    <InputItem labelNumber={6} style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title_name}</InputItem>
                 </List>
             </div>
         }
