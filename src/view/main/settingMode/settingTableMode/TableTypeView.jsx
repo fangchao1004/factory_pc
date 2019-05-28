@@ -73,7 +73,6 @@ class TableTypeView extends Component {
             <div>
                 表单类型管理界面
                 <Table
-                    size={'small'}
                     rowClassName={() => 'editable-row'}
                     bordered
                     dataSource={this.state.dataSource}

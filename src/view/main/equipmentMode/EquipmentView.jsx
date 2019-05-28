@@ -302,7 +302,6 @@ class EquipmentView extends Component {
                     </Row>) : null
                 }
                 <Table
-                    size={'small'}
                     bordered
                     dataSource={this.state.dataSource}
                     columns={columns}
@@ -433,7 +432,6 @@ class EquipmentView extends Component {
             }
         ]
         return <Table
-            size={'small'}
             bordered
             dataSource={this.state.deviceRecords}
             columns={columns}

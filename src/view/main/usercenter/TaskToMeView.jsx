@@ -190,7 +190,6 @@ class TaskToMeView extends Component {
         return (
             <div>
                 <Table
-                    size={'small'}
                     bordered
                     dataSource={this.state.tasks}
                     columns={columns}

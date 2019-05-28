@@ -191,7 +191,6 @@ class StaffView extends Component {
                     </Col>
                 </Row>
                 <Table
-                    size={'small'}
                     bordered
                     dataSource={this.state.users}
                     columns={columns}

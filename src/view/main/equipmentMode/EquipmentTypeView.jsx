@@ -121,7 +121,6 @@ class EquipmentTypeView extends Component {
                     </Col>
                 </Row>
                 <Table
-                    size={'small'}
                     rowClassName={() => 'editable-row'}
                     bordered
                     dataSource={this.state.dataSource}

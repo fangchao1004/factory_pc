@@ -10,6 +10,7 @@ import UserModeRoot from './usercenter/UserModeRoot'
 import SettingEquipmentModeRoot from './settingMode/settingEquipmentMode/SettingEquipmentModeRoot';
 import SettingStaffModeRoot from './settingMode/settingStaffMode/SettingStaffModeRoot';
 import SettingTableModeRoot from './settingMode/settingTableMode/SettingTableModeRoot';
+import BugModeRoot from './bugMode/BugModeRoot';
 
 var storage = window.localStorage;
 const { Header, Content, Sider } = Layout;
@@ -102,9 +103,10 @@ class MainView extends Component {
                                 <Link to={`${this.props.match.url}/table`} />
                             </Menu.Item> : null}
                         </SubMenu>
-                        <Menu.Item>
+                        <Menu.Item key="缺陷">
                             <Icon type="hdd" />
                             <span>缺陷</span>
+                            <Link to={`${this.props.match.url}/bug`} />
                         </Menu.Item>
                         {this.state.isAdmin ? <Menu.Item key="员工">
                             <Icon type="team" />
@@ -177,6 +179,11 @@ class MainView extends Component {
                                 path={`${this.props.match.path}/table`}
                                 // component={TableModeRoot}
                                 component={() => (storage.getItem('userinfo') ? <TableModeRoot /> : <Redirect to='/' />)}
+                            />
+                             <Route
+                                exact
+                                path={`${this.props.match.path}/bug`}
+                                component={() => (storage.getItem('userinfo') ? <BugModeRoot /> : <Redirect to='/' />)}
                             />
                             <Route
                                 exact

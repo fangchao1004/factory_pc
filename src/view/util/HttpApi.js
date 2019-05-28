@@ -1,8 +1,7 @@
 import Axios from 'axios';
 
-// const Testuri1 = 'http://127.0.0.1:3009/' ///本地服务器
-const Testuri2 = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
-const Testuri = Testuri2;
+const Testuri = 'http://127.0.0.1:3009/' ///本地服务器
+// const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
 class HttpApi {
     /**
      * 上传的模版
@@ -223,6 +222,13 @@ class HttpApi {
     }
     static sendMessageToLeader(params, f1, f2) {
         Axios.post(Testuri + 'sendMessageToLeader', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static getBugInfo(params, f1, f2) {
+        Axios.post(Testuri + 'find_bug', params).then(res => {
             if (f1) { f1(res) }
         }).catch(res => {
             if (f2) { f2(res) }

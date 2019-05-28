@@ -111,7 +111,6 @@ class StaffTypeView extends Component {
                     </Col>
                 </Row>
                 <Table
-                    size={'small'}
                     bordered
                     dataSource={this.state.levels}
                     columns={columns}

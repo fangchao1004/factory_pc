@@ -180,7 +180,6 @@ export default class EditableTable extends Component {
           </Col>
         </Row>
         <Table
-          size={'small'}
           rowClassName={() => 'editable-row'}
           bordered
           dataSource={dataSource}

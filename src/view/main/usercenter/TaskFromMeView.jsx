@@ -211,7 +211,6 @@ class TaskFromMeView extends Component {
                     </Col>
                 </Row>
                 <Table
-                    size={'small'}
                     bordered
                     dataSource={this.state.tasks}
                     columns={columns}
