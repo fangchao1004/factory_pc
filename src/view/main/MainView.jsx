@@ -22,7 +22,6 @@ class MainView extends Component {
             collapsed: false,
             isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin
         }
-        console.log(this.state.isAdmin)
     }
     toggle = () => {
         this.setState({
@@ -79,29 +78,34 @@ class MainView extends Component {
                             <span>首页</span>
                             <Link to={`${this.props.match.url}`} />
                         </Menu.Item>
-
-
+                        <Menu.Item>
+                            <Icon type="hdd" />
+                            <span>设备</span>
+                        </Menu.Item>
                         <SubMenu
                             key="巡检平台"
                             title={
                                 <span>
                                     <Icon type="scan" />
-                                    <span>巡检平台</span>
+                                    <span>巡检</span>
                                 </span>
                             }
                         >
                             <Menu.Item key="设备">
                                 <Icon type="switcher" />
-                                <span>设备</span>
+                                <span>巡检设备</span>
                                 <Link to={`${this.props.match.url}/equipment`} />
                             </Menu.Item>
                             {this.state.isAdmin ? <Menu.Item key="表单">
                                 <Icon type="file" />
-                                <span>表单</span>
+                                <span>巡检表单</span>
                                 <Link to={`${this.props.match.url}/table`} />
                             </Menu.Item> : null}
-
                         </SubMenu>
+                        <Menu.Item>
+                            <Icon type="hdd" />
+                            <span>缺陷</span>
+                        </Menu.Item>
                         {this.state.isAdmin ? <Menu.Item key="员工">
                             <Icon type="team" />
                             <span>员工</span>

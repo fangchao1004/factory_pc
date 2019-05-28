@@ -24,7 +24,8 @@ class EquipmentView extends Component {
             drawerVisible2: false,
             deviceRecords: [],
             recordView: null,
-            addEquipmentVisible: false
+            addEquipmentVisible: false,
+            isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin
         }
     }
     async componentDidMount() {
@@ -258,7 +259,7 @@ class EquipmentView extends Component {
                     return <Tag color={strColor}>{str}</Tag>
                 }
             },
-          
+
             {
                 title: '备注',
                 dataIndex: 'remark',
@@ -272,10 +273,18 @@ class EquipmentView extends Component {
                 width: 150,
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
-                        <Popconfirm title="确定要删除该设备吗?" onConfirm={this.deleteEquipmentConfirm.bind(null, record)}>
-                            <Button size="small" type="danger">删除</Button>
-                        </Popconfirm>
-                        <Divider type="vertical" />
+                        {
+                            this.state.isAdmin ?
+                                <Popconfirm title="确定要删除该设备吗?" onConfirm={this.deleteEquipmentConfirm.bind(null, record)}>
+                                    <Button size="small" type="danger">删除</Button>
+                                </Popconfirm>
+                                : null
+                        }
+                        {
+                            this.state.isAdmin ?
+                                <Divider type="vertical" />
+                                : null
+                        }
                         <Button size="small" type='primary' onClick={() => this.openModalHandler(record)} >详情</Button></div>
                 )
             }
@@ -283,13 +292,15 @@ class EquipmentView extends Component {
 
         return (
             <div>
-                <Row>
-                    <Col span={6}>
-                        <Button onClick={this.addEquipment} type="primary" style={{ marginBottom: 16 }}>
-                            添加设备
-                         </Button>
-                    </Col>
-                </Row>
+                {
+                    this.state.isAdmin ? (<Row>
+                        <Col span={6}>
+                            <Button onClick={this.addEquipment} type="primary" style={{ marginBottom: 16 }}>
+                                添加设备
+                             </Button>
+                        </Col>
+                    </Row>) : null
+                }
                 <Table
                     size={'small'}
                     bordered
@@ -416,7 +427,7 @@ class EquipmentView extends Component {
                 dataIndex: 'operation',
                 render: (text, record) => {
                     return (
-                        <Button style={{marginLeft: 10}} size="small" type='primary' onClick={() => this.openDrawer2(record)} >详情</Button>
+                        <Button style={{ marginLeft: 10 }} size="small" type='primary' onClick={() => this.openDrawer2(record)} >详情</Button>
                     )
                 },
             }

@@ -7,7 +7,9 @@ import EquipmentAreaView from './EquipmentAreaView'
 const tabListNoTitle = [{
     key: 'EquipmentView',
     tab: '设备管理',
-}, {
+}];
+
+const tabListNoTitle2 = [{
     key: 'EquipmentTypeView',
     tab: '设备类型管理',
 }, {
@@ -25,6 +27,7 @@ class EquipmentModeRoot extends Component {
     state = {
         key: 'EquipmentView',
         noTitleKey: 'EquipmentView',
+        isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin
     }
 
     onTabChange = (key) => {
@@ -32,18 +35,26 @@ class EquipmentModeRoot extends Component {
     }
 
     render() {
-        return (
-            <div>
-                <Card
-                    style={{ width: '100%' }}
-                    tabList={tabListNoTitle}
-                    activeTabKey={this.state.noTitleKey}
-                    onTabChange={(key) => { this.onTabChange(key); }}
-                >
-                    {contentListNoTitle[this.state.noTitleKey]}
-                </Card>
-            </div>
-        );
+
+        var tabs
+        if (this.state.isAdmin) {
+            tabs = tabListNoTitle.concat(tabListNoTitle2)
+        } else {
+            tabs = tabListNoTitle
+        }
+
+            return (
+                <div>
+                    <Card
+                        style={{ width: '100%' }}
+                        tabList={tabs}
+                        activeTabKey={this.state.noTitleKey}
+                        onTabChange={(key) => { this.onTabChange(key); }}
+                    >
+                        {contentListNoTitle[this.state.noTitleKey]}
+                    </Card>
+                </div>
+            );
     }
 }
 
