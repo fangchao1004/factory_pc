@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Form, Input, Select, DatePicker, Switch } from 'antd'
+import { Modal, Form, Input, DatePicker, Switch, TreeSelect } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 /**
@@ -7,15 +7,12 @@ import moment from 'moment'
  */
 function AddTaskForm(props) {
     const { getFieldDecorator } = props.form
-    const userOptions = props.users.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
 
     return <Form>
         <Form.Item label="执行人" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('to', {
                 rules: [{ required: true, message: '请选择执行人' }]
-            })(<Select showSearch mode="multiple" filterOption={(input, option) =>
-                option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-            } optionFilterProp="children" placeholder="请选择执行人">{userOptions}</Select>)}
+            })(<TreeSelect placeholder="请选择执行人" treeCheckable treeData={props.data}></TreeSelect>)}
         </Form.Item>
         <Form.Item label="主题" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('title', {
@@ -48,13 +45,35 @@ const TaskForm = Form.create({ name: 'staffForm' })(AddTaskForm)
 
 export default function AddTaskView(props) {
     const staffFormRef = React.useRef(null)
-    const [users, setUsers] = React.useState(null)
+    const [data, setData] = React.useState(null)
     React.useEffect(() => {
-        HttpApi.getUserInfo({}, data => {
-            if (data.data.code === 0) {
-                setUsers(data.data.data)
-            }
-        })
+        async function initData() {
+            const levels = await getLevelData()
+            levels.map(level => {
+                level.title = level.name
+                level.key = level.id
+                level.value = level.id
+                level.children = []
+                return level
+            })
+            const users = await getUserData()
+            users.forEach(user => {
+                levels.map(level => {
+                    if (level.id === user.level_id) {
+
+                        level.children.push({
+                            title: user.name,
+                            value: level.id + '-' + user.id,
+                            key: level.id + '-' + user.id,
+                            ...user
+                        })
+                    }
+                    return level
+                })
+            })
+            setData(levels)
+        }
+        initData()
     }, [])
     const handlerOk = () => {
         staffFormRef.current.validateFields((error, values) => {
@@ -66,6 +85,25 @@ export default function AddTaskView(props) {
     return <Modal width={700} centered onOk={handlerOk} title="新建任务"
         onCancel={props.onCancel}
         visible={props.visible}>
-        <TaskForm ref={staffFormRef} users={users}></TaskForm>
+        <TaskForm ref={staffFormRef} data={data}></TaskForm>
     </Modal>
+}
+
+async function getLevelData() {
+    return new Promise((resolve, reject) => {
+        HttpApi.getUserLevel(null, data => {
+            if (data.data.code === 0) {
+                resolve(data.data.data)
+            }
+        })
+    })
+}
+async function getUserData() {
+    return new Promise((resolve, reject) => {
+        HttpApi.getUserInfo(null, data => {
+            if (data.data.code === 0) {
+                resolve(data.data.data)
+            }
+        })
+    })
 }

@@ -19,7 +19,6 @@ export default function BugModeRoot(props) {
     // componentDidMount hook
     useEffect(() => {
         HttpApi.getBugInfo(null, (data) => {
-            console.log(data)
             if (data.data.code === 0 && data.data.data) {
                 setDataSource(data.data.data.map(item => { item.key = item.id; return item }))
             }

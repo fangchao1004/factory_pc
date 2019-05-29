@@ -26,7 +26,7 @@ class TaskFromMeView extends Component {
             tasks: tasksData.map(user => {
                 user.key = user.id
                 return user
-            })
+            }).reverse()
         })
     }
     getTaskInfo() {
@@ -43,10 +43,16 @@ class TaskFromMeView extends Component {
         this.setState({ addStaffVisible: true })
     }
     addStaffOnOk = (newValues) => {
-        let toUsersArr = newValues.to
+        var toIds = []
+        newValues.to.forEach(toItem => {
+            let items = toItem.split('-')
+            if (items.length === 2) {
+                toIds.push(items[1])
+            }
+        })
         newValues.status = 0;
         newValues.from = userinfo.user_id
-        newValues.to = "," + newValues.to.join(',') + ","
+        newValues.to = "," + toIds.join(',') + ","
         newValues.overTime = newValues.overTime.endOf('day').valueOf()
         newValues.isMessage = newValues.isMessage ? 1 : 0;
         HttpApi.addTaskInfo(newValues, data => {
@@ -56,7 +62,7 @@ class TaskFromMeView extends Component {
                 this.getTasksData()
                 if (newValues.isMessage === 1) {
                     console.log('短信通知')
-                    this.sendMessageToStaff(toUsersArr, newValues);
+                    this.sendMessageToStaff(toIds, newValues);
                 } else {
                     console.log('不必短信通知')
                 }
