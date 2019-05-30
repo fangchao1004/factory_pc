@@ -21,7 +21,6 @@ class TaskFromMeView extends Component {
     async getTasksData() {
         userinfo = JSON.parse(storage.getItem("userinfo"))
         let tasksData = await this.getTaskInfo()
-        // console.log('我发起的任务：', tasksData)
         this.setState({
             tasks: tasksData.map(user => {
                 user.key = user.id
@@ -31,7 +30,7 @@ class TaskFromMeView extends Component {
     }
     getTaskInfo() {
         return new Promise((resolve, reject) => {
-            HttpApi.getTaskInfo({ from: userinfo.user_id }, data => {
+            HttpApi.getTaskInfo({ from: userinfo.id }, data => {
                 if (data.data.code === 0) {
                     resolve(data.data.data)
                 }
@@ -51,7 +50,7 @@ class TaskFromMeView extends Component {
             }
         })
         newValues.status = 0;
-        newValues.from = userinfo.user_id
+        newValues.from = userinfo.id
         newValues.to = "," + toIds.join(',') + ","
         newValues.overTime = newValues.overTime.endOf('day').valueOf()
         newValues.isMessage = newValues.isMessage ? 1 : 0;
