@@ -1,18 +1,26 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { List, Modal, Form, Input } from 'antd'
+import { List, Modal, Form, Input, message } from 'antd'
+import HttpApi from '../../util/HttpApi'
+
+var storage = window.localStorage;
 
 function ChangePasswordForm(props) {
     const { getFieldDecorator } = props.form
     return <Form>
-        <Form.Item label="密码" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('username', {
-                rules: [{ required: true, message: '请输入员工用户名' }]
-            })(<Input></Input>)}
+        <Form.Item label="原密码" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('oldpassword', {
+                rules: [{ required: true, message: '请输入原密码' }]
+            })(<Input type='password'></Input>)}
+        </Form.Item>
+        <Form.Item label="新密码" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('newPassword', {
+                rules: [{ required: true, message: '请输入新密码' }]
+            })(<Input type='password' maxLength={12} placeholder={'最大支持12位'}></Input>)}
         </Form.Item>
         <Form.Item label="确认密码" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('name', {
-                rules: [{ required: true, message: '请输入员工昵称' }]
-            })(<Input></Input>)}
+            {getFieldDecorator('confrimPassword', {
+                rules: [{ required: true, message: '请确认密码' }]
+            })(<Input type='password' maxLength={12} placeholder={'最大支持12位'}></Input>)}
         </Form.Item>
     </Form>
 }
@@ -32,10 +40,30 @@ export default function SecuritySettingView(props) {
     function onOk() {
         form.current.validateFields((error, values) => {
             if (!error) {
-                console.log(values)
+                // console.log("撒打算打算打算：", values)
+                if (values.newPassword !== values.confrimPassword) { message.error('新密码不一致，请检查后重新确认'); return }
+                let userInfo = storage.getItem('userinfo')
+                HttpApi.getUserInfo({ id: JSON.parse(userInfo).id }, (res) => {
+                    if (res.data.code === 0) {
+                        let password = res.data.data[0].password;
+                        if (password !== values.oldpassword) { message.error('原密码错误'); return }
+                        else {
+                            HttpApi.updateUserInfo({ query: { id: JSON.parse(userInfo).id }, update: { password: values.newPassword } }, (res) => {
+                                if (res.data.code === 0) {
+                                    message.success('修改密码成功');
+                                    setVisible(false)
+                                } else {
+                                    message.error('修改密码失败');
+                                }
+                            })
+
+
+                        }
+                    }
+                })
+
             }
         })
-        setVisible(false)
     }
 
     function onCancel() {
@@ -56,7 +84,7 @@ export default function SecuritySettingView(props) {
             )}
         />
         <Modal visible={visible} onOk={onOk} onCancel={onCancel} title="修改密码">
-            <NormalForm ref={form}/>
+            <NormalForm ref={form} />
         </Modal>
     </div>
 }
