@@ -11,6 +11,7 @@ import SettingEquipmentModeRoot from './settingMode/settingEquipmentMode/Setting
 import SettingStaffModeRoot from './settingMode/settingStaffMode/SettingStaffModeRoot';
 import SettingTableModeRoot from './settingMode/settingTableMode/SettingTableModeRoot';
 import BugModeRoot from './bugMode/BugModeRoot';
+import SettingViewRoot from './setting/SettingViewRoot';
 
 var storage = window.localStorage;
 const { Header, Content, Sider } = Layout;
@@ -19,10 +20,13 @@ const SubMenu = Menu.SubMenu
 class MainView extends Component {
     constructor(props) {
         super(props)
+        const userinfo = window.localStorage.getItem('userinfo')
+        console.log(userinfo)
         this.state = {
             collapsed: false,
-            isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin
+            isAdmin: userinfo && JSON.parse(userinfo).isadmin === 1
         }
+        console.log(this.state.isAdmin)
     }
     toggle = () => {
         this.setState({
@@ -37,7 +41,7 @@ class MainView extends Component {
                     collapsed={this.state.collapsed}
                     onCollapse={this.onCollapse}
                     trigger={null}
-                    width="200"
+                    width={255}
                 >
                     <div
                         style={{
@@ -113,11 +117,14 @@ class MainView extends Component {
                             <span>员工</span>
                             <Link to={`${this.props.match.url}/staff`} />
                         </Menu.Item> : null}
-                        <Menu.Item key="个人中心">
+                        <Menu.Item key="任务">
                             <Icon type="user" />
-                            <span>个人中心</span>
+                            <span>任务</span>
                             <Link to={`${this.props.match.url}/user`} />
                         </Menu.Item>
+                        <SubMenu key="设置" title={<span><Icon type="setting" /><span>设置</span></span>}>
+                            <Menu.Item key="个人设置"><Icon type="switcher" /><span>个人设置</span><Link to={`${this.props.match.url}/usersetting`} /></Menu.Item>
+                        </SubMenu>
                     </Menu>
                 </Sider>
                 <Layout>
@@ -149,8 +156,10 @@ class MainView extends Component {
                     <Content
                         style={{
                             background: '#fff',
-                            margin: 14,
-                            padding: 14,
+                            margin: 26,
+                            paddingTop: 20,
+                            paddingLeft: 0,
+                            paddingRight: 0,
                             minHeight: 280,
                             height: '100%'
                         }}
@@ -159,7 +168,6 @@ class MainView extends Component {
                             <Route
                                 exact
                                 path={`${this.props.match.path}`}
-                                // component={HomePageViewRoot}
                                 component={() => (storage.getItem('userinfo') ? <HomePageViewRoot /> : <Redirect to='/' />)}
                             />
                             <Route
@@ -180,15 +188,18 @@ class MainView extends Component {
                                 // component={TableModeRoot}
                                 component={() => (storage.getItem('userinfo') ? <TableModeRoot /> : <Redirect to='/' />)}
                             />
-                             <Route
+                            <Route
                                 exact
                                 path={`${this.props.match.path}/bug`}
                                 component={() => (storage.getItem('userinfo') ? <BugModeRoot /> : <Redirect to='/' />)}
                             />
                             <Route
+                                path={`${this.props.match.path}/usersetting`}
+                                render={props => storage.getItem('userinfo') ? <SettingViewRoot {...props}/> : <Redirect to='/' />}
+                            />
+                            <Route
                                 exact
                                 path={`${this.props.match.path}/user`}
-                                // component={UserModeRoot}
                                 component={() => (storage.getItem('userinfo') ? <UserModeRoot /> : <Redirect to='/' />)}
                             />
                             <Route

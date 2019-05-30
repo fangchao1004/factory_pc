@@ -3,7 +3,6 @@ import { Form, Card, message } from 'antd'
 import LoginFromClass from './LoginForm'
 import HttpApi from '../util/HttpApi'
 import Background from '../../assets/bg.jpg';
-import AppData from '../util/AppData'
 
 const LoginFrom = Form.create({ name: 'normal_login' })(LoginFromClass)
 var storage = window.localStorage;
@@ -23,13 +22,9 @@ export default class LoginView extends React.Component {
       if (!error) {
         HttpApi.getUserInfo(values, doc => {
           if (doc.data.code === 0 && doc.data.data.length > 0) {
-            // 登录成功
-            AppData.user_id = doc.data.data[0].id
-            AppData.username = doc.data.data[0].username;
-            AppData.name = doc.data.data[0].name
-            AppData.isadmin = doc.data.data[0].isadmin === 1
             storage.clear();
-            storage['userinfo'] = JSON.stringify(AppData);
+            console.log(doc.data.data[0])
+            storage['userinfo'] = JSON.stringify(doc.data.data[0]);
             console.log("获取storage", storage.getItem('userinfo'));
             this.props.history.push('/mainView')
           } else {

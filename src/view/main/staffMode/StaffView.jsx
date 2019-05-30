@@ -165,7 +165,14 @@ class StaffView extends Component {
                 render: (text, record) => (
                     <div>{text}</div>
                 )
-            },              
+            },    
+            {
+                title: '备注',
+                dataIndex: 'remark',
+                render: (text, record) => (
+                    <div>{text}</div>
+                )
+            },           
             {
                 title: '操作',
                 dataIndex: 'actions',

@@ -31,7 +31,7 @@ function AddStaffForm(props) {
         </Form.Item> 
         <Form.Item label="员工工卡" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('nfc_id', {
-                rules: [{ required: true, message: '请选择员工NFC' }]
+                rules: [{ required: false, message: '请选择员工NFC' }]
             })(<Select>{nfcOptions}</Select>)}
         </Form.Item>       
         <Form.Item label="密码" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
@@ -43,7 +43,12 @@ function AddStaffForm(props) {
             {getFieldDecorator('phonenumber', {
                 rules: [{ required: true, message: '请输入员工电话号码' }]
             })(<Input></Input>)}
-        </Form.Item>        
+        </Form.Item>   
+        <Form.Item label="员工备注" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('remark', {
+                rules: [{ required: true, message: '请输入员工备注' }]
+            })(<Input></Input>)}
+        </Form.Item>
     </Form>
 }
 

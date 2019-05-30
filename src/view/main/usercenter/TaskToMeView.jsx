@@ -3,7 +3,6 @@ import { Table, Button, message, Tag } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import AddStaffView from './AddTaskView';
 import UpdateStaffView from './UpdateTaskView'
-import AppData from '../../util/AppData'
 import moment from 'moment'
 
 var storage = window.localStorage;
@@ -45,7 +44,7 @@ class TaskToMeView extends Component {
     }
     addStaffOnOk = (newValues) => {
         // console.log(newValues)
-        newValues.from = AppData.username
+        newValues.from = 0
         newValues.to = newValues.to.join(',')
         HttpApi.addTaskInfo(newValues, data => {
             if (data.data.code === 0) {
