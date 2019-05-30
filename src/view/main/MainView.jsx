@@ -78,7 +78,7 @@ class MainView extends Component {
                         mode="inline"
                         onClick={this.onMeunClick}
                     >
-                        <Menu.Item key="首页">
+                        {/* <Menu.Item key="首页">
                             <Icon type="home" />
                             <span>首页</span>
                             <Link to={`${this.props.match.url}`} />
@@ -116,7 +116,7 @@ class MainView extends Component {
                             <Icon type="team" />
                             <span>员工</span>
                             <Link to={`${this.props.match.url}/staff`} />
-                        </Menu.Item> : null}
+                        </Menu.Item> : null} */}
                         <Menu.Item key="任务">
                             <Icon type="user" />
                             <span>任务</span>
@@ -168,7 +168,7 @@ class MainView extends Component {
                             <Route
                                 exact
                                 path={`${this.props.match.path}`}
-                                component={() => (storage.getItem('userinfo') ? <HomePageViewRoot /> : <Redirect to='/' />)}
+                                component={() => (storage.getItem('userinfo') ? <UserModeRoot /> : <Redirect to='/' />)}
                             />
                             <Route
                                 exact

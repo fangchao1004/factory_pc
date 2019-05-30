@@ -126,6 +126,10 @@ class TaskToMeView extends Component {
     render() {
         const columns = [
             {
+                title: '任务主题',
+                dataIndex: 'title',
+            },
+            {
                 title: '当前状态',
                 dataIndex: 'status',
                 align: 'center',
@@ -169,11 +173,7 @@ class TaskToMeView extends Component {
                     }
                     return <div>{record.status === 0 ? (remain_time > 0 ? result : "超时 " + result) : result}</div>
                 }
-            },
-            {
-                title: '任务主题',
-                dataIndex: 'title',
-            },
+            },         
             {
                 title: '操作',
                 dataIndex: 'actions',
