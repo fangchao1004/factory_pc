@@ -69,7 +69,7 @@ class MainView extends Component {
                                     fontSize: 20
                                 }}
                             >
-                                工厂管理平台
+                                信息综合管理平台
               </span>
                         )}
                     </div>

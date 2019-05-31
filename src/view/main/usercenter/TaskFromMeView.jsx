@@ -190,6 +190,13 @@ class TaskFromMeView extends Component {
             {
                 title: '任务主题',
                 dataIndex: 'title',
+            },            
+            {
+                title: '执行人',
+                dataIndex: 'toArrname',
+                render: (text, record) => {
+                    return <div>{text.join(',')}</div>
+                }
             },
             {
                 title: '当前状态',
@@ -237,13 +244,6 @@ class TaskFromMeView extends Component {
                 }
             },
           
-            {
-                title: '执行人',
-                dataIndex: 'toArrname',
-                render: (text, record) => {
-                    return <div>{text.join(',')}</div>
-                }
-            },
             {
                 title: '操作',
                 dataIndex: 'actions',
