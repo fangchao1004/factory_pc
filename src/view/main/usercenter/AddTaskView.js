@@ -31,8 +31,9 @@ function AddTaskForm(props) {
         </Form.Item>
         <Form.Item label="短信通知" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('isMessage', {
+                initialValue: true,
                 rules: [{ required: false, message: '请选择是否短信通知' }]
-            })(<Switch checkedChildren="开" unCheckedChildren="关"/>)}
+            })(<Switch checkedChildren="开" unCheckedChildren="关" defaultChecked={true} />)}
         </Form.Item>
     </Form >
 }
