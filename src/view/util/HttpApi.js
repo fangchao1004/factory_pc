@@ -1,7 +1,6 @@
 import Axios from 'axios';
 
-const Testuri = 'http://192.168.3.119:3009/' ///本地服务器
-// const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
+const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
 class HttpApi {
     /**
      * 上传的模版
