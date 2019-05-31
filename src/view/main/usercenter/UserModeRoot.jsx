@@ -28,16 +28,14 @@ class UserModeRoot extends Component {
 
     render() {
         return (
-            <div>
-                <Card
-                    style={{ width: '100%' }}
-                    tabList={tabListNoTitle}
-                    activeTabKey={this.state.noTitleKey}
-                    onTabChange={(key) => { this.onTabChange(key); }}
-                >
-                    {contentListNoTitle[this.state.noTitleKey]}
-                </Card>
-            </div>
+            <Card bordered={false}
+                style={{ width: '100%' }}
+                tabList={tabListNoTitle}
+                activeTabKey={this.state.noTitleKey}
+                onTabChange={(key) => { this.onTabChange(key); }}
+            >
+                {contentListNoTitle[this.state.noTitleKey]}
+            </Card>
         );
     }
 }

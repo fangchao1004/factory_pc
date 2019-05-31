@@ -13,7 +13,7 @@ var currentTime = moment().toDate().getTime();
  */
 class TaskToMeView extends Component {
 
-    state = { tasks: null, addStaffVisible: false, updateStaffVisible: false, updateStaffData: null }
+    state = { tasks: null, users: null, addStaffVisible: false, updateStaffVisible: false, updateStaffData: null }
 
     componentDidMount() {
         this.getTasksData()
@@ -21,17 +21,28 @@ class TaskToMeView extends Component {
     async getTasksData() {
         userinfo = JSON.parse(storage.getItem("userinfo"))
         let tasksData = await this.getTaskInfo()
-        // console.log("分配给我的任务", tasksData)
+        let usersData = await this.getAllUserInfo()
         this.setState({
-            tasks: tasksData.map(user => {
-                user.key = user.id
-                return user
-            })
+            tasks: tasksData.map(task => {
+                task.key = task.id
+                return task
+            }),
+            users: usersData
         })
     }
     getTaskInfo() {
         return new Promise((resolve, reject) => {
             HttpApi.getTaskInfo({ to: { $like: `%,${userinfo.id},%` } }, data => {
+                if (data.data.code === 0) {
+                    resolve(data.data.data)
+                }
+            })
+        })
+    }
+
+    getAllUserInfo = () => {
+        return new Promise((resolve, reject) => {
+            HttpApi.getUserInfo({}, data => {
                 if (data.data.code === 0) {
                     resolve(data.data.data)
                 }
@@ -128,6 +139,21 @@ class TaskToMeView extends Component {
             {
                 title: '任务主题',
                 dataIndex: 'title',
+            },
+            {
+                title: '分配人',
+                dataIndex: 'from',
+                render: (text, record) => {
+                    var u
+                    this.state.users.some(user => {
+                        if (user.id === text) {
+                            u = user
+                            return true
+                        }
+                        return false
+                    })
+                    return <span>{u.name}</span>
+                }
             },
             {
                 title: '当前状态',

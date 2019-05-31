@@ -31,19 +31,15 @@ class TaskFromMeView extends Component {
             })
         });
         let newArr = allDoThingManIdArr.map((item) => (parseInt(item)))
-        console.log('处理后：', newArr);
         needStaffInfo = await this.getUserInfo(newArr)
-        console.log(needStaffInfo); ///获取到人员信息
 
         for (const item of tasksData) {
             let toArrname = [];
             for (const id of item.toArr) {
-                console.log(id);
                 toArrname.push(this.findUserName(id));
             }
             item.toArrname = toArrname;
         }
-        console.log("tasksData:",tasksData);
         this.setState({
             tasks: tasksData.map(user => {
                 user.key = user.id

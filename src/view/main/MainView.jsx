@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Layout, Menu, Icon, Row, Col, Popover, Button } from 'antd'
 import { Route, Link, Redirect } from 'react-router-dom'
 import logopng from '../../assets/logo.png'
-import HomePageViewRoot from './homePageMode/HomePageViewRoot';
+// import HomePageViewRoot from './homePageMode/HomePageViewRoot';
 import EquipmentModeRoot from './equipmentMode/EquipmentModeRoot'
 import StaffModeRoot from './staffMode/StaffModeRoot'
 import TableModeRoot from './tableMode/TableModeRoot';
@@ -118,7 +118,7 @@ class MainView extends Component {
                             <Link to={`${this.props.match.url}/staff`} />
                         </Menu.Item> : null} */}
                         <Menu.Item key="任务">
-                            <Icon type="user" />
+                            <Icon type="project" />
                             <span>任务</span>
                             <Link to={`${this.props.match.url}/user`} />
                         </Menu.Item>
