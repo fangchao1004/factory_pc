@@ -75,7 +75,7 @@ export default function SecuritySettingView(props) {
             itemLayout="horizontal"
             dataSource={data}
             renderItem={item => (
-                <List.Item actions={[<a onClick={e => { setVisible(true) }}>修改</a>]}>
+                <List.Item actions={[<span style={{color: '#438ef7'}} onClick={e => { setVisible(true) }}>修改</span>]}>
                     <List.Item.Meta
                         title={item.title}
                         description={item.description}

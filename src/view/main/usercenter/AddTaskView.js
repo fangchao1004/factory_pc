@@ -47,6 +47,18 @@ const TaskForm = Form.create({ name: 'staffForm' })(AddTaskForm)
 export default function AddTaskView(props) {
     const staffFormRef = React.useRef(null)
     const [data, setData] = React.useState(null)
+    const [loading, setLoading] = React.useState(false)
+
+    React.useEffect(() => {
+        console.log(props.visible)
+        if (!props.visible) {
+            if (staffFormRef.current) {
+                staffFormRef.current.resetFields()
+            }
+            setLoading(false)
+        }
+    }, [props.visible])
+
     React.useEffect(() => {
         async function initData() {
             const levels = await getLevelData()
@@ -76,14 +88,17 @@ export default function AddTaskView(props) {
         }
         initData()
     }, [])
+
     const handlerOk = () => {
         staffFormRef.current.validateFields((error, values) => {
             if (!error) {
+                setLoading(true)
                 props.onOk(values)
             }
         })
     }
     return <Modal width={700} centered onOk={handlerOk} title="新建任务"
+        confirmLoading={loading}
         onCancel={props.onCancel}
         visible={props.visible}>
         <TaskForm ref={staffFormRef} data={data}></TaskForm>
