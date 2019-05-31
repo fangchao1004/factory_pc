@@ -31,7 +31,7 @@ class TaskToMeView extends Component {
     }
     getTaskInfo() {
         return new Promise((resolve, reject) => {
-            HttpApi.getTaskInfo({ to: { $like: `%,${userinfo.user_id},%` } }, data => {
+            HttpApi.getTaskInfo({ to: { $like: `%,${userinfo.id},%` } }, data => {
                 if (data.data.code === 0) {
                     resolve(data.data.data)
                 }

@@ -8,6 +8,8 @@ import moment from 'moment'
 var storage = window.localStorage;
 var userinfo;
 var currentTime = moment().toDate().getTime();
+var allDoThingManIdArr = []; /////所有的执行人id 数组  去重复的
+var needStaffInfo=[];
 /**
  * 我发起的任务 界面
  */
@@ -17,11 +19,31 @@ class TaskFromMeView extends Component {
 
     componentDidMount() {
         this.getTasksData()
+        allDoThingManIdArr.length = 0;
     }
     async getTasksData() {
         userinfo = JSON.parse(storage.getItem("userinfo"))
         let tasksData = await this.getTaskInfo()
-        // console.log('我发起的任务：', tasksData)
+        tasksData.forEach(element => {
+            element.toArr = element.to.substring(1, element.to.length - 1).split(','); ///字符串元素数字
+            element.toArr.forEach((oneId) => {
+                if (allDoThingManIdArr.indexOf(oneId) === -1) { allDoThingManIdArr.push(oneId) }
+            })
+        });
+        let newArr = allDoThingManIdArr.map((item) => (parseInt(item)))
+        console.log('处理后：', newArr);
+        needStaffInfo = await this.getUserInfo(newArr)
+        console.log(needStaffInfo); ///获取到人员信息
+
+        for (const item of tasksData) {
+            let toArrname = [];
+            for (const id of item.toArr) {
+                console.log(id);
+                toArrname.push(this.findUserName(id));
+            }
+            item.toArrname = toArrname;
+        }
+        console.log("tasksData:",tasksData);
         this.setState({
             tasks: tasksData.map(user => {
                 user.key = user.id
@@ -29,9 +51,32 @@ class TaskFromMeView extends Component {
             }).reverse()
         })
     }
-    getTaskInfo() {
+
+    findUserName=(userid)=>{
+        let username = '';
+        needStaffInfo.forEach((item)=>{
+            if(item.id===parseInt(userid)){
+                username = item.name
+            }
+        })
+        return username;
+    }
+
+    getUserInfo = (userArr) => {
         return new Promise((resolve, reject) => {
-            HttpApi.getTaskInfo({ from: userinfo.user_id }, data => {
+            let result = [];
+            HttpApi.getUserInfo({ id: userArr }, data => {
+                if (data.data.code === 0) {
+                    result = data.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
+
+    getTaskInfo = () => {
+        return new Promise((resolve, reject) => {
+            HttpApi.getTaskInfo({ from: userinfo.id }, data => {
                 if (data.data.code === 0) {
                     resolve(data.data.data)
                 }
@@ -39,7 +84,7 @@ class TaskFromMeView extends Component {
         })
     }
 
-    addStaff() {
+    addStaff = () => {
         this.setState({ addStaffVisible: true })
     }
     addStaffOnOk = (newValues) => {
@@ -51,7 +96,7 @@ class TaskFromMeView extends Component {
             }
         })
         newValues.status = 0;
-        newValues.from = userinfo.user_id
+        newValues.from = userinfo.id
         newValues.to = "," + toIds.join(',') + ","
         newValues.overTime = newValues.overTime.endOf('day').valueOf()
         newValues.isMessage = newValues.isMessage ? 1 : 0;
@@ -192,6 +237,13 @@ class TaskFromMeView extends Component {
                 }
             },
           
+            {
+                title: '执行人',
+                dataIndex: 'toArrname',
+                render: (text, record) => {
+                    return <div>{text.join(',')}</div>
+                }
+            },
             {
                 title: '操作',
                 dataIndex: 'actions',
