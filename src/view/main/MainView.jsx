@@ -21,12 +21,12 @@ class MainView extends Component {
     constructor(props) {
         super(props)
         const userinfo = window.localStorage.getItem('userinfo')
-        console.log(userinfo)
+        // console.log(userinfo)
         this.state = {
             collapsed: false,
             isAdmin: userinfo && JSON.parse(userinfo).isadmin === 1
         }
-        console.log(this.state.isAdmin)
+        // console.log(this.state.isAdmin)
     }
     toggle = () => {
         this.setState({

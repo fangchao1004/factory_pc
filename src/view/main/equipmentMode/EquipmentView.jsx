@@ -44,9 +44,9 @@ class EquipmentView extends Component {
             device_type_data_filter.push({ text: item.name, value: item.id })
         })
         device_data = await this.getDeviceData();
-        console.log('device_data', device_data)
+        // console.log('device_data', device_data)
         let newData = await this.transformConstruct();
-        console.log('newData', newData)
+        // console.log('newData', newData)
         this.setState({
             dataSource: newData
         })
@@ -110,7 +110,7 @@ class EquipmentView extends Component {
             item.area_name = await this.findAreaName(item)
             item.nfc_name = await this.findNfcName(item)
         }
-        console.log('处理后的：', device_data);
+        // console.log('处理后的：', device_data);
         return device_data
     }
     findTypeName = (deviceItem) => {
@@ -154,8 +154,7 @@ class EquipmentView extends Component {
             let result = '';
             user_data.forEach((item) => {
                 if (item.id === recordItem.user_id) {
-                    resolve(item.username)
-                    result = item.username
+                    result = {username:item.username,name:item.name}
                 }
             })
             resolve(result)
@@ -177,7 +176,7 @@ class EquipmentView extends Component {
     }
     addEquipmentOk = (newValues) => {
         newValues.status = 3 // 默认设置设备为 待检 状态
-        console.log(newValues)
+        // console.log(newValues)
         HttpApi.addDeviceInfo(newValues, data => {
             if (data.data.code === 0) {
                 this.setState({ addEquipmentVisible: false })
@@ -250,7 +249,6 @@ class EquipmentView extends Component {
                 align: 'center',
                 onFilter: (value, record) => record.status === value,
                 render: (text, record) => {
-                    console.log(record);
                     let str = '';
                     let strColor = '#555555'
                     if (text === 1) { str = '正常'; strColor = '#00CC00' }
@@ -346,8 +344,10 @@ class EquipmentView extends Component {
                 return b.id - a.id
             })
             for (let item of resultArr) {
+                let userInfo = await this.findUserName(item)
                 item.key = item.id + '';
-                item.username = await this.findUserName(item);
+                item.username = userInfo.username;
+                item.name = userInfo.name;
                 item.devicename = await this.findDeviceName(item)
             }
             this.setState({
@@ -368,7 +368,6 @@ class EquipmentView extends Component {
         })
     }
     openDrawer2 = (record) => {
-        console.log(record);
         let titleObj = {};
         titleObj.key = '0';
         titleObj.title_name = '表头';
@@ -415,10 +414,10 @@ class EquipmentView extends Component {
             },
             {
                 title: '报告人',
-                dataIndex: 'username',
-                render: (text, record) => (
-                    <div>{text}</div>
-                )
+                dataIndex: 'name',
+                render: (text, record) => {
+                    return <div>{text}</div>
+                }
             },
             // {
             //     title: '操作',
