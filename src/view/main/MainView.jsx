@@ -83,10 +83,6 @@ class MainView extends Component {
                             <span>首页</span>
                             <Link to={`${this.props.match.url}`} />
                         </Menu.Item>
-                        <Menu.Item>
-                            <Icon type="hdd" />
-                            <span>设备</span>
-                        </Menu.Item>
                         <SubMenu
                             key="巡检平台"
                             title={
