@@ -1,7 +1,7 @@
 import Axios from 'axios';
 
-// export const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
-export const Testuri = 'http://192.168.3.119:3009/'///小木服务器数据库
+export const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
+// export const Testuri = 'http://192.168.3.119:3009/'///小木服务器数据库
 class HttpApi {
     /**
      * 上传的模版
