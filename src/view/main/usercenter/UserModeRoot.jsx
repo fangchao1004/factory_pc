@@ -28,7 +28,8 @@ class UserModeRoot extends Component {
 
     render() {
         return (
-            <Card bordered={false}
+            <Card
+                bordered={false}
                 style={{ width: '100%' }}
                 tabList={tabListNoTitle}
                 activeTabKey={this.state.noTitleKey}

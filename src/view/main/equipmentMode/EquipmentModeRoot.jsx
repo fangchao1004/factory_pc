@@ -43,18 +43,17 @@ class EquipmentModeRoot extends Component {
             tabs = tabListNoTitle
         }
 
-            return (
-                <div>
-                    <Card
-                        style={{ width: '100%' }}
-                        tabList={tabs}
-                        activeTabKey={this.state.noTitleKey}
-                        onTabChange={(key) => { this.onTabChange(key); }}
-                    >
-                        {contentListNoTitle[this.state.noTitleKey]}
-                    </Card>
-                </div>
-            );
+        return (
+            <Card
+                bordered={false}
+                style={{ width: '100%' }}
+                tabList={tabs}
+                activeTabKey={this.state.noTitleKey}
+                onTabChange={(key) => { this.onTabChange(key); }}
+            >
+                {contentListNoTitle[this.state.noTitleKey]}
+            </Card>
+        );
     }
 }
 
