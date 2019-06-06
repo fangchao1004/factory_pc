@@ -208,7 +208,7 @@ export default class BugView extends Component {
                     footer={null}
                     width={500}
                 >
-                    <img src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} style={{ width: 450, height: 600 }} />
+                    <img alt='' src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} style={{ width: 450, height: 600 }} />
                 </Modal>
             </div>
         );
