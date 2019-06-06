@@ -202,13 +202,13 @@ class EquipmentView extends Component {
     }
     render() {
         const columns = [
-            {
-                title: '编号',
-                dataIndex: 'id',
-                render: (text, record) => (
-                    <div>{text}</div>
-                )
-            },
+            // {
+            //     title: '编号',
+            //     dataIndex: 'id',
+            //     render: (text, record) => (
+            //         <div>{text}</div>
+            //     )
+            // },
             {
                 title: '设备名称',
                 dataIndex: 'name',
