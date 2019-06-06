@@ -5,8 +5,10 @@ import SampleViewTool from '../../util/SampleViewTool';
 import HttpApi from '../../util/HttpApi'
 const Option = Select.Option;
 
-const optionsData = [{ "value": "1", "text": "文本输入框" }, { "value": "2", "text": "数字输入框" }, { "value": "3", "text": "单选" },
-{ "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" }, { "value": "7", "text": "表单类型" }];
+// const optionsData = [{ "value": "1", "text": "文本输入框" }, { "value": "2", "text": "数字输入框" }, { "value": "3", "text": "单选" },
+// { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" }, { "value": "7", "text": "表单类型" }];
+
+const optionsData = [{ "value": "4", "text": "多选" }, { "value": "7", "text": "表单类型" }];
 ////测试数据， 实际数据要从设备类型表device_type表中获取
 // var titleData = [{ "value": "1", "text": "水表报告单" }, { "value": "2", "text": "电表报告单" }, { "value": "3", "text": "锅炉报告单" }]
 // var titleData = [];
@@ -26,16 +28,11 @@ export default class EditableTable extends Component {
         title_name: '表头',
         type_id: '7',
         default_values: '',
-      }, {
-        key: '1',
-        title_name: '设备基本状态',
-        type_id: '3',
-        default_values: '正常/故障',
       }],
-      count: "2",
+      count: "1",
       modalvisible: false,
       sampleView: null,
-      haveExistSampleIDs:[]
+      haveExistSampleIDs: []
     };
   }
 
@@ -66,10 +63,10 @@ export default class EditableTable extends Component {
         // console.log(res.data.data);
         let sampleIdArr = [];
         res.data.data.forEach(element => {
-          sampleIdArr.push(element.device_type_id+"")
+          sampleIdArr.push(element.device_type_id + "")
         });
         this.setState({
-          haveExistSampleIDs:sampleIdArr
+          haveExistSampleIDs: sampleIdArr
         })
       }
     })
@@ -128,7 +125,7 @@ export default class EditableTable extends Component {
           let Options = [];
           this.state.titleData.forEach((item) => {
             // console.log(item);
-            Options.push(<Option key={item.value} disabled={this.state.haveExistSampleIDs.indexOf(item.value)!==-1} value={item.value}>{item.text}</Option>)
+            Options.push(<Option key={item.value} disabled={this.state.haveExistSampleIDs.indexOf(item.value) !== -1} value={item.value}>{item.text}</Option>)
           })
           return (
             record.type_id === '7' ? ///标题--不可修改---是个选项
@@ -187,7 +184,7 @@ export default class EditableTable extends Component {
         />
         <Modal
           // confirmLoading={this.state.modalvisible}
-          centered 
+          centered
           width={450}
           hight={500}
           title={<div><span>效果预览</span><span style={{ fontSize: 10, color: '#AAAAAA', marginLeft: 40 }}>实际效果以移动端显示为准</span></div>}
@@ -219,8 +216,8 @@ export default class EditableTable extends Component {
     const { count, dataSource } = this.state;
     const newData = {
       key: count,
-      title_name: `标题${parseInt(count) + 1}`,
-      type_id: "1",
+      title_name: `标题${parseInt(count)}`,
+      type_id: "4",
       default_values: '',
     };
     this.setState({

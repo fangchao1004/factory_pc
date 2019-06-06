@@ -420,16 +420,16 @@ class EquipmentView extends Component {
                     <div>{text}</div>
                 )
             },
-            {
-                title: '操作',
-                width: 75,
-                dataIndex: 'operation',
-                render: (text, record) => {
-                    return (
-                        <Button style={{ marginLeft: 10 }} size="small" type='primary' onClick={() => this.openDrawer2(record)} >详情</Button>
-                    )
-                },
-            }
+            // {
+            //     title: '操作',
+            //     width: 75,
+            //     dataIndex: 'operation',
+            //     render: (text, record) => {
+            //         return (
+            //             <Button style={{ marginLeft: 10 }} size="small" type='primary' onClick={() => this.openDrawer2(record)} >详情</Button>
+            //         )
+            //     },
+            // }
         ]
         return <Table
             bordered
