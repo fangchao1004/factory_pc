@@ -165,9 +165,9 @@ export default class BugView extends Component {
                 }
             },
             {
-                key: 'content', dataIndex: 'content', title: '内容', render: (text) => {
+                key: 'content', dataIndex: 'content', title: '内容', render: (text,record) => {
                     let obj = JSON.parse(text);
-                    return <div><div>{obj.select}</div><div>{obj.text}</div></div>
+                    return <div><div style={{color:'#438ef7'}}>{record.title_name}</div><div>{obj.select}</div><div>{obj.text}</div></div>
                 }
             },
             {
