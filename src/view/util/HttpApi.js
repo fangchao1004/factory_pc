@@ -1,7 +1,7 @@
 import Axios from 'axios';
 
-export const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
-// export const Testuri = 'http://192.168.3.119:3009/'///小木服务器数据库
+// export const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
+export const Testuri = 'http://127.0.0.1:3009/'///小木服务器数据库
 class HttpApi {
     /**
      * 上传的模版
@@ -156,7 +156,6 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
-
     static addUserLevel(params, f1, f2) {
         Axios.post(Testuri + 'insert_level', params).then(res => {
             if (f1) { f1(res) }
@@ -180,6 +179,34 @@ class HttpApi {
     }
     static updateUserLevel(params, f1, f2) {
         Axios.post(Testuri + 'update_level', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static addUserMajor(params, f1, f2) {
+        Axios.post(Testuri + 'insert_major', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static getUserMajor(params, f1, f2) {
+        Axios.post(Testuri + 'find_major', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static removeUserMajor(params, f1, f2) {
+        Axios.post(Testuri + 'remove_major', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static updateUserMajor(params, f1, f2) {
+        Axios.post(Testuri + 'update_major', params).then(res => {
             if (f1) { f1(res) }
         }).catch(res => {
             if (f2) { f2(res) }
