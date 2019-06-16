@@ -6,7 +6,7 @@ import UpdateStaffView from './UpdateStaffView';
 
 class StaffView extends Component {
 
-    state = { levels: null, nfcs: null, users: null, addStaffVisible: false, updateStaffVisible: false, updateStaffData: null}
+    state = { levels: null, nfcs: null, users: null, addStaffVisible: false, updateStaffVisible: false, updateStaffData: null }
 
     componentDidMount() {
         this.getUsersData()
@@ -55,6 +55,7 @@ class StaffView extends Component {
         this.setState({ addStaffVisible: true })
     }
     addStaffOnOk = (newValues) => {
+        newValues.permission = newValues.permission.join(',')
         HttpApi.addUserInfo(newValues, data => {
             if (data.data.code === 0) {
                 this.setState({ addStaffVisible: false })
@@ -69,11 +70,12 @@ class StaffView extends Component {
         this.setState({ addStaffVisible: false })
     }
     updateStaff(record) {
-        this.setState({ updateStaffVisible: true, updateStaffData: record})
+        this.setState({ updateStaffVisible: true, updateStaffData: record })
     }
     updateStaffOnOk = (newValues) => {
         newValues.isadmin = newValues.isadmin ? 1 : 0
-        HttpApi.updateUserInfo({query: {id: this.state.updateStaffData.id}, update: newValues}, data => {
+        newValues.permission = newValues.permission.join(',')
+        HttpApi.updateUserInfo({ query: { id: this.state.updateStaffData.id }, update: newValues }, data => {
             if (data.data.code === 0) {
                 this.setState({ updateStaffVisible: false })
                 this.getUsersData()
@@ -99,13 +101,6 @@ class StaffView extends Component {
 
     render() {
         const columns = [
-            {
-                title: '编号',
-                dataIndex: 'id',
-                render: (text, record) => (
-                    <div>{text}</div>
-                )
-            },
             {
                 title: '登陆账户',
                 dataIndex: 'username',
@@ -136,43 +131,43 @@ class StaffView extends Component {
                     return <div>{levelName}</div>
                 }
             },
-            {
-                title: '员工工卡',
-                dataIndex: 'nfc_id',
-                render: (text) => {
-                    var nfcName
-                    this.state.nfcs.some(nfc => {
-                        if (nfc.id === text) {
-                            nfcName = nfc.name
-                            return true
-                        } else {
-                            return false
-                        }
-                    })
-                    return <div>{nfcName}</div>
-                }
-            },
+            // {
+            //     title: '员工工卡',
+            //     dataIndex: 'nfc_id',
+            //     render: (text) => {
+            //         var nfcName
+            //         this.state.nfcs.some(nfc => {
+            //             if (nfc.id === text) {
+            //                 nfcName = nfc.name
+            //                 return true
+            //             } else {
+            //                 return false
+            //             }
+            //         })
+            //         return <div>{nfcName}</div>
+            //     }
+            // },
             {
                 title: '密码',
                 dataIndex: 'password',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
-            },               
+            },
             {
                 title: '联系方式',
                 dataIndex: 'phonenumber',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
-            },    
+            },
             {
                 title: '备注',
                 dataIndex: 'remark',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
-            },           
+            },
             {
                 title: '操作',
                 dataIndex: 'actions',
@@ -203,8 +198,8 @@ class StaffView extends Component {
                     columns={columns}
                 />
                 <AddStaffView onOk={this.addStaffOnOk} onCancel={this.addStaffOnCancel} visible={this.state.addStaffVisible} />
-                <UpdateStaffView staff={this.state.updateStaffData} onOk={this.updateStaffOnOk} 
-                onCancel={this.updateStaffOnCancel} visible={this.state.updateStaffVisible} />
+                <UpdateStaffView staff={this.state.updateStaffData} onOk={this.updateStaffOnOk}
+                    onCancel={this.updateStaffOnCancel} visible={this.state.updateStaffVisible} />
             </div>
         )
     }

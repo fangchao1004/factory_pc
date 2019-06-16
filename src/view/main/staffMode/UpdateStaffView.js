@@ -2,6 +2,10 @@ import React from 'react'
 import { Modal, Form, Input, Select, Switch } from 'antd'
 import HttpApi from '../../util/HttpApi'
 
+const permissionOptions = [{ name: '发布权限', value: 0 }, { name: '维修权限', value: 1 }, { name: '审查权限', value: 2 }].map(
+    permission => <Select.Option value={permission.value} key={permission.value}>{permission.name}</Select.Option>
+)
+
 /**
  * 更新员工的表单界面
  *
@@ -31,12 +35,6 @@ function UpdateStaffForm(props) {
                 rules: [{ required: true, message: '请选择员工部门' }]
             })(<Select>{levelOptions}</Select>)}
         </Form.Item>
-        <Form.Item label="员工工卡" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('nfc_id', {
-                initialValue: props.staff.nfc_id,
-                rules: [{ required: true, message: '请选择员工工卡' }]
-            })(<Select>{nfcOptions}</Select>)}
-        </Form.Item>
         <Form.Item label="密码" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('password', {
                 initialValue: props.staff.password,
@@ -47,6 +45,23 @@ function UpdateStaffForm(props) {
             {getFieldDecorator('phonenumber', {
                 initialValue: props.staff.phonenumber,
                 rules: [{ required: true, message: '请输入员工联系方式' }]
+            })(<Input></Input>)}
+        </Form.Item>
+        <Form.Item label="员工工卡" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('nfc_id', {
+                initialValue: props.staff.nfc_id,
+                rules: [{ required: false, message: '请选择员工工卡' }]
+            })(<Select>{nfcOptions}</Select>)}
+        </Form.Item>
+        <Form.Item label="员工权限" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('permission', {
+                initialValue: props.staff.permission && props.staff.permission.split(',').map(permission => parseInt(permission)),
+                rules: [{ required: false, message: '请选择员工权限' }]
+            })(<Select mode="multiple">{permissionOptions}</Select>)}
+        </Form.Item>
+        <Form.Item label="员工备注" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('remark', {
+                rules: [{ required: false, message: '请输入员工备注' }]
             })(<Input></Input>)}
         </Form.Item>
         <Form.Item label="管理员" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
