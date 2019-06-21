@@ -1,8 +1,21 @@
 import Axios from 'axios';
 
-// export const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
-export const Testuri = 'http://127.0.0.1:3009/'///小木服务器数据库
+export const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
+// export const Testuri = 'http://127.0.0.1:3009/'///小木服务器数据库
 class HttpApi {
+    /**
+     * obs操作---慎用
+     * @param {*} params 
+     * @param {*} f1 
+     * @param {*} f2 
+     */
+    static obs(params, f1, f2) {
+        Axios.post(Testuri + 'obs', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
     /**
      * 上传的模版
      * @param {*} params 

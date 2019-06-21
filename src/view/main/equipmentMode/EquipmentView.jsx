@@ -4,6 +4,7 @@ import HttpApi from '../../util/HttpApi';
 import RecordViewTool from '../../util/RecordViewTool';
 import moment from 'moment';
 import AddEquipmentView from './AddEquipmentView';
+import PieViewOfOneDeStus from './PieViewOfOneDeStus';
 
 var nfc_data = [];
 var area_data = [];
@@ -25,7 +26,8 @@ class EquipmentView extends Component {
             deviceRecords: [],
             recordView: null,
             addEquipmentVisible: false,
-            isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin
+            isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin,
+            pieDeviceId: null,
         }
     }
     async componentDidMount() {
@@ -154,7 +156,7 @@ class EquipmentView extends Component {
             let result = '';
             user_data.forEach((item) => {
                 if (item.id === recordItem.user_id) {
-                    result = {username:item.username,name:item.name}
+                    result = { username: item.username, name: item.name }
                 }
             })
             resolve(result)
@@ -320,7 +322,8 @@ class EquipmentView extends Component {
                     width={600}
                 >
                     {this.renderDeviceRecordsView()}
-                    <Drawer
+                    {this.renderDevicePieView()}
+                    {/* <Drawer
                         title="当次报表"
                         placement="left"
                         width={520}
@@ -329,7 +332,7 @@ class EquipmentView extends Component {
                         visible={this.state.drawerVisible2}
                     >
                         {this.state.recordView}
-                    </Drawer>
+                    </Drawer> */}
                 </Drawer>
                 <AddEquipmentView visible={this.state.addEquipmentVisible} onOk={this.addEquipmentOk} onCancel={this.addEquipmentCancel} />
             </div>
@@ -337,7 +340,7 @@ class EquipmentView extends Component {
     }
 
     openModalHandler = (record) => {
-        // console.log(record);
+        // console.log("record:",record);
         HttpApi.getRecordInfo({ device_id: record.id }, async (res) => {
             let resultArr = res.data.data;
             resultArr.sort(function (a, b) {
@@ -350,9 +353,11 @@ class EquipmentView extends Component {
                 item.name = userInfo.name;
                 item.devicename = await this.findDeviceName(item)
             }
+            ///获取了当前的设备id
             this.setState({
+                pieDeviceId: record.id,
                 drawerVisible1: true,
-                deviceRecords: resultArr
+                deviceRecords: resultArr,
             })
         })
     }
@@ -434,7 +439,12 @@ class EquipmentView extends Component {
             bordered
             dataSource={this.state.deviceRecords}
             columns={columns}
+            pagination={{ pageSize: 5 }}
         />
+    }
+
+    renderDevicePieView = () => {
+        return <PieViewOfOneDeStus pieDeviceId={this.state.pieDeviceId} isShow={this.state.drawerVisible1} />
     }
 }
 
