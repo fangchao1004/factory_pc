@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Layout, Menu, Icon, Row, Col, Popover, Button } from 'antd'
 import { Route, Link, Redirect } from 'react-router-dom'
 import logopng from '../../assets/logo.png'
-// import HomePageViewRoot from './homePageMode/HomePageViewRoot';
+import HomePageViewRoot from './homePageMode/HomePageViewRoot';
 import EquipmentModeRoot from './equipmentMode/EquipmentModeRoot'
 import StaffModeRoot from './staffMode/StaffModeRoot'
 import TableModeRoot from './tableMode/TableModeRoot';
@@ -164,7 +164,7 @@ class MainView extends Component {
                             <Route
                                 exact
                                 path={`${this.props.match.path}`}
-                                component={() => (storage.getItem('userinfo') ? <UserModeRoot /> : <Redirect to='/' />)}
+                                component={() => (storage.getItem('userinfo') ? <HomePageViewRoot /> : <Redirect to='/' />)}
                             />
                             <Route
                                 exact

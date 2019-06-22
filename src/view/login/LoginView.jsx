@@ -23,9 +23,9 @@ export default class LoginView extends React.Component {
         HttpApi.getUserInfo(values, doc => {
           if (doc.data.code === 0 && doc.data.data.length > 0) {
             storage.clear();
-            console.log(doc.data.data[0])
+            // console.log(doc.data.data[0])
             storage['userinfo'] = JSON.stringify(doc.data.data[0]);
-            console.log("获取storage", storage.getItem('userinfo'));
+            // console.log("获取storage", storage.getItem('userinfo'));
             this.props.history.push('/mainView')
           } else {
             message.error("用户名/密码错误")

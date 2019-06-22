@@ -177,7 +177,7 @@ class EquipmentView extends Component {
         this.setState({ addEquipmentVisible: true })
     }
     addEquipmentOk = (newValues) => {
-        newValues.status = 3 // 默认设置设备为 待检 状态
+        newValues.status = 1 // 默认设置设备为 正常 状态
         // console.log(newValues)
         HttpApi.addDeviceInfo(newValues, data => {
             if (data.data.code === 0) {

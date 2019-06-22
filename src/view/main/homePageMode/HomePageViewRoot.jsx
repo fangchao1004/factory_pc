@@ -4,7 +4,6 @@ import LineChartView from './LineChartView'
 import { Row, Col } from 'antd'
 import HttpApi from '../../util/HttpApi'
 
-var allDeviceTypes = [];
 class HomePageViewRoot extends Component {
     constructor(props) {
         super(props);
@@ -16,67 +15,74 @@ class HomePageViewRoot extends Component {
         this.init();
     }
     init = async () => {
-        let all_devices = await this.getDevicesData();
-        allDeviceTypes = await this.getDeviceTypesData();
+        ///获取所有设备的当前的状态统计信息。
+        let allDeviceStatusCount = await this.getAllDeviceStatusCount();///获取所有设备的 状态统计 信息
+        // console.log(allDeviceStatusCount);////[{device_status: 1, status_count: 3},{device_status: 2, status_count: 4}]
+        let allTodayRecordInfo = await this.getEveryUserRecordToday(); ///获取当日 所有设备的巡检情况（针对参加巡检的人员的分组）
+        // console.log('allTodayRecordInfo:', allTodayRecordInfo); ////这里的数据很有指导性---如果后期修改要看这个数据结构
         let b = {};
-        for (let item of all_devices) {
-            if (b.hasOwnProperty(item.type_id)) {
-                b[item.type_id].push(item)
-            } else {
-                b[item.type_id] = [item]
-            }
-            item.type_name = await this.findTypeName(item)
+        for (let item of allTodayRecordInfo) {
+            if (b.hasOwnProperty(item.user_name)) { b[item.user_name].push(item) }
+            else { b[item.user_name] = [item] }
         }
-        let group_data_by_typeId = [{ device_type_id: 0, device_Info: all_devices }]; /// device_type_id===0代表的数所有类型的设备总数
-        for (var i in b) {
-            // console.log("设备类型:",i,"设备数量:",b[i].length,'设备的数据:',b[i])
-            group_data_by_typeId.push({
-                device_type_id: parseInt(i),
-                device_Info: b[i]
-            });
-        }
+        let result = this.changeDataConstruct(b);////进行数据结构的改变统计
+        let linkAll = [{ user_name: '所有设备', count_data: allDeviceStatusCount }, ...result]
+        // console.log(linkAll);////如果后期看不懂，要看这里的数据结构
         this.setState({
-            groupData: group_data_by_typeId,
+            groupData: linkAll
         })
     }
-    getDevicesData = () => {
-        let p = new Promise((resolve, reject) => {
-            HttpApi.getDeviceInfo({}, (res) => {
+    changeDataConstruct = (v) => {
+        let finallyResult = [];
+        for (const key in v) {
+            // console.log(key, v[key]);//// 员工A  [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+            ///对 v[key] 这个数组进行遍历
+            let tempArr = JSON.parse(JSON.stringify(v[key]));
+            let result_arr = [{ device_status: 1, status_count: 0 }, { device_status: 2, status_count: 0 }, { device_status: null, status_count: 0 }]
+            tempArr.forEach((item) => {
+                if (item.device_status === 1) {
+                    result_arr[0].status_count = result_arr[0].status_count + 1
+                } else if (item.device_status === 2) {
+                    result_arr[1].status_count = result_arr[1].status_count + 1
+                } else {
+                    result_arr[2].status_count = result_arr[2].status_count + 1
+                }
+            })
+            // console.log(key, result_arr);
+            finallyResult.push({ 'user_name': key, 'count_data': result_arr });
+        }
+        return finallyResult
+    }
+    getAllDeviceStatusCount = () => {
+        let sqlText = 'select devices.status as device_status,count(devices.status) as status_count from devices group by devices.status'
+        return new Promise((resolve, reject) => {
+            HttpApi.obs({ sql: sqlText }, (res) => {
+                let result = [];
                 if (res.data.code === 0) {
-                    resolve(res.data.data);
+                    result = res.data.data;
                 }
+                resolve(result);
             })
         })
-        return p;
     }
-    getDeviceTypesData = () => {
-        let p = new Promise((resolve, reject) => {
-            HttpApi.getDeviceTypeInfo({}, (res) => {
+    getEveryUserRecordToday = () => {
+        return new Promise((resolve, reject) => {
+            HttpApi.getEveryUserRecordToday({}, (res) => {
+                let result = [];
                 if (res.data.code === 0) {
-                    resolve(res.data.data);
+                    result = res.data.data;
                 }
+                resolve(result);
             })
         })
-        return p;
-    }
-    findTypeName = (deviceItem) => {
-        let result = '';
-        let p = new Promise((resolve, reject) => {
-            allDeviceTypes.forEach((item) => {
-                if (item.id === deviceItem.type_id) {
-                    result = item.name;
-                }
-            })
-            resolve(result)
-        })
-        return p;
     }
     renderPieView = () => {
         let cellsArr = [];
         let copy_data = JSON.parse(JSON.stringify(this.state.groupData))
         if (copy_data.length === 0) { return null }
         copy_data.forEach((item, index) => {
-            let dataObj = { datasouce: item.device_Info, isAll: item.device_type_id === 0 }
+            // console.log(item);
+            let dataObj = { datasouce: item.count_data, title: item.user_name }
             cellsArr.push(
                 <Col span={8} key={index}>
                     <PieView data={dataObj} />
@@ -88,7 +94,7 @@ class HomePageViewRoot extends Component {
 
     render() {
         return (
-            <div style={{ marginTop: -16 }}>
+            <div style={{ marginTop: -16, paddingLeft: 10, paddingRight: 10 }}>
                 <Row gutter={5}>
                     {this.renderPieView()}
                 </Row>

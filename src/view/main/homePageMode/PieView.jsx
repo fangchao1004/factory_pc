@@ -15,41 +15,25 @@ export default class PieView extends React.Component {
     this.state = {
       data: [],
       titleStr: '',
+      allCount: ''
     }
   }
   componentDidMount = () => {
     this.transConstruct(this.props.data);
   }
   transConstruct = (data) => {
-    let allCount = data.datasouce.length;
-    let b = {};
-    data.datasouce.forEach(item => {
-      if (b.hasOwnProperty(item.status)) {
-        b[item.status].push(item)
-      } else {
-        b[item.status] = [item]
+    // console.log('获取原始数据：',data.datasouce,'对应的标题：',data.title);
+    let newArr = [];
+    data.datasouce.forEach((ele) => {
+      if (ele.status_count > 0) {
+        let stautsTxt = '待检'
+        if (ele.device_status === 1) { stautsTxt = '正常' }
+        else if (ele.device_status === 2) { stautsTxt = '故障' }
+        newArr.push({ item: stautsTxt, count: ele.status_count });
       }
     })
-    let titleStr = '';
-    let group_data_by_status = [];
-    for (var i in b) {
-      // console.log("设备状态:",i,"设备数量:",b[i].length)
-      let statusStr = '';
-      if (i === "1") {
-        statusStr = '正常'
-      } else if (i === "2") {
-        statusStr = '故障'
-      } else if (i === "3") {
-        statusStr = '待检'
-      }
-      titleStr = data.isAll ? "设备总数" : b[i][0].type_name+"数" ///获取表单的类型名
-      group_data_by_status.push({ item: statusStr, count: b[i].length })
-    }
-    this.setState({
-      data: group_data_by_status,
-      allCount: allCount,
-      titleStr: titleStr,
-    })
+    // console.log('处理后的数据：', newArr);
+    this.setState({ data: newArr, titleStr: data.title })
   }
   render() {
     const { DataView } = DataSet;
@@ -72,7 +56,7 @@ export default class PieView extends React.Component {
       }
     };
     return (
-      <div style={{ backgroundColor: '#F0F2F5', height: 280, marginTop: 16,borderRadius:5 }}>
+      <div style={{ backgroundColor: '#F0F2F5', height: 280, marginTop: 16, borderRadius: 5 }}>
         <Chart
           height={280}
           data={dv}
@@ -115,8 +99,9 @@ export default class PieView extends React.Component {
             <Label
               content="percent"
               formatter={(val, item) => {
-                let floatVal = parseFloat(val.substring(0, val.length - 1)).toFixed(1)
-                return item.point.item + ": " + floatVal + '%';
+                // let floatVal = parseFloat(val.substring(0, val.length - 1)).toFixed(1)
+                // return item.point.item + ": " + floatVal + '%';
+                return item.point.item + ": " + item.point.count + '台';
               }}
             />
           </Geom>

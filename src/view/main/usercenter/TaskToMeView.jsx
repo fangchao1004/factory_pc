@@ -106,7 +106,7 @@ class TaskToMeView extends Component {
         let leaderInfo = await this.getUserInfo(taskInfo.from);
         let param = { phonenumber: leaderInfo.phonenumber, name: leaderInfo.name, name_to: userinfo.name }
         HttpApi.sendMessageToLeader(param, (res) => {
-            console.log(res);
+            // console.log(res);
         })
     }
     getUserInfo = (userid) => {

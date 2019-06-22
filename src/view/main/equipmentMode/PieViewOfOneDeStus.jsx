@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { G2, Chart, Geom, Axis, Tooltip, Coord, Label, Legend, View, Guide, Shape, Facet, Util } from "bizcharts";
+import { Chart, Geom, Tooltip, Coord, Label } from "bizcharts";
 import DataSet from "@antv/data-set";
 import { Radio, Popover, Icon, Empty } from 'antd'
 import moment from 'moment'
@@ -65,7 +65,7 @@ class PieViewOfOneDeStus extends Component {
                 if (res.data.code === 0) {
                     result = res.data.data;
                 } else {
-                    console.log(res.data.data);
+                    // console.log(res.data.data);
                 }
                 resolve(result);
             })
@@ -123,7 +123,7 @@ class PieViewOfOneDeStus extends Component {
                         height={320}
                         data={dv}
                         scale={cols}
-                        padding={[30,0,30,50]}
+                        padding={[30, 0, 30, 50]}
                     >
                         <Coord type="theta" radius={1} />
                         <Tooltip
@@ -156,7 +156,7 @@ class PieViewOfOneDeStus extends Component {
                                 }}
                             />
                         </Geom>
-                    </Chart> : <Empty style={{marginTop:50}}/>}
+                    </Chart> : <Empty style={{ marginTop: 50 }} />}
             </div>
         );
     }

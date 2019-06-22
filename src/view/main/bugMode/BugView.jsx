@@ -28,7 +28,7 @@ export default class BugView extends Component {
         usersInfoArr = await this.getUserInfo();
         areaInfoArr = await this.getAreaInfo();
         let finallyData = this.linkTwoData(bugsInfo);
-        console.log(finallyData);
+        // console.log(finallyData);
         this.setState({
             data: finallyData
         })

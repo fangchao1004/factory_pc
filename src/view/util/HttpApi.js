@@ -1,7 +1,7 @@
 import Axios from 'axios';
 
-export const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
-// export const Testuri = 'http://127.0.0.1:3009/'///小木服务器数据库
+// export const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
+export const Testuri = 'http://127.0.0.1:3009/'///本地服务器测试用
 class HttpApi {
     /**
      * obs操作---慎用
@@ -11,6 +11,28 @@ class HttpApi {
      */
     static obs(params, f1, f2) {
         Axios.post(Testuri + 'obs', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    /**
+     * 获取今天设备的巡检情况。(只要今天在的record记录中，出现了某些人
+     * ，就认为他是巡检人员。就把他所对应的所有的设备记录都查询出来。
+     * 例如：巡检人员 甲 ，乙
+     * 所有设备 A，B
+     * 就有以下情况
+     * 甲 A  (1正常/2故障/null未检)  null代表今天没有记录说明未检
+     * 甲 B  (1正常/2故障/null未检)  null代表今天没有记录说明未检
+     * 乙 A  (1正常/2故障/null未检)  null代表今天没有记录说明未检
+     * 乙 B  (1正常/2故障/null未检)  null代表今天没有记录说明未检
+     * )
+     * @param {*} params 
+     * @param {*} f1 
+     * @param {*} f2 
+     */
+    static getEveryUserRecordToday(params, f1, f2) {
+        Axios.post(Testuri + 'getEveryUserRecordToday', params).then(res => {
             if (f1) { f1(res) }
         }).catch(res => {
             if (f2) { f2(res) }
