@@ -84,9 +84,9 @@ export default class PieView extends React.Component {
             tooltip={[
               "item*percent",
               (item, percent) => {
-                percent = `${(percent * 100).toFixed(1)}%`;
+                percent = `${(percent * 100).toFixed(2)}%`;
                 return {
-                  name: item,
+                  name: item + '率',
                   value: percent
                 };
               }
