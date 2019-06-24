@@ -35,6 +35,7 @@ class StaffModeRoot extends Component {
         return (
             <div>
                 <Card
+                    bordered={false}
                     style={{ width: '100%' }}
                     tabList={tabListNoTitle}
                     activeTabKey={this.state.noTitleKey}
