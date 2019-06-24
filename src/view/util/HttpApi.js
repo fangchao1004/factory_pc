@@ -1,7 +1,8 @@
 import Axios from 'axios';
 
 // export const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
-export const Testuri = 'http://127.0.0.1:3009/'///本地服务器测试用
+// export const Testuri = 'http://127.0.0.1:3009/'///本地服务器测试用
+export const Testuri = 'http://192.168.3.119:3009/'///本地服务器测试用 fc
 class HttpApi {
     /**
      * obs操作---慎用
