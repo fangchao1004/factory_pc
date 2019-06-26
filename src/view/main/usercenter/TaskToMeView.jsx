@@ -8,6 +8,7 @@ import moment from 'moment'
 var storage = window.localStorage;
 var userinfo;
 var currentTime = moment().toDate().getTime();
+var task_status_filter = [{ text: '已完成', value: 1 }, { text: '未完成', value: 0 }];///用于筛选任务状态的数据 选项
 /**
  * 给我的任务界面
  */
@@ -139,10 +140,12 @@ class TaskToMeView extends Component {
             {
                 title: '任务主题',
                 dataIndex: 'title',
+                width:'20%',
             },
             {
                 title: '分配人',
                 dataIndex: 'from',
+                width:'15%',
                 render: (text, record) => {
                     var u
                     this.state.users.some(user => {
@@ -159,6 +162,9 @@ class TaskToMeView extends Component {
                 title: '当前状态',
                 dataIndex: 'status',
                 align: 'center',
+                width:'10%',
+                filters: task_status_filter,
+                onFilter: (value, record) => record.status === value, 
                 render: (text, record) => {
                     let strColor = '#555555'
                     let str = '';
