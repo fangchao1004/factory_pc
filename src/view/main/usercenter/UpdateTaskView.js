@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Form, Input, Select,DatePicker,Switch } from 'antd'
+import { Modal, Form, Input, Select, DatePicker, Switch, Button } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 
@@ -40,19 +40,27 @@ function UpdateTaskForm(props) {
             {getFieldDecorator('content', {
                 initialValue: props.task.content,
                 rules: [{ required: true, message: '请输入任务内容' }]
-            })(<Input.TextArea disabled style={{ height: 150 }} placeholder="请输入任务内容"></Input.TextArea>)}
+            })(<Input.TextArea disabled style={{ height: 50 }} placeholder="请输入任务内容"></Input.TextArea>)}
         </Form.Item>
+        {props.task.remark ?
+            <Form.Item label="追加内容" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+                {getFieldDecorator('remark', {
+                    initialValue: props.task.remark,
+                    rules: [{ required: false, message: '请输入任务内容' }]
+                })(<Input.TextArea disabled style={{ height: 50 }} placeholder="请输入任务内容"></Input.TextArea>)}
+            </Form.Item>
+            : null}
         <Form.Item label="截止日期" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('overTime', {
                 initialValue: moment(props.task.overTime),
                 rules: [{ required: true, message: '请选择截止日期' }]
-            })(<DatePicker disabled={true}/>)}
+            })(<DatePicker disabled={true} />)}
         </Form.Item>
         <Form.Item label="短信通知" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('overTime', {
                 initialValue: null,
                 rules: [{ required: true, message: '请选择短信通知' }]
-            })(<Switch disabled={true} checkedChildren="开" unCheckedChildren="关" checked={props.task.isMessage===1}/>)}
+            })(<Switch disabled={true} checkedChildren="开" unCheckedChildren="关" checked={props.task.isMessage === 1} />)}
         </Form.Item>
     </Form >
 }
@@ -72,10 +80,21 @@ export default function UpdateTaskView(props) {
     const handlerOk = () => {
         props.onOk(props.staff)
     }
-    return <Modal width={700} centered onOk={handlerOk} title="任务详情"
-        onCancel={props.onCancel}
+    console.log('props.staff:', props.staff);
+    return <Modal width={700}
+        centered
+        title="任务详情"
         visible={props.visible}
-        okText="已完成">
+        onCancel={props.onCancel}
+        footer={
+            props.staff && props.staff.status === 0 ?
+                <div>
+                    <Button onClick={props.onCancel}>取消</Button>
+                    <Button type={'primary'} onClick={handlerOk}>已完成</Button>
+                </div>
+                : null
+        }
+    >
         <TaskForm ref={staffFormRef} users={users} task={props.staff}></TaskForm>
     </Modal>
 }

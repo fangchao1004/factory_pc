@@ -117,17 +117,30 @@ class TaskFromMeView extends Component {
         this.setState({ addStaffVisible: false })
     }
     updateStaff(record) {
-        // console.log('update', record)
+        // console.log('record ：：：', record)
         this.setState({ updateStaffVisible: true, updateStaffData: record })
     }
+    /**
+     * 确定修改任务。
+     */
     updateStaffOnOk = (newValues) => {
-        HttpApi.updateUserInfo({ query: { id: this.state.updateStaffData.id }, update: newValues }, data => {
+        HttpApi.updateTaskInfo({ query: { id: this.state.updateStaffData.id }, update: newValues }, data => {
             if (data.data.code === 0) {
                 this.setState({ updateStaffVisible: false })
                 this.getTasksData()
-                message.success('更新成功')
+                message.success('任务修改成功')
+                if (newValues.isMessage === 1) {
+                    console.log('短信通知')
+                    let usersIdArr = newValues.to.split(',');
+                    usersIdArr.shift();
+                    usersIdArr.pop();
+                    let a = usersIdArr.map((item) => parseInt(item))
+                    this.sendMessageToStaff(a, newValues);
+                } else {
+                    console.log('不必短信通知')
+                }
             } else {
-                message.error(data.data.data)
+                message.error('任务修改失败')
             }
         })
     }
@@ -187,21 +200,45 @@ class TaskFromMeView extends Component {
             {
                 title: '任务主题',
                 dataIndex: 'title',
-                width:'15%'
+                width: '15%'
             },
             {
                 title: '执行人',
                 dataIndex: 'toArrname',
-                width:'20%',
+                width: '20%',
                 render: (text, record) => {
                     return <div>{text.join(',')}</div>
+                }
+            },
+            {
+                title: '倒计时',
+                dataIndex: 'overTime',
+                align: 'center',
+                render: (text, record) => {
+                    let remain_time = record.overTime - currentTime; ///剩余时间 ms
+                    // console.log('剩余时间ms:', remain_time);
+                    let result = '/'
+                    if (record.status === 0) { ///未完成 计算超时
+                        result = this.getDuration(Math.abs(remain_time));
+                    }
+                    return <div>{record.status === 0 ? (remain_time > 0 ? result : "超时 " + result) : result}</div>
+                }
+            },
+            {
+                title: '任务发起时间',
+                dataIndex: 'createdAt',
+                align: 'center',
+                render: (text, record) => {
+                    let createdAtTxt = '创建于:' + moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss');
+                    let upadtedAtTxt = '更新于:' + moment(record.updatedAt).format('YYYY-MM-DD HH:mm:ss');
+                    return <div>{createdAtTxt}<br />{upadtedAtTxt}</div>
                 }
             },
             {
                 title: '当前状态',
                 dataIndex: 'status',
                 align: 'center',
-                width:'10%',
+                width: '10%',
                 filters: task_status_filter,
                 onFilter: (value, record) => record.status === value,
                 render: (text, record) => {
@@ -231,21 +268,6 @@ class TaskFromMeView extends Component {
                     return <Tag color={strColor}>{str}</Tag>
                 }
             },
-            {
-                title: '倒计时',
-                dataIndex: 'overTime',
-                align: 'center',
-                render: (text, record) => {
-                    let remain_time = record.overTime - currentTime; ///剩余时间 ms
-                    // console.log('剩余时间ms:', remain_time);
-                    let result = '/'
-                    if (record.status === 0) { ///未完成 计算超时
-                        result = this.getDuration(Math.abs(remain_time));
-                    }
-                    return <div>{record.status === 0 ? (remain_time > 0 ? result : "超时 " + result) : result}</div>
-                }
-            },
-
             {
                 title: '操作',
                 dataIndex: 'actions',
