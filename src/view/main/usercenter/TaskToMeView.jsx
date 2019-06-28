@@ -163,6 +163,11 @@ class TaskToMeView extends Component {
                 title: '倒计时',
                 dataIndex: 'overTime',
                 align: 'center',
+                sorter: (a, b) => {
+                    let remain_time = a.overTime - b.overTime; ///剩余时间 ms
+                    return remain_time
+                },
+                defaultSortOrder: 'ascend',
                 render: (text, record) => {
                     let remain_time = record.overTime - currentTime; ///剩余时间 ms
                     // console.log('剩余时间ms:', remain_time);
@@ -174,7 +179,7 @@ class TaskToMeView extends Component {
                 }
             },
             {
-                title: '任务时间节点',
+                title: '任务发起时间',
                 dataIndex: 'createdAt',
                 align: 'center',
                 render: (text, record) => {
