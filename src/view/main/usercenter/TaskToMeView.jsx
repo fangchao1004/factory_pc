@@ -173,7 +173,6 @@ class TaskToMeView extends Component {
                     return <span>{u.name}</span>
                 }
             },
-
             {
                 title: '倒计时',
                 dataIndex: 'overTime',

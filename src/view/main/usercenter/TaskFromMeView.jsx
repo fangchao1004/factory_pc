@@ -244,7 +244,6 @@ class TaskFromMeView extends Component {
                     return <div>{record.status === 0 ? (remain_time > 0 ? result : "超时 " + result) : result}</div>
                 }
             },
-
             {
                 title: '当前状态',
                 dataIndex: 'status',
