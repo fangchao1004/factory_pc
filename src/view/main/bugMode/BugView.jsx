@@ -126,7 +126,8 @@ export default class BugView extends Component {
     render() {
         const columns = [
             {
-                key: 'createdAt', dataIndex: 'createdAt', title: '时间', width: 190,
+                key: 'createdAt', dataIndex: 'createdAt', title: '时间',
+                // width: 190,
                 sorter: (a, b) => {
                     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
                 },
@@ -134,16 +135,23 @@ export default class BugView extends Component {
                 render: (text, record) => { return <div>{moment(text).format('YYYY-MM-DD HH:mm:ss')}</div> }
             },
             {
-                key: 'device_name', dataIndex: 'device_name', title: '设备', width: 120, render: (text) => {
+                key: 'device_name', dataIndex: 'device_name', title: '设备',
+                // width: 120, 
+                render: (text) => {
                     let result = '/'
                     if (text && text !== '') { result = text }
                     return <div>{result}</div>
                 }
             },
-            { key: 'user_name', dataIndex: 'user_name', title: '上报人', width: 80 },
+            {
+                key: 'user_name', dataIndex: 'user_name', title: '上报人',
+                // width: 80 
+            },
             // { key: 'status', dataIndex: 'status', title: '状态', width: 80 },
             {
-                key: 'area_remark', dataIndex: 'area_remark', title: '区域', width: 100, render: (text, record) => {
+                key: 'area_remark', dataIndex: 'area_remark', title: '区域',
+                // width: 100, 
+                render: (text, record) => {
                     let result = '/'
                     if (text) { result = text }
                     else { result = record.area_name }
@@ -151,7 +159,9 @@ export default class BugView extends Component {
                 }
             },
             {
-                key: 'buglevel', dataIndex: 'buglevel', title: '等级', width: 80, render: (text) => {
+                key: 'buglevel', dataIndex: 'buglevel', title: '等级',
+                // width: 80, 
+                render: (text) => {
                     let result = null;
                     let resultCom = '/'
                     let color = '#505659';
@@ -165,9 +175,9 @@ export default class BugView extends Component {
                 }
             },
             {
-                key: 'content', dataIndex: 'content', title: '内容', render: (text,record) => {
+                key: 'content', dataIndex: 'content', title: '内容', render: (text, record) => {
                     let obj = JSON.parse(text);
-                    return <div><div style={{color:'#438ef7'}}>{record.title_name}</div><div>{obj.select}</div><div>{obj.text}</div></div>
+                    return <div><div style={{ color: '#438ef7' }}>{record.title_name}</div><div>{obj.select}</div><div>{obj.text}</div></div>
                 }
             },
             {

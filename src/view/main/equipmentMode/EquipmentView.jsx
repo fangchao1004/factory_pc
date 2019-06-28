@@ -239,7 +239,7 @@ class EquipmentView extends Component {
             {
                 title: '设备ID',
                 dataIndex: 'nfc_name',
-                width: '20%',
+                // width: '20%',
                 render: (text, record) => (
                     <div>{text}</div>
                 )

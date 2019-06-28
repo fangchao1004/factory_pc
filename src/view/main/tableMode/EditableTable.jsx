@@ -80,7 +80,7 @@ export default class EditableTable extends Component {
       {
         title: '编号',
         dataIndex: 'key',
-        width: '8%',
+        // width: '8%',
         render: (text, record) => (
           // <Input value={text} />
           <div>{text}</div>
@@ -88,7 +88,7 @@ export default class EditableTable extends Component {
       }, {
         title: '标签',
         dataIndex: 'title_name',
-        width: '15%',
+        // width: '15%',
         render: (text, record) => {
           return (
             <Input disabled={(record.type_id === '7' && record.key === '0') || (record.type_id === '3' && record.key === '1')}
@@ -98,7 +98,7 @@ export default class EditableTable extends Component {
       }, {
         title: '元素类型',
         dataIndex: 'type_id',
-        width: '15%',
+        // width: '15%',
         render: (text, record) => {
           // console.log(record);
           let Options = [];
@@ -145,6 +145,7 @@ export default class EditableTable extends Component {
       }, {
         title: '操作',
         dataIndex: 'operation',
+        width: 150,
         render: (text, record) => {
           if (this.state.dataSource.length >= 1) {
             if ((record.type_id === '7' && record.key === '0') || (record.type_id === '3' && record.key === '1')) {

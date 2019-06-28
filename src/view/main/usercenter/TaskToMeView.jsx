@@ -155,12 +155,12 @@ class TaskToMeView extends Component {
             {
                 title: '任务主题',
                 dataIndex: 'title',
-                width: '20%',
+                // width: '20%',
             },
             {
                 title: '分配人',
                 dataIndex: 'from',
-                width: '15%',
+                // width: '15%',
                 render: (text, record) => {
                     var u
                     this.state.users.some(user => {
@@ -196,7 +196,7 @@ class TaskToMeView extends Component {
                 title: '当前状态',
                 dataIndex: 'status',
                 align: 'center',
-                width: '10%',
+                // width: '10%',
                 filters: task_status_filter,
                 onFilter: (value, record) => record.status === value,
                 render: (text, record) => {

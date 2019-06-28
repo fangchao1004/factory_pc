@@ -4,7 +4,7 @@ import { Modal, Form, Input } from 'antd'
 function AddDeviceTypeFrom(props) {
     const { getFieldDecorator } = props.form
     return <Form>
-        <Form.Item label="设备区域名称" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+        <Form.Item label="设备区域名称:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('name', {
                 rules: [{ required: true, message: '请输入设备区域名称' }]
             })(<Input></Input>)}
