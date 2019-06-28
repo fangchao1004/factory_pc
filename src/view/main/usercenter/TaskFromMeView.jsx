@@ -198,6 +198,21 @@ class TaskFromMeView extends Component {
     render() {
         const columns = [
             {
+                title: '任务发起时间',
+                dataIndex: 'createdAt',
+                align: 'center',
+                sorter: (a, b) => {
+                    let remain_time = moment(a.createdAt).toDate().getTime() - moment(b.createdAt).toDate().getTime();
+                    return remain_time
+                },
+                defaultSortOrder: 'descend',
+                render: (text, record) => {
+                    let createdAtTxt = moment(record.createdAt).format('YYYY-MM-DD');
+                    // let upadtedAtTxt = '更新于:' + moment(record.updatedAt).format('YYYY-MM-DD HH:mm:ss');
+                    return <div>{createdAtTxt}</div>
+                }
+            },
+            {
                 title: '任务主题',
                 dataIndex: 'title',
                 width: '15%'
@@ -229,16 +244,7 @@ class TaskFromMeView extends Component {
                     return <div>{record.status === 0 ? (remain_time > 0 ? result : "超时 " + result) : result}</div>
                 }
             },
-            {
-                title: '任务发起时间',
-                dataIndex: 'createdAt',
-                align: 'center',
-                render: (text, record) => {
-                    let createdAtTxt = '创建于:' + moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss');
-                    let upadtedAtTxt = '更新于:' + moment(record.updatedAt).format('YYYY-MM-DD HH:mm:ss');
-                    return <div>{createdAtTxt}<br />{upadtedAtTxt}</div>
-                }
-            },
+
             {
                 title: '当前状态',
                 dataIndex: 'status',
