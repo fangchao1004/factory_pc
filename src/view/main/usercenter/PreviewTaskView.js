@@ -156,9 +156,11 @@ export default function PreviewTaskView(props) {
         footer={
             <div>
                 <Button onClick={() => { props.onCancel(); setIsEditeable(false); setIsExtra(false) }}>取消</Button>
-                {props.staff && props.staff.status === 0 ?
-                    <Button type={'danger'} onClick={() => { setIsEditeable(true); setIsExtra(false); }}>修改任务</Button> :
-                    <Button type={'danger'} onClick={() => { setIsEditeable(true); setIsExtra(true); }}>追加任务</Button>}
+                {isEditable ? null :
+                    (props.staff && props.staff.status === 0 ?
+                        <Button type={'danger'} onClick={() => { setIsEditeable(true); setIsExtra(false); }}>修改任务</Button> :
+                        <Button type={'danger'} onClick={() => { setIsEditeable(true); setIsExtra(true); }}>追加任务</Button>)}
+
                 {isEditable ? (isExtra ? <Button type={'primary'} onClick={handlerAdd}>确定追加</Button> : <Button type={'primary'} onClick={handlerOk}>确定修改</Button>)
                     : null}
             </div>
