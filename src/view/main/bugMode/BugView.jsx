@@ -3,11 +3,8 @@ import { Table, Tag, Modal } from 'antd'
 import HttpApi, { Testuri } from '../../util/HttpApi'
 import moment from 'moment'
 
-let needSeachDeviceIdArr = [];
-let needSeachUserIdArr = [];
-let devicesInfoArr = [];
-let usersInfoArr = [];
-let areaInfoArr = [];
+var major_filter = [];///用于筛选任务状态的数据 选项
+
 export default class BugView extends Component {
     constructor(props) {
         super(props);
@@ -21,108 +18,45 @@ export default class BugView extends Component {
         this.init();
     }
     init = async () => {
-        needSeachDeviceIdArr.length = 0;
-        needSeachUserIdArr.length = 0;
-        let bugsInfo = await this.getBugInfo();
-        devicesInfoArr = await this.getDeviceInfo();
-        usersInfoArr = await this.getUserInfo();
-        areaInfoArr = await this.getAreaInfo();
-        let finallyData = this.linkTwoData(bugsInfo);
-        // console.log(finallyData);
+        major_filter.length = 0;
+        let marjorData = await this.getMajorInfo();
+        marjorData.forEach((item) => { major_filter.push({ text: item.name, value: item.id }) })
+        console.log('marjorData:', marjorData);
+        let finallyData = await this.getBugsInfo();
+        finallyData.forEach((item) => { item.key = item.id + '' })
+        console.log('bug数据：', finallyData);
         this.setState({
             data: finallyData
         })
     }
-    linkTwoData = (bugsInfoArr) => {
-        bugsInfoArr.forEach((item) => {
-            let deviceInfo = this.findDeviceName(item);
-            item.device_name = deviceInfo.device_name;
-            item.user_name = this.findUserName(item);
-            item.area_name = this.findAreaName(deviceInfo.area_id);
-        })
-        return bugsInfoArr
-    }
-    findAreaName = (areaId) => {
-        let result = '';
-        areaInfoArr.forEach((area) => {
-            if (area.id === areaId) { result = area.name }
-        })
-        return result;
-    }
-    findUserName = (item) => {
-        let result = '';
-        usersInfoArr.forEach((user) => {
-            if (user.id === item.user_id) { result = user.name }
-        })
-        return result;
-    }
-    findDeviceName = (item) => {
-        let result = '';
-        devicesInfoArr.forEach((device) => {
-            if (device.id === item.device_id) { result = { 'device_name': device.name, 'area_id': device.area_id } }
-        })
-        return result;
-    }
-
-    getBugInfo = () => {
+    getMajorInfo = () => {
+        let sqlText = 'select m.id,m.name from majors m'
         return new Promise((resolve, reject) => {
-            let result = [];
-            HttpApi.getBugInfo({}, (res) => {
-                if (res.data.code === 0 && res.data.data) {
-                    let tempArr = JSON.parse(JSON.stringify(res.data.data))
-                    tempArr.forEach((item) => {
-                        item.key = item.id + ''
-                        if (item.device_id !== null && needSeachDeviceIdArr.indexOf(item.device_id) === -1) {
-                            needSeachDeviceIdArr.push(item.device_id);
-                        }
-                        if (item.user_id !== null && needSeachUserIdArr.indexOf(item.user_id) === -1) {
-                            needSeachUserIdArr.push(item.user_id);
-                        }
-                        if (item.fixed_user_id !== null && needSeachUserIdArr.indexOf(item.fixed_user_id) === -1) {
-                            needSeachUserIdArr.push(item.user_id);
-                        }
-                    })
-                    result = tempArr;
+            HttpApi.obs({ sql: sqlText }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
                 }
                 resolve(result);
             })
         })
     }
-    getDeviceInfo = () => {
+    getBugsInfo = () => {
+        let sql1 = ' select t1.* ,users.name as fixed_user_name from'
+        let sql2 = ' (select bugs.*,users.name as user_name ,majors.name as major_name,devices.name as device_name,areas.name as area_name from bugs'
+        let sql3 = ' left join users on users.id = bugs.user_id left join majors on majors.id = bugs.major_id left join devices on devices.id = bugs.device_id'
+        let sql4 = ' left join areas on areas.id = devices.area_id) t1 left join users on t1.fixed_user_id = users.id'
+        let sqlText = sql1 + sql2 + sql3 + sql4;
         return new Promise((resolve, reject) => {
-            let result = [];
-            HttpApi.getDeviceInfo({ id: needSeachDeviceIdArr }, (res) => {
-                if (res.data.code === 0 && res.data.data) {
-                    result = res.data.data;
+            HttpApi.obs({ sql: sqlText }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
                 }
-                resolve(result)
-            })
-        })
-
-    }
-    getUserInfo = () => {
-        return new Promise((resolve, reject) => {
-            let result = [];
-            HttpApi.getUserInfo({ id: needSeachUserIdArr }, (res) => {
-                if (res.data.code === 0 && res.data.data) {
-                    result = res.data.data;
-                }
-                resolve(result)
+                resolve(result);
             })
         })
     }
-    getAreaInfo = () => {
-        return new Promise((resolve, reject) => {
-            let result = [];
-            HttpApi.getAreainfo({}, (res) => {
-                if (res.data.code === 0 && res.data.data) {
-                    result = res.data.data;
-                }
-                resolve(result)
-            })
-        })
-    }
-
     render() {
         const columns = [
             {
@@ -178,6 +112,14 @@ export default class BugView extends Component {
                 key: 'content', dataIndex: 'content', title: '内容', render: (text, record) => {
                     let obj = JSON.parse(text);
                     return <div><div style={{ color: '#438ef7' }}>{record.title_name}</div><div>{obj.select}</div><div>{obj.text}</div></div>
+                }
+            },
+            {
+                key: 'major_name', dataIndex: 'major_name', title: '专业',
+                filters: major_filter,
+                onFilter: (value, record) => record.major_id === value,
+                render: (text, record) => {
+                    return <div>{text}</div>
                 }
             },
             {
