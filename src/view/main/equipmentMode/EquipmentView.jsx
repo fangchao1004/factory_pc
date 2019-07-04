@@ -23,6 +23,7 @@ class EquipmentView extends Component {
             dataSource: [],
             drawerVisible1: false,
             drawerVisible2: false,
+            drawerVisible3: false,
             deviceRecords: [],
             recordView: null,
             addEquipmentVisible: false,
@@ -236,14 +237,14 @@ class EquipmentView extends Component {
                     <div>{text}</div>
                 )
             },
-            {
-                title: '设备ID',
-                dataIndex: 'nfc_name',
-                // width: '20%',
-                render: (text, record) => (
-                    <div>{text}</div>
-                )
-            },
+            // {
+            //     title: '设备ID',
+            //     dataIndex: 'nfc_name',
+            //     // width: '20%',
+            //     render: (text, record) => (
+            //         <div>{text}</div>
+            //     )
+            // },
             {
                 title: '当前状态',
                 dataIndex: 'status',
@@ -256,7 +257,9 @@ class EquipmentView extends Component {
                     if (text === 1) { str = '正常'; strColor = '#00CC00' }
                     else if (text === 2) { str = '故障'; strColor = '#FF0000' }
                     else { str = '待检'; strColor = 'gray' }
-                    return <Tag color={strColor}>{str}</Tag>
+                    return <Tag color={strColor} onClick={() => {
+                        if (text === 2) { this.openLastRecord(record) }
+                    }}>{str}</Tag>
                 }
             },
             // {
@@ -267,9 +270,20 @@ class EquipmentView extends Component {
             //     )
             // },
             {
-                title: '操作',
+                title: '巡检时间',
+                dataIndex: 'updatedAt',
+                sorter: (a, b) => {
+                    return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+                },
+                defaultSortOrder: 'descend',
+                render: (text, record) => {
+                    return <div>{moment(text).format('YYYY-MM-DD HH:mm:ss')}</div>
+                }
+            },
+            {
+                title: '记录查询',
                 dataIndex: 'actions',
-                width: 150,
+                width: 250,
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
                         {
@@ -284,7 +298,8 @@ class EquipmentView extends Component {
                                 <Divider type="vertical" />
                                 : null
                         }
-                        <Button size="small" type='primary' onClick={() => this.openModalHandler(record)} >详情</Button></div>
+                        <Button size="small" type='primary' onClick={() => this.openModalHandler(record)} >巡检记录</Button>
+                    </div>
                 )
             }
         ];
@@ -323,7 +338,7 @@ class EquipmentView extends Component {
                     {this.renderDeviceRecordsView()}
                     {this.renderDevicePieView()}
                     <Drawer
-                        title="当次报表"
+                        title="当次记录"
                         placement="left"
                         width={520}
                         closable={false}
@@ -333,9 +348,40 @@ class EquipmentView extends Component {
                         {this.state.recordView}
                     </Drawer>
                 </Drawer>
+                <Drawer
+                    title="最新记录"
+                    placement="right"
+                    width={520}
+                    closable={false}
+                    onClose={this.closeDrawer3}
+                    visible={this.state.drawerVisible3}
+                >
+                    {this.state.recordView}
+                </Drawer>
                 <AddEquipmentView visible={this.state.addEquipmentVisible} onOk={this.addEquipmentOk} onCancel={this.addEquipmentCancel} />
             </div>
         );
+    }
+
+    openLastRecord = async (record) => {
+        ///获取该设备，数据库中最近的一条records 记录
+        let lastRecordData = await this.getLastRecordData(record.id);
+        // console.log('lastRecordData:', lastRecordData);
+        this.openDrawer3(lastRecordData)
+    }
+
+    getLastRecordData = (device_id) => {
+        return new Promise((resolve, reject) => {
+            let sqlText = 'select * from records rds where device_id = ' + device_id + ' order by id desc limit 1';
+            let result = {};
+            HttpApi.obs({ sql: sqlText }, (res) => {
+                if (res.data.code === 0) {
+                    result = res.data.data[0]
+                }
+                resolve(result);
+            })
+
+        })
     }
 
     openModalHandler = (record) => {
@@ -371,6 +417,11 @@ class EquipmentView extends Component {
             drawerVisible2: false
         })
     }
+    closeDrawer3 = () => {
+        this.setState({
+            drawerVisible3: false
+        })
+    }
     openDrawer2 = (record) => {
         let titleObj = {};
         titleObj.key = '0';
@@ -392,6 +443,26 @@ class EquipmentView extends Component {
         this.setState({
             recordView: sample,
             drawerVisible2: true
+        })
+    }
+    openDrawer3 = (record) => {
+        let titleObj = {};
+        titleObj.key = '0';
+        titleObj.title_name = '表头';
+        titleObj.type_id = '7';
+        titleObj.default_values = record.device_type_id + ''; ///表头的value值
+        titleObj.extra_value = record.table_name;
+        let dataArr = JSON.parse(record.content);
+        let newArr = [titleObj, ...dataArr];///将数据结构进行转化
+        let recordViewFinallyData = {
+            devicename: record.devicename,
+            username: record.username,
+            tableData: newArr
+        }
+        let sample = RecordViewTool.renderTable(recordViewFinallyData);
+        this.setState({
+            recordView: sample,
+            drawerVisible3: true
         })
     }
 

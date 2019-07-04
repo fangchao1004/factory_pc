@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, Tag, Modal, Popconfirm, Button, Divider, Steps, Select, message, Input, Row, Col } from 'antd'
+import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col } from 'antd'
 import HttpApi, { Testuri } from '../../util/HttpApi'
 import moment from 'moment'
 const { Step } = Steps;
@@ -35,7 +35,6 @@ export default class BugView extends Component {
     componentDidMount() {
         this.init();
         localUserInfo = storage.getItem('userinfo');
-        // console.log(localUserInfo);
     }
     init = async () => {
         major_filter.length = 0;
@@ -98,9 +97,6 @@ export default class BugView extends Component {
         // console.log('详情：', record);
         // console.log('localUserInfo:',localUserInfo);
         this.setState({ showModal2: true, currentRecord: record })
-    }
-    deleteBugs = (record) => {
-        // console.log('删除：', record);
     }
     ///根据userid 查找 username
     getLocalUserName = (userId) => {
@@ -478,10 +474,6 @@ export default class BugView extends Component {
                 width: 150,
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
-                        <Popconfirm title={<div><div>确定要删除该缺陷记录吗?</div><div>可能会造成设备的巡检记录显示不全</div></div>} onConfirm={() => { this.deleteBugs(record) }}>
-                            <Button size="small" type="danger">删除</Button>
-                        </Popconfirm>
-                        <Divider type="vertical" />
                         <Button size="small" type="primary" onClick={() => { this.actionsHandler(record) }}>处理</Button>
                     </div>
                 )
