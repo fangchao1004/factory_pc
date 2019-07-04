@@ -63,15 +63,16 @@ export default class EditableTable extends Component {
     const { dataSource } = this.state;
     // console.log('dataSource:', dataSource);
     const columns = [
+      // {
+      //   title: '编号',
+      //   dataIndex: 'key',
+      //   width: '8%',
+      //   render: (text, record) => (
+      //     // <Input value={text} />
+      //     <div>{text}</div>
+      //   )
+      // },
       {
-        title: '编号',
-        dataIndex: 'key',
-        width: '8%',
-        render: (text, record) => (
-          // <Input value={text} />
-          <div>{text}</div>
-        )
-      }, {
         title: '标签',
         dataIndex: 'title',
         width: '15%',
@@ -155,7 +156,7 @@ export default class EditableTable extends Component {
           </Col>
           <Col span={18} >
             <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
-              <Button onClick={this.readyHandler} type="primary" style={{ marginBottom: 16}}>
+              <Button onClick={this.readyHandler} type="primary" style={{ marginBottom: 16 }}>
                 预览
               </Button>
             </div>

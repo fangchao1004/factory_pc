@@ -72,13 +72,13 @@ class StaffTypeView extends Component {
     }
     render() {
         const columns = [
-            {
-                title: '编号',
-                dataIndex: 'id',
-                render: (text) => (
-                    <div>{text}</div>
-                )
-            },
+            // {
+            //     title: '编号',
+            //     dataIndex: 'id',
+            //     render: (text) => (
+            //         <div>{text}</div>
+            //     )
+            // },
             {
                 title: '职位名称',
                 dataIndex: 'name',

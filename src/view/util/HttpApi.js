@@ -297,6 +297,13 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
+    static updateBugInfo(params, f1, f2) {
+        Axios.post(Testuri + 'update_bug', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
 }
 
 export default HttpApi

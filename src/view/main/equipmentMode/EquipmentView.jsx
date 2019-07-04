@@ -259,14 +259,13 @@ class EquipmentView extends Component {
                     return <Tag color={strColor}>{str}</Tag>
                 }
             },
-
-            {
-                title: '备注',
-                dataIndex: 'remark',
-                render: (text, record) => (
-                    <div>{text}</div>
-                )
-            },
+            // {
+            //     title: '备注',
+            //     dataIndex: 'remark',
+            //     render: (text, record) => (
+            //         <div>{text}</div>
+            //     )
+            // },
             {
                 title: '操作',
                 dataIndex: 'actions',
@@ -323,7 +322,7 @@ class EquipmentView extends Component {
                 >
                     {this.renderDeviceRecordsView()}
                     {this.renderDevicePieView()}
-                    {/* <Drawer
+                    <Drawer
                         title="当次报表"
                         placement="left"
                         width={520}
@@ -332,7 +331,7 @@ class EquipmentView extends Component {
                         visible={this.state.drawerVisible2}
                     >
                         {this.state.recordView}
-                    </Drawer> */}
+                    </Drawer>
                 </Drawer>
                 <AddEquipmentView visible={this.state.addEquipmentVisible} onOk={this.addEquipmentOk} onCancel={this.addEquipmentCancel} />
             </div>
@@ -424,16 +423,16 @@ class EquipmentView extends Component {
                     return <div>{text}</div>
                 }
             },
-            // {
-            //     title: '操作',
-            //     width: 75,
-            //     dataIndex: 'operation',
-            //     render: (text, record) => {
-            //         return (
-            //             <Button style={{ marginLeft: 10 }} size="small" type='primary' onClick={() => this.openDrawer2(record)} >详情</Button>
-            //         )
-            //     },
-            // }
+            {
+                title: '操作',
+                width: 75,
+                dataIndex: 'operation',
+                render: (text, record) => {
+                    return (
+                        <Button style={{ marginLeft: 10 }} size="small" type='primary' onClick={() => this.openDrawer2(record)} >详情</Button>
+                    )
+                },
+            }
         ]
         return <Table
             bordered

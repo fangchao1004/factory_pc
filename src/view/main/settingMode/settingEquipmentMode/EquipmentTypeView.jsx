@@ -30,14 +30,14 @@ class EquipmentTypeView extends Component {
     render() {
 
         const columns = [
-            {
-                title: '编号',
-                dataIndex: 'key',
-                width: '8%',
-                render: (text, record) => (
-                    <div>{text}</div>
-                )
-            },
+            // {
+            //     title: '编号',
+            //     dataIndex: 'key',
+            //     width: '8%',
+            //     render: (text, record) => (
+            //         <div>{text}</div>
+            //     )
+            // },
             {
                 title: '设备类型名',
                 dataIndex: 'name',

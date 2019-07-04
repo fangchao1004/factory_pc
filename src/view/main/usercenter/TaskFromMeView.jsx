@@ -236,7 +236,7 @@ class TaskFromMeView extends Component {
                 defaultSortOrder: 'ascend',
                 render: (text, record) => {
                     let remain_time = record.overTime - currentTime; ///剩余时间 ms
-                    console.log('剩余时间ms:', remain_time);
+                    // console.log('剩余时间ms:', remain_time);
                     let result = '/'
                     if (record.status === 0) { ///未完成 计算超时
                         result = this.getDuration(Math.abs(remain_time));
