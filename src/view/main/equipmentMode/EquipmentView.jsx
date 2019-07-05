@@ -1,16 +1,10 @@
 import React, { Component } from 'react';
 import { Table, Button, Row, Col, Drawer, Icon, message, Popconfirm, Divider, Tag } from 'antd'
 import HttpApi from '../../util/HttpApi';
-import RecordViewTool from '../../util/RecordViewTool';
 import moment from 'moment';
 import AddEquipmentView from './AddEquipmentView';
 import PieViewOfOneDeStus from './PieViewOfOneDeStus';
-
-var nfc_data = [];
-var area_data = [];
-var device_type_data = [];
-var device_data = [];
-var user_data = [];
+import OneRecordDetialView from './OneRecordDetialView'
 
 var device_status_filter = [{ text: '正常', value: 1 }, { text: '故障', value: 2 }, { text: '待检', value: 3 }];///用于筛选设备状态的数据 选项
 var device_type_data_filter = []; ///用于筛选设备类型的数据 选项
@@ -25,6 +19,7 @@ class EquipmentView extends Component {
             drawerVisible2: false,
             drawerVisible3: false,
             deviceRecords: [],
+            oneRecordData: {},
             recordView: null,
             addEquipmentVisible: false,
             isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin,
@@ -36,144 +31,39 @@ class EquipmentView extends Component {
     }
 
     init = async () => {
-        device_type_data_filter.length = device_type_data_filter.length = area_data_filter.length = 0;
-        nfc_data = await this.getNFCData();
-        area_data = await this.getAreaData();
-        area_data.forEach((item) => {
-            area_data_filter.push({ text: item.name, value: item.id })
-        })
-        device_type_data = await this.getDeviceTypeData();
-        device_type_data.forEach((item) => {
-            device_type_data_filter.push({ text: item.name, value: item.id })
-        })
-        device_data = await this.getDeviceData();
-        // console.log('device_data', device_data)
-        let newData = await this.transformConstruct();
-        // console.log('newData', newData)
+        let devicesInfo = await this.getDevicesInfo();
+        devicesInfo.map((item) => item.key = item.id + '')
         this.setState({
-            dataSource: newData
+            dataSource: devicesInfo
         })
-        user_data = await this.getUserData();
     }
-    getNFCData = () => {
-        // console.log("getNFCDatagetNFCDatagetNFCDatagetNFCDatagetNFCData");
-        let p = new Promise((resolve, reject) => {
-            HttpApi.getNFCInfo({}, (res) => {
+    getDevicesInfo = () => {
+        return new Promise((resolve, reject) => {
+            let sql1 = ' select des.*,dts.name as device_type_name,areas.name as area_name,nfcs.name as nfc_name from devices des';
+            let sql2 = ' left join device_types dts on dts.id = des.type_id left join areas on areas.id = des.area_id left join nfcs on nfcs.id = des.nfc_id'
+            let sqlText = sql1 + sql2;
+            HttpApi.obs({ sql: sqlText }, (res) => {
+                let result = [];
                 if (res.data.code === 0) {
-                    resolve(res.data.data)
+                    result = res.data.data
                 }
+                resolve(result);
             })
         })
-        return p;
     }
-    getAreaData = () => {
-        let p = new Promise((resolve, reject) => {
-            HttpApi.getAreainfo({}, (res) => {
+    getBugsInfo = (bug_id_arr) => {
+        return new Promise((resolve, reject) => {
+            let sqlText = 'select bugs.*,mjs.name as major_name from bugs left join majors mjs on mjs.id = bugs.major_id where bugs.id in (' + bug_id_arr.join(',') + ')';
+            HttpApi.obs({ sql: sqlText }, (res) => {
+                let result = [];
                 if (res.data.code === 0) {
-                    resolve(res.data.data)
+                    result = res.data.data
                 }
+                resolve(result);
             })
         })
-        return p;
     }
-    getDeviceTypeData = () => {
-        let p = new Promise((resolve, reject) => {
-            HttpApi.getDeviceTypeInfo({}, (res) => {
-                if (res.data.code === 0) {
-                    resolve(res.data.data)
-                }
-            })
-        })
-        return p;
-    }
-    getDeviceData = () => {
-        let p = new Promise((resolve, reject) => {
-            HttpApi.getDeviceInfo({}, (res) => {
-                if (res.data.code === 0) {
-                    resolve(res.data.data)
-                }
-            })
-        })
-        return p;
-    }
-    getUserData = () => {
-        let p = new Promise((resolve, reject) => {
-            HttpApi.getUserInfo({}, (res) => {
-                if (res.data.code === 0) {
-                    resolve(res.data.data)
-                }
-            })
-        })
-        return p;
-    }
-    transformConstruct = async () => {
-        for (const item of device_data) {
-            item.key = item.id + ""
-            item.device_type_name = await this.findTypeName(item)
-            item.area_name = await this.findAreaName(item)
-            item.nfc_name = await this.findNfcName(item)
-        }
-        // console.log('处理后的：', device_data);
-        return device_data
-    }
-    findTypeName = (deviceItem) => {
-        let p = new Promise((resolve, reject) => {
-            let result = '';
-            device_type_data.forEach((item) => {
-                if (item.id === deviceItem.type_id) {
-                    result = item.name
-                }
-            })
-            resolve(result)
-        })
-        return p;
-    }
-    findAreaName = (deviceItem) => {
-        let p = new Promise((resolve, reject) => {
-            let result = '';
-            area_data.forEach((item) => {
-                if (item.id === deviceItem.area_id) {
-                    result = item.name
-                }
-            })
-            resolve(result)
-        })
-        return p;
-    }
-    findNfcName = (deviceItem) => {
-        let p = new Promise((resolve, reject) => {
-            let result = '';
-            nfc_data.forEach((item) => {
-                if (item.id === deviceItem.nfc_id) {
-                    result = item.name
-                }
-            })
-            resolve(result)
-        })
-        return p;
-    }
-    findUserName = (recordItem) => {
-        let p = new Promise((resolve, reject) => {
-            let result = '';
-            user_data.forEach((item) => {
-                if (item.id === recordItem.user_id) {
-                    result = { username: item.username, name: item.name }
-                }
-            })
-            resolve(result)
-        })
-        return p;
-    }
-    findDeviceName = (recordItem) => {
-        let p = new Promise((resolve, reject) => {
-            device_data.forEach((item) => {
-                if (item.id === recordItem.device_id) {
-                    resolve(item.name)
-                }
-            })
-        })
-        return p;
-    }
+
     addEquipment = (newValues) => {
         this.setState({ addEquipmentVisible: true })
     }
@@ -205,13 +95,6 @@ class EquipmentView extends Component {
     }
     render() {
         const columns = [
-            // {
-            //     title: '编号',
-            //     dataIndex: 'id',
-            //     render: (text, record) => (
-            //         <div>{text}</div>
-            //     )
-            // },
             {
                 title: '设备名称',
                 dataIndex: 'name',
@@ -237,14 +120,6 @@ class EquipmentView extends Component {
                     <div>{text}</div>
                 )
             },
-            // {
-            //     title: '设备ID',
-            //     dataIndex: 'nfc_name',
-            //     // width: '20%',
-            //     render: (text, record) => (
-            //         <div>{text}</div>
-            //     )
-            // },
             {
                 title: '当前状态',
                 dataIndex: 'status',
@@ -262,13 +137,6 @@ class EquipmentView extends Component {
                     }}>{str}</Tag>
                 }
             },
-            // {
-            //     title: '备注',
-            //     dataIndex: 'remark',
-            //     render: (text, record) => (
-            //         <div>{text}</div>
-            //     )
-            // },
             {
                 title: '巡检时间',
                 dataIndex: 'updatedAt',
@@ -338,25 +206,31 @@ class EquipmentView extends Component {
                     {this.renderDeviceRecordsView()}
                     {this.renderDevicePieView()}
                     <Drawer
-                        title="当次记录"
+                        title={<div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', }}>
+                            <span>当次记录</span>
+                            <span>{moment(this.state.oneRecordData.updatedAt).format('YYYY-MM-DD HH:mm:ss')}</span>
+                        </div>}
                         placement="left"
-                        width={520}
+                        width={500}
                         closable={false}
                         onClose={this.closeDrawer2}
                         visible={this.state.drawerVisible2}
                     >
-                        {this.state.recordView}
+                        <OneRecordDetialView renderData={this.state.oneRecordData} />
                     </Drawer>
                 </Drawer>
                 <Drawer
-                    title="最新记录"
+                    title={<div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', }}>
+                        <span>最新记录</span>
+                        <span>{moment(this.state.oneRecordData.updatedAt).format('YYYY-MM-DD HH:mm:ss')}</span>
+                    </div>}
                     placement="right"
-                    width={520}
+                    width={500}
                     closable={false}
                     onClose={this.closeDrawer3}
                     visible={this.state.drawerVisible3}
                 >
-                    {this.state.recordView}
+                    <OneRecordDetialView renderData={this.state.oneRecordData} />
                 </Drawer>
                 <AddEquipmentView visible={this.state.addEquipmentVisible} onOk={this.addEquipmentOk} onCancel={this.addEquipmentCancel} />
             </div>
@@ -367,12 +241,15 @@ class EquipmentView extends Component {
         ///获取该设备，数据库中最近的一条records 记录
         let lastRecordData = await this.getLastRecordData(record.id);
         // console.log('lastRecordData:', lastRecordData);
-        this.openDrawer3(lastRecordData)
+        this.openDrawer(lastRecordData, 3)
     }
 
     getLastRecordData = (device_id) => {
         return new Promise((resolve, reject) => {
-            let sqlText = 'select * from records rds where device_id = ' + device_id + ' order by id desc limit 1';
+            let sql1 = ' select rds.*,users.name as user_name,devices.name as device_name,device_types.name as device_type_name from records rds'
+            let sql2 = ' left join users on users.id = rds.user_id left join devices on devices.id = rds.device_id'
+            let sql3 = ' left join device_types on device_types.id = rds.device_type_id where device_id = ' + device_id + ' order by id desc limit 1'
+            let sqlText = sql1 + sql2 + sql3;
             let result = {};
             HttpApi.obs({ sql: sqlText }, (res) => {
                 if (res.data.code === 0) {
@@ -383,26 +260,29 @@ class EquipmentView extends Component {
 
         })
     }
-
-    openModalHandler = (record) => {
-        // console.log("record:",record);
-        HttpApi.getRecordInfo({ device_id: record.id }, async (res) => {
-            let resultArr = res.data.data;
-            resultArr.sort(function (a, b) {
-                return b.id - a.id
-            })
-            for (let item of resultArr) {
-                let userInfo = await this.findUserName(item)
-                item.key = item.id + '';
-                item.username = userInfo.username;
-                item.name = userInfo.name;
-                item.devicename = await this.findDeviceName(item)
-            }
-            ///获取了当前的设备id
-            this.setState({
-                pieDeviceId: record.id,
-                drawerVisible1: true,
-                deviceRecords: resultArr,
+    ///查询某个设备的所有record记录数据
+    openModalHandler = async (record) => {
+        ///查询数据库中某个设备的所有record记录
+        let OneDeviceAllRecords = await this.getOneDeviceAllRecords(record.id);
+        OneDeviceAllRecords.map((item) => item.key = item.id + '')
+        ///获取了当前的设备id
+        this.setState({
+            pieDeviceId: record.id,
+            drawerVisible1: true,
+            deviceRecords: OneDeviceAllRecords,
+        })
+    }
+    getOneDeviceAllRecords = (device_id) => {
+        return new Promise((resolve, reject) => {
+            let sql1 = ' select rds.*,us.name as user_name,des.name as device_name,dts.name as device_type_name from records rds left join users us on us.id = rds.user_id ';
+            let sql2 = ' left join devices des on des.id = rds.device_id left join device_types dts on dts.id = rds.device_type_id where device_id = ' + device_id + ' order by rds.id desc ';
+            let sqlText = sql1 + sql2;
+            let result = [];
+            HttpApi.obs({ sql: sqlText }, (res) => {
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
             })
         })
     }
@@ -422,50 +302,50 @@ class EquipmentView extends Component {
             drawerVisible3: false
         })
     }
-    openDrawer2 = (record) => {
-        let titleObj = {};
-        titleObj.key = '0';
-        titleObj.title_name = '表头';
-        titleObj.type_id = '7';
-        titleObj.default_values = record.device_type_id + ''; ///表头的value值
-        titleObj.extra_value = record.table_name;
-        let dataArr = JSON.parse(record.content);
-        let newArr = [titleObj, ...dataArr];///将数据结构进行转化
-        this.setState({
-            modalvisible: true
-        })
-        let recordViewFinallyData = {
-            devicename: record.devicename,
-            username: record.username,
-            tableData: newArr
+    ///2 左边的二级抽屉，显示该设备任意一次的record记录 
+    ///3 右边的独立的一级抽屉，显示该设备最新一次的record记录 
+    openDrawer = async (record, v) => {
+        if (record.device_status === 1) {
+            message.success('正常');
+            return;
         }
-        let sample = RecordViewTool.renderTable(recordViewFinallyData);
-        this.setState({
-            recordView: sample,
-            drawerVisible2: true
+        ///对record.content内容进行处理。
+        let bug_id_arr = [];
+        let bug_key_id_arr = [];///key标题和bugId的对应关系
+        JSON.parse(record.content).forEach((item) => {
+            if (item.bug_id !== null) {
+                bug_id_arr.push(item.bug_id);
+                bug_key_id_arr.push({ key: item.key, bug_id: item.bug_id });
+            }
         })
-    }
-    openDrawer3 = (record) => {
-        let titleObj = {};
-        titleObj.key = '0';
-        titleObj.title_name = '表头';
-        titleObj.type_id = '7';
-        titleObj.default_values = record.device_type_id + ''; ///表头的value值
-        titleObj.extra_value = record.table_name;
-        let dataArr = JSON.parse(record.content);
-        let newArr = [titleObj, ...dataArr];///将数据结构进行转化
-        let recordViewFinallyData = {
-            devicename: record.devicename,
-            username: record.username,
-            tableData: newArr
+        let bugs_info_arr = await this.getBugsInfo(bug_id_arr);
+        ///将key 合并到 bugs_info_arr中
+        bugs_info_arr.forEach((oneBugInfo) => {
+            bug_key_id_arr.forEach((one_key_bug_id) => {
+                if (oneBugInfo.id === one_key_bug_id.bug_id) {
+                    oneBugInfo.key = one_key_bug_id.key
+                }
+            })
+        })
+        let oneRecordData = {
+            table_name: record.table_name,
+            device_name: record.device_name,
+            user_name: record.user_name,
+            content: bugs_info_arr,
+            updatedAt: record.updatedAt
         }
-        let sample = RecordViewTool.renderTable(recordViewFinallyData);
-        this.setState({
-            recordView: sample,
-            drawerVisible3: true
-        })
+        if (v === 2) {
+            this.setState({
+                drawerVisible2: true,
+                oneRecordData
+            })
+        } else if (v === 3) {
+            this.setState({
+                drawerVisible3: true,
+                oneRecordData
+            })
+        }
     }
-
     renderDeviceRecordsView = () => {
         const columns = [
             {
@@ -489,7 +369,7 @@ class EquipmentView extends Component {
             },
             {
                 title: '报告人',
-                dataIndex: 'name',
+                dataIndex: 'user_name',
                 render: (text, record) => {
                     return <div>{text}</div>
                 }
@@ -500,7 +380,7 @@ class EquipmentView extends Component {
                 dataIndex: 'operation',
                 render: (text, record) => {
                     return (
-                        <Button style={{ marginLeft: 10 }} size="small" type='primary' onClick={() => this.openDrawer2(record)} >详情</Button>
+                        <Button style={{ marginLeft: 10 }} size="small" type='primary' onClick={() => this.openDrawer(record, 2)} >详情</Button>
                     )
                 },
             }
