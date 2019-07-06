@@ -132,8 +132,8 @@ class EquipmentView extends Component {
                     if (text === 1) { str = '正常'; strColor = '#00CC00' }
                     else if (text === 2) { str = '故障'; strColor = '#FF0000' }
                     else { str = '待检'; strColor = 'gray' }
-                    return <Tag color={strColor} onClick={() => {
-                        if (text === 2) { this.openLastRecord(record) }
+                    return <Tag style={{ cursor: 'pointer' }} color={strColor} onClick={() => {
+                        if (text === 2) { this.openLastRecord(record) } else { message.success('正常') }
                     }}>{str}</Tag>
                 }
             },

@@ -55,7 +55,8 @@ function UpdateStaffForm(props) {
         </Form.Item>
         <Form.Item label="员工权限" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('permission', {
-                initialValue: props.staff.permission && props.staff.permission.split(',').map(permission => parseInt(permission)),
+                // initialValue: props.staff.permission && props.staff.permission.split(',').map(permission => parseInt(permission)),
+                initialValue: props.staff.permission ? props.staff.permission.split(',').map(permission => parseInt(permission)) : undefined,
                 rules: [{ required: false, message: '请选择员工权限' }]
             })(<Select mode="multiple">{permissionOptions}</Select>)}
         </Form.Item>

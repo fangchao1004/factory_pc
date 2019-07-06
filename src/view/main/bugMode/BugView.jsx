@@ -460,18 +460,19 @@ export default class BugView extends Component {
                 title: '缺陷状态',
                 dataIndex: 'status',
                 filters: status_filter,
+                align: 'center',
                 onFilter: (value, record) => record.status === value,
                 render: (text, record) => {
                     let str = '';
-                    if (text === 0) { str = '待分配' } else if (text === 1) { str = '维修中' } else if (text === 2) { str = '专工验收中' }
-                    else if (text === 3) { str = '运行验收中' } else if (text === 4) { str = '处理完毕' }
-                    return str;
+                    let color = '#888888'
+                    if (text === 0) { str = '待分配' } else if (text === 1) { str = '维修中'; color = '#FF9999' } else if (text === 2) { str = '专工验收中'; color = '#6699CC' }
+                    else if (text === 3) { str = '运行验收中'; color = '#9933CC' } else if (text === 4) { str = '处理完毕'; color = '#87d068' }
+                    return <Tag color={color}>{str}</Tag>;
                 }
             },
             {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 150,
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
                         <Button size="small" type="primary" onClick={() => { this.actionsHandler(record) }}>处理</Button>
