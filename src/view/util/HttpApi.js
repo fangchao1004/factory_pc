@@ -129,6 +129,13 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
+    static updateDeviceInfo(params, f1, f2) {
+        Axios.post(Testuri + 'update_device', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
     static addDeviceAreaInfo(params, f1, f2) {
         Axios.post(Testuri + 'insert_area', params).then(res => {
             if (f1) { f1(res) }
@@ -159,6 +166,13 @@ class HttpApi {
     }
     static getRecordInfo(params, f1, f2) {
         Axios.post(Testuri + 'find_record', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static insertRecordInfo(params, f1, f2) {
+        Axios.post(Testuri + 'insert_record', params).then(res => {
             if (f1) { f1(res) }
         }).catch(res => {
             if (f2) { f2(res) }

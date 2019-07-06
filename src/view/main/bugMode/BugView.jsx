@@ -76,6 +76,19 @@ export default class BugView extends Component {
             })
         })
     }
+    getOneBugInfo = (bug_id) => {
+        let sql1 = ' select bugs.* from bugs where id = ' + bug_id;
+        let sqlText = sql1;
+        return new Promise((resolve, reject) => {
+            HttpApi.obs({ sql: sqlText }, (res) => {
+                let result = null;
+                if (res.data.code === 0) {
+                    result = res.data.data[0]
+                }
+                resolve(result);
+            })
+        })
+    }
     getBugsInfo = () => {
         let sql1 = ' select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,areas.name as area_name from bugs'
         let sql2 = ' left join devices des on bugs.device_id = des.id '
@@ -88,6 +101,19 @@ export default class BugView extends Component {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
+    getOneRecordInfo = (device_id) => {
+        let sql1 = ' select * from records rds where device_id = ' + device_id + ' order by rds.id desc limit 1';
+        let sqlText = sql1;
+        return new Promise((resolve, reject) => {
+            HttpApi.obs({ sql: sqlText }, (res) => {
+                let result = null;
+                if (res.data.code === 0) {
+                    result = res.data.data[0]
                 }
                 resolve(result);
             })
@@ -267,6 +293,7 @@ export default class BugView extends Component {
      */
     changeBugStatus = (targetStatus, currentStep, remarkText, fromId, toId = null) => {
         // console.log('要将bug的status置成：', targetStatus, '当前流程在哪一步：', currentStep, '备注的文本：', remarkText, '操作人：', fromId, '目标对象：', toId);
+        // return;
         ////首先要先把当前的bug的remak信息全copy一份。
         // console.log("this.state.currentRecord.remark:", this.state.currentRecord.remark);
         let remarkCopy = {};
@@ -277,13 +304,13 @@ export default class BugView extends Component {
         if (remarkCopy && remarkCopy[currentStep]) {
             ///如果remark已经存在。
             // console.log(remarkCopy[currentStep]);
-            if (toId) {
+            if (toId !== null) {
                 remarkCopy[currentStep].push({ from: fromId, to: toId, remark: remarkText, time: moment().format('YYYY-MM-DD HH:mm:ss') });
             } else {
                 remarkCopy[currentStep].push({ from: fromId, remark: remarkText, time: moment().format('YYYY-MM-DD HH:mm:ss') });
             }
         } else {
-            if (toId) {
+            if (toId !== null) {
                 remarkCopy[currentStep] = [{ from: fromId, to: toId, remark: remarkText, time: moment().format('YYYY-MM-DD HH:mm:ss') }]
             } else {
                 remarkCopy[currentStep] = [{ from: fromId, remark: remarkText, time: moment().format('YYYY-MM-DD HH:mm:ss') }]
@@ -297,6 +324,8 @@ export default class BugView extends Component {
                     if (res.data.code === 0) {
                         message.success('发布成功');
                         this.setState({ currentRecord: res.data.data[0] })
+                        ////如果是状态4 则说明这个bug已经解决了。要把这个bug对应的record给更新（复制原有数据，本地修改，再作为新数据插入数据库record表）
+                        if (targetStatus === 4) { this.changeRecordData(); }
                     }
                 })
             }
@@ -304,6 +333,61 @@ export default class BugView extends Component {
         ////同时要刷新整个表中的数据
         this.init();
     }
+
+    ////改变包含了这个bug_id 的record 再数据库中的值。
+    changeRecordData = async () => {
+        let bugId = this.state.currentRecord.id;
+        ///1，要根据bug_id 去bugs表中去查询该条数据，获取其中的 device_id 字段信息
+        let oneBugInfo = await this.getOneBugInfo(bugId);
+        let device_id = oneBugInfo.device_id;
+        ///2，根据 device_id 去record 表中 找到 这个设备最新的一次record。 获取到后，在本地修改。再最为一条新数据插入到records表中
+        let oneRecordInfo = await this.getOneRecordInfo(device_id);
+        let bug_content = JSON.parse(oneRecordInfo.content);
+        ///content 数组。找到其中bug_id 不为null的。把bug_id 和 bugId 相同的给至null,再手动判断是不是bug_id字段都是null了。如果是device_status就要至1（正常）
+        let bug_id_count = 0;
+        ///先知道 有多少个 bug_id 不为null
+        bug_content.forEach((oneSelect) => {
+            if (oneSelect.bug_id !== null) {
+                bug_id_count++;
+            }
+        })
+        // console.log('这个设备还有几个bug:', bug_id_count);
+        if (bug_id_count > 0) {
+            ///如果找到对应的bug_id。将它至null,说明这个缺陷已经解决了。就不要再出现在record中了。同时bug_id_count减1
+            bug_content.forEach((oneSelect) => {
+                if (oneSelect.bug_id === bugId) {
+                    oneSelect.bug_id = null;
+                    bug_id_count--;
+                }
+            })
+            // console.log('处理完一个bug后的content为:', bug_content);
+            oneRecordInfo.content = JSON.stringify(bug_content);
+            if (bug_id_count === 0) {
+                oneRecordInfo.device_status = 1;
+            }
+        }
+        // oneRecordInfo.user_id = JSON.parse(localUserInfo).id;///更新record的上传人。
+        delete oneRecordInfo.id;
+        delete oneRecordInfo.createdAt;
+        delete oneRecordInfo.updatedAt;
+        // console.log('待入库的最新record:', oneRecordInfo);
+        HttpApi.insertRecordInfo(oneRecordInfo, (res) => {
+            if (res.data.code === 0) {
+                // console.log('入库成功。');
+                if (oneRecordInfo.device_status === 1) {
+                    ///手动更新数据库中，对应设备的状态
+                    HttpApi.updateDeviceInfo({ query: { id: device_id }, update: { status: 1 } }, (res) => {
+                        if (res.data.code === 0) { message.success('对应设备最新巡检记录更新-设备状态恢复正常'); }
+                    })
+                }else{
+                    HttpApi.updateDeviceInfo({ query: { id: device_id }, update: { status: 2 } }, (res) => {
+                        if (res.data.code === 0) { message.info('对应设备最新巡检记录更新'); } ///这么做的目的是只要有record上传，就要更新对应设备的updateAt
+                    })
+                }
+            }
+        })
+    }
+
     ///////////////////////////////////////
     ///////////////////////////////////////
     ///////////////////////////////////////
@@ -343,7 +427,7 @@ export default class BugView extends Component {
             }
         } else if (btnV === 1) {
             ////当前用户是不是 0 数组中最后一位的 to  且 当前status 的值 =1
-            if (localUserInfo && JSON.parse(localUserInfo).id && this.state.currentRecord.remark && this.state.currentRecord.status === 1) {
+            if (localUserInfo && this.state.currentRecord.remark && this.state.currentRecord.status === 1) {
                 let stepData_0_arr = JSON.parse(this.state.currentRecord.remark)['0'];
                 if (stepData_0_arr) {
                     let to_id = stepData_0_arr[stepData_0_arr.length - 1].to; ////最新一次任务分配给了谁。
