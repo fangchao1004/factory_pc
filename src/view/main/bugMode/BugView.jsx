@@ -317,7 +317,11 @@ export default class BugView extends Component {
             }
         }
         ///将最新的 remark 数据 更新到 bugs 表中。并且判断要把 status 改到哪一步
-        HttpApi.updateBugInfo({ query: { id: this.state.currentRecord.id }, update: { status: targetStatus, remark: JSON.stringify(remarkCopy) } }, (res) => {
+        let newValue = { status: targetStatus, remark: JSON.stringify(remarkCopy) }
+        if (toId !== null) {
+            newValue.fix_id = toId;
+        }
+        HttpApi.updateBugInfo({ query: { id: this.state.currentRecord.id }, update: newValue }, (res) => {
             if (res.data.code === 0) {
                 ///成功以后要立即刷新当前的bug数据。
                 HttpApi.getBugInfo({ id: this.state.currentRecord.id }, (res) => {
@@ -379,7 +383,7 @@ export default class BugView extends Component {
                     HttpApi.updateDeviceInfo({ query: { id: device_id }, update: { status: 1 } }, (res) => {
                         if (res.data.code === 0) { message.success('对应设备最新巡检记录更新-设备状态恢复正常'); }
                     })
-                }else{
+                } else {
                     HttpApi.updateDeviceInfo({ query: { id: device_id }, update: { status: 2 } }, (res) => {
                         if (res.data.code === 0) { message.info('对应设备最新巡检记录更新'); } ///这么做的目的是只要有record上传，就要更新对应设备的updateAt
                     })
