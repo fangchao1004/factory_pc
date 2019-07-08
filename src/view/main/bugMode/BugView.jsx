@@ -3,24 +3,28 @@ import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col } fr
 import HttpApi, { Testuri } from '../../util/HttpApi'
 import moment from 'moment'
 const { Step } = Steps;
+const { TextArea } = Input;
 var major_filter = [];///用于筛选任务专业的数据 选项
-var status_filter = [{ text: '待分配', value: 0 }, { text: '维修中', value: 1 },
+const status_filter = [{ text: '待分配', value: 0 }, { text: '维修中', value: 1 },
 { text: '专工验收中', value: 2 }, { text: '运行验收中', value: 3 }, { text: '处理完毕', value: 4 }];///用于筛选状态的数据
 var storage = window.localStorage;
 var localUserInfo = '';
-var userOptions = [];
+var userOptions = [];///人员选项
+const bug_level_Options = [{ id: 1, name: '一级' }, { id: 2, name: '二级' }, { id: 3, name: '三级' }].map(bug_level => <Select.Option value={bug_level.id} key={bug_level.id}>{bug_level.name}</Select.Option>)
+var major_Options = [];///专业选项
 
 export default class BugView extends Component {
     constructor(props) {
         super(props);
         this.state = {
             data: [],
-            showModal: false,
+            showModal1: false,///img显示框
             showModal2: false,
             showModal3: false,
             showModal4: false,
             showModal5: false,
             showModal6: false,
+            showModal7: false,///添加缺陷显示框
             imguuid: null,
             userData: [],
             currentRecord: {},///当前选择的某一行。某一个缺陷对象
@@ -29,7 +33,13 @@ export default class BugView extends Component {
             step_0_remark: '',///分配时的备注
             step_1_remark: '',///维修界面的备注
             step_2_remark: '',///专工验收界面的备注
-            step_3_remark: ''///运行验收界面的备注
+            step_3_remark: '',///运行验收界面的备注
+
+            ////添加bug
+            bug_level_select_id: null,
+            major_select_id: null,
+            area_remark: null,
+            bug_text: null,
         }
     }
     componentDidMount() {
@@ -41,6 +51,8 @@ export default class BugView extends Component {
         let marjorData = await this.getMajorInfo();
         marjorData.forEach((item) => { major_filter.push({ text: item.name, value: item.id }) })
         // console.log('marjorData:', marjorData);
+        major_Options = marjorData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
+
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
         finallyData.forEach((item) => { item.key = item.id + '' })
         // console.log('bug数据：', finallyData);
@@ -129,6 +141,75 @@ export default class BugView extends Component {
         let name = '';
         if (this.state.userData && this.state.userData.length > 0) { this.state.userData.forEach((item) => { if (item.id === userId) { name = item.name } }) }
         return name;
+    }
+    ///添加缺陷
+    renderAddBugModal = () => {
+        return (<div>
+            <Row gutter={16}>
+                <Col span={4}>
+                    <span>紧急类型:</span>
+                </Col>
+                <Col span={18}>
+                    <Select value={this.state.bug_level_select_id} defaultValue={null} style={{ width: '100%' }}
+                        onChange={(v) => { this.setState({ bug_level_select_id: v }) }}
+                    >{bug_level_Options}</Select>
+                </Col>
+            </Row>
+            <Row gutter={16} style={{ marginTop: 20 }}>
+                <Col span={4}>
+                    <span>缺陷专业:</span>
+                </Col>
+                <Col span={18}>
+                    <Select value={this.state.major_select_id} defaultValue={null} style={{ width: '100%' }}
+                        onChange={(v) => { this.setState({ major_select_id: v }) }}
+                    >{major_Options}</Select>
+                </Col>
+            </Row>
+            <Row gutter={16} style={{ marginTop: 20 }}>
+                <Col span={4}>
+                    <span>所在区域:</span>
+                </Col>
+                <Col span={18}>
+                    <Input value={this.state.area_remark} style={{ width: '100%' }} placeholder='请填写位置信息' onChange={(e) => { this.setState({ area_remark: e.target.value }) }} allowClear></Input>
+                </Col>
+            </Row>
+            <Row gutter={16} style={{ marginTop: 20 }}>
+                <Col span={4}>
+                    <span>问题描述:</span>
+                </Col>
+                <Col span={18}>
+                    <TextArea value={this.state.bug_text} style={{ width: '100%' }} placeholder='请填写缺陷信息' onChange={(e) => { this.setState({ bug_text: e.target.value }) }}></TextArea>
+                </Col>
+            </Row>
+            <Row gutter={16} style={{ marginTop: 20 }}>
+                <Col span={4}>
+                </Col>
+                <Col span={18} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Button type={'ghost'} onClick={() => {
+                        this.setState({
+                            bug_level_select_id: null,
+                            major_select_id: null,
+                            area_remark: null,
+                            bug_text: null,
+                        })
+                    }}>重置</Button>
+                    <Button type={'primary'} onClick={() => {
+                        if (this.state.bug_level_select_id && this.state.major_select_id && this.state.area_remark && this.state.bug_text) {
+                            let valueObj = {};
+                            valueObj.user_id = JSON.parse(localUserInfo).id;
+                            valueObj.major_id = this.state.major_select_id;
+                            valueObj.content = JSON.stringify({ select: '', text: this.state.bug_text, imgs: [] });
+                            valueObj.buglevel = this.state.bug_level_select_id;
+                            valueObj.area_remark = this.state.area_remark;
+                            valueObj.status = 0;
+                            HttpApi.addBugInfo(valueObj, (res) => {
+                                if (res.data.code === 0) { message.success('上传成功'); this.init(); this.setState({ showModal7: false }) }
+                            })
+                        } else { message.error('请完善相关信息') }
+                    }}>确定</Button>
+                </Col>
+            </Row>
+        </div>)
     }
     ////缺陷分配界面
     renderSelectWorkerModal = () => {
@@ -535,7 +616,7 @@ export default class BugView extends Component {
                             onClick={e => {
                                 this.setState({
                                     imguuid: item.uuid,
-                                    showModal: true
+                                    showModal1: true
                                 })
                             }}>{item.name}</span>)
                     });
@@ -570,15 +651,25 @@ export default class BugView extends Component {
         ]
         return (
             <div>
+                <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
                 <Table
                     bordered
                     dataSource={this.state.data}
                     columns={columns}
                 />
                 <Modal
+                    title="添加缺陷"
+                    visible={this.state.showModal7}
+                    onCancel={() => { this.setState({ showModal7: false }) }}
+                    footer={null}
+                    width={500}
+                >
+                    {this.renderAddBugModal()}
+                </Modal>
+                <Modal
                     title="图片查看"
-                    visible={this.state.showModal}
-                    onCancel={() => { this.setState({ showModal: false }) }}
+                    visible={this.state.showModal1}
+                    onCancel={() => { this.setState({ showModal1: false }) }}
                     footer={null}
                     width={500}
                 >
