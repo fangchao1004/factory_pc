@@ -139,11 +139,13 @@ class MainView extends Component {
                                 <Popover width={100} placement="rightBottom"
                                     title={storage.getItem('userinfo') ? "用户名: " + JSON.parse(storage.getItem('userinfo')).username + "(" + JSON.parse(storage.getItem('userinfo')).name + ")" :
                                         "不存在"}
-                                    content={<Button type='primary' style={{ width: "100%" }}
-                                        onClick={() => {
-                                            storage.clear();
-                                            window.location.href = "/";
-                                        }}>退出登录</Button>} trigger="click">
+                                    content={
+                                        <Button type='primary' style={{ width: "100%" }}
+                                            onClick={() => {
+                                                storage.clear();
+                                                window.location.href = "/";
+                                            }}>退出登录</Button>
+                                    } trigger="click">
                                     <Icon type="user" style={{ fontSize: 24 }} />
                                 </Popover>
                             </Col>
@@ -191,7 +193,7 @@ class MainView extends Component {
                             />
                             <Route
                                 path={`${this.props.match.path}/usersetting`}
-                                render={props => storage.getItem('userinfo') ? <SettingViewRoot {...props}/> : <Redirect to='/' />}
+                                render={props => storage.getItem('userinfo') ? <SettingViewRoot {...props} /> : <Redirect to='/' />}
                             />
                             <Route
                                 exact
