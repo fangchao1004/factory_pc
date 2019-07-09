@@ -29,15 +29,19 @@ class LineChartView extends Component {
     //     })
     // }
     getData = async () => {
-        let currentDeviceStatusData = await this.getDeviceStatusCount();
+        let currentDeviceStatusData = await this.getDeviceStatusCount();////当前设备的状态。分布（正常多少）（故障多少）
         // console.log('当前的设备状态：', currentDeviceStatusData);///今日记录
-        let historyOfDevicesStatusData = await this.getStatusCounts();///近一个月的设备情况
+        let historyOfDevicesStatusData = await this.getStatusCount();///近一个月的设备情况
         // console.log('设备历史记录：', historyOfDevicesStatusData);
+        let todayHasDetectCount = await this.getTodayHasDetectCount();///今日检测了多少台设备
+        console.log('今日检测了多少台设备:', todayHasDetectCount.todayDetectCount);
+
         let dataArr = [];
         historyOfDevicesStatusData.forEach((item) => {
             let obj = {};
             obj.总共 = item.total_num;
             obj.故障 = item.error_num;
+            obj.巡检 = item.detect_num;
             obj.date = moment(item.createdAt).format('DD');
             dataArr.push(obj);
         })
@@ -49,6 +53,7 @@ class LineChartView extends Component {
         let todayObj = {}
         todayObj.总共 = allcountForToday;
         todayObj.故障 = currentDeviceStatusData[1].status_count;
+        todayObj.巡检 = todayHasDetectCount.todayDetectCount;
         todayObj.date = moment().format('DD');
         dataArr.push(todayObj);
         this.setState({
@@ -67,7 +72,7 @@ class LineChartView extends Component {
             });
         })
     }
-    getStatusCounts = () => {
+    getStatusCount = () => {
         let startOfMonth = moment().startOf('month').format('YYYY-MM-DD HH:mm:ss');
         let endOfMonth = moment().endOf('month').format('YYYY-MM-DD HH:mm:ss');
         // console.log([startOfMonth, endOfMonth]);
@@ -82,12 +87,29 @@ class LineChartView extends Component {
             });
         })
     }
+    getTodayHasDetectCount = () => {
+        let startOfToday = moment().startOf('day').format('YYYY-MM-DD HH:mm:ss');
+        let endOfToday = moment().endOf('day').format('YYYY-MM-DD HH:mm:ss');
+        // console.log(startOfToday,endOfToday);
+        return new Promise((resolve, reject) => {
+            let sql1 = ' select count(*) as todayDetectCount  from (select distinct rds.device_id from records rds'
+            let sql2 = ' where rds.createdAt > "' + startOfToday + '" and rds.createdAt < "' + endOfToday + '") t1 ';
+            let sqlText = sql1 + sql2;
+            HttpApi.obs({ sql: sqlText }, (res) => {
+                let result = null;
+                if (res.data.code === 0) {
+                    result = res.data.data[0]
+                }
+                resolve(result);
+            });
+        })
+    }
     render() {
         const ds = new DataSet();
         const dv = ds.createView().source(this.state.data);
         dv.transform({
             type: "fold",
-            fields: ["总共", "故障"],
+            fields: ["总共","巡检", "故障"],
             // 展开字段集
             key: "status",
             // key字段
