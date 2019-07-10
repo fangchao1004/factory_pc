@@ -59,9 +59,9 @@ export default class LoginView extends React.Component {
           }}>
             <Card title={<div style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
               <span>登录</span>
-              <img src={downloadUrl} alt="" width="30" height="30" style={{ cursor: 'pointer' }}
+              {/* <img src={downloadUrl} alt="" width="30" height="30" style={{ cursor: 'pointer' }}
                 onClick={() => { this.setState({ modalvisible: true }) }}
-              />
+              /> */}
             </div>}
               style={{ width: 300, height: 280, marginRight: 120 }}>
               <LoginFrom ref="form" onLoginOk={this.onLoginOk} />
