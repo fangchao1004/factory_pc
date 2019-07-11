@@ -219,7 +219,13 @@ export default class BugView extends Component {
                     <span>人员选择:</span>
                 </Col>
                 <Col span={18}>
-                    <Select value={this.state.user_select_id} defaultValue={null} style={{ width: '100%' }}
+                    <Select
+                        showSearch
+                        optionFilterProp="children"
+                        filterOption={(input, option) =>
+                            option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        }
+                        value={this.state.user_select_id} defaultValue={null} style={{ width: '100%' }}
                         onChange={(v) => { this.setState({ user_select_id: v }) }}
                     >{userOptions}</Select>
                 </Col>

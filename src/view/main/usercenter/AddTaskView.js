@@ -12,7 +12,7 @@ function AddTaskForm(props) {
         <Form.Item label="执行人" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('to', {
                 rules: [{ required: true, message: '请选择执行人' }]
-            })(<TreeSelect placeholder="请选择执行人" treeCheckable treeData={props.data}></TreeSelect>)}
+            })(<TreeSelect showSearch treeNodeFilterProp="title" placeholder="请选择执行人" treeCheckable treeData={props.data}></TreeSelect>)}
         </Form.Item>
         <Form.Item label="主题" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('title', {
