@@ -55,6 +55,8 @@ class StaffView extends Component {
         this.setState({ addStaffVisible: true })
     }
     addStaffOnOk = (newValues) => {
+        console.log(newValues)
+
         newValues.permission = newValues.permission.join(',')
         HttpApi.addUserInfo(newValues, data => {
             if (data.data.code === 0) {
@@ -74,7 +76,7 @@ class StaffView extends Component {
     }
     updateStaffOnOk = (newValues) => {
         newValues.isadmin = newValues.isadmin ? 1 : 0
-        newValues.permission = newValues.permission.join(',')
+        if(newValues.permission) newValues.permission = newValues.permission.join(',')
         HttpApi.updateUserInfo({ query: { id: this.state.updateStaffData.id }, update: newValues }, data => {
             if (data.data.code === 0) {
                 this.setState({ updateStaffVisible: false })
