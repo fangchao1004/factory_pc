@@ -17,7 +17,13 @@ function UpdateTaskForm(props) {
     tos.shift()
     tos.pop();
     // console.log('props.task:截止时间：', moment(props.task.overTime).format('YYYY-MM-DD HH:mm:ss'));
-    // console.log('props.taskppp:', props.task);
+    // console.log('props.taskppp:', props.task); 
+    let isMessageflag = props.task.isMessage === 1;
+    // console.log('当前任务的默认是否发送短信:',isMessageflag);
+    const [isMess, setIsMess] = React.useState(isMessageflag);
+    React.useEffect(()=>{
+        setIsMess(isMessageflag);
+    },[isMessageflag]) 
     return <Form>
         <Form.Item label="执行人" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('to', {
@@ -63,9 +69,9 @@ function UpdateTaskForm(props) {
         </Form.Item>
         <Form.Item label="短信通知" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('isMessage', {
-                initialValue: props.task.isMessage === 1,
+                initialValue: isMess,
                 rules: [{ required: true, message: '请选择短信通知' }]
-            })(<Switch disabled={!isEditable} checkedChildren="开" unCheckedChildren="关" defaultChecked={props.task.isMessage === 1} />)}
+            })(<Switch disabled={!isEditable} checkedChildren="开" unCheckedChildren="关" checked={isMess} onChange={(v) => { setIsMess(v) }} />)}
         </Form.Item>
     </Form >
 }
