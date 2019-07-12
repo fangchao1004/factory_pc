@@ -102,12 +102,14 @@ class TaskFromMeView extends Component {
                 this.setState({ addStaffVisible: false })
                 message.success('添加成功')
                 this.getTasksData()
+                let usersIdArrInt = toIds.map((item) => parseInt(item))
                 if (newValues.isMessage === 1) {
-                    console.log('短信通知')
-                    this.sendMessageToStaff(toIds, newValues);
+                    console.log('添加任务，短信通知')
+                    this.sendMessageToStaff(usersIdArrInt, newValues);
                 } else {
-                    console.log('不必短信通知')
+                    console.log('添加任务，不必短信通知')
                 }
+                this.pushNoticeToApp(usersIdArrInt);
             } else {
                 message.error(data.data.data)
             }
@@ -129,16 +131,17 @@ class TaskFromMeView extends Component {
                 this.setState({ updateStaffVisible: false })
                 this.getTasksData()
                 message.success('任务修改成功')
-                if (newValues.isMessage === 1) {
-                    console.log('短信通知')
-                    let usersIdArr = newValues.to.split(',');
+                let usersIdArr = newValues.to.split(',');
                     usersIdArr.shift();
                     usersIdArr.pop();
-                    let a = usersIdArr.map((item) => parseInt(item))
-                    this.sendMessageToStaff(a, newValues);
+                    let usersIdArrInt = usersIdArr.map((item) => parseInt(item))
+                if (newValues.isMessage === 1) {
+                    console.log('修改任务，短信通知')
+                    this.sendMessageToStaff(usersIdArrInt, newValues);
                 } else {
-                    console.log('不必短信通知')
+                    console.log('修改任务，不必短信通知')
                 }
+                this.pushNoticeToApp(usersIdArrInt);
             } else {
                 message.error('任务修改失败')
             }
@@ -171,10 +174,17 @@ class TaskFromMeView extends Component {
                     time: overTimeDate
                 }
                 tempArr.push(messageObj);
-                console.log(item)
-                HttpApi.pushnotice({user_id: item.id, title: '任务通知', text: '您有最新的任务,请注意查看'})
+                // console.log(item)
+                // HttpApi.pushnotice({user_id: item.id, title: '任务通知', text: '您有最新的任务,请注意查看'})
             })
             HttpApi.sendMessageToStaffs(tempArr)
+        })
+    }
+
+    pushNoticeToApp=(toUsersArr)=>{
+        console.log('开始向app推送信息。需要推送通知的人员有:',toUsersArr);
+        toUsersArr.forEach((oneUserId)=>{
+            HttpApi.pushnotice({user_id: oneUserId, title: '任务通知', text: '您有最新的任务,请注意查看'})
         })
     }
 
