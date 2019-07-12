@@ -171,6 +171,8 @@ class TaskFromMeView extends Component {
                     time: overTimeDate
                 }
                 tempArr.push(messageObj);
+                console.log(item)
+                HttpApi.pushnotice({user_id: item.id, title: '任务通知', text: '您有最新的任务,请注意查看'})
             })
             HttpApi.sendMessageToStaffs(tempArr)
         })
