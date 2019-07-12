@@ -7,7 +7,8 @@ import moment from 'moment'
  */
 function AddTaskForm(props) {
     const { getFieldDecorator } = props.form
-    // console.log('props.data:',props.data);
+    // console.log('props.form:',props.form);
+    const [isMessage, setIsMessage] = React.useState(false)
     return <Form>
         <Form.Item label="执行人" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('to', {
@@ -31,9 +32,9 @@ function AddTaskForm(props) {
         </Form.Item>
         <Form.Item label="短信通知" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('isMessage', {
-                initialValue: true,
+                initialValue: isMessage,
                 rules: [{ required: false, message: '请选择是否短信通知' }]
-            })(<Switch checkedChildren="开" unCheckedChildren="关" defaultChecked={true} />)}
+            })(<Switch checkedChildren="开" unCheckedChildren="关" defaultChecked={isMessage} onChange={(v)=>{setIsMessage(v)}} />)}
         </Form.Item>
     </Form >
 }
@@ -50,7 +51,7 @@ export default function AddTaskView(props) {
     const [loading, setLoading] = React.useState(false)
 
     React.useEffect(() => {
-        console.log(props.visible)
+        // console.log(props.visible)
         if (!props.visible) {
             if (staffFormRef.current) {
                 staffFormRef.current.resetFields()
