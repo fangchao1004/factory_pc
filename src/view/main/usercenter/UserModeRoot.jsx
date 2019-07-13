@@ -3,13 +3,14 @@ import { Card } from 'antd';
 import TaskFromMeView from './TaskFromMeView';
 import TaskToMeView from './TaskToMeView'
 
-const tabListNoTitle = [{
-    key: 'TaskFromMeView',
-    tab: '我分配的任务',
-}, {
-    key: 'TaskToMeView',
-    tab: '分配我的任务'
-}];
+const tabListNoTitle = [
+    {
+        key: 'TaskToMeView',
+        tab: '分配我的任务'
+    }, {
+        key: 'TaskFromMeView',
+        tab: '我分配的任务',
+    }];
 
 const contentListNoTitle = {
     TaskFromMeView: <TaskFromMeView />,
@@ -18,8 +19,8 @@ const contentListNoTitle = {
 
 class UserModeRoot extends Component {
     state = {
-        key: 'TaskFromMeView',
-        noTitleKey: 'TaskFromMeView',
+        key: 'TaskToMeView',
+        noTitleKey: 'TaskToMeView',
     }
 
     onTabChange = (key) => {
