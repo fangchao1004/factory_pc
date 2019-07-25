@@ -1,7 +1,7 @@
 import Axios from 'axios';
 
 export const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
-// export const Testuri = 'http://localhost:3010/'///本地服务器测试用
+// export const Testuri = 'http://localhost:3009/'///本地服务器测试用
 
 export const TesturiForss = 'http://hefeixiaomu.com:3010/'///小木服务器数据库 sql server 服务独立地址
 // export const TesturiForss = 'http://localhost:3010/'///本地服务器测试用 sql server 服务独立地址
