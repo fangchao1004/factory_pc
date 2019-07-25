@@ -1,8 +1,10 @@
 import Axios from 'axios';
 
 export const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
-// export const Testuri = 'http://127.0.0.1:3009/'///本地服务器测试用
-// export const Testuri = 'http://192.168.3.119:3009/'///本地服务器测试用 fc
+// export const Testuri = 'http://localhost:3010/'///本地服务器测试用
+
+export const TesturiForss = 'http://hefeixiaomu.com:3010/'///小木服务器数据库 sql server 服务独立地址
+// export const TesturiForss = 'http://localhost:3010/'///本地服务器测试用 sql server 服务独立地址
 class HttpApi {
     /**
      * obs操作---慎用
@@ -17,6 +19,21 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
+
+    /**
+     * obs操作---慎用  操作sql server
+     * @param {*} params 
+     * @param {*} f1 
+     * @param {*} f2 
+     */
+    static obsForss(params, f1, f2) {
+        Axios.post(TesturiForss + 'obs', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+
     /**
      * 获取今天设备的巡检情况。(只要今天在的record记录中，出现了某些人
      * ，就认为他是巡检人员。就把他所对应的所有的设备记录都查询出来。
@@ -332,6 +349,27 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
+
+    /**
+     * 操作sql server 部分接口
+     * *******************************************************
+     * *******************************************************
+     */
+    static getAllTransactionInfo(params, f1, f2) {
+        Axios.post(TesturiForss + 'getAllTransactionInfo', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static getSomeOneTransactionInfo(params, f1, f2) {
+        Axios.post(TesturiForss + 'getSomeOneTransactionInfo', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+
 }
 
 export default HttpApi

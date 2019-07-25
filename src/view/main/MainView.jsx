@@ -12,6 +12,7 @@ import SettingStaffModeRoot from './settingMode/settingStaffMode/SettingStaffMod
 import SettingTableModeRoot from './settingMode/settingTableMode/SettingTableModeRoot';
 import BugModeRoot from './bugMode/BugModeRoot';
 import SettingViewRoot from './setting/SettingViewRoot';
+import TransactionModeRoot from './transactionMode/TransactionModeRoot';
 
 var storage = window.localStorage;
 const { Header, Content, Sider } = Layout;
@@ -118,6 +119,11 @@ class MainView extends Component {
                             <span>任务</span>
                             <Link to={`${this.props.match.url}/user`} />
                         </Menu.Item>
+                        <Menu.Item key="交易">
+                            <Icon type="money-collect" />
+                            <span>消费</span>
+                            <Link to={`${this.props.match.url}/transaction`} />
+                        </Menu.Item>
                         <SubMenu key="设置" title={<span><Icon type="setting" /><span>设置</span></span>}>
                             <Menu.Item key="个人设置"><Icon type="switcher" /><span>个人设置</span><Link to={`${this.props.match.url}/usersetting`} /></Menu.Item>
                         </SubMenu>
@@ -217,6 +223,12 @@ class MainView extends Component {
                                 path={`${this.props.match.path}/setting/tableModeRoot`}
                                 // component={SettingTableModeRoot}
                                 component={() => (storage.getItem('userinfo') ? <SettingTableModeRoot /> : <Redirect to='/' />)}
+                            />
+                            <Route
+                                exact
+                                path={`${this.props.match.path}/transaction`}
+                                // component={SettingTableModeRoot}
+                                component={() => (storage.getItem('userinfo') ? <TransactionModeRoot /> : <Redirect to='/' />)}
                             />
                         </section>
                     </Content>
