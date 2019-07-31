@@ -1,14 +1,19 @@
 import React, { Component } from 'react';
 import { Card } from 'antd';
 import BugView from './BugView';
+import BugCompletedView from './BugCompletedView'
 
 const tabListNoTitle = [{
     key: 'BugView',
     tab: '缺陷记录',
+},{
+    key: 'BugCompletedView',
+    tab: '已完成的缺陷',
 }];
 
 const contentListNoTitle = {
     BugView: <BugView />,
+    BugCompletedView: <BugCompletedView />,
 };
 
 class BugModeRoot extends Component {

@@ -5,15 +5,13 @@ import moment from 'moment'
 const { Step } = Steps;
 const { TextArea } = Input;
 var major_filter = [];///用于筛选任务专业的数据 选项
-const status_filter = [{ text: '待分配', value: 0 }, { text: '维修中', value: 1 },
-{ text: '专工验收中', value: 2 }, { text: '运行验收中', value: 3 }];///用于筛选状态的数据
 var storage = window.localStorage;
 var localUserInfo = '';
 var userOptions = [];///人员选项
 const bug_level_Options = [{ id: 1, name: '一级' }, { id: 2, name: '二级' }, { id: 3, name: '三级' }].map(bug_level => <Select.Option value={bug_level.id} key={bug_level.id}>{bug_level.name}</Select.Option>)
 var major_Options = [];///专业选项
 
-export default class BugView extends Component {
+export default class BugCompletedView extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -104,12 +102,12 @@ export default class BugView extends Component {
         })
     }
     getBugsInfo = () => {
-        let sqlText = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,areas.name as area_name from bugs
+        let sqlText =  `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,areas.name as area_name from bugs
         left join devices des on bugs.device_id = des.id
         left join users urs on bugs.user_id = urs.id
         left join majors mjs on bugs.major_id = mjs.id
         left join areas on des.area_id = areas.id
-        where bugs.status != 4
+        where bugs.status = 4
         `;
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql: sqlText }, (res) => {
@@ -419,9 +417,7 @@ export default class BugView extends Component {
                         message.success('发布成功');
                         this.setState({ currentRecord: res.data.data[0] })
                         ////如果是状态4 则说明这个bug已经解决了。要把这个bug对应的record给更新（复制原有数据，本地修改，再作为新数据插入数据库record表）
-                        if (targetStatus === 4) { this.changeRecordData(); setTimeout(() => {
-                            this.setState({ showModal2: false })
-                        }, 1000); }
+                        if (targetStatus === 4) { this.changeRecordData(); }
                     }
                 })
             }
@@ -436,7 +432,6 @@ export default class BugView extends Component {
         ///1，要根据bug_id 去bugs表中去查询该条数据，获取其中的 device_id 字段信息
         let oneBugInfo = await this.getOneBugInfo(bugId);
         let device_id = oneBugInfo.device_id;
-        if (!device_id) { return }
         ///2，根据 device_id 去record 表中 找到 这个设备最新的一次record。 获取到后，在本地修改。再最为一条新数据插入到records表中
         let oneRecordInfo = await this.getOneRecordInfo(device_id);
         let bug_content = JSON.parse(oneRecordInfo.content);
@@ -688,9 +683,7 @@ export default class BugView extends Component {
             {
                 title: '缺陷状态',
                 dataIndex: 'status',
-                filters: status_filter,
                 align: 'center',
-                onFilter: (value, record) => record.status === value,
                 render: (text, record) => {
                     let str = '';
                     let color = '#888888'
@@ -711,7 +704,7 @@ export default class BugView extends Component {
         ]
         return (
             <div>
-                <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
+                {/* <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button> */}
                 <Table
                     bordered
                     dataSource={this.state.data}
