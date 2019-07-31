@@ -3,13 +3,16 @@ import { Table, Tag, Input } from 'antd'
 import HttpApi from '../../util/HttpApi';
 import moment from 'moment'
 const { Search } = Input;
+const storage = window.localStorage;
+var userinfo = storage.getItem('userinfo')
 
 export default class TransactionView extends Component {
     constructor(props) {
         super(props);
         this.state = {
             data: [],
-            filterData: []
+            filterData: [],
+            isAdmin: false
         }
     }
     componentDidMount() {
@@ -35,9 +38,16 @@ export default class TransactionView extends Component {
         })
     }
     init = async () => {
-        let data = await this.getAllTransactionInfo();
+        userinfo = storage.getItem('userinfo')
+        let isAdmin = JSON.parse(userinfo).isadmin === 1;
+        let data = [];
+        if(isAdmin){
+            data = await this.getAllTransactionInfo();
+        }else{
+            data =  await this.getSomeOneTransactionInfo(JSON.parse(userinfo).name);
+        }
         data.map((item, index) => { return item.key = index })
-        this.setState({ data })
+        this.setState({ data, isAdmin})
     }
     getAllTransactionInfo = () => {
         return new Promise((resolve, reject) => {
@@ -51,6 +61,7 @@ export default class TransactionView extends Component {
         })
     }
     seachPeopleHandler = async (v) => {
+        if (!v) { return }
         let data = await this.getSomeOneTransactionInfo(v);
         data.map((item, index) => { return item.key = index });
         this.setState({ data })
@@ -112,21 +123,22 @@ export default class TransactionView extends Component {
                 }
             },
             {
-                title: '卡内余额',
+                title: '账户余额 / 补贴余额',
                 dataIndex: 'FinalBalance',
             }
         ]
         return (
             <div>
-                <Search
-                    style={{ width: '40%', marginBottom: 20 }}
-                    placeholder="支持人员姓名模糊查询"
-                    enterButton="搜索"
-                    size="large"
-                    allowClear
-                    onSearch={value => this.seachPeopleHandler(value)}
-                    onChange={e => { if (e.currentTarget.value === '') { this.init() } }}
-                />
+                {this.state.isAdmin ?
+                    <Search
+                        style={{ width: '40%', marginBottom: 20 }}
+                        placeholder="支持人员姓名模糊查询"
+                        enterButton="搜索"
+                        size="large"
+                        allowClear
+                        onSearch={value => this.seachPeopleHandler(value)}
+                        onChange={e => { if (e.currentTarget.value === '') { this.init() } }}
+                    /> : null}
                 <Table
                     bordered
                     dataSource={this.state.data}

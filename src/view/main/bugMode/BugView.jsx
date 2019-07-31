@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col } from 'antd'
+import React, { Component, Fragment } from 'react';
+import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Spin, Drawer } from 'antd'
 import HttpApi, { Testuri } from '../../util/HttpApi'
 import moment from 'moment'
 const { Step } = Steps;
@@ -19,6 +19,8 @@ export default class BugView extends Component {
         this.state = {
             data: [],
             showModal1: false,///img显示框
+            showLoading: true,///现实loading图片
+            preImguuid: null,///上一次加载的图片的uuid
             showModal2: false,
             showModal3: false,
             showModal4: false,
@@ -215,7 +217,7 @@ export default class BugView extends Component {
     renderSelectWorkerModal = () => {
         return (<div>
             <Row gutter={16}>
-                <Col span={4}>
+                <Col span={5}>
                     <span>人员选择:</span>
                 </Col>
                 <Col span={18}>
@@ -231,7 +233,7 @@ export default class BugView extends Component {
                 </Col>
             </Row>
             <Row gutter={16} style={{ marginTop: 20 }}>
-                <Col span={4}>
+                <Col span={5}>
                     <span>备注:</span>
                 </Col>
                 <Col span={18}>
@@ -255,7 +257,7 @@ export default class BugView extends Component {
         return (
             <div>
                 <Row gutter={16}>
-                    <Col span={4}>
+                    <Col span={5}>
                         <span>备注:</span>
                     </Col>
                     <Col span={18}>
@@ -295,7 +297,7 @@ export default class BugView extends Component {
         return (
             <div>
                 <Row gutter={16}>
-                    <Col span={4}>
+                    <Col span={5}>
                         <span>备注:</span>
                     </Col>
                     <Col span={18}>
@@ -335,7 +337,7 @@ export default class BugView extends Component {
         return (
             <div>
                 <Row gutter={16}>
-                    <Col span={4}>
+                    <Col span={5}>
                         <span>备注:</span>
                     </Col>
                     <Col span={18}>
@@ -491,15 +493,58 @@ export default class BugView extends Component {
             // console.log("每一步的操作流程数据：", stepRemarkObj[statusValue]);
             if (stepRemarkObj[statusValue]) {
                 let renderArr = stepRemarkObj[statusValue];
-                renderArr.forEach((item) => {
+                renderArr.forEach((item, index) => {
                     let text = ''
-                    let remarkText = item.remark ? '  备注:' + item.remark : '';
-                    if (item.to) {
-                        text = item.time + '  ' + this.getLocalUserName(item.from) + '  分配给 ' + this.getLocalUserName(item.to) + remarkText;
-                    } else {
-                        text = item.time + '  ' + this.getLocalUserName(item.from) + remarkText;
+                    let remarkText = item.remark ? item.remark : '';
+                    /////////////////
+                    let result_arr = [];
+                    let comArr = [];///组件数组
+                    if (item.imgs) {
+                        item.imgs.forEach((item, index) => {
+                            result_arr.push({ key: index + item, name: ('图片' + (index + 1)), uuid: item });
+                        })
+                        result_arr.forEach((item, index) => {
+                            comArr.push(<Button size={'small'} type={'primary'} key={item.uuid} style={{ marginLeft: 10, cursor: "pointer" }}
+                                onClick={e => {
+                                    if (this.state.preImguuid !== item.uuid) {
+                                        this.setState({
+                                            showLoading: true,
+                                        })
+                                    } else {
+                                        this.setState({
+                                            showLoading: false,
+                                        })
+                                    }
+                                    this.setState({
+                                        imguuid: item.uuid,
+                                        showModal1: true,
+                                        preImguuid: item.uuid,
+                                    })
+                                }}>{item.name}</Button>)
+                        });
                     }
-                    oneStepContent.push(<div key={oneStepContent.length}>{text}</div>)
+                    /////////////////
+                    if (item.to || item.to >= 0) {
+                        // text = '  ' + this.getLocalUserName(item.from) + '  分配给 ' + this.getLocalUserName(item.to);
+                        text = <Fragment><span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{item.time}</span>
+                            <span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{' ' + this.getLocalUserName(item.from)}</span>
+                            <span> 分配给 </span>
+                            <span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{' ' + this.getLocalUserName(item.to)}</span>
+                            {remarkText ? <span style={{color:'#888888'}}> 备注: </span> : null}
+                            <span style={{ color: renderArr.length - 1 === index ? 'orange' : '#888888' }}>{remarkText}</span>
+                        </Fragment>
+                    } else {
+                        text = '  ' + this.getLocalUserName(item.from);
+                        text = <Fragment><span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{item.time}</span>
+                            <span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{' ' + this.getLocalUserName(item.from)}</span>
+                            {remarkText ? <span style={{color:'#888888'}}> 备注: </span> : null}
+                            <span style={{ color: renderArr.length - 1 === index ? 'orange' : '#888888' }}>{remarkText}</span>
+                        </Fragment>
+                    }
+                    oneStepContent.push(<div key={index}>
+                        {text}
+                        {comArr}
+                    </div>)
                 })
             }
         }
@@ -547,7 +592,6 @@ export default class BugView extends Component {
         const columns = [
             {
                 key: 'createdAt', dataIndex: 'createdAt', title: '时间',
-                // width: 190,
                 sorter: (a, b) => {
                     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
                 },
@@ -556,7 +600,6 @@ export default class BugView extends Component {
             },
             {
                 key: 'device_name', dataIndex: 'device_name', title: '设备',
-                // width: 120, 
                 render: (text) => {
                     let result = '/'
                     if (text && text !== '') { result = text }
@@ -565,12 +608,9 @@ export default class BugView extends Component {
             },
             {
                 key: 'user_name', dataIndex: 'user_name', title: '上报人',
-                // width: 80 
             },
-            // { key: 'status', dataIndex: 'status', title: '状态', width: 80 },
             {
                 key: 'area_remark', dataIndex: 'area_remark', title: '区域',
-                // width: 100, 
                 render: (text, record) => {
                     let result = '/'
                     if (text) { result = text }
@@ -580,7 +620,6 @@ export default class BugView extends Component {
             },
             {
                 key: 'buglevel', dataIndex: 'buglevel', title: '等级',
-                // width: 80, 
                 render: (text) => {
                     let result = null;
                     let resultCom = '/'
@@ -620,10 +659,21 @@ export default class BugView extends Component {
                     result_arr.forEach((item, index) => {
                         comArr.push(<span key={item.uuid} style={{ color: '#438ef7', marginRight: 10, cursor: "pointer" }}
                             onClick={e => {
+                                if (this.state.preImguuid !== item.uuid) {
+                                    this.setState({
+                                        showLoading: true,
+                                    })
+                                } else {
+                                    this.setState({
+                                        showLoading: false,
+                                    })
+                                }
                                 this.setState({
                                     imguuid: item.uuid,
-                                    showModal1: true
+                                    showModal1: true,
+                                    preImguuid: item.uuid,
                                 })
+
                             }}>{item.name}</span>)
                     });
                     let result = '/'
@@ -672,17 +722,9 @@ export default class BugView extends Component {
                 >
                     {this.renderAddBugModal()}
                 </Modal>
-                <Modal
-                    title="图片查看"
-                    visible={this.state.showModal1}
-                    onCancel={() => { this.setState({ showModal1: false }) }}
-                    footer={null}
-                    width={500}
-                >
-                    <img alt='' src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} style={{ width: 450, height: 600 }} />
-                </Modal>
                 {/* 进度界面 */}
                 <Modal
+                    mask={false}
                     title="当前进度"
                     visible={this.state.showModal2}
                     onCancel={() => { this.setState({ showModal2: false }) }}
@@ -714,45 +756,56 @@ export default class BugView extends Component {
                     >运行人员验收</Button>
                 </Modal>
                 {/* 分配人员操作界面 */}
-                <Modal
+                <Drawer
                     title="分配维修人员"
+                    placement='right'
                     visible={this.state.showModal3}
-                    onCancel={() => { this.setState({ user_select_id: null, step_0_remark: '', showModal3: false }) }}
-                    footer={null}
-                    width={520}
+                    onClose={() => { this.setState({ user_select_id: null, step_0_remark: '', showModal3: false }) }}
+                    width={450}
                 >
                     {this.renderSelectWorkerModal()}
-                </Modal>
+                </Drawer>
                 {/* 维修人员操作界面 */}
-                <Modal
+                <Drawer
                     title="维修处理"
+                    placement='right'
                     visible={this.state.showModal4}
-                    onCancel={() => { this.setState({ step_1_remark: '', showModal4: false }) }}
-                    footer={null}
-                    width={520}
+                    onClose={() => { this.setState({ step_1_remark: '', showModal4: false }) }}
+                    width={450}
                 >
                     {this.renderWorkerModal()}
-                </Modal>
+                </Drawer>
                 {/* 专工验收操作界面 */}
-                <Modal
+                <Drawer
                     title="专工验收处理"
+                    placement='right'
                     visible={this.state.showModal5}
-                    onCancel={() => { this.setState({ step_2_remark: '', showModal5: false }) }}
-                    footer={null}
-                    width={520}
+                    onClose={() => { this.setState({ step_2_remark: '', showModal5: false }) }}
+                    width={450}
                 >
                     {this.renderManagerModal()}
-                </Modal>
+                </Drawer>
                 {/* 运行验收操作界面 */}
-                <Modal
+                <Drawer
                     title="运行验收处理"
+                    placement='right'
                     visible={this.state.showModal6}
-                    onCancel={() => { this.setState({ step_3_remark: '', showModal6: false }) }}
-                    footer={null}
-                    width={520}
+                    onClose={() => { this.setState({ step_3_remark: '', showModal6: false }) }}
+                    width={450}
                 >
                     {this.renderRunerModal()}
-                </Modal>
+                </Drawer>
+                <Drawer
+                    title="查看图片"
+                    placement="left"
+                    visible={this.state.showModal1}
+                    onClose={() => { this.setState({ showModal1: false }); }}
+                    width={450}
+                    bodyStyle={{padding:10}}
+                >
+                    <div style={{ textAlign: 'center', display: this.state.showLoading ? 'block' : 'none' }}><Spin tip='努力加载中。。。' /></div>
+                    <img alt='' src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} style={{ width:430 , height: 430/3*4, display: this.state.showLoading ? 'none' : 'block' }} onLoad={() => { console.log('图片加载完成'); this.setState({ showLoading: false }) }} />
+                </Drawer>
             </div>
         );
     }
