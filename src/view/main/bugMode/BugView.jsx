@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Spin, Drawer } from 'antd'
+import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Spin, Drawer, TreeSelect } from 'antd'
 import HttpApi, { Testuri } from '../../util/HttpApi'
 import moment from 'moment'
 const { Step } = Steps;
@@ -9,7 +9,6 @@ const status_filter = [{ text: '待分配', value: 0 }, { text: '维修中', val
 { text: '专工验收中', value: 2 }, { text: '运行验收中', value: 3 }];///用于筛选状态的数据
 var storage = window.localStorage;
 var localUserInfo = '';
-var userOptions = [];///人员选项
 const bug_level_Options = [{ id: 1, name: '一级' }, { id: 2, name: '二级' }, { id: 3, name: '三级' }].map(bug_level => <Select.Option value={bug_level.id} key={bug_level.id}>{bug_level.name}</Select.Option>)
 var major_Options = [];///专业选项
 
@@ -42,6 +41,8 @@ export default class BugView extends Component {
             major_select_id: null,
             area_remark: null,
             bug_text: null,
+
+            userLevels: [],
         }
     }
     componentDidMount() {
@@ -59,16 +60,54 @@ export default class BugView extends Component {
         finallyData.forEach((item) => { item.key = item.id + '' })
         // console.log('bug数据：', finallyData);
         let userData = await this.getUsersInfo();
+        let userLevels = await this.getUsersLevels();
+        // console.log('userLevels:',userLevels);
         // console.log('userData:', userData);
-        userOptions = userData.map(user => <Select.Option value={user.id} key={user.id}>{user.name}</Select.Option>)
+        userLevels.forEach((oneLevel) => {
+            // console.log(oneLevel);
+            let tempArr = [];
+            userData.forEach((oneUser) => {
+                if (oneLevel.level_id === oneUser.level_id) {
+                    // console.log(oneUser);
+                    tempArr.push(oneUser);
+                }
+            })
+            // console.log(tempArr);
+            oneLevel.children = tempArr
+            oneLevel.selectable = false
+        })
+        // console.log(userLevels);
+
+        // userOptions = userData.map(user => <Select.Option value={user.id} key={user.id}>{user.name}</Select.Option>)
         this.setState({
             data: finallyData,
-            userData
+            userData,
+            userLevels
+        })
+    }
+    getUsersLevels = () => {
+        return new Promise((resolve, reject) => {
+            // let sqlText = 'select * from users order by convert(name using gbk) ASC'
+            let sqlText = `select distinct users.level_id, users.level_id as 'value',levels.name as title from users
+            left join levels
+            on levels.id = users.level_id
+            order by level_id`
+            HttpApi.obs({ sql: sqlText }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
         })
     }
     getUsersInfo = () => {
         return new Promise((resolve, reject) => {
-            let sqlText = 'select * from users order by convert(name using gbk) ASC'
+            // let sqlText = 'select * from users order by convert(name using gbk) ASC'
+            let sqlText = `select users.*,users.name as title,levels.name level_name,  CONCAT(users.level_id,'-',users.id) 'key',CONCAT(users.level_id,'-',users.id) 'value' from users
+            left join levels
+            on users.level_id = levels.id
+            order by users.level_id`
             HttpApi.obs({ sql: sqlText }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -222,15 +261,21 @@ export default class BugView extends Component {
                     <span>人员选择:</span>
                 </Col>
                 <Col span={18}>
-                    <Select
-                        showSearch
-                        optionFilterProp="children"
-                        filterOption={(input, option) =>
-                            option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                        }
-                        value={this.state.user_select_id} defaultValue={null} style={{ width: '100%' }}
-                        onChange={(v) => { this.setState({ user_select_id: v }) }}
-                    >{userOptions}</Select>
+                    <TreeSelect
+                        style={{ width: '100%' }}
+                        treeNodeFilterProp="title"
+                        placeholder="请选择维修人员"
+                        treeCheckable={false}
+                        treeData={this.state.userLevels}
+                        onSelect={(v, node, extra) => {
+                            // console.log(v, node, extra);
+                            if (v.split('-').length === 2) {
+                                let user_select_id =parseInt(v.split('-')[1]);
+                                // console.log('user_select_id:', user_select_id);
+                                this.setState({ user_select_id })
+                            }
+                        }}
+                    ></TreeSelect>
                 </Col>
             </Row>
             <Row gutter={16} style={{ marginTop: 20 }}>
@@ -419,9 +464,11 @@ export default class BugView extends Component {
                         message.success('发布成功');
                         this.setState({ currentRecord: res.data.data[0] })
                         ////如果是状态4 则说明这个bug已经解决了。要把这个bug对应的record给更新（复制原有数据，本地修改，再作为新数据插入数据库record表）
-                        if (targetStatus === 4) { this.changeRecordData(); setTimeout(() => {
-                            this.setState({ showModal2: false })
-                        }, 1000); }
+                        if (targetStatus === 4) {
+                            this.changeRecordData(); setTimeout(() => {
+                                this.setState({ showModal2: false })
+                            }, 1000);
+                        }
                     }
                 })
             }
