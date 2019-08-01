@@ -710,7 +710,7 @@ export default class BugView extends Component {
             }
         ]
         return (
-            <div>
+            <Fragment>
                 <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
                 <Table
                     bordered
@@ -722,7 +722,7 @@ export default class BugView extends Component {
                     visible={this.state.showModal7}
                     onCancel={() => { this.setState({ showModal7: false }) }}
                     footer={null}
-                    width={500}
+                    width={520}
                 >
                     {this.renderAddBugModal()}
                 </Modal>
@@ -810,7 +810,7 @@ export default class BugView extends Component {
                     <div style={{ textAlign: 'center', display: this.state.showLoading ? 'block' : 'none' }}><Spin tip='努力加载中。。。' /></div>
                     <img alt='' src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} style={{ width: 430, height: 430 / 3 * 4, display: this.state.showLoading ? 'none' : 'block' }} onLoad={() => { console.log('图片加载完成'); this.setState({ showLoading: false }) }} />
                 </Drawer>
-            </div>
+            </Fragment>
         );
     }
 }

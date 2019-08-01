@@ -100,7 +100,7 @@ class HomePageViewRoot extends Component {
                 </Row>
                 <Row gutter={10}>
                     <Col span={24}>
-                        <div style={{ marginTop: 16 }}>
+                        <div style={{ marginTop: 16, marginBottom: 20 }}>
                             <LineChartView />
                         </div>
                     </Col>
