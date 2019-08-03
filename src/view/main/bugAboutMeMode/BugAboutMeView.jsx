@@ -59,7 +59,7 @@ export default class BugAboutMeView extends Component {
 
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
         finallyData.forEach((item) => { item.key = item.id + '' })
-        // console.log('bug数据：', finallyData);
+        // console.log('about me bug数据：', finallyData);
         let userData = await this.getUsersInfo();
         let userLevels = await this.getUsersLevels();
         // console.log('userLevels:',userLevels);
@@ -736,7 +736,6 @@ export default class BugAboutMeView extends Component {
                                     showModal1: true,
                                     preImguuid: item.uuid,
                                 })
-
                             }}>{item.name}</span>)
                     });
                     let result = '/'
