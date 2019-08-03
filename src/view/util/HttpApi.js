@@ -35,6 +35,20 @@ class HttpApi {
     }
 
     /**
+     * 查找那些关于我的缺陷
+     * @param {*} params 
+     * @param {*} f1 
+     * @param {*} f2 
+     */
+    static findBugsAboutMe(params, f1, f2) {
+        Axios.post(Testuri + 'findBugsAboutMe', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+
+    /**
      * 获取今天设备的巡检情况。(只要今天在的record记录中，出现了某些人
      * ，就认为他是巡检人员。就把他所对应的所有的设备记录都查询出来。
      * 例如：巡检人员 甲 ，乙
