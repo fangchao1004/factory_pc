@@ -12,7 +12,7 @@ var localUserInfo = '';
 const bug_level_Options = [{ id: 1, name: '一级' }, { id: 2, name: '二级' }, { id: 3, name: '三级' }].map(bug_level => <Select.Option value={bug_level.id} key={bug_level.id}>{bug_level.name}</Select.Option>)
 var major_Options = [];///专业选项
 
-export default class BugView extends Component {
+export default class BugAboutMeView extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -47,8 +47,8 @@ export default class BugView extends Component {
         }
     }
     componentDidMount() {
-        this.init();
         localUserInfo = storage.getItem('userinfo');
+        this.init();
     }
     init = async () => {
         major_filter.length = 0;
@@ -144,15 +144,8 @@ export default class BugView extends Component {
         })
     }
     getBugsInfo = () => {
-        let sqlText = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,areas.name as area_name from bugs
-        left join devices des on bugs.device_id = des.id
-        left join users urs on bugs.user_id = urs.id
-        left join majors mjs on bugs.major_id = mjs.id
-        left join areas on des.area_id = areas.id
-        where bugs.status != 4 and bugs.effective = 1
-        `;
         return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.findBugsAboutMe({ userId: JSON.parse(localUserInfo).id, isCompleted: 0 }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -642,7 +635,7 @@ export default class BugView extends Component {
     }
 
     deleteBugsHandler = (record) => {
-        HttpApi.obs({sql:`update bugs set effective= 0 where id = ${record.id} `},(res)=>{
+        HttpApi.obs({ sql: `update bugs set effective= 0 where id = ${record.id} ` }, (res) => {
             if (res.data.code === 0) {
                 message.success('移除缺陷成功');
                 this.init();
@@ -653,10 +646,10 @@ export default class BugView extends Component {
     render() {
         const columns = [
             {
-                key: 'id',
-                dataIndex: 'id',
-                title: 'id',
-                render: (text, record) => {
+                key:'id',
+                dataIndex:'id',
+                title:'id',
+                render:(text,record)=>{
                     return <div>{text}</div>
                 }
             },
@@ -785,7 +778,8 @@ export default class BugView extends Component {
         ]
         return (
             <Fragment>
-                <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
+                {/* <div>与我相关</div> */}
+                {/* <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button> */}
                 <Table
                     bordered
                     dataSource={this.state.data}

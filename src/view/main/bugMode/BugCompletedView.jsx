@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Spin, Drawer } from 'antd'
+import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Spin, Drawer, Popconfirm, Divider } from 'antd'
 import HttpApi, { Testuri } from '../../util/HttpApi'
 import moment from 'moment'
 const { Step } = Steps;
@@ -102,12 +102,12 @@ export default class BugCompletedView extends Component {
         })
     }
     getBugsInfo = () => {
-        let sqlText =  `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,areas.name as area_name from bugs
+        let sqlText = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,areas.name as area_name from bugs
         left join devices des on bugs.device_id = des.id
         left join users urs on bugs.user_id = urs.id
         left join majors mjs on bugs.major_id = mjs.id
         left join areas on des.area_id = areas.id
-        where bugs.status = 4
+        where bugs.status = 4 and bugs.effective = 1
         `;
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql: sqlText }, (res) => {
@@ -587,8 +587,25 @@ export default class BugCompletedView extends Component {
         return disabledFlag;
     }
 
+    deleteBugsHandler = (record) => {
+        HttpApi.obs({ sql: `update bugs set effective= 0 where id = ${record.id} ` }, (res) => {
+            if (res.data.code === 0) {
+                message.success('移除缺陷成功');
+                this.init();
+            }
+        })
+    }
+
     render() {
         const columns = [
+            {
+                key: 'id',
+                dataIndex: 'id',
+                title: 'id',
+                render: (text, record) => {
+                    return <div>{text}</div>
+                }
+            },
             {
                 key: 'createdAt', dataIndex: 'createdAt', title: '时间',
                 sorter: (a, b) => {
@@ -697,7 +714,15 @@ export default class BugCompletedView extends Component {
                 dataIndex: 'actions',
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
-                        <Button size="small" type="primary" onClick={() => { this.actionsHandler(record) }}>处理</Button>
+                        <Button size="small" type="primary" onClick={() => { this.actionsHandler(record) }}>查看</Button>
+                        {JSON.parse(localUserInfo).isadmin === 1 ?
+                            <Fragment>
+                                <Divider type="vertical" />
+                                <Popconfirm title="确定要删除该专业吗?" onConfirm={() => { this.deleteBugsHandler(record); }}>
+                                    <Button size="small" type="danger">删除</Button>
+                                </Popconfirm>
+                            </Fragment> : null
+                        }
                     </div>
                 )
             }

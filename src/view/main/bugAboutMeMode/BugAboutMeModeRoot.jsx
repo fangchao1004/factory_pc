@@ -1,25 +1,25 @@
 import React, { Component } from 'react';
 import { Card } from 'antd';
-import BugView from './BugView';
-import BugCompletedView from './BugCompletedView'
+import BugAboutMeView from './BugAboutMeView';
+import BugAboutMeCompletedView from './BugAboutMeCompletedView'
 
 const tabListNoTitle = [{
-    key: 'BugView',
-    tab: '所有缺陷',
+    key: 'BugAboutMeView',
+    tab: '相关缺陷',
 },{
-    key: 'BugCompletedView',
-    tab: '所有已完成',
+    key: 'BugAboutMeCompletedView',
+    tab: '相关已完成',
 }];
 
 const contentListNoTitle = {
-    BugView: <BugView />,
-    BugCompletedView: <BugCompletedView />,
+    BugAboutMeView: <BugAboutMeView />,
+    BugAboutMeCompletedView: <BugAboutMeCompletedView />,
 };
 
-class BugModeRoot extends Component {
+class BugAboutMeModeRoot extends Component {
     state = {
-        key: 'BugView',
-        noTitleKey: 'BugView',
+        key: 'BugAboutMeView',
+        noTitleKey: 'BugAboutMeView',
     }
 
     onTabChange = (key) => {
@@ -41,4 +41,4 @@ class BugModeRoot extends Component {
     }
 }
 
-export default BugModeRoot;
+export default BugAboutMeModeRoot;

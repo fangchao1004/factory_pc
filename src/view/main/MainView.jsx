@@ -11,6 +11,7 @@ import SettingEquipmentModeRoot from './settingMode/settingEquipmentMode/Setting
 import SettingStaffModeRoot from './settingMode/settingStaffMode/SettingStaffModeRoot';
 import SettingTableModeRoot from './settingMode/settingTableMode/SettingTableModeRoot';
 import BugModeRoot from './bugMode/BugModeRoot';
+import BugAboutMeModeRoot from './bugAboutMeMode/BugAboutMeModeRoot';
 import SettingViewRoot from './setting/SettingViewRoot';
 import TransactionModeRoot from './transactionMode/TransactionModeRoot';
 
@@ -104,11 +105,32 @@ class MainView extends Component {
                                 <Link to={`${this.props.match.url}/table`} />
                             </Menu.Item> : null}
                         </SubMenu>
-                        <Menu.Item key="缺陷">
+
+                        {/* <Menu.Item key="缺陷">
                             <Icon type="hdd" />
                             <span>缺陷</span>
                             <Link to={`${this.props.match.url}/bug`} />
-                        </Menu.Item>
+                        </Menu.Item> */}
+                        <SubMenu
+                            key="缺陷"
+                            title={
+                                <span>
+                                    <Icon type="scan" />
+                                    <span>缺陷</span>
+                                </span>
+                            }
+                        >
+                            <Menu.Item key="所有缺陷">
+                                <Icon type="hdd" />
+                                <span>所有缺陷</span>
+                                <Link to={`${this.props.match.url}/bug`} />
+                            </Menu.Item>
+                            <Menu.Item key="相关缺陷">
+                                <Icon type="hdd" />
+                                <span>与我相关</span>
+                                <Link to={`${this.props.match.url}/bugAboutMe`} />
+                            </Menu.Item>
+                        </SubMenu>
                         {this.state.isAdmin ? <Menu.Item key="员工">
                             <Icon type="team" />
                             <span>员工</span>
@@ -196,6 +218,11 @@ class MainView extends Component {
                                 exact
                                 path={`${this.props.match.path}/bug`}
                                 component={() => (storage.getItem('userinfo') ? <BugModeRoot /> : <Redirect to='/' />)}
+                            />
+                            <Route
+                                exact
+                                path={`${this.props.match.path}/bugAboutMe`}
+                                component={() => (storage.getItem('userinfo') ? <BugAboutMeModeRoot /> : <Redirect to='/' />)}
                             />
                             <Route
                                 path={`${this.props.match.path}/usersetting`}

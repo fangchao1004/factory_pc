@@ -50,6 +50,7 @@ class OneRecordDetialView extends Component {
             return parseInt(a.key) - parseInt(b.key)
         })
         let result = [];
+        // console.log('state.renderData.content:',this.state.renderData);
         for (const oneBug of this.state.renderData.content) {
             let oneBugContent = [];
             oneBugContent.push(<div key={0} style={{ color: '#40A9FF' }}>{oneBug.key + '. ' + oneBug.title_name}</div>)

@@ -1,18 +1,17 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Spin, Drawer, TreeSelect, Popconfirm, Divider } from 'antd'
+import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Spin, Drawer, Popconfirm, Divider } from 'antd'
 import HttpApi, { Testuri } from '../../util/HttpApi'
 import moment from 'moment'
 const { Step } = Steps;
 const { TextArea } = Input;
 var major_filter = [];///用于筛选任务专业的数据 选项
-const status_filter = [{ text: '待分配', value: 0 }, { text: '维修中', value: 1 },
-{ text: '专工验收中', value: 2 }, { text: '运行验收中', value: 3 }];///用于筛选状态的数据
 var storage = window.localStorage;
 var localUserInfo = '';
+var userOptions = [];///人员选项
 const bug_level_Options = [{ id: 1, name: '一级' }, { id: 2, name: '二级' }, { id: 3, name: '三级' }].map(bug_level => <Select.Option value={bug_level.id} key={bug_level.id}>{bug_level.name}</Select.Option>)
 var major_Options = [];///专业选项
 
-export default class BugView extends Component {
+export default class BugAboutMeCompletedView extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -31,7 +30,6 @@ export default class BugView extends Component {
             currentRecord: {},///当前选择的某一行。某一个缺陷对象
 
             user_select_id: null, ///分配的维修人员的id
-            user_select_title: null,///分配的维修人员的title
             step_0_remark: '',///分配时的备注
             step_1_remark: '',///维修界面的备注
             step_2_remark: '',///专工验收界面的备注
@@ -42,13 +40,11 @@ export default class BugView extends Component {
             major_select_id: null,
             area_remark: null,
             bug_text: null,
-
-            userLevels: [],
         }
     }
     componentDidMount() {
-        this.init();
         localUserInfo = storage.getItem('userinfo');
+        this.init();
     }
     init = async () => {
         major_filter.length = 0;
@@ -61,54 +57,16 @@ export default class BugView extends Component {
         finallyData.forEach((item) => { item.key = item.id + '' })
         // console.log('bug数据：', finallyData);
         let userData = await this.getUsersInfo();
-        let userLevels = await this.getUsersLevels();
-        // console.log('userLevels:',userLevels);
         // console.log('userData:', userData);
-        userLevels.forEach((oneLevel) => {
-            // console.log(oneLevel);
-            let tempArr = [];
-            userData.forEach((oneUser) => {
-                if (oneLevel.level_id === oneUser.level_id) {
-                    // console.log(oneUser);
-                    tempArr.push(oneUser);
-                }
-            })
-            // console.log(tempArr);
-            oneLevel.children = tempArr
-            oneLevel.selectable = false
-        })
-        // console.log(userLevels);
-
-        // userOptions = userData.map(user => <Select.Option value={user.id} key={user.id}>{user.name}</Select.Option>)
+        userOptions = userData.map(user => <Select.Option value={user.id} key={user.id}>{user.name}</Select.Option>)
         this.setState({
             data: finallyData,
-            userData,
-            userLevels
-        })
-    }
-    getUsersLevels = () => {
-        return new Promise((resolve, reject) => {
-            // let sqlText = 'select * from users order by convert(name using gbk) ASC'
-            let sqlText = `select distinct users.level_id, users.level_id as 'value',levels.name as title from users
-            left join levels
-            on levels.id = users.level_id
-            order by level_id`
-            HttpApi.obs({ sql: sqlText }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
+            userData
         })
     }
     getUsersInfo = () => {
         return new Promise((resolve, reject) => {
-            // let sqlText = 'select * from users order by convert(name using gbk) ASC'
-            let sqlText = `select users.*,users.name as title,levels.name level_name,  CONCAT(users.level_id,'-',users.id) 'key',CONCAT(users.level_id,'-',users.id) 'value' from users
-            left join levels
-            on users.level_id = levels.id
-            order by users.level_id`
+            let sqlText = 'select * from users order by convert(name using gbk) ASC'
             HttpApi.obs({ sql: sqlText }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -144,15 +102,8 @@ export default class BugView extends Component {
         })
     }
     getBugsInfo = () => {
-        let sqlText = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,areas.name as area_name from bugs
-        left join devices des on bugs.device_id = des.id
-        left join users urs on bugs.user_id = urs.id
-        left join majors mjs on bugs.major_id = mjs.id
-        left join areas on des.area_id = areas.id
-        where bugs.status != 4 and bugs.effective = 1
-        `;
         return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.findBugsAboutMe({ userId: JSON.parse(localUserInfo).id, isCompleted: 1 }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -262,22 +213,15 @@ export default class BugView extends Component {
                     <span>人员选择:</span>
                 </Col>
                 <Col span={18}>
-                    <TreeSelect
-                        value={this.state.user_select_title}
-                        style={{ width: '100%' }}
-                        treeNodeFilterProp="title"
-                        placeholder="请选择维修人员"
-                        treeCheckable={false}
-                        treeData={this.state.userLevels}
-                        onSelect={(v, node, extra) => {
-                            console.log(v, node, '选中的title:', extra.selectedNodes[0].props.title);
-                            if (v.split('-').length === 2) {
-                                let user_select_id = parseInt(v.split('-')[1]);
-                                let user_select_title = extra.selectedNodes[0].props.title;
-                                this.setState({ user_select_id, user_select_title })
-                            }
-                        }}
-                    ></TreeSelect>
+                    <Select
+                        showSearch
+                        optionFilterProp="children"
+                        filterOption={(input, option) =>
+                            option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        }
+                        value={this.state.user_select_id} defaultValue={null} style={{ width: '100%' }}
+                        onChange={(v) => { this.setState({ user_select_id: v }) }}
+                    >{userOptions}</Select>
                 </Col>
             </Row>
             <Row gutter={16} style={{ marginTop: 20 }}>
@@ -466,11 +410,7 @@ export default class BugView extends Component {
                         message.success('发布成功');
                         this.setState({ currentRecord: res.data.data[0] })
                         ////如果是状态4 则说明这个bug已经解决了。要把这个bug对应的record给更新（复制原有数据，本地修改，再作为新数据插入数据库record表）
-                        if (targetStatus === 4) {
-                            this.changeRecordData(); setTimeout(() => {
-                                this.setState({ showModal2: false })
-                            }, 1000);
-                        }
+                        if (targetStatus === 4) { this.changeRecordData(); }
                     }
                 })
             }
@@ -485,7 +425,6 @@ export default class BugView extends Component {
         ///1，要根据bug_id 去bugs表中去查询该条数据，获取其中的 device_id 字段信息
         let oneBugInfo = await this.getOneBugInfo(bugId);
         let device_id = oneBugInfo.device_id;
-        if (!device_id) { return }
         ///2，根据 device_id 去record 表中 找到 这个设备最新的一次record。 获取到后，在本地修改。再最为一条新数据插入到records表中
         let oneRecordInfo = await this.getOneRecordInfo(device_id);
         let bug_content = JSON.parse(oneRecordInfo.content);
@@ -642,7 +581,7 @@ export default class BugView extends Component {
     }
 
     deleteBugsHandler = (record) => {
-        HttpApi.obs({sql:`update bugs set effective= 0 where id = ${record.id} `},(res)=>{
+        HttpApi.obs({ sql: `update bugs set effective= 0 where id = ${record.id} ` }, (res) => {
             if (res.data.code === 0) {
                 message.success('移除缺陷成功');
                 this.init();
@@ -653,10 +592,10 @@ export default class BugView extends Component {
     render() {
         const columns = [
             {
-                key: 'id',
-                dataIndex: 'id',
-                title: 'id',
-                render: (text, record) => {
+                key:'id',
+                dataIndex:'id',
+                title:'id',
+                render:(text,record)=>{
                     return <div>{text}</div>
                 }
             },
@@ -754,9 +693,7 @@ export default class BugView extends Component {
             {
                 title: '缺陷状态',
                 dataIndex: 'status',
-                filters: status_filter,
                 align: 'center',
-                onFilter: (value, record) => record.status === value,
                 render: (text, record) => {
                     let str = '';
                     let color = '#888888'
@@ -770,7 +707,7 @@ export default class BugView extends Component {
                 dataIndex: 'actions',
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
-                        <Button size="small" type="primary" onClick={() => { this.actionsHandler(record) }}>处理</Button>
+                        <Button size="small" type="primary" onClick={() => { this.actionsHandler(record) }}>查看</Button>
                         {JSON.parse(localUserInfo).isadmin === 1 ?
                             <Fragment>
                                 <Divider type="vertical" />
@@ -784,8 +721,8 @@ export default class BugView extends Component {
             }
         ]
         return (
-            <Fragment>
-                <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
+            <div>
+                {/* <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button> */}
                 <Table
                     bordered
                     dataSource={this.state.data}
@@ -796,7 +733,7 @@ export default class BugView extends Component {
                     visible={this.state.showModal7}
                     onCancel={() => { this.setState({ showModal7: false }) }}
                     footer={null}
-                    width={520}
+                    width={500}
                 >
                     {this.renderAddBugModal()}
                 </Modal>
@@ -838,7 +775,7 @@ export default class BugView extends Component {
                     title="分配维修人员"
                     placement='right'
                     visible={this.state.showModal3}
-                    onClose={() => { this.setState({ user_select_title: null, user_select_id: null, step_0_remark: '', showModal3: false }) }}
+                    onClose={() => { this.setState({ user_select_id: null, step_0_remark: '', showModal3: false }) }}
                     width={450}
                 >
                     {this.renderSelectWorkerModal()}
@@ -884,7 +821,7 @@ export default class BugView extends Component {
                     <div style={{ textAlign: 'center', display: this.state.showLoading ? 'block' : 'none' }}><Spin tip='努力加载中。。。' /></div>
                     <img alt='' src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} style={{ width: 430, height: 430 / 3 * 4, display: this.state.showLoading ? 'none' : 'block' }} onLoad={() => { console.log('图片加载完成'); this.setState({ showLoading: false }) }} />
                 </Drawer>
-            </Fragment>
+            </div>
         );
     }
 }
