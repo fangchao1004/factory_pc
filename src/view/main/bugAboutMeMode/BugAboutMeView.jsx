@@ -287,7 +287,7 @@ export default class BugAboutMeView extends Component {
                         if (this.state.user_select_id !== null) {
                             //// 人员选择完毕。改变bug中的数据。status 和 remark
                             this.changeBugStatus(1, 0, this.state.step_0_remark, JSON.parse(localUserInfo).id, this.state.user_select_id);
-                            this.setState({ user_select_id: null, step_0_remark: '', showModal3: false })
+                            this.setState({ user_select_title: null, user_select_id: null, step_0_remark: '', showModal3: false })
                         } else { message.error('请分配人员'); }
                     }}>确定人员</Button>
             </div>
@@ -646,10 +646,10 @@ export default class BugAboutMeView extends Component {
     render() {
         const columns = [
             {
-                key:'id',
-                dataIndex:'id',
-                title:'id',
-                render:(text,record)=>{
+                key: 'id',
+                dataIndex: 'id',
+                title: 'id',
+                render: (text, record) => {
                     return <div>{text}</div>
                 }
             },
@@ -756,6 +756,33 @@ export default class BugAboutMeView extends Component {
                     if (text === 0) { str = '待分配' } else if (text === 1) { str = '维修中'; color = '#FF9999' } else if (text === 2) { str = '专工验收中'; color = '#6699CC' }
                     else if (text === 3) { str = '运行验收中'; color = '#9933CC' } else if (text === 4) { str = '处理完毕'; color = '#87d068' }
                     return <Tag color={color}>{str}</Tag>;
+                }
+            },
+            {
+                title: '当前处理人员',
+                dataIndex: 'a',
+                render: (text, record) => {
+                    let remarkObj = JSON.parse(record.remark);
+                    let currentStatus = record.status;
+                    let str = '/';
+                    if (currentStatus === 1 && remarkObj) {
+                        // console.log('id:', record.id,'数组长度:',remarkObj['0'].length,'最新:',remarkObj['0'][remarkObj['0'].length-1]);
+                        // console.log('最新的维修人员id:',remarkObj['0'][remarkObj['0'].length-1].to);
+                        let currentUserID = remarkObj['0'][remarkObj['0'].length - 1].to;
+                        this.state.userData.forEach((item) => {
+                            if (item.id === currentUserID) {
+                                str = item.name
+                            }
+                        })
+                    }
+                    if (currentStatus === 2) {
+                        str = '专工'
+                    } else if (currentStatus === 3) {
+                        str = '运行人员'
+                    } else if (currentStatus === 4) {
+                        str = '/'
+                    }
+                    return <div>{str}</div>;
                 }
             },
             {
