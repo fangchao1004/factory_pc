@@ -53,7 +53,7 @@ class EquipmentView extends Component {
     }
     getBugsInfo = (bug_id_arr) => {
         return new Promise((resolve, reject) => {
-            let sqlText = 'select bugs.*,mjs.name as major_name from bugs left join majors mjs on mjs.id = bugs.major_id where bugs.id in (' + bug_id_arr.join(',') + ')';
+            let sqlText = 'select bugs.*,mjs.name as major_name from bugs left join majors mjs on mjs.id = bugs.major_id where bugs.id in (' + bug_id_arr.join(',') + ') and effective = 1';
             HttpApi.obs({ sql: sqlText }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -305,6 +305,7 @@ class EquipmentView extends Component {
     ///2 左边的二级抽屉，显示该设备任意一次的record记录 
     ///3 右边的独立的一级抽屉，显示该设备最新一次的record记录 
     openDrawer = async (record, v) => {
+        // console.log('record:',record);
         if (record.device_status === 1) {
             message.success('正常');
             return;

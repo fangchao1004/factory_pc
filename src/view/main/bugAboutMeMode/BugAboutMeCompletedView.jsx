@@ -705,6 +705,7 @@ export default class BugAboutMeCompletedView extends Component {
             {
                 title: '操作',
                 dataIndex: 'actions',
+                width: 150,
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
                         <Button size="small" type="primary" onClick={() => { this.actionsHandler(record) }}>查看</Button>
