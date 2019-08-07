@@ -80,7 +80,7 @@ export default function UpdateTaskView(props) {
     const handlerOk = () => {
         props.onOk(props.staff)
     }
-    console.log('props.staff:', props.staff);
+    // console.log('props.staff:', props.staff);
     return <Modal width={700}
         centered
         title="任务详情"

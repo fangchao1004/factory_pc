@@ -75,7 +75,7 @@ export default class LoginView extends React.Component {
               onCancel={() => { this.setState({ modalvisible: false }) }}
               footer={null}
             >
-              <img src={downloadUrl} alt="" width="300" height="300"/>
+              <img src={downloadUrl} alt="" width="300" height="300" />
             </Modal>
           </div>
         </div>

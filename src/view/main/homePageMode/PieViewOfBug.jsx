@@ -9,7 +9,7 @@ import {
 } from "bizcharts";
 import DataSet from "@antv/data-set";
 
-export default class PieView extends React.Component {
+export default class PieViewOfBug extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -23,15 +23,12 @@ export default class PieView extends React.Component {
   }
   transConstruct = (data) => {
     // console.log('获取原始数据：',data.datasouce,'对应的标题：',data.title);
-    let newArr = [];
     let totalCount = 0;
+    let newArr = [];
     data.datasouce.forEach((ele) => {
-      if (ele.status_count > 0) {
-        totalCount += ele.status_count;
-        let stautsTxt = '待检'
-        if (ele.device_status === 1) { stautsTxt = '正常' }
-        else if (ele.device_status === 2) { stautsTxt = '故障' }
-        newArr.push({ item: stautsTxt, count: ele.status_count });
+      if (ele.major_count > 0) {
+        totalCount += ele.major_count;
+        newArr.push({ item: ele.major_name, count: ele.major_count });
       }
     })
     // console.log('处理后的数据：', newArr);
@@ -103,7 +100,7 @@ export default class PieView extends React.Component {
               formatter={(val, item) => {
                 // let floatVal = parseFloat(val.substring(0, val.length - 1)).toFixed(1)
                 // return item.point.item + ": " + floatVal + '%';
-                return item.point.item + ": " + item.point.count + '台';
+                return item.point.item + ": " + item.point.count + '次';
               }}
             />
           </Geom>

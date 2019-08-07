@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Spin, Drawer, TreeSelect, Popconfirm, Divider } from 'antd'
 import HttpApi, { Testuri } from '../../util/HttpApi'
 import moment from 'moment'
+
 const { Step } = Steps;
 const { TextArea } = Input;
 var major_filter = [];///用于筛选任务专业的数据 选项
@@ -48,9 +49,16 @@ export default class BugView extends Component {
     }
     componentDidMount() {
         this.init();
-        // this.getUsersInfo();
         localUserInfo = storage.getItem('userinfo');
     }
+
+    // socketTest() {
+    //     let message = messageFormat('我在bugView');
+    //     // console.log('BugView中向服务器发送的socket信息', message);
+    //     sendMessageToS('to_server', message);
+    //     getMessageFromS(`to_${JSON.parse(localUserInfo).username}`, (data) => { console.log('BugView中收到 来自服务器的socket信息:', data); });
+    // }
+
     init = async () => {
         major_filter.length = 0;
         let marjorData = await this.getMajorInfo();

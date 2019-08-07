@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Spin, Drawer, TreeSelect, Popconfirm, Divider } from 'antd'
 import HttpApi, { Testuri } from '../../util/HttpApi'
 import moment from 'moment'
+
 const { Step } = Steps;
 const { TextArea } = Input;
 var major_filter = [];///用于筛选任务专业的数据 选项
@@ -49,7 +50,10 @@ export default class BugAboutMeView extends Component {
     componentDidMount() {
         localUserInfo = storage.getItem('userinfo');
         this.init();
+        // console.log('重新进入了我的缺陷界面');
+        // this.socketTest();
     }
+
     init = async () => {
         major_filter.length = 0;
         let marjorData = await this.getMajorInfo();

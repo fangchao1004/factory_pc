@@ -2,9 +2,10 @@ import Axios from 'axios';
 
 export const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
 // export const Testuri = 'http://localhost:3009/'///本地服务器测试用
+// export const Testuri = 'http://localhost:2019/'///本地服务器测试用 socket.io 服务测试
 
-export const TesturiForss = 'http://hefeixiaomu.com:3007/'///小木服务器数据库 sql server 服务独立地址
-// export const TesturiForss = 'http://localhost:3007/'///本地服务器测试用 sql server 服务独立地址
+export const TesturiForss = 'http://hefeixiaomu.com:3007/'///小木服务器数据库 sql server 服务独立地址 消费机
+// export const TesturiForss = 'http://localhost:3007/'///本地服务器测试用 sql server 服务独立地址 消费机
 class HttpApi {
     /**
      * obs操作---慎用

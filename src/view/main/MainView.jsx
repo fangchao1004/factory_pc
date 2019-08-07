@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { Layout, Menu, Icon, Row, Col, Popover, Button } from 'antd'
+import { Layout, Menu, Icon, Row, Col, Popover, Button, Badge } from 'antd'
 import { Route, Link, Redirect } from 'react-router-dom'
 import logopng from '../../assets/logo.png'
-import HomePageViewRoot from './homePageMode/HomePageViewRoot';
+import HomePageRoot from './homePageMode/HomePageRoot';
 import EquipmentModeRoot from './equipmentMode/EquipmentModeRoot'
 import StaffModeRoot from './staffMode/StaffModeRoot'
 import TableModeRoot from './tableMode/TableModeRoot';
@@ -18,11 +18,12 @@ import TransactionModeRoot from './transactionMode/TransactionModeRoot';
 var storage = window.localStorage;
 const { Header, Content, Sider } = Layout;
 const SubMenu = Menu.SubMenu
+var userinfo =null;
 
 class MainView extends Component {
     constructor(props) {
         super(props)
-        const userinfo = window.localStorage.getItem('userinfo')
+        userinfo = window.localStorage.getItem('userinfo')
         // console.log(userinfo)
         this.state = {
             collapsed: false,
@@ -117,6 +118,8 @@ class MainView extends Component {
                                 <span>
                                     <Icon type="scan" />
                                     <span>缺陷</span>
+                                    <Badge dot={true} style={{ marginLeft: 30 }}>
+                                    </Badge>
                                 </span>
                             }
                         >
@@ -128,7 +131,9 @@ class MainView extends Component {
                             <Menu.Item key="相关缺陷">
                                 <Icon type="hdd" />
                                 <span>与我相关</span>
-                                <Link to={`${this.props.match.url}/bugAboutMe`} />
+                                <Badge count={99} style={{ marginLeft: 30 }}>
+                                </Badge>
+                                <Link to={`${this.props.match.url}/bugAboutMe`} onClick={() => { console.log('点击-与我相关-进入与我相关-清除-消息标记'); }} />
                             </Menu.Item>
                         </SubMenu>
                         {this.state.isAdmin ? <Menu.Item key="员工">
@@ -194,7 +199,7 @@ class MainView extends Component {
                             <Route
                                 exact
                                 path={`${this.props.match.path}`}
-                                component={() => (storage.getItem('userinfo') ? <HomePageViewRoot /> : <Redirect to='/' />)}
+                                component={() => (storage.getItem('userinfo') ? <HomePageRoot /> : <Redirect to='/' />)}
                             />
                             <Route
                                 exact

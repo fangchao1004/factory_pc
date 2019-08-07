@@ -4,7 +4,7 @@ import LineChartView from './LineChartView'
 import { Row, Col } from 'antd'
 import HttpApi from '../../util/HttpApi'
 
-class HomePageViewRoot extends Component {
+class HomePageView extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -83,6 +83,7 @@ class HomePageViewRoot extends Component {
         copy_data.forEach((item, index) => {
             // console.log(item);
             let dataObj = { datasouce: item.count_data, title: item.user_name }
+            // console.log('dataObj:',dataObj);
             cellsArr.push(
                 <Col span={8} key={index}>
                     <PieView data={dataObj} />
@@ -110,4 +111,4 @@ class HomePageViewRoot extends Component {
     }
 }
 
-export default HomePageViewRoot;
+export default HomePageView;

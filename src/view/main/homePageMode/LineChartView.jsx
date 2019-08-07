@@ -34,7 +34,7 @@ class LineChartView extends Component {
         let historyOfDevicesStatusData = await this.getStatusCount();///近一个月的设备情况
         // console.log('设备历史记录：', historyOfDevicesStatusData);
         let todayHasDetectCount = await this.getTodayHasDetectCount();///今日检测了多少台设备
-        console.log('今日检测了多少台设备:', todayHasDetectCount.todayDetectCount);
+        // console.log('今日检测了多少台设备:', todayHasDetectCount.todayDetectCount);
 
         let dataArr = [];
         historyOfDevicesStatusData.forEach((item) => {
