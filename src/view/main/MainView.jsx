@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, Menu, Icon, Row, Col, Popover, Button, Badge } from 'antd'
+import { Layout, Menu, Icon, Row, Col, Popover, Button } from 'antd'
 import { Route, Link, Redirect } from 'react-router-dom'
 import logopng from '../../assets/logo.png'
 import HomePageRoot from './homePageMode/HomePageRoot';
@@ -118,8 +118,8 @@ class MainView extends Component {
                                 <span>
                                     <Icon type="scan" />
                                     <span>缺陷</span>
-                                    <Badge dot={true} style={{ marginLeft: 30 }}>
-                                    </Badge>
+                                    {/* <Badge dot={true} style={{ marginLeft: 30 }}>
+                                    </Badge> */}
                                 </span>
                             }
                         >
@@ -131,8 +131,8 @@ class MainView extends Component {
                             <Menu.Item key="相关缺陷">
                                 <Icon type="hdd" />
                                 <span>与我相关</span>
-                                <Badge count={99} style={{ marginLeft: 30 }}>
-                                </Badge>
+                                {/* <Badge count={99} style={{ marginLeft: 30 }}>
+                                </Badge> */}
                                 <Link to={`${this.props.match.url}/bugAboutMe`} onClick={() => { console.log('点击-与我相关-进入与我相关-清除-消息标记'); }} />
                             </Menu.Item>
                         </SubMenu>

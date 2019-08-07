@@ -22,8 +22,8 @@ export default class BugsPageView extends Component {
     }
     getTodayBugsInfo = () => {
         return new Promise((resolve, reject) => {
-            let todayStart = moment().subtract(10, 'day').startOf('day').format('YYYY-MM-DD HH:mm:ss');
-            // let todayStart = moment().startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            // let todayStart = moment().subtract(10, 'day').startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            let todayStart = moment().startOf('day').format('YYYY-MM-DD HH:mm:ss');
             let todayEnd = moment().endOf('day').format('YYYY-MM-DD HH:mm:ss');
             let sql = `select t1.*,majors.name as major_name from
             (select 
