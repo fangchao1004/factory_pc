@@ -464,6 +464,9 @@ export default class BugView extends Component {
         }
         ///将最新的 remark 数据 更新到 bugs 表中。并且判断要把 status 改到哪一步
         let newValue = { status: targetStatus, remark: JSON.stringify(remarkCopy) }
+        if (targetStatus === 4) { ///当 运行验收后， 状态为 4 此时还要记录一下缺陷的解决时间，为什么不用 updatedAt 来判断？ 因为怕 混乱 
+            newValue = { status: targetStatus, remark: JSON.stringify(remarkCopy), closedAt: moment().format('YYYY-MM-DD HH:mm:ss') }
+        }
         if (toId !== null) {
             newValue.fix_id = toId;
         }

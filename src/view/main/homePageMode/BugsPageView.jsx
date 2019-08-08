@@ -3,6 +3,7 @@ import { Row, Col, Empty } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 import PieViewOfBug from './PieViewOfBug';
+import LineChartViewOfBug from './LineChartViewOfBug'
 
 export default class BugsPageView extends Component {
     constructor(props) {
@@ -16,6 +17,7 @@ export default class BugsPageView extends Component {
     }
     init = async () => {
         let data = await this.getTodayBugsInfo();
+        // console.log('今日的缺陷统计:', data.length);
         let result = { datasouce: data, title: '今日缺陷统计' }
         // console.log('result:', result);
         this.setState({ data: result })
@@ -49,7 +51,7 @@ export default class BugsPageView extends Component {
                     image="https://gw.alipayobjects.com/mdn/miniapp_social/afts/img/A*pevERLJC9v0AAAAAAAAAAABjAQAAAQ/original"
                     imageStyle={{
                         height: 160,
-                        marginTop:50,
+                        marginTop: 50,
                     }}
                     description={'今日缺陷-暂无数据'} />
             </Col>
@@ -65,6 +67,13 @@ export default class BugsPageView extends Component {
             <div style={{ marginTop: -16, paddingLeft: 10, paddingRight: 10 }}>
                 <Row gutter={5}>
                     {this.renderPieView()}
+                </Row>
+                <Row gutter={10}>
+                    <Col span={24}>
+                        <div style={{ marginTop: 16, marginBottom: 20 }}>
+                            <LineChartViewOfBug />
+                        </div>
+                    </Col>
                 </Row>
             </div>
         );

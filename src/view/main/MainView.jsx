@@ -31,6 +31,7 @@ class MainView extends Component {
             collapsed: false,
             isAdmin: userinfo && JSON.parse(userinfo).isadmin === 1,
             aboutMeBugNum: 0,
+            aboutMeTaskNum: 0,
         }
         // console.log(this.state.isAdmin)
     }
@@ -39,10 +40,12 @@ class MainView extends Component {
         this.init();
     }
     init = async () => {
-        let result = await this.getBugsInfo();
+        let bugResult = await this.getBugsInfo();
+        let taskResult = await this.getTaskInfo();
         setTimeout(() => {
             this.setState({
-                aboutMeBugNum: result.length
+                aboutMeBugNum: bugResult.length,
+                aboutMeTaskNum: taskResult.length
             })
         }, 500);
     }
@@ -54,6 +57,15 @@ class MainView extends Component {
                     result = res.data.data
                 }
                 resolve(result);
+            })
+        })
+    }
+    getTaskInfo() {
+        return new Promise((resolve, reject) => {
+            HttpApi.getTaskInfo({ to: { $like: `%,${JSON.parse(localUserInfo).id},%` }, status: 0 }, data => {
+                if (data.data.code === 0) {
+                    resolve(data.data.data)
+                }
             })
         })
     }
@@ -170,6 +182,8 @@ class MainView extends Component {
                         <Menu.Item key="任务">
                             <Icon type="project" />
                             <span>任务</span>
+                            <Badge count={this.state.aboutMeTaskNum} style={{ marginLeft: 30 }}>
+                            </Badge>
                             <Link to={`${this.props.match.url}/user`} />
                         </Menu.Item>
                         <Menu.Item key="交易">
