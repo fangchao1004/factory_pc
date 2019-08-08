@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, Menu, Icon, Row, Col, Popover, Button } from 'antd'
+import { Layout, Menu, Icon, Row, Col, Popover, Button, Badge } from 'antd'
 import { Route, Link, Redirect } from 'react-router-dom'
 import logopng from '../../assets/logo.png'
 import HomePageRoot from './homePageMode/HomePageRoot';
@@ -14,11 +14,13 @@ import BugModeRoot from './bugMode/BugModeRoot';
 import BugAboutMeModeRoot from './bugAboutMeMode/BugAboutMeModeRoot';
 import SettingViewRoot from './setting/SettingViewRoot';
 import TransactionModeRoot from './transactionMode/TransactionModeRoot';
+import HttpApi from '../util/HttpApi';
 
 var storage = window.localStorage;
 const { Header, Content, Sider } = Layout;
 const SubMenu = Menu.SubMenu
-var userinfo =null;
+var userinfo = null;
+var localUserInfo = '';
 
 class MainView extends Component {
     constructor(props) {
@@ -27,9 +29,33 @@ class MainView extends Component {
         // console.log(userinfo)
         this.state = {
             collapsed: false,
-            isAdmin: userinfo && JSON.parse(userinfo).isadmin === 1
+            isAdmin: userinfo && JSON.parse(userinfo).isadmin === 1,
+            aboutMeBugNum: 0,
         }
         // console.log(this.state.isAdmin)
+    }
+    componentDidMount() {
+        localUserInfo = storage.getItem('userinfo');
+        this.init();
+    }
+    init = async () => {
+        let result = await this.getBugsInfo();
+        setTimeout(() => {
+            this.setState({
+                aboutMeBugNum: result.length
+            })
+        }, 500);
+    }
+    getBugsInfo = () => {
+        return new Promise((resolve, reject) => {
+            HttpApi.findBugsAboutMe({ userId: JSON.parse(localUserInfo).id, isCompleted: 0 }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
     }
     toggle = () => {
         this.setState({
@@ -118,8 +144,8 @@ class MainView extends Component {
                                 <span>
                                     <Icon type="scan" />
                                     <span>缺陷</span>
-                                    {/* <Badge dot={true} style={{ marginLeft: 30 }}>
-                                    </Badge> */}
+                                    <Badge dot={this.state.aboutMeBugNum > 0} style={{ marginLeft: 30 }}>
+                                    </Badge>
                                 </span>
                             }
                         >
@@ -131,9 +157,9 @@ class MainView extends Component {
                             <Menu.Item key="相关缺陷">
                                 <Icon type="hdd" />
                                 <span>与我相关</span>
-                                {/* <Badge count={99} style={{ marginLeft: 30 }}>
-                                </Badge> */}
-                                <Link to={`${this.props.match.url}/bugAboutMe`} onClick={() => { console.log('点击-与我相关-进入与我相关-清除-消息标记'); }} />
+                                <Badge count={this.state.aboutMeBugNum} style={{ marginLeft: 30 }}>
+                                </Badge>
+                                <Link to={`${this.props.match.url}/bugAboutMe`} onClick={() => { console.log('点击-与我相关-进入与我相关'); }} />
                             </Menu.Item>
                         </SubMenu>
                         {this.state.isAdmin ? <Menu.Item key="员工">

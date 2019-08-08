@@ -50,10 +50,7 @@ export default class BugAboutMeView extends Component {
     componentDidMount() {
         localUserInfo = storage.getItem('userinfo');
         this.init();
-        // console.log('重新进入了我的缺陷界面');
-        // this.socketTest();
     }
-
     init = async () => {
         major_filter.length = 0;
         let marjorData = await this.getMajorInfo();
