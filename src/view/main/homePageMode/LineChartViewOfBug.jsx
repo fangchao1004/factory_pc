@@ -43,7 +43,7 @@ class LineChartViewOfBug extends Component {
             let todayStart = moment().startOf('day').format('YYYY-MM-DD HH:mm:ss');
             let todayEnd = moment().endOf('day').format('YYYY-MM-DD HH:mm:ss');
             let sql = `select count(*) count from bugs
-            where createdAt>'${todayStart}' and createdAt<'${todayEnd}'`
+            where createdAt>'${todayStart}' and createdAt<'${todayEnd}' and effective = 1`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -58,7 +58,7 @@ class LineChartViewOfBug extends Component {
             let todayStart = moment().startOf('day').format('YYYY-MM-DD HH:mm:ss');
             let todayEnd = moment().endOf('day').format('YYYY-MM-DD HH:mm:ss');
             let sql = `select count(*) count from bugs
-            where closedAt>'${todayStart}' and closedAt<'${todayEnd}'`
+            where closedAt>'${todayStart}' and closedAt<'${todayEnd}' and effective = 1`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {

@@ -2,6 +2,8 @@ import React, { Component, Fragment } from 'react';
 import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Spin, Drawer, TreeSelect, Popconfirm, Divider } from 'antd'
 import HttpApi, { Testuri } from '../../util/HttpApi'
 import moment from 'moment'
+import Store from '../../../redux/store/Store';
+import { showBugNum } from '../../../redux/actions/BugAction';
 
 const { Step } = Steps;
 const { TextArea } = Input;
@@ -472,6 +474,10 @@ export default class BugView extends Component {
         }
         HttpApi.updateBugInfo({ query: { id: this.state.currentRecord.id }, update: newValue }, (res) => {
             if (res.data.code === 0) {
+                this.init();
+                if (targetStatus === 1 || targetStatus === 4) {
+                    this.updateDataByRedux();
+                }
                 ///成功以后要立即刷新当前的bug数据。
                 HttpApi.getBugInfo({ id: this.state.currentRecord.id }, (res) => {
                     if (res.data.code === 0) {
@@ -487,8 +493,6 @@ export default class BugView extends Component {
                 })
             }
         })
-        ////同时要刷新整个表中的数据
-        this.init();
     }
 
     ////改变包含了这个bug_id 的record 再数据库中的值。
@@ -654,12 +658,18 @@ export default class BugView extends Component {
     }
 
     deleteBugsHandler = (record) => {
-        HttpApi.obs({ sql: `update bugs set effective= 0 where id = ${record.id} ` }, (res) => {
+        HttpApi.obs({ sql: `update bugs set effective = 0 where id = ${record.id} ` }, (res) => {
             if (res.data.code === 0) {
                 message.success('移除缺陷成功');
                 this.init();
+                ///要利用redux刷新 mainView处的徽标数
+                this.updateDataByRedux();
             }
         })
+    }
+    updateDataByRedux = () => {
+        ///每次删除
+        Store.dispatch(showBugNum(null)) ///随便派发一个值，目的是让 mainView处监听到 执行init();
     }
 
     render() {

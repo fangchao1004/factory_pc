@@ -308,13 +308,6 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
-    static removeTaskInfo(params, f1, f2) {
-        Axios.post(Testuri + 'remove_task', params).then(res => {
-            if (f1) { f1(res) }
-        }).catch(res => {
-            if (f2) { f2(res) }
-        })
-    }
     static updateTaskInfo(params, f1, f2) {
         Axios.post(Testuri + 'update_task', params).then(res => {
             if (f1) { f1(res) }

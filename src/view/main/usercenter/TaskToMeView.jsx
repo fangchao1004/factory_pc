@@ -36,7 +36,7 @@ class TaskToMeView extends Component {
     }
     getTaskInfo() {
         return new Promise((resolve, reject) => {
-            HttpApi.getTaskInfo({ to: { $like: `%,${userinfo.id},%` } }, data => {
+            HttpApi.getTaskInfo({ to: { $like: `%,${userinfo.id},%` }, effective: 1 }, data => {
                 if (data.data.code === 0) {
                     resolve(data.data.data)
                 }
@@ -83,10 +83,10 @@ class TaskToMeView extends Component {
             if (data.data.code === 0) {
                 this.setState({ updateStaffVisible: false })
                 this.getTasksData()
-                this.updateDataByRedux();
+                this.updateDataByRedux()
                 message.success('更新成功')
                 if (taskInfo.isMessage === 1) {
-                    this.sendMessageToLeader(taskInfo);
+                    this.sendMessageToLeader(taskInfo)
                 }
             } else {
                 message.error(data.data.data)
@@ -128,20 +128,9 @@ class TaskToMeView extends Component {
         }
         return time;
     }
-    updateDataByRedux = async () => {
-        let taskResult = await this.getUncompleteTaskInfo();
-        Store.dispatch(showTaskNum(taskResult.length));
+    updateDataByRedux = () => {
+        Store.dispatch(showTaskNum(null)); ///随便派发一个值，目的是让 mainView处监听到 执行init();
     }
-    getUncompleteTaskInfo() {
-        return new Promise((resolve, reject) => {
-            HttpApi.getTaskInfo({ to: { $like: `%,${userinfo.id},%` }, status: 0 }, data => {
-                if (data.data.code === 0) {
-                    resolve(data.data.data)
-                }
-            })
-        })
-    }
-
     render() {
         const columns = [
             {

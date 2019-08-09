@@ -4,6 +4,8 @@ import HttpApi from '../../util/HttpApi'
 import AddStaffView from './AddTaskView';
 import UpdateStaffView from './PreviewTaskView'
 import moment from 'moment'
+import Store from '../../../redux/store/Store';
+import { showTaskNum } from '../../../redux/actions/TaskAction';
 
 var storage = window.localStorage;
 var userinfo;
@@ -73,7 +75,7 @@ class TaskFromMeView extends Component {
 
     getTaskInfo = () => {
         return new Promise((resolve, reject) => {
-            HttpApi.getTaskInfo({ from: userinfo.id }, data => {
+            HttpApi.getTaskInfo({ from: userinfo.id, effective: 1 }, data => {
                 if (data.data.code === 0) {
                     resolve(data.data.data)
                 }
@@ -102,6 +104,10 @@ class TaskFromMeView extends Component {
                 this.setState({ addStaffVisible: false })
                 message.success('添加成功')
                 this.getTasksData()
+                ///新建任务的时候 如果分配人员中有自己 立刻刷新
+                if (toIds.indexOf(userinfo.id + '') !== -1) {
+                    this.updateDataByRedux()
+                }
                 let usersIdArrInt = toIds.map((item) => parseInt(item))
                 if (newValues.isMessage === 1) {
                     console.log('添加任务，短信通知')
@@ -132,9 +138,9 @@ class TaskFromMeView extends Component {
                 this.getTasksData()
                 message.success('任务修改成功')
                 let usersIdArr = newValues.to.split(',');
-                    usersIdArr.shift();
-                    usersIdArr.pop();
-                    let usersIdArrInt = usersIdArr.map((item) => parseInt(item))
+                usersIdArr.shift();
+                usersIdArr.pop();
+                let usersIdArrInt = usersIdArr.map((item) => parseInt(item))
                 if (newValues.isMessage === 1) {
                     console.log('修改任务，短信通知')
                     this.sendMessageToStaff(usersIdArrInt, newValues);
@@ -151,14 +157,24 @@ class TaskFromMeView extends Component {
         this.setState({ updateStaffVisible: false })
     }
     deleteStaffConfirm = (record) => {
-        HttpApi.removeTaskInfo({ id: record.id }, data => {
-            if (data.data.code === 0) {
+        // console.log(record);
+        // console.log(record.to.substring(1, record.to.length - 1).split(','));
+        // return;
+        HttpApi.updateTaskInfo({ query: { id: record.id }, update: { effective: 0 } }, (res) => {
+            if (res.data.code === 0) {
                 message.success('删除成功')
                 this.getTasksData()
+                ////当删除的任务中 执行人包含自己的时候，立即刷新
+                if (record.to.substring(1, record.to.length - 1).split(',').indexOf(userinfo.id + '') !== -1) {
+                    this.updateDataByRedux()
+                }
             } else {
-                message.error(data.data.data)
+                message.error(res.data.data)
             }
         })
+    }
+    updateDataByRedux = () => {
+        Store.dispatch(showTaskNum(null)); ///随便派发一个值，目的是让 mainView处监听到 执行init();
     }
     sendMessageToStaff = async (toUsersArr, data) => {
         let title = data.title;
@@ -181,10 +197,10 @@ class TaskFromMeView extends Component {
         })
     }
 
-    pushNoticeToApp=(toUsersArr)=>{
-        console.log('开始向app推送信息。需要推送通知的人员有:',toUsersArr);
-        toUsersArr.forEach((oneUserId)=>{
-            HttpApi.pushnotice({user_id: oneUserId, title: '任务通知', text: '您有最新的任务,请注意查看'})
+    pushNoticeToApp = (toUsersArr) => {
+        console.log('开始向app推送信息。需要推送通知的人员有:', toUsersArr);
+        toUsersArr.forEach((oneUserId) => {
+            HttpApi.pushnotice({ user_id: oneUserId, title: '任务通知', text: '您有最新的任务,请注意查看' })
         })
     }
 

@@ -42,10 +42,8 @@ class MainView extends Component {
         this.init();
         unsubscribe = Store.subscribe(() => {
             // console.log("获取store中的state:", Store.getState())
-            this.setState({
-                aboutMeBugNum: Store.getState().bug.bugNum,
-                aboutMeTaskNum: Store.getState().task.taskNum
-            })
+            ////监听到 其他类中 利用redux派发的事件了
+            this.init();
         });
     }
     componentWillUnmount() {
@@ -75,7 +73,7 @@ class MainView extends Component {
     }
     getTaskInfo() {
         return new Promise((resolve, reject) => {
-            HttpApi.getTaskInfo({ to: { $like: `%,${JSON.parse(localUserInfo).id},%` }, status: 0 }, data => {
+            HttpApi.getTaskInfo({ to: { $like: `%,${JSON.parse(localUserInfo).id},%` }, status: 0, effective: 1 }, data => {
                 if (data.data.code === 0) {
                     resolve(data.data.data)
                 }
@@ -176,7 +174,7 @@ class MainView extends Component {
                             <Menu.Item key="相关缺陷">
                                 <Icon type="hdd" />
                                 <span>与我相关</span>
-                                <Badge count={this.state.aboutMeBugNum} overflowCount={99} style={{ marginLeft: 30,  }} >
+                                <Badge count={this.state.aboutMeBugNum} overflowCount={99} style={{ marginLeft: 30, }} >
                                 </Badge>
                                 <Link to={`${this.props.match.url}/bugAboutMe`} onClick={() => { console.log('点击-与我相关-进入与我相关'); }} />
                             </Menu.Item>

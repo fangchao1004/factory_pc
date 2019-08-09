@@ -451,6 +451,9 @@ export default class BugAboutMeView extends Component {
         }
         ///将最新的 remark 数据 更新到 bugs 表中。并且判断要把 status 改到哪一步
         let newValue = { status: targetStatus, remark: JSON.stringify(remarkCopy) }
+        if (targetStatus === 4) { ///当 运行验收后， 状态为 4 此时还要记录一下缺陷的解决时间，为什么不用 updatedAt 来判断？ 因为怕 混乱 
+            newValue = { status: targetStatus, remark: JSON.stringify(remarkCopy), closedAt: moment().format('YYYY-MM-DD HH:mm:ss') }
+        }
         if (toId !== null) {
             newValue.fix_id = toId;
         }
@@ -458,10 +461,8 @@ export default class BugAboutMeView extends Component {
             if (res.data.code === 0) {
                 ///同时要刷新整个表中的数据 要利用redux刷新 mainView处的徽标数！！
                 this.init();
-                if (targetStatus === 4) {
-                    setTimeout(() => {
-                        this.updateDataByRedux();
-                    }, 1000);
+                if (targetStatus === 1 || targetStatus === 4) { ////因为分配人员的时候，fromid 一定是自己 所以和自己有关闭 要刷新 缺陷完成时也要刷新
+                    this.updateDataByRedux();
                 }
                 ///成功以后要立即刷新 当前的bug数据。
                 HttpApi.getBugInfo({ id: this.state.currentRecord.id }, (res) => {
@@ -650,15 +651,12 @@ export default class BugAboutMeView extends Component {
                 message.success('移除缺陷成功');
                 this.init();
                 ///要利用redux刷新 mainView处的徽标数
-                setTimeout(() => {
-                    this.updateDataByRedux();
-                }, 1000);
+                this.updateDataByRedux();
             }
         })
     }
     updateDataByRedux = () => {
-        let bugNum = this.state.data.length
-        Store.dispatch(showBugNum(bugNum))
+        Store.dispatch(showBugNum(null)) ///随便派发一个值，目的是让 mainView处监听到 执行init();
     }
     render() {
         const columns = [

@@ -32,7 +32,7 @@ export default class BugsPageView extends Component {
             major_id,
             count(major_id) as major_count
             from bugs
-            where createdAt>'${todayStart}' and createdAt<'${todayEnd}'
+            where createdAt>'${todayStart}' and createdAt<'${todayEnd}' and effective = 1
             group by bugs.major_id) t1
             left join majors
             on majors.id = t1.major_id`
