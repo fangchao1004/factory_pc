@@ -4,6 +4,9 @@ import HttpApi from '../../util/HttpApi'
 import AddStaffView from './AddTaskView';
 import UpdateStaffView from './UpdateTaskView'
 import moment from 'moment'
+import Store from '../../../redux/store/Store';
+import { showTaskNum } from '../../../redux/actions/TaskAction';
+
 
 var storage = window.localStorage;
 var userinfo;
@@ -80,6 +83,7 @@ class TaskToMeView extends Component {
             if (data.data.code === 0) {
                 this.setState({ updateStaffVisible: false })
                 this.getTasksData()
+                this.updateDataByRedux();
                 message.success('更新成功')
                 if (taskInfo.isMessage === 1) {
                     this.sendMessageToLeader(taskInfo);
@@ -91,16 +95,6 @@ class TaskToMeView extends Component {
     }
     updateStaffOnCancel = () => {
         this.setState({ updateStaffVisible: false })
-    }
-    deleteStaffConfirm = (record) => {
-        HttpApi.removeUserInfo({ id: record.id }, data => {
-            if (data.data.code === 0) {
-                message.success('删除成功')
-                this.getTasksData()
-            } else {
-                message.error(data.data.data)
-            }
-        })
     }
     sendMessageToLeader = async (taskInfo) => {
         // console.log("数据:", "from:", taskInfo.from, "me:", userinfo.user_id, userinfo.name);
@@ -133,6 +127,19 @@ class TaskToMeView extends Component {
             time = hoursRound + '小时 ' + minutesRound + '分钟'
         }
         return time;
+    }
+    updateDataByRedux = async () => {
+        let taskResult = await this.getUncompleteTaskInfo();
+        Store.dispatch(showTaskNum(taskResult.length));
+    }
+    getUncompleteTaskInfo() {
+        return new Promise((resolve, reject) => {
+            HttpApi.getTaskInfo({ to: { $like: `%,${userinfo.id},%` }, status: 0 }, data => {
+                if (data.data.code === 0) {
+                    resolve(data.data.data)
+                }
+            })
+        })
     }
 
     render() {

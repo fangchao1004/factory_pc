@@ -15,12 +15,14 @@ import BugAboutMeModeRoot from './bugAboutMeMode/BugAboutMeModeRoot';
 import SettingViewRoot from './setting/SettingViewRoot';
 import TransactionModeRoot from './transactionMode/TransactionModeRoot';
 import HttpApi from '../util/HttpApi';
+import Store from '../../redux/store/Store';
 
 var storage = window.localStorage;
 const { Header, Content, Sider } = Layout;
 const SubMenu = Menu.SubMenu
 var userinfo = null;
 var localUserInfo = '';
+let unsubscribe;
 
 class MainView extends Component {
     constructor(props) {
@@ -38,10 +40,21 @@ class MainView extends Component {
     componentDidMount() {
         localUserInfo = storage.getItem('userinfo');
         this.init();
+        unsubscribe = Store.subscribe(() => {
+            // console.log("获取store中的state:", Store.getState())
+            this.setState({
+                aboutMeBugNum: Store.getState().bug.bugNum,
+                aboutMeTaskNum: Store.getState().task.taskNum
+            })
+        });
+    }
+    componentWillUnmount() {
+        unsubscribe();
     }
     init = async () => {
         let bugResult = await this.getBugsInfo();
         let taskResult = await this.getTaskInfo();
+        ///初始化的时候，就先获取所需数据，展示在导航栏处
         setTimeout(() => {
             this.setState({
                 aboutMeBugNum: bugResult.length,
@@ -144,12 +157,6 @@ class MainView extends Component {
                                 <Link to={`${this.props.match.url}/table`} />
                             </Menu.Item> : null}
                         </SubMenu>
-
-                        {/* <Menu.Item key="缺陷">
-                            <Icon type="hdd" />
-                            <span>缺陷</span>
-                            <Link to={`${this.props.match.url}/bug`} />
-                        </Menu.Item> */}
                         <SubMenu
                             key="缺陷"
                             title={
@@ -169,7 +176,7 @@ class MainView extends Component {
                             <Menu.Item key="相关缺陷">
                                 <Icon type="hdd" />
                                 <span>与我相关</span>
-                                <Badge count={this.state.aboutMeBugNum} style={{ marginLeft: 30 }}>
+                                <Badge count={this.state.aboutMeBugNum} overflowCount={99} style={{ marginLeft: 30,  }} >
                                 </Badge>
                                 <Link to={`${this.props.match.url}/bugAboutMe`} onClick={() => { console.log('点击-与我相关-进入与我相关'); }} />
                             </Menu.Item>
@@ -182,7 +189,7 @@ class MainView extends Component {
                         <Menu.Item key="任务">
                             <Icon type="project" />
                             <span>任务</span>
-                            <Badge count={this.state.aboutMeTaskNum} style={{ marginLeft: 30 }}>
+                            <Badge count={this.state.aboutMeTaskNum} overflowCount={99} style={{ marginLeft: 30 }}>
                             </Badge>
                             <Link to={`${this.props.match.url}/user`} />
                         </Menu.Item>
@@ -305,7 +312,7 @@ class MainView extends Component {
                         </section>
                     </Content>
                 </Layout>
-            </Layout>
+            </Layout >
         );
     }
 }

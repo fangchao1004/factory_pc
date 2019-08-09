@@ -2,6 +2,8 @@ import React, { Component, Fragment } from 'react';
 import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Spin, Drawer, TreeSelect, Popconfirm, Divider } from 'antd'
 import HttpApi, { Testuri } from '../../util/HttpApi'
 import moment from 'moment'
+import Store from '../../../redux/store/Store';
+import { showBugNum } from '../../../redux/actions/BugAction';
 
 const { Step } = Steps;
 const { TextArea } = Input;
@@ -454,12 +456,20 @@ export default class BugAboutMeView extends Component {
         }
         HttpApi.updateBugInfo({ query: { id: this.state.currentRecord.id }, update: newValue }, (res) => {
             if (res.data.code === 0) {
-                ///成功以后要立即刷新当前的bug数据。
+                ///同时要刷新整个表中的数据 要利用redux刷新 mainView处的徽标数！！
+                this.init();
+                if (targetStatus === 4) {
+                    setTimeout(() => {
+                        this.updateDataByRedux();
+                    }, 1000);
+                }
+                ///成功以后要立即刷新 当前的bug数据。
                 HttpApi.getBugInfo({ id: this.state.currentRecord.id }, (res) => {
                     if (res.data.code === 0) {
                         message.success('发布成功');
                         this.setState({ currentRecord: res.data.data[0] })
-                        ////如果是状态4 则说明这个bug已经解决了。要把这个bug对应的record给更新（复制原有数据，本地修改，再作为新数据插入数据库record表）
+                        ///如果是状态4 则说明这个bug已经解决了。要把这个bug对应的record给更新（复制原有数据，本地修改，再作为新数据插入数据库record表）
+                        ///还要 通过redux改变mainView中，导航栏处的 徽标数量值
                         if (targetStatus === 4) {
                             this.changeRecordData(); setTimeout(() => {
                                 this.setState({ showModal2: false })
@@ -469,8 +479,7 @@ export default class BugAboutMeView extends Component {
                 })
             }
         })
-        ////同时要刷新整个表中的数据
-        this.init();
+
     }
 
     ////改变包含了这个bug_id 的record 再数据库中的值。
@@ -640,10 +649,17 @@ export default class BugAboutMeView extends Component {
             if (res.data.code === 0) {
                 message.success('移除缺陷成功');
                 this.init();
+                ///要利用redux刷新 mainView处的徽标数
+                setTimeout(() => {
+                    this.updateDataByRedux();
+                }, 1000);
             }
         })
     }
-
+    updateDataByRedux = () => {
+        let bugNum = this.state.data.length
+        Store.dispatch(showBugNum(bugNum))
+    }
     render() {
         const columns = [
             {

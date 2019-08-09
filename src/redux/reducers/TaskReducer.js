@@ -1,14 +1,14 @@
-import { SHOW_BUG_NUM } from '../actions/BugAction';
+import { SHOW_TASK_NUM } from '../actions/TaskAction';
 
 const initialState = {
-    bugNum: 0,
+    taskNum: 0,
 }
 
 export default function (state = initialState, action) {
     switch (action.type) {
-        case SHOW_BUG_NUM: {
+        case SHOW_TASK_NUM: {
             return {
-                bugNum: action.payload.num
+                taskNum: action.payload.num
             }
         }
 
