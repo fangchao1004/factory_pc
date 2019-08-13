@@ -62,7 +62,7 @@ class EquipmentAreaView extends Component {
         this.setState({ updateStaffVisible: false })
     }
     deleteStaffConfirm = (record) => {
-        HttpApi.removeDeviceAreaInfo({ id: record.id }, data => {
+        HttpApi.obs({ sql: `update areas set effective = 0 where id = ${record.id} ` }, (data) => {
             if (data.data.code === 0) {
                 message.success('删除成功')
                 this.getDeviceTypeData();

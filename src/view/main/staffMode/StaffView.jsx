@@ -55,9 +55,9 @@ class StaffView extends Component {
         this.setState({ addStaffVisible: true })
     }
     addStaffOnOk = (newValues) => {
-        // console.log(newValues)
-
-        newValues.permission = newValues.permission.join(',')
+        if (newValues.permission) {
+            newValues.permission = newValues.permission.join(',')
+        }
         HttpApi.addUserInfo(newValues, data => {
             if (data.data.code === 0) {
                 this.setState({ addStaffVisible: false })
@@ -91,7 +91,8 @@ class StaffView extends Component {
         this.setState({ updateStaffVisible: false })
     }
     deleteStaffConfirm = (record) => {
-        HttpApi.removeUserInfo({ id: record.id }, data => {
+        HttpApi.obs({ sql: `update users set effective = 0 where id = ${record.id} ` }, (data) => {
+        // HttpApi.removeUserInfo({ id: record.id }, data => {
             if (data.data.code === 0) {
                 message.success('删除成功')
                 this.getUsersData()

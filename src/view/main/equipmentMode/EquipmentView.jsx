@@ -26,7 +26,7 @@ class EquipmentView extends Component {
             pieDeviceId: null,
         }
     }
-    async componentDidMount() {
+    componentDidMount() {
         this.init();
     }
     init = async () => {
@@ -82,11 +82,12 @@ class EquipmentView extends Component {
     addEquipmentCancel = () => {
         this.setState({ addEquipmentVisible: false })
     }
-    deleteEquipmentConfirm(record) {
-        HttpApi.removeDeviceInfo({ id: record.id }, data => {
+    deleteEquipmentConfirm = (record) => {
+        // console.log('确定删除 某个设备:', record.id);
+        HttpApi.obs({ sql: `update devices set effective = 0 where id = ${record.id} ` }, (data) => {
             if (data.data.code === 0) {
-                message.success('删除成功')
-                this.init()
+                message.success('删除设备成功')
+                this.init();
             } else {
                 message.error(data.data.data)
             }
@@ -155,7 +156,7 @@ class EquipmentView extends Component {
                     <div style={{ textAlign: 'center' }}>
                         {
                             this.state.isAdmin ?
-                                <Popconfirm title="确定要删除该设备吗?" onConfirm={this.deleteEquipmentConfirm.bind(null, record)}>
+                                <Popconfirm title="确定要删除该设备吗?" onConfirm={()=>{this.deleteEquipmentConfirm(record)}}>
                                     <Button size="small" type="danger">删除</Button>
                                 </Popconfirm>
                                 : null

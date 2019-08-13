@@ -61,7 +61,8 @@ class StaffTypeView extends Component {
         this.setState({ updateLevelVisible: false })
     }
     deleteLevelConfirm = (record) => {
-        HttpApi.removeUserLevel({ id: record.id }, data => {
+        HttpApi.obs({ sql: `update levels set effective = 0 where id = ${record.id} ` }, (data) => {
+        // HttpApi.removeUserLevel({ id: record.id }, data => {
             if (data.data.code === 0) {
                 message.success('删除成功')
                 this.getUsersData()

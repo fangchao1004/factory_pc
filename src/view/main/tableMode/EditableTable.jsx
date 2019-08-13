@@ -42,7 +42,7 @@ export default class EditableTable extends Component {
   }
 
   getTitleData = () => {
-    HttpApi.getDeviceTypeInfo({}, (res) => {
+    HttpApi.getDeviceTypeInfo({ effective: 1 }, (res) => {
       if (res.data.code === 0) {
         // console.log(res.data.data);
         let copyArrData = JSON.parse(JSON.stringify(res.data.data))
@@ -58,7 +58,7 @@ export default class EditableTable extends Component {
   }
 
   getSampleData = () => {
-    HttpApi.getSampleInfo({}, (res) => {
+    HttpApi.getSampleInfo({ effective: 1 }, (res) => {
       if (res.data.code === 0) {
         // console.log(res.data.data);
         let sampleIdArr = [];

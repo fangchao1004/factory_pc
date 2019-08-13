@@ -61,7 +61,8 @@ class StaffMajorView extends Component {
         this.setState({ updateLevelVisible: false })
     }
     deleteLevelConfirm = (record) => {
-        HttpApi.removeUserMajor({ id: record.id }, data => {
+        HttpApi.obs({ sql: `update majors set effective = 0 where id = ${record.id} ` }, (data) => {
+        // HttpApi.removeUserMajor({ id: record.id }, data => {
             if (data.data.code === 0) {
                 message.success('删除成功')
                 this.getUsersData()

@@ -32,7 +32,7 @@ class TableView extends Component {
     }
     getSampleData = () => {
         let p = new Promise((resolve, reject) => {
-            HttpApi.getSampleInfo({}, (res) => {
+            HttpApi.getSampleInfo({ effective: 1 }, (res) => {
                 if (res.data.code === 0) {
                     resolve(res.data.data)
                 }
@@ -100,7 +100,8 @@ class TableView extends Component {
         return cellsArr
     }
     onConfirmDeleteHandler = (element) => {
-        HttpApi.removeSampleInfo({ id: element.id }, (res) => {
+        HttpApi.obs({ sql: `update samples set effective = 0 where id = ${element.id} ` }, (res) => {
+            // HttpApi.removeSampleInfo({ id: element.id }, (res) => {
             if (res.data.code === 0) {
                 this.initHandler();
             }

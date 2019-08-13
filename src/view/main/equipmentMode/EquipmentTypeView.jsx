@@ -60,9 +60,10 @@ class EquipmentTypeView extends Component {
     }
     updateStaffOnCancel = () => {
         this.setState({ updateStaffVisible: false })
-    }
+    } 
     deleteStaffConfirm = (record) => {
-        HttpApi.removeDeviceTypeInfo({ id: record.id }, data => {
+        HttpApi.obs({ sql: `update device_types set effective = 0 where id = ${record.id} ` }, (data) => {
+        // HttpApi.removeDeviceTypeInfo({ id: record.id }, data => {
             if (data.data.code === 0) {
                 message.success('删除成功')
                 this.getDeviceTypeData();
