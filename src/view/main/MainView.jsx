@@ -23,8 +23,9 @@ const SubMenu = Menu.SubMenu
 var userinfo = null;
 var localUserInfo = '';
 let unsubscribe;
+var time;
 
-class MainView extends Component {
+export default class MainView extends Component {
     constructor(props) {
         super(props)
         userinfo = window.localStorage.getItem('userinfo')
@@ -45,20 +46,22 @@ class MainView extends Component {
             ////监听到 其他类中 利用redux派发的事件了
             this.init();
         });
-    }
-    componentWillUnmount() {
-        unsubscribe();
+        this.openPolling();///开启轮询---定时去获取缺陷了任务数据
     }
     init = async () => {
         let bugResult = await this.getBugsInfo();
         let taskResult = await this.getTaskInfo();
         ///初始化的时候，就先获取所需数据，展示在导航栏处
-        setTimeout(() => {
-            this.setState({
-                aboutMeBugNum: bugResult.length,
-                aboutMeTaskNum: taskResult.length
-            })
-        }, 500);
+        ////如果有变化 才刷新
+        if (this.state.aboutMeBugNum !== bugResult.length || this.state.aboutMeTaskNum !== taskResult.length) {
+            console.log('有关我的-缺陷和任务数量有变化-刷新');
+            setTimeout(() => {
+                this.setState({
+                    aboutMeBugNum: bugResult.length,
+                    aboutMeTaskNum: taskResult.length
+                })
+            }, 500);
+        }
     }
     getBugsInfo = () => {
         return new Promise((resolve, reject) => {
@@ -85,105 +88,72 @@ class MainView extends Component {
             collapsed: !this.state.collapsed
         })
     }
+    openPolling = () => {
+        time = setInterval(() => {
+            // console.log('Polling');
+            this.init();
+        }, 10000);////10秒轮询一次
+    }
+    componentWillUnmount() {
+        clearInterval(time);
+        unsubscribe();
+    }
     render() {
         return (
             <Layout style={{ minHeight: '100vh' }}>
-                <Sider
-                    collapsible
-                    collapsed={this.state.collapsed}
-                    onCollapse={this.onCollapse}
-                    trigger={null}
-                    width={255}
-                >
-                    <div
-                        style={{
-                            height: 64,
-                            background: 'rgba(8,32,61,1)',
-                            padding: '16 24',
-                            position: 'relative'
-                        }}
-                    >
-                        <img
-                            src={logopng}
-                            alt=""
-                            width="32"
-                            height="32"
-                            style={{ position: 'absolute', left: 24, top: 16 }}
-                        />
-                        {this.state.collapsed ? null : (
-                            <span
-                                style={{
-                                    position: 'absolute',
-                                    top: 18,
-                                    left: 60,
-                                    width: 180,
-                                    color: '#fff',
-                                    fontSize: 20
-                                }}
-                            >
-                                信息综合管理平台
-              </span>
-                        )}
+                <Sider collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse} trigger={null} width={255}>
+                    <div style={{ height: 64, background: 'rgba(8,32,61,1)', padding: '16 24', position: 'relative' }}>
+                        <img src={logopng} alt="" width="32" height="32" style={{ position: 'absolute', left: 24, top: 16 }} />
+                        {this.state.collapsed ? null :
+                            <span style={{ position: 'absolute', top: 18, left: 60, width: 180, color: '#fff', fontSize: 20 }}>信息综合管理平台</span>
+                        }
                     </div>
-                    <Menu
-                        theme="dark"
-                        mode="inline"
-                        onClick={this.onMeunClick}
-                    >
+                    <Menu theme="dark" mode="inline" onClick={this.onMeunClick}>
                         <Menu.Item key="首页">
                             <Icon type="home" />
                             <span>首页</span>
                             <Link to={`${this.props.match.url}`} />
                         </Menu.Item>
-                        <SubMenu
-                            key="巡检平台"
-                            title={
-                                <span>
-                                    <Icon type="scan" />
-                                    <span>巡检</span>
-                                </span>
-                            }
-                        >
+                        <SubMenu key="巡检平台" title={<span><Icon type="scan" /><span>巡检</span></span>}>
                             <Menu.Item key="设备">
                                 <Icon type="switcher" />
                                 <span>巡检设备</span>
                                 <Link to={`${this.props.match.url}/equipment`} />
                             </Menu.Item>
-                            {this.state.isAdmin ? <Menu.Item key="表单">
-                                <Icon type="file" />
-                                <span>巡检表单</span>
-                                <Link to={`${this.props.match.url}/table`} />
-                            </Menu.Item> : null}
+                            {this.state.isAdmin ?
+                                <Menu.Item key="表单">
+                                    <Icon type="file" />
+                                    <span>巡检表单</span>
+                                    <Link to={`${this.props.match.url}/table`} />
+                                </Menu.Item> : null}
                         </SubMenu>
-                        <SubMenu
-                            key="缺陷"
-                            title={
-                                <span>
-                                    <Icon type="scan" />
-                                    <span>缺陷</span>
-                                    <Badge dot={this.state.aboutMeBugNum > 0} style={{ marginLeft: 30 }}>
-                                    </Badge>
-                                </span>
-                            }
-                        >
-                            <Menu.Item key="所有缺陷">
-                                <Icon type="hdd" />
-                                <span>所有缺陷</span>
-                                <Link to={`${this.props.match.url}/bug`} />
-                            </Menu.Item>
-                            <Menu.Item key="相关缺陷">
+                        <SubMenu key="缺陷" title={
+                            <span>
+                                <Icon type="scan" />
+                                <span>缺陷</span>
+                                <Badge dot={this.state.aboutMeBugNum > 0} style={{ marginLeft: 30 }}>
+                                </Badge>
+                            </span>
+                        }>
+                            <Menu.Item key="与我相关">
                                 <Icon type="hdd" />
                                 <span>与我相关</span>
                                 <Badge count={this.state.aboutMeBugNum} overflowCount={99} style={{ marginLeft: 30, }} >
                                 </Badge>
                                 <Link to={`${this.props.match.url}/bugAboutMe`} onClick={() => { console.log('点击-与我相关-进入与我相关'); }} />
                             </Menu.Item>
+                            <Menu.Item key="所有缺陷">
+                                <Icon type="hdd" />
+                                <span>所有缺陷</span>
+                                <Link to={`${this.props.match.url}/bug`} />
+                            </Menu.Item>
                         </SubMenu>
-                        {this.state.isAdmin ? <Menu.Item key="员工">
-                            <Icon type="team" />
-                            <span>员工</span>
-                            <Link to={`${this.props.match.url}/staff`} />
-                        </Menu.Item> : null}
+                        {this.state.isAdmin ?
+                            <Menu.Item key="员工">
+                                <Icon type="team" />
+                                <span>员工</span>
+                                <Link to={`${this.props.match.url}/staff`} />
+                            </Menu.Item> : null}
                         <Menu.Item key="任务">
                             <Icon type="project" />
                             <span>任务</span>
@@ -191,11 +161,11 @@ class MainView extends Component {
                             </Badge>
                             <Link to={`${this.props.match.url}/user`} />
                         </Menu.Item>
-                        <Menu.Item key="交易">
+                        {/* <Menu.Item key="交易">
                             <Icon type="money-collect" />
                             <span>消费</span>
                             <Link to={`${this.props.match.url}/transaction`} />
-                        </Menu.Item>
+                        </Menu.Item> */}
                         <SubMenu key="设置" title={<span><Icon type="setting" /><span>设置</span></span>}>
                             <Menu.Item key="个人设置"><Icon type="switcher" /><span>个人设置</span><Link to={`${this.props.match.url}/usersetting`} /></Menu.Item>
                         </SubMenu>
@@ -205,16 +175,10 @@ class MainView extends Component {
                     <Header style={{ background: '#fff', padding: 0 }}>
                         <Row>
                             <Col span={8}>
-                                <Icon
-                                    className="trigger"
-                                    style={{ fontSize: 24, marginLeft: 30 }}
-                                    type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'}
-                                    onClick={this.toggle}
-                                />
-
+                                <Icon className="trigger" style={{ fontSize: 24, marginLeft: 30 }} type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'} onClick={this.toggle} />
                             </Col>
                             <Col span={16} style={{ textAlign: 'right', paddingRight: 24 }}>
-                                <Popover width={100} placement="rightBottom"
+                                <Popover width={100} placement="rightBottom" trigger="click"
                                     title={storage.getItem('userinfo') ? "用户名: " + JSON.parse(storage.getItem('userinfo')).username + "(" + JSON.parse(storage.getItem('userinfo')).name + ")" :
                                         "不存在"}
                                     content={
@@ -223,23 +187,13 @@ class MainView extends Component {
                                                 storage.clear();
                                                 window.location.href = "/";
                                             }}>退出登录</Button>
-                                    } trigger="click">
+                                    }>
                                     <Icon type="user" style={{ fontSize: 24 }} />
                                 </Popover>
                             </Col>
                         </Row>
                     </Header>
-                    <Content
-                        style={{
-                            background: '#fff',
-                            margin: 26,
-                            paddingTop: 20,
-                            paddingLeft: 0,
-                            paddingRight: 0,
-                            minHeight: 280,
-                            height: '100%'
-                        }}
-                    >
+                    <Content style={{ background: '#fff', margin: 26, paddingTop: 20, paddingLeft: 0, paddingRight: 0, minHeight: 280, height: '100%' }}>
                         <section>
                             <Route
                                 exact
@@ -249,19 +203,16 @@ class MainView extends Component {
                             <Route
                                 exact
                                 path={`${this.props.match.path}/equipment`}
-                                // component={EquipmentModeRoot}
                                 component={() => (storage.getItem('userinfo') ? <EquipmentModeRoot /> : <Redirect to='/' />)}
                             />
                             <Route
                                 exact
                                 path={`${this.props.match.path}/staff`}
-                                // component={StaffModeRoot}
                                 component={() => (storage.getItem('userinfo') ? <StaffModeRoot /> : <Redirect to='/' />)}
                             />
                             <Route
                                 exact
                                 path={`${this.props.match.path}/table`}
-                                // component={TableModeRoot}
                                 component={() => (storage.getItem('userinfo') ? <TableModeRoot /> : <Redirect to='/' />)}
                             />
                             <Route
@@ -286,25 +237,21 @@ class MainView extends Component {
                             <Route
                                 exact
                                 path={`${this.props.match.path}/setting/equipmentModeRoot`}
-                                // component={SettingEquipmentModeRoot}
                                 component={() => (storage.getItem('userinfo') ? <SettingEquipmentModeRoot /> : <Redirect to='/' />)}
                             />
                             <Route
                                 exact
                                 path={`${this.props.match.path}/setting/staffModeRoot`}
-                                // component={SettingStaffModeRoot}
                                 component={() => (storage.getItem('userinfo') ? <SettingStaffModeRoot /> : <Redirect to='/' />)}
                             />
                             <Route
                                 exact
                                 path={`${this.props.match.path}/setting/tableModeRoot`}
-                                // component={SettingTableModeRoot}
                                 component={() => (storage.getItem('userinfo') ? <SettingTableModeRoot /> : <Redirect to='/' />)}
                             />
                             <Route
                                 exact
                                 path={`${this.props.match.path}/transaction`}
-                                // component={SettingTableModeRoot}
                                 component={() => (storage.getItem('userinfo') ? <TransactionModeRoot /> : <Redirect to='/' />)}
                             />
                         </section>
@@ -314,5 +261,3 @@ class MainView extends Component {
         );
     }
 }
-
-export default MainView;

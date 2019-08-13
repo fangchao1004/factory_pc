@@ -10,7 +10,8 @@ export default function UserSettingView(props) {
             { title: '姓名', description: userinfo.name },
             { title: '职位', description: userinfo.remark },
             { title: '手机号', description: userinfo.phonenumber },
-            { title: '版本号', description: 'V 1.0.1' }
+            { title: '版本号', description: 'V 1.0.2' },
+            { title: '更新', description: '增加轮询' }
         ]
         setData(listData)
     }, [])

@@ -674,14 +674,14 @@ export default class BugView extends Component {
 
     render() {
         const columns = [
-            {
-                key: 'id',
-                dataIndex: 'id',
-                title: 'id',
-                render: (text, record) => {
-                    return <div>{text}</div>
-                }
-            },
+            // {
+            //     key: 'id',
+            //     dataIndex: 'id',
+            //     title: 'id',
+            //     render: (text, record) => {
+            //         return <div>{text}</div>
+            //     }
+            // },
             {
                 key: 'createdAt', dataIndex: 'createdAt', title: '时间',
                 sorter: (a, b) => {
@@ -722,13 +722,13 @@ export default class BugView extends Component {
                         else if (text === 3) { result = '三级'; color = '#87d068' }
                         resultCom = <Tag color={color}>{result}</Tag>
                     }
-                    return <div>{resultCom}</div>
+                    return resultCom
                 }
             },
             {
                 key: 'content', dataIndex: 'content', title: '内容', render: (text, record) => {
                     let obj = JSON.parse(text);
-                    return <div><div style={{ color: '#438ef7' }}>{record.title_name}</div><div>{obj.select}</div><div>{obj.text}</div></div>
+                    return <div><div style={{ color: '#000', fontWeight: 900 }}>{record.title_name}</div><div>{obj.select}</div><div>{obj.text}</div></div>
                 }
             },
             {
@@ -749,7 +749,7 @@ export default class BugView extends Component {
                     })
                     let comArr = [];
                     result_arr.forEach((item, index) => {
-                        comArr.push(<span key={item.uuid} style={{ color: '#438ef7', marginRight: 10, cursor: "pointer" }}
+                        comArr.push(<span key={item.uuid} style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
                             onClick={e => {
                                 if (this.state.preImguuid !== item.uuid) {
                                     this.setState({
@@ -765,7 +765,6 @@ export default class BugView extends Component {
                                     showModal1: true,
                                     preImguuid: item.uuid,
                                 })
-
                             }}>{item.name}</span>)
                     });
                     let result = '/'

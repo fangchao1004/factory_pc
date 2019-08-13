@@ -5,7 +5,7 @@ import BugAboutMeCompletedView from './BugAboutMeCompletedView'
 
 const tabListNoTitle = [{
     key: 'BugAboutMeView',
-    tab: '相关缺陷',
+    tab: '相关未完成',
 },{
     key: 'BugAboutMeCompletedView',
     tab: '相关已完成',

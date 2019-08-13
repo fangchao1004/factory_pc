@@ -6,7 +6,7 @@ import UpdateStaffMajorView from './UpdateStaffMajorView';
 
 class StaffMajorView extends Component {
 
-    state = { levels: null, addLevelVisible: false, updateLevelVisible: false, updateLevelData: null}
+    state = { levels: null, addLevelVisible: false, updateLevelVisible: false, updateLevelData: null }
 
     componentDidMount() {
         this.getUsersData()
@@ -18,7 +18,7 @@ class StaffMajorView extends Component {
     }
     getUserLevelList() {
         return new Promise((resolve, reject) => {
-            HttpApi.getUserMajor({}, data => {
+            HttpApi.getUserMajor({ effective: 1 }, data => {
                 if (data.data.code === 0) {
                     resolve(data.data.data)
                 }
@@ -115,10 +115,10 @@ class StaffMajorView extends Component {
                     dataSource={this.state.levels}
                     columns={columns}
                 />
-                <AddStaffMajorView visible={this.state.addLevelVisible} onOk={this.addLevelOnOk} 
-                onCancel={this.addLevelOnCancel}/>
-                <UpdateStaffMajorView level={this.state.updateLevelData} onOk={this.updateLevelOnOk} 
-                onCancel={this.updateLevelOnCancel} visible={this.state.updateLevelVisible} />
+                <AddStaffMajorView visible={this.state.addLevelVisible} onOk={this.addLevelOnOk}
+                    onCancel={this.addLevelOnCancel} />
+                <UpdateStaffMajorView level={this.state.updateLevelData} onOk={this.updateLevelOnOk}
+                    onCancel={this.updateLevelOnCancel} visible={this.state.updateLevelVisible} />
             </div>
         )
     }

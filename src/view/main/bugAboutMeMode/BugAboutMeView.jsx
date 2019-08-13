@@ -91,12 +91,12 @@ export default class BugAboutMeView extends Component {
     }
     getUsersLevels = () => {
         return new Promise((resolve, reject) => {
-            // let sqlText = 'select * from users order by convert(name using gbk) ASC'
-            let sqlText = `select distinct users.level_id, users.level_id as 'value',levels.name as title from users
+            // let sql = 'select * from users order by convert(name using gbk) ASC'
+            let sql = `select distinct users.level_id, users.level_id as 'value',levels.name as title from users
             left join levels
             on levels.id = users.level_id
             order by level_id`
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -107,12 +107,12 @@ export default class BugAboutMeView extends Component {
     }
     getUsersInfo = () => {
         return new Promise((resolve, reject) => {
-            // let sqlText = 'select * from users order by convert(name using gbk) ASC'
-            let sqlText = `select users.*,users.name as title,levels.name level_name,  CONCAT(users.level_id,'-',users.id) 'key',CONCAT(users.level_id,'-',users.id) 'value' from users
+            // let sql = 'select * from users order by convert(name using gbk) ASC'
+            let sql = `select users.*,users.name as title,levels.name level_name,  CONCAT(users.level_id,'-',users.id) 'key',CONCAT(users.level_id,'-',users.id) 'value' from users
             left join levels
             on users.level_id = levels.id
             order by users.level_id`
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -122,9 +122,9 @@ export default class BugAboutMeView extends Component {
         })
     }
     getMajorInfo = () => {
-        let sqlText = 'select m.id,m.name from majors m'
+        let sql = 'select m.id,m.name from majors m'
         return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -134,10 +134,9 @@ export default class BugAboutMeView extends Component {
         })
     }
     getOneBugInfo = (bug_id) => {
-        let sql1 = ' select bugs.* from bugs where id = ' + bug_id;
-        let sqlText = sql1;
+        let sql = ' select bugs.* from bugs where id = ' + bug_id;
         return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
                 let result = null;
                 if (res.data.code === 0) {
                     result = res.data.data[0]
@@ -158,10 +157,9 @@ export default class BugAboutMeView extends Component {
         })
     }
     getOneRecordInfo = (device_id) => {
-        let sql1 = ' select * from records rds where device_id = ' + device_id + ' order by rds.id desc limit 1';
-        let sqlText = sql1;
+        let sql = ' select * from records rds where device_id = ' + device_id + ' order by rds.id desc limit 1';
         return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
                 let result = null;
                 if (res.data.code === 0) {
                     result = res.data.data[0]
@@ -660,14 +658,14 @@ export default class BugAboutMeView extends Component {
     }
     render() {
         const columns = [
-            {
-                key: 'id',
-                dataIndex: 'id',
-                title: 'id',
-                render: (text, record) => {
-                    return <div>{text}</div>
-                }
-            },
+            // {
+            //     key: 'id',
+            //     dataIndex: 'id',
+            //     title: 'id',
+            //     render: (text, record) => {
+            //         return <div>{text}</div>
+            //     }
+            // },
             {
                 key: 'createdAt', dataIndex: 'createdAt', title: '时间',
                 sorter: (a, b) => {
@@ -714,7 +712,7 @@ export default class BugAboutMeView extends Component {
             {
                 key: 'content', dataIndex: 'content', title: '内容', render: (text, record) => {
                     let obj = JSON.parse(text);
-                    return <div><div style={{ color: '#438ef7' }}>{record.title_name}</div><div>{obj.select}</div><div>{obj.text}</div></div>
+                    return <div><div style={{ color: '#000', fontWeight: 900 }}>{record.title_name}</div><div>{obj.select}</div><div>{obj.text}</div></div>
                 }
             },
             {
@@ -735,7 +733,7 @@ export default class BugAboutMeView extends Component {
                     })
                     let comArr = [];
                     result_arr.forEach((item, index) => {
-                        comArr.push(<span key={item.uuid} style={{ color: '#438ef7', marginRight: 10, cursor: "pointer" }}
+                        comArr.push(<span key={item.uuid} style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
                             onClick={e => {
                                 if (this.state.preImguuid !== item.uuid) {
                                     this.setState({

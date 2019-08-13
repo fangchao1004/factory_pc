@@ -25,7 +25,7 @@ class StaffView extends Component {
     }
     getUserLevelList() {
         return new Promise((resolve, reject) => {
-            HttpApi.getUserLevel({}, data => {
+            HttpApi.getUserLevel({ effective: 1 }, data => {
                 if (data.data.code === 0) {
                     resolve(data.data.data)
                 }
@@ -34,7 +34,7 @@ class StaffView extends Component {
     }
     getUserNfcList() {
         return new Promise((resolve, reject) => {
-            HttpApi.getNFCInfo({ type: 1 }, data => {
+            HttpApi.getNFCInfo({ type: 1, effective: 1 }, data => {
                 if (data.data.code === 0) {
                     resolve(data.data.data)
                 }
@@ -43,7 +43,7 @@ class StaffView extends Component {
     }
     getUserList() {
         return new Promise((resolve, reject) => {
-            HttpApi.getUserInfo({}, data => {
+            HttpApi.getUserInfo({ effective: 1 }, data => {
                 if (data.data.code === 0) {
                     resolve(data.data.data)
                 }
@@ -55,7 +55,7 @@ class StaffView extends Component {
         this.setState({ addStaffVisible: true })
     }
     addStaffOnOk = (newValues) => {
-        console.log(newValues)
+        // console.log(newValues)
 
         newValues.permission = newValues.permission.join(',')
         HttpApi.addUserInfo(newValues, data => {
@@ -76,7 +76,7 @@ class StaffView extends Component {
     }
     updateStaffOnOk = (newValues) => {
         newValues.isadmin = newValues.isadmin ? 1 : 0
-        if(newValues.permission) newValues.permission = newValues.permission.join(',')
+        if (newValues.permission) newValues.permission = newValues.permission.join(',')
         HttpApi.updateUserInfo({ query: { id: this.state.updateStaffData.id }, update: newValues }, data => {
             if (data.data.code === 0) {
                 this.setState({ updateStaffVisible: false })

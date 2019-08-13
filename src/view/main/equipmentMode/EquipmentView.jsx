@@ -29,7 +29,6 @@ class EquipmentView extends Component {
     async componentDidMount() {
         this.init();
     }
-
     init = async () => {
         let devicesInfo = await this.getDevicesInfo();
         devicesInfo.map((item) => item.key = item.id + '')
@@ -39,10 +38,10 @@ class EquipmentView extends Component {
     }
     getDevicesInfo = () => {
         return new Promise((resolve, reject) => {
-            let sql1 = ' select des.*,dts.name as device_type_name,areas.name as area_name,nfcs.name as nfc_name from devices des';
-            let sql2 = ' left join device_types dts on dts.id = des.type_id left join areas on areas.id = des.area_id left join nfcs on nfcs.id = des.nfc_id'
-            let sqlText = sql1 + sql2;
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            let sql = `select des.*,dts.name as device_type_name,areas.name as area_name,nfcs.name as nfc_name from devices des
+            left join device_types dts on dts.id = des.type_id left join areas on areas.id = des.area_id left join nfcs on nfcs.id = des.nfc_id
+            where des.effective = 1`;
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -53,8 +52,8 @@ class EquipmentView extends Component {
     }
     getBugsInfo = (bug_id_arr) => {
         return new Promise((resolve, reject) => {
-            let sqlText = 'select bugs.*,mjs.name as major_name from bugs left join majors mjs on mjs.id = bugs.major_id where bugs.id in (' + bug_id_arr.join(',') + ') and effective = 1';
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            let sql = 'select bugs.*,mjs.name as major_name from bugs left join majors mjs on mjs.id = bugs.major_id where bugs.id in (' + bug_id_arr.join(',') + ') and effective = 1';
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data

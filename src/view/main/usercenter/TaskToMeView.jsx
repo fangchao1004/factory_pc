@@ -46,7 +46,7 @@ class TaskToMeView extends Component {
 
     getAllUserInfo = () => {
         return new Promise((resolve, reject) => {
-            HttpApi.getUserInfo({}, data => {
+            HttpApi.getUserInfo({ effective: 1 }, data => {
                 if (data.data.code === 0) {
                     resolve(data.data.data)
                 }

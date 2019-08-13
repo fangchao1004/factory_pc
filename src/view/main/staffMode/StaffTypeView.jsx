@@ -6,7 +6,7 @@ import UpdateStaffTypeView from './UpdateStaffTypeView';
 
 class StaffTypeView extends Component {
 
-    state = { levels: null, addLevelVisible: false, updateLevelVisible: false, updateLevelData: null}
+    state = { levels: null, addLevelVisible: false, updateLevelVisible: false, updateLevelData: null }
 
     componentDidMount() {
         this.getUsersData()
@@ -18,7 +18,7 @@ class StaffTypeView extends Component {
     }
     getUserLevelList() {
         return new Promise((resolve, reject) => {
-            HttpApi.getUserLevel({}, data => {
+            HttpApi.getUserLevel({ effective: 1 }, data => {
                 if (data.data.code === 0) {
                     resolve(data.data.data)
                 }
@@ -115,10 +115,10 @@ class StaffTypeView extends Component {
                     dataSource={this.state.levels}
                     columns={columns}
                 />
-                <AddStaffTypeView visible={this.state.addLevelVisible} onOk={this.addLevelOnOk} 
-                onCancel={this.addLevelOnCancel}/>
-                <UpdateStaffTypeView level={this.state.updateLevelData} onOk={this.updateLevelOnOk} 
-                onCancel={this.updateLevelOnCancel} visible={this.state.updateLevelVisible} />
+                <AddStaffTypeView visible={this.state.addLevelVisible} onOk={this.addLevelOnOk}
+                    onCancel={this.addLevelOnCancel} />
+                <UpdateStaffTypeView level={this.state.updateLevelData} onOk={this.updateLevelOnOk}
+                    onCancel={this.updateLevelOnCancel} visible={this.state.updateLevelVisible} />
             </div>
         )
     }

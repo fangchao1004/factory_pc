@@ -16,7 +16,7 @@ class EquipmentTypeView extends Component {
         this.getDeviceTypeData();
     }
     getDeviceTypeData = () => {
-        HttpApi.getDeviceTypeInfo({}, (res) => {
+        HttpApi.getDeviceTypeInfo({ effective: 1 }, (res) => {
             if (res.data.code === 0) {
                 res.data.data.map((item) => (
                     item.key = item.id + ""

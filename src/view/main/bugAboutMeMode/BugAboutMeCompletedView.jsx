@@ -591,14 +591,14 @@ export default class BugAboutMeCompletedView extends Component {
 
     render() {
         const columns = [
-            {
-                key:'id',
-                dataIndex:'id',
-                title:'id',
-                render:(text,record)=>{
-                    return <div>{text}</div>
-                }
-            },
+            // {
+            //     key:'id',
+            //     dataIndex:'id',
+            //     title:'id',
+            //     render:(text,record)=>{
+            //         return <div>{text}</div>
+            //     }
+            // },
             {
                 key: 'createdAt', dataIndex: 'createdAt', title: '时间',
                 sorter: (a, b) => {
@@ -645,7 +645,7 @@ export default class BugAboutMeCompletedView extends Component {
             {
                 key: 'content', dataIndex: 'content', title: '内容', render: (text, record) => {
                     let obj = JSON.parse(text);
-                    return <div><div style={{ color: '#438ef7' }}>{record.title_name}</div><div>{obj.select}</div><div>{obj.text}</div></div>
+                    return <div><div style={{ color: '#000', fontWeight: 900 }}>{record.title_name}</div><div>{obj.select}</div><div>{obj.text}</div></div>
                 }
             },
             {
@@ -666,7 +666,7 @@ export default class BugAboutMeCompletedView extends Component {
                     })
                     let comArr = [];
                     result_arr.forEach((item, index) => {
-                        comArr.push(<span key={item.uuid} style={{ color: '#438ef7', marginRight: 10, cursor: "pointer" }}
+                        comArr.push(<span key={item.uuid} style={{ color: '#438ef7',fontWeight: 500, marginRight: 10, cursor: "pointer" }}
                             onClick={e => {
                                 if (this.state.preImguuid !== item.uuid) {
                                     this.setState({

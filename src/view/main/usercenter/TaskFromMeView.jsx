@@ -64,7 +64,7 @@ class TaskFromMeView extends Component {
     getUserInfo = (userArr) => {
         return new Promise((resolve, reject) => {
             let result = [];
-            HttpApi.getUserInfo({ id: userArr }, data => {
+            HttpApi.getUserInfo({ id: userArr, effective: 1 }, data => {
                 if (data.data.code === 0) {
                     result = data.data.data
                 }
