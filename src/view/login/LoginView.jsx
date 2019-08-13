@@ -23,6 +23,8 @@ export default class LoginView extends React.Component {
   onLoginOk = e => {
     this.refs.form.validateFields((error, values) => {
       if (!error) {
+        values.effective = 1;
+        // console.log('values:',values);
         HttpApi.getUserInfo(values, doc => {
           if (doc.data.code === 0 && doc.data.data.length > 0) {
             storage.clear();
