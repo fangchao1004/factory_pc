@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, Menu, Icon, Row, Col, Popover, Button, Badge } from 'antd'
+import { Layout, Menu, Icon, Row, Col, Popover, Button, Badge, notification } from 'antd'
 import { Route, Link, Redirect } from 'react-router-dom'
 import logopng from '../../assets/logo.png'
 import HomePageRoot from './homePageMode/HomePageRoot';
@@ -14,28 +14,32 @@ import BugModeRoot from './bugMode/BugModeRoot';
 import BugAboutMeModeRoot from './bugAboutMeMode/BugAboutMeModeRoot';
 import SettingViewRoot from './setting/SettingViewRoot';
 import TransactionModeRoot from './transactionMode/TransactionModeRoot';
+import UserMenuView from './userMenu/UserMenuView'
 import HttpApi from '../util/HttpApi';
 import Store from '../../redux/store/Store';
 
 var storage = window.localStorage;
 const { Header, Content, Sider } = Layout;
 const SubMenu = Menu.SubMenu
-var userinfo = null;
+var noticeinfo = null;
 var localUserInfo = '';
 let unsubscribe;
 var time;
-
+var tempNoticeStr = '';
 export default class MainView extends Component {
     constructor(props) {
         super(props)
-        userinfo = window.localStorage.getItem('userinfo')
-        // console.log(userinfo)
+        localUserInfo = storage.getItem('userinfo')
+        noticeinfo = storage.getItem('noticeinfo')
+        console.log('noticeinfo', noticeinfo);
         this.state = {
             collapsed: false,
-            isAdmin: userinfo && JSON.parse(userinfo).isadmin === 1,
+            isAdmin: localUserInfo && JSON.parse(localUserInfo).isadmin === 1,
             aboutMeBugNum: 0,
             aboutMeTaskNum: 0,
         }
+        tempNoticeStr = noticeinfo ? noticeinfo : ''///获取曾提醒过的最新内容。作为临时数据。
+        console.log('tempNoticeStr:', tempNoticeStr);
         // console.log(this.state.isAdmin)
     }
     componentDidMount() {
@@ -83,6 +87,30 @@ export default class MainView extends Component {
             })
         })
     }
+    getLastNotice = async () => {
+        // console.log('getLastNotice');
+        // console.log('userinfo:', userinfo)
+        let result = await this.getNoticeInfo(); ///JSON.parse(userinfo).notice
+        // console.log('JSON.stringify(result):',JSON.stringify(result));
+        if (JSON.stringify(result) !== '{}' && tempNoticeStr !== JSON.stringify(result)) {
+            console.log('发现最新通知：', JSON.stringify(result));
+            tempNoticeStr = JSON.stringify(result)
+            // this.setState({ tempNoticeStr: JSON.stringify(result) })///获取到新的 先马上存在本地state中，避免重复执行
+            this.openNotification(result);
+        }
+    }
+    getNoticeInfo = () => {
+        return new Promise((resolve, reject) => {
+            let sql = `select * from notices order by id desc limit 1`
+            let result = {};
+            HttpApi.obs({ sql }, data => {
+                if (data.data.code === 0) {
+                    result = data.data.data[0]
+                }
+                resolve(result);
+            })
+        })
+    }
     toggle = () => {
         this.setState({
             collapsed: !this.state.collapsed
@@ -92,12 +120,31 @@ export default class MainView extends Component {
         time = setInterval(() => {
             // console.log('Polling');
             this.init();
+            this.getLastNotice();
         }, 10000);////10秒轮询一次
     }
     componentWillUnmount() {
         clearInterval(time);
         unsubscribe();
     }
+    openNotification = (result) => {
+        const key = `open${Date.now()}`;
+        const btn = <div style={{ display: 'flex', justifyContent: 'space-between', width: 330 }}>
+            <span >{result.time} {result.name}</span>
+            <Button type="primary" size="small" onClick={() => { notification.close(key); close(); }}>确认</Button>
+        </div>
+        const close = () => { storage['noticeinfo'] = JSON.stringify(result) }
+        const message = <div><Icon type="info-circle" style={{ color: '#108ee9' }} /><span style={{ marginLeft: 10 }}>最新通知</span></div>
+        notification.open({
+            message,
+            description: result.content,
+            btn,
+            key,
+            duration: 0,
+            onClose: close,
+        });
+    };
+
     render() {
         return (
             <Layout style={{ minHeight: '100vh' }}>
@@ -174,19 +221,20 @@ export default class MainView extends Component {
                 <Layout>
                     <Header style={{ background: '#fff', padding: 0 }}>
                         <Row>
-                            <Col span={8}>
+                            <Col span={2}>
                                 <Icon className="trigger" style={{ fontSize: 24, marginLeft: 30 }} type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'} onClick={this.toggle} />
                             </Col>
-                            <Col span={16} style={{ textAlign: 'right', paddingRight: 24 }}>
+                            <Col span={22} style={{ textAlign: 'right', paddingRight: 24 }}>
                                 <Popover width={100} placement="rightBottom" trigger="click"
                                     title={storage.getItem('userinfo') ? "用户名: " + JSON.parse(storage.getItem('userinfo')).username + "(" + JSON.parse(storage.getItem('userinfo')).name + ")" :
                                         "不存在"}
                                     content={
-                                        <Button type='primary' style={{ width: "100%" }}
-                                            onClick={() => {
-                                                storage.clear();
-                                                window.location.href = "/";
-                                            }}>退出登录</Button>
+                                        // <Button type='primary' style={{ width: "100%" }}
+                                        //     onClick={() => {
+                                        //         storage.clear();
+                                        //         window.location.href = "/";
+                                        //     }}>退出登录</Button>
+                                        <UserMenuView />
                                     }>
                                     <Icon type="user" style={{ fontSize: 24 }} />
                                 </Popover>

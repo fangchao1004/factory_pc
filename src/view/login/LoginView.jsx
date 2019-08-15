@@ -27,7 +27,7 @@ export default class LoginView extends React.Component {
         // console.log('values:',values);
         HttpApi.getUserInfo(values, doc => {
           if (doc.data.code === 0 && doc.data.data.length > 0) {
-            storage.clear();
+            storage.removeItem('userinfo');
             // console.log(doc.data.data[0])
             storage['userinfo'] = JSON.stringify(doc.data.data[0]);
             // console.log("获取storage", storage.getItem('userinfo'));
