@@ -4,7 +4,7 @@ import moment from 'moment'
 import HttpApi from '../../util/HttpApi';
 
 var storage = window.localStorage;
-// var userinfo = storage.getItem('userinfo')
+var userinfo = storage.getItem('userinfo')
 
 class CarView extends Component {
     constructor(props) {
@@ -18,18 +18,20 @@ class CarView extends Component {
         // console.log('asdasd:',userinfo);
     }
     init = async () => {
-        // console.log(JSON.parse(userinfo));
-        let sql1 = `select carNumber from p_car_card where employeeId =(select recordId from p_employee where name = '测试' )`
+        console.log(JSON.parse(userinfo).name);
+        let sql1 = `select carNumber from p_car_card where employeeId =(select recordId from p_employee where name = '${JSON.parse(userinfo).name}' )`
         let mycar = await this.getCarInfo(sql1);
-        // console.log('mycarNumber:', mycar[0].carNumber);
-        let carNumber = mycar[0].carNumber;
-        let sql2 = `select carNumber,inTime as time, 0 as io from p_record_in_history where carNumber = '${carNumber}' 
+        // console.log('mycarInfo:', mycar);
+        if (mycar.length > 0) {
+            let carNumber = mycar[0].carNumber;
+            let sql2 = `select carNumber,inTime as time, 0 as io from p_record_in_history where carNumber = '${carNumber}' 
             union all (select carNumber, inTime as time, 0 as io from p_record_in where carNumber = '${carNumber}')
             union all (select carNumber, outTime as time, 1 as io from p_record_out where carNumber = '${carNumber}')
             ORDER BY time DESC`
-        let resultOfMine = await this.getCarInfo(sql2);
-        // console.log(resultOfMine.map((item, index) => { item.key = index; return item }));
-        this.setState({ data: resultOfMine.map((item, index) => { item.key = index; return item }) })
+            let resultOfMine = await this.getCarInfo(sql2);
+            // console.log(resultOfMine.map((item, index) => { item.key = index; return item }));
+            this.setState({ data: resultOfMine.map((item, index) => { item.key = index; return item }) })
+        }
     }
     getCarInfo = (sql) => {
         return new Promise((resolve, reject) => {

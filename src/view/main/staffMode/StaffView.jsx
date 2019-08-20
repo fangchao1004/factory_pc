@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
-import { Row, Col, Table, Button, Divider, message, Popconfirm } from 'antd'
+import { Row, Col, Table, Button, Divider, message, Popconfirm, Input } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import AddStaffView from './AddStaffView';
 import UpdateStaffView from './UpdateStaffView';
 var level_filter = [];///用于筛选任务专业的数据 选项
+const { Search } = Input;
 
 class StaffView extends Component {
 
@@ -119,6 +120,43 @@ class StaffView extends Component {
             }
         })
     }
+    onSearch = async (value) => {
+        if (value === '') { message.info('请输入有效字符'); return; }
+        // console.log('onSearch:', value);
+        let usersData = await this.searchUserData(value);
+        this.setState({
+            users: usersData.map(user => {
+                user.key = user.id
+                return user
+            })
+        })
+    }
+    onChange = async (value) => {
+        if (value !== '') { return; }
+        // console.log('init')
+        var usersData = await this.getUserList()
+        if (usersData.length !== this.state.users.length) {
+            // console.log('需要重新渲染所有');
+            this.setState({
+                users: usersData.map(user => {
+                    user.key = user.id
+                    return user
+                })
+            })
+        }
+        // else { console.log('不需要重新渲染所有'); }
+    }
+    searchUserData(value) {
+        return new Promise((resolve, reject) => {
+            let sql = `select * from users where effective = 1 and name like '%${value}%'
+            order by level_id`;
+            let result = [];
+            HttpApi.obs({ sql }, (res) => {
+                if (res.data.code === 0) { result = res.data.data }
+                resolve(result);
+            })
+        })
+    }
 
     render() {
         const columns = [
@@ -213,6 +251,9 @@ class StaffView extends Component {
                         <Button type="primary" style={{ marginBottom: 16 }} onClick={this.addStaff.bind(this)}>
                             添加员工
                          </Button>
+                    </Col>
+                    <Col span={18} style={{ display: 'flex', flexDirection: 'row-reverse' }}>
+                        <Search style={{ width: 400 }} allowClear placeholder="支持姓名模糊查询" onSearch={value => this.onSearch(value)} onChange={e => this.onChange(e.currentTarget.value)} enterButton />
                     </Col>
                 </Row>
                 <Table
