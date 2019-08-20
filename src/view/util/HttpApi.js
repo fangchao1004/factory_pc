@@ -6,6 +6,10 @@ export const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
 
 export const TesturiForss = 'http://hefeixiaomu.com:3007/'///小木服务器数据库 sql server 服务独立地址 消费机
 // export const TesturiForss = 'http://localhost:3007/'///本地服务器测试用 sql server 服务独立地址 消费机
+
+export const TesturiForcar = 'http://hefeixiaomu.com:3006/'///小木服务器数据库 mysql server 服务独立地址 车辆信息
+// export const TesturiForcar = 'http://localhost:3006/'///本地服务器测试用
+
 class HttpApi {
     /**
      * obs操作---慎用
@@ -22,13 +26,27 @@ class HttpApi {
     }
 
     /**
-     * obs操作---慎用  操作sql server
+     * obs操作---慎用  操作 sql server 消费机
      * @param {*} params 
      * @param {*} f1 
      * @param {*} f2 
      */
     static obsForss(params, f1, f2) {
         Axios.post(TesturiForss + 'obs', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+
+    /**
+     * obs操作---慎用  操作 mysql 车辆
+     * @param {*} params 
+     * @param {*} f1 
+     * @param {*} f2 
+     */
+    static obsForcar(params, f1, f2) {
+        Axios.post(TesturiForcar + 'obs', params).then(res => {
             if (f1) { f1(res) }
         }).catch(res => {
             if (f2) { f2(res) }

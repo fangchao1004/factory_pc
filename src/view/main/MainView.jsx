@@ -14,6 +14,7 @@ import BugModeRoot from './bugMode/BugModeRoot';
 import BugAboutMeModeRoot from './bugAboutMeMode/BugAboutMeModeRoot';
 import SettingViewRoot from './setting/SettingViewRoot';
 import TransactionModeRoot from './transactionMode/TransactionModeRoot';
+import CarModeRoot from './carMode/CarModeRoot'
 import UserMenuView from './userMenu/UserMenuView'
 import HttpApi from '../util/HttpApi';
 import Store from '../../redux/store/Store';
@@ -213,6 +214,12 @@ export default class MainView extends Component {
                             <span>消费</span>
                             <Link to={`${this.props.match.url}/transaction`} />
                         </Menu.Item> */}
+
+                        <Menu.Item key="车辆">
+                            <Icon type="car" />
+                            <span>车辆</span>
+                            <Link to={`${this.props.match.url}/car`} />
+                        </Menu.Item>
                         <SubMenu key="设置" title={<span><Icon type="setting" /><span>设置</span></span>}>
                             <Menu.Item key="个人设置"><Icon type="switcher" /><span>个人设置</span><Link to={`${this.props.match.url}/usersetting`} /></Menu.Item>
                         </SubMenu>
@@ -301,6 +308,11 @@ export default class MainView extends Component {
                                 exact
                                 path={`${this.props.match.path}/transaction`}
                                 component={() => (storage.getItem('userinfo') ? <TransactionModeRoot /> : <Redirect to='/' />)}
+                            />
+                            <Route
+                                exact
+                                path={`${this.props.match.path}/car`}
+                                component={() => (storage.getItem('userinfo') ? <CarModeRoot /> : <Redirect to='/' />)}
                             />
                         </section>
                     </Content>
