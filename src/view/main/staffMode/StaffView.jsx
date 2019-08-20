@@ -3,6 +3,7 @@ import { Row, Col, Table, Button, Divider, message, Popconfirm } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import AddStaffView from './AddStaffView';
 import UpdateStaffView from './UpdateStaffView';
+var level_filter = [];///用于筛选任务专业的数据 选项
 
 class StaffView extends Component {
 
@@ -12,6 +13,9 @@ class StaffView extends Component {
         this.getUsersData()
     }
     async getUsersData() {
+        level_filter.length = 0;
+        let levelData = await this.getLevelInfo();
+        levelData.forEach((item) => { level_filter.push({ text: item.name, value: item.id }) })
         let levelsData = await this.getUserLevelList()
         let nfcsData = await this.getUserNfcList()
         this.setState({ levels: levelsData, nfcs: nfcsData })
@@ -20,6 +24,18 @@ class StaffView extends Component {
             users: usersData.map(user => {
                 user.key = user.id
                 return user
+            })
+        })
+    }
+    getLevelInfo = () => {
+        let sqlText = 'select m.id,m.name from levels m'
+        return new Promise((resolve, reject) => {
+            HttpApi.obs({ sql: sqlText }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
             })
         })
     }
@@ -43,10 +59,12 @@ class StaffView extends Component {
     }
     getUserList() {
         return new Promise((resolve, reject) => {
-            HttpApi.getUserInfo({ effective: 1 }, data => {
-                if (data.data.code === 0) {
-                    resolve(data.data.data)
-                }
+            let sql = `select * from users where effective = 1
+            order by level_id`;
+            let result = [];
+            HttpApi.obs({ sql }, (res) => {
+                if (res.data.code === 0) { result = res.data.data }
+                resolve(result);
             })
         })
     }
@@ -92,7 +110,7 @@ class StaffView extends Component {
     }
     deleteStaffConfirm = (record) => {
         HttpApi.obs({ sql: `update users set effective = 0 where id = ${record.id} ` }, (data) => {
-        // HttpApi.removeUserInfo({ id: record.id }, data => {
+            // HttpApi.removeUserInfo({ id: record.id }, data => {
             if (data.data.code === 0) {
                 message.success('删除成功')
                 this.getUsersData()
@@ -121,6 +139,8 @@ class StaffView extends Component {
             {
                 title: '部门',
                 dataIndex: 'level_id',
+                filters: level_filter,
+                onFilter: (value, record) => record.level_id === value,
                 render: (text) => {
                     var levelName
                     this.state.levels.some(level => {
