@@ -32,7 +32,7 @@ export default class MainView extends Component {
         super(props)
         localUserInfo = storage.getItem('userinfo')
         noticeinfo = storage.getItem('noticeinfo')
-        console.log('noticeinfo', noticeinfo);
+        // console.log('noticeinfo', noticeinfo);
         this.state = {
             collapsed: false,
             isAdmin: localUserInfo && JSON.parse(localUserInfo).isadmin === 1,
@@ -40,7 +40,7 @@ export default class MainView extends Component {
             aboutMeTaskNum: 0,
         }
         tempNoticeStr = noticeinfo ? noticeinfo : ''///获取曾提醒过的最新内容。作为临时数据。
-        console.log('tempNoticeStr:', tempNoticeStr);
+        // console.log('tempNoticeStr:', tempNoticeStr);
         // console.log(this.state.isAdmin)
     }
     componentDidMount() {
@@ -52,6 +52,9 @@ export default class MainView extends Component {
             this.init();
         });
         this.openPolling();///开启轮询---定时去获取缺陷了任务数据
+
+        // toExcel.saveExcel();
+        // console.log('toExcel.saveExcel();');
     }
     init = async () => {
         let bugResult = await this.getBugsInfo();
@@ -188,7 +191,7 @@ export default class MainView extends Component {
                                 <span>与我相关</span>
                                 <Badge count={this.state.aboutMeBugNum} overflowCount={99} style={{ marginLeft: 30, }} >
                                 </Badge>
-                                <Link to={`${this.props.match.url}/bugAboutMe`} onClick={() => { console.log('点击-与我相关-进入与我相关'); }} />
+                                <Link to={`${this.props.match.url}/bugAboutMe`} />
                             </Menu.Item>
                             <Menu.Item key="所有缺陷">
                                 <Icon type="hdd" />
@@ -214,12 +217,11 @@ export default class MainView extends Component {
                             <span>消费</span>
                             <Link to={`${this.props.match.url}/transaction`} />
                         </Menu.Item> */}
-
-                        <Menu.Item key="车辆">
+                        {/* <Menu.Item key="车辆">
                             <Icon type="car" />
                             <span>车辆</span>
                             <Link to={`${this.props.match.url}/car`} />
-                        </Menu.Item>
+                        </Menu.Item> */}
                         <SubMenu key="设置" title={<span><Icon type="setting" /><span>设置</span></span>}>
                             <Menu.Item key="个人设置"><Icon type="switcher" /><span>个人设置</span><Link to={`${this.props.match.url}/usersetting`} /></Menu.Item>
                         </SubMenu>

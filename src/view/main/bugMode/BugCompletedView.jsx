@@ -598,14 +598,14 @@ export default class BugCompletedView extends Component {
 
     render() {
         const columns = [
-            // {
-            //     key: 'id',
-            //     dataIndex: 'id',
-            //     title: 'id',
-            //     render: (text, record) => {
-            //         return <div>{text}</div>
-            //     }
-            // },
+            {
+                key: 'id',
+                dataIndex: 'id',
+                title: '编号',
+                render: (text, record) => {
+                    return <div>{text}</div>
+                }
+            },
             {
                 key: 'createdAt', dataIndex: 'createdAt', title: '时间',
                 sorter: (a, b) => {

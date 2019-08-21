@@ -7,8 +7,8 @@ export const Testuri = 'http://hefeixiaomu.com:3009/'///小木服务器数据库
 export const TesturiForss = 'http://hefeixiaomu.com:3007/'///小木服务器数据库 sql server 服务独立地址 消费机
 // export const TesturiForss = 'http://localhost:3007/'///本地服务器测试用 sql server 服务独立地址 消费机
 
-export const TesturiForcar = 'http://hefeixiaomu.com:3006/'///小木服务器数据库 mysql server 服务独立地址 车辆信息
-// export const TesturiForcar = 'http://localhost:3006/'///本地服务器测试用
+// export const TesturiForcar = 'http://hefeixiaomu.com:3006/'///小木服务器数据库 mysql server 服务独立地址 车辆信息
+export const TesturiForcar = 'http://localhost:3006/'///本地服务器测试用
 
 class HttpApi {
     /**

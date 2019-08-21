@@ -14,6 +14,7 @@ var storage = window.localStorage;
 var localUserInfo = '';
 const bug_level_Options = [{ id: 1, name: '一级' }, { id: 2, name: '二级' }, { id: 3, name: '三级' }].map(bug_level => <Select.Option value={bug_level.id} key={bug_level.id}>{bug_level.name}</Select.Option>)
 var major_Options = [];///专业选项
+var runner_Options = [];///运行选项
 
 export default class BugView extends Component {
     constructor(props) {
@@ -35,6 +36,7 @@ export default class BugView extends Component {
 
             user_select_id: null, ///分配的维修人员的id
             user_select_title: null,///分配的维修人员的title
+            runner_select_id: null,///分配的运行人员的id
             step_0_remark: '',///分配时的备注
             step_1_remark: '',///维修界面的备注
             step_2_remark: '',///专工验收界面的备注
@@ -73,6 +75,9 @@ export default class BugView extends Component {
         // console.log('bug数据：', finallyData);
         let userData = await this.getUsersInfo();
         let userLevels = await this.getUsersLevels();
+        let runnerData = await this.getRunnerInfo();///获取有运行权限的人员
+        // console.log('runnerData:', runnerData);
+        runner_Options = runnerData.map(userInfo => <Select.Option value={userInfo.id} key={userInfo.id}>{userInfo.name}</Select.Option>)
         // console.log('userLevels:',userLevels);
         // console.log('userData:', userData);
         userLevels.forEach((oneLevel) => {
@@ -104,6 +109,19 @@ export default class BugView extends Component {
             left join levels
             on levels.id = users.level_id
             order by level_id`
+            HttpApi.obs({ sql: sqlText }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
+    getRunnerInfo = () => {
+        return new Promise((resolve, reject) => {
+            // let sqlText = 'select * from users order by convert(name using gbk) ASC'
+            let sqlText = `select * from users where permission like '%1%'`
             HttpApi.obs({ sql: sqlText }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -357,6 +375,16 @@ export default class BugView extends Component {
             <div>
                 <Row gutter={16}>
                     <Col span={5}>
+                        <span>运行人员选择:</span>
+                    </Col>
+                    <Col span={18}>
+                        <Select value={this.state.runner_select_id} defaultValue={null} style={{ width: '100%' }}
+                            onChange={(v) => { this.setState({ runner_select_id: v }) }}
+                        >{runner_Options}</Select>
+                    </Col>
+                </Row>
+                <Row gutter={16} style={{ marginTop: 20 }}>
+                    <Col span={5}>
                         <span>备注:</span>
                     </Col>
                     <Col span={18}>
@@ -382,10 +410,11 @@ export default class BugView extends Component {
                     <Button type={'primary'}
                         style={{ marginLeft: 20 }}
                         onClick={() => {
-                            //// 人员选择完毕。改变bug中的数据。status 和 remark
+                            if (this.state.runner_select_id === null) { message.error('请选择运行人员进行下一步验收工作'); return }
+                            /// 人员选择完毕。改变bug中的数据。status 和 remark
                             let remarkText = this.state.step_2_remark ? this.state.step_2_remark : '完成验收,等待运行验收';
-                            this.changeBugStatus(3, 2, remarkText, JSON.parse(localUserInfo).id);
-                            this.setState({ step_2_remark: '', showModal5: false })
+                            this.changeBugStatus(3, 2, remarkText, JSON.parse(localUserInfo).id, this.state.runner_select_id);
+                            this.setState({ step_2_remark: '', showModal5: false, runner_select_id: null })
                         }}>完成验收</Button>
                 </div>
             </div>
@@ -647,10 +676,19 @@ export default class BugView extends Component {
                 }
             }
         } else if (btnV === 3) {
-            ///有运行权限，且 status = 3 时 可用。disableFlag = false;
-            if (localUserInfo && JSON.parse(localUserInfo).permission && this.state.currentRecord.remark) {
-                if (JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('1') !== -1 && this.state.currentRecord.status === 3) {
-                    disabledFlag = false;
+            // ///有运行权限，且 status = 3 时 可用。disableFlag = false;
+            // if (localUserInfo && JSON.parse(localUserInfo).permission && this.state.currentRecord.remark) {
+            //     if (JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('1') !== -1 && this.state.currentRecord.status === 3) {
+            //         disabledFlag = false;
+            //     }
+            // }
+            ////当前用户是不是 2 数组中最后一位的 to  且 当前status 的值 =3
+            if (localUserInfo && this.state.currentRecord.remark && this.state.currentRecord.status === 3) {
+                let stepData_2_arr = JSON.parse(this.state.currentRecord.remark)['2'];
+                if (stepData_2_arr) {
+                    let to_id = stepData_2_arr[stepData_2_arr.length - 1].to; ////最新一次任务分配给了谁。
+                    disabledFlag = to_id !== JSON.parse(localUserInfo).id;/// 如果不等于 则禁用
+                    // console.log('运行_to_id:',to_id);
                 }
             }
         }
@@ -674,14 +712,14 @@ export default class BugView extends Component {
 
     render() {
         const columns = [
-            // {
-            //     key: 'id',
-            //     dataIndex: 'id',
-            //     title: 'id',
-            //     render: (text, record) => {
-            //         return <div>{text}</div>
-            //     }
-            // },
+            {
+                key: 'id',
+                dataIndex: 'id',
+                title: '编号',
+                render: (text, record) => {
+                    return <div>{text}</div>
+                }
+            },
             {
                 key: 'createdAt', dataIndex: 'createdAt', title: '时间',
                 sorter: (a, b) => {
@@ -806,7 +844,13 @@ export default class BugView extends Component {
                     if (currentStatus === 2) {
                         str = '专工'
                     } else if (currentStatus === 3) {
-                        str = '运行人员'
+                        // str = '运行人员'
+                        let currentUserID = remarkObj['2'][remarkObj['2'].length - 1].to;
+                        this.state.userData.forEach((item) => {
+                            if (item.id === currentUserID) {
+                                str = item.name
+                            }
+                        })
                     } else if (currentStatus === 4) {
                         str = '/'
                     }
@@ -907,7 +951,7 @@ export default class BugView extends Component {
                     title="专工验收处理"
                     placement='right'
                     visible={this.state.showModal5}
-                    onClose={() => { this.setState({ step_2_remark: '', showModal5: false }) }}
+                    onClose={() => { this.setState({ step_2_remark: '', showModal5: false, runner_select_id: null }) }}
                     width={450}
                 >
                     {this.renderManagerModal()}
