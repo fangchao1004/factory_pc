@@ -1,10 +1,15 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Spin, Drawer, TreeSelect, Popconfirm, Divider } from 'antd'
+import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Spin, Drawer, TreeSelect, Popconfirm, Divider, DatePicker, Checkbox } from 'antd'
+import ExportJsonExcel from 'js-export-excel'
 import HttpApi, { Testuri } from '../../util/HttpApi'
 import moment from 'moment'
 import Store from '../../../redux/store/Store';
 import { showBugNum } from '../../../redux/actions/BugAction';
 
+const CheckboxGroup = Checkbox.Group;
+const majorPlainOptions = [];
+const completeStatusPlainOptions = [{ label: '已完成', value: 4 }, { label: '未完成', value: 0 }];
+const { RangePicker } = DatePicker;
 const { Step } = Steps;
 const { TextArea } = Input;
 var major_filter = [];///用于筛选任务专业的数据 选项
@@ -30,6 +35,7 @@ export default class BugView extends Component {
             showModal5: false,
             showModal6: false,
             showModal7: false,///添加缺陷显示框
+            showModal8: false,///导出缺陷显示框
             imguuid: null,
             userData: [],
             currentRecord: {},///当前选择的某一行。某一个缺陷对象
@@ -49,6 +55,13 @@ export default class BugView extends Component {
             bug_text: null,
 
             userLevels: [],
+            ///导出Excel部分
+            completeStatusCheckList: [],/// 完成状态 [0,4]
+            timeStampCheckList: [moment().startOf('day').format('YYYY-MM-DD HH:ss:mm'), moment().endOf('day').format('YYYY-MM-DD HH:ss:mm')],/// 时间段区间默认是今日 ['2019-01-01 00:00:00','2019-01-01 23:59:59']
+            majorCheckList: [],///['A','B',...] 专业A,B,...
+            // majorIndeterminate: false,
+            majorCheckAll: false,
+            completeStatusCheckAll: false,
         }
     }
     componentDidMount() {
@@ -65,8 +78,12 @@ export default class BugView extends Component {
 
     init = async () => {
         major_filter.length = 0;
+        majorPlainOptions.length = 0;
         let marjorData = await this.getMajorInfo();
-        marjorData.forEach((item) => { major_filter.push({ text: item.name, value: item.id }) })
+        marjorData.forEach((item) => {
+            major_filter.push({ text: item.name, value: item.id });
+            majorPlainOptions.push({ label: item.name, value: item.id })
+        })
         // console.log('marjorData:', marjorData);
         major_Options = marjorData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
 
@@ -282,6 +299,94 @@ export default class BugView extends Component {
                 </Col>
             </Row>
         </div>)
+    }
+    /// 导出Excel界面
+    renderExportExcelView = () => {
+        return <div>
+            <Row gutter={16}>
+                <Col span={5}>
+                    <span>时间段选择:</span>
+                </Col>
+                <Col span={19}>
+                    <RangePicker
+                        ranges={{
+                            '今日': [moment(), moment()],
+                            '本月': [moment().startOf('month'), moment().endOf('month')],
+                            '上月': [moment().add(-1, 'month').startOf('month'), moment().add(-1, 'month').endOf('month')],
+                        }}
+                        defaultValue={[moment().startOf('day'), moment().endOf('day')]}
+                        onChange={(momentArr) => {
+                            if (momentArr.length === 2) {
+                                let timeStampCheckList = [momentArr[0].startOf('day').format('YYYY-MM-DD HH:ss:mm'),
+                                momentArr[1].endOf('day').format('YYYY-MM-DD HH:ss:mm')]
+                                // console.log('timeStampCheckList:', timeStampCheckList);
+                                // console.log('this.state.timeStampCheckList1:', this.state.timeStampCheckList);
+                                this.setState({ timeStampCheckList })
+                            }
+                        }}
+                    />
+                </Col>
+            </Row>
+            <Row gutter={16} style={{ marginTop: 20 }}>
+                <Col span={5}>
+                    <span>专业选择:</span>
+                </Col>
+                <Col span={19}>
+                    <CheckboxGroup
+                        options={majorPlainOptions}
+                        value={this.state.majorCheckList}
+                        onChange={(majorCheckList) => {
+                            this.setState({
+                                majorCheckList,
+                                // majorIndeterminate: !!majorCheckList.length && majorCheckList.length < majorPlainOptions.length,
+                                majorCheckAll: majorCheckList.length === majorPlainOptions.length,
+                            });
+                        }}
+                    />
+                    <Checkbox
+                        // indeterminate={this.state.majorIndeterminate}
+                        checked={this.state.majorCheckAll}
+                        onChange={(e) => {
+                            this.setState({
+                                majorCheckList: e.target.checked ? majorPlainOptions.map((item) => (item.value)) : [],
+                                // majorIndeterminate: false,
+                                majorCheckAll: e.target.checked,
+                            });
+                        }}
+                    >
+                        全选
+                    </Checkbox>
+                </Col>
+            </Row>
+            <Row gutter={16} style={{ marginTop: 20 }}>
+                <Col span={5}>
+                    <span>状态选择:</span>
+                </Col>
+                <Col span={19}>
+                    <CheckboxGroup
+                        options={completeStatusPlainOptions}
+                        value={this.state.completeStatusCheckList}
+                        onChange={(completeStatusCheckList) => {
+                            this.setState({
+                                completeStatusCheckList,
+                                completeStatusCheckAll: completeStatusCheckList.length === completeStatusPlainOptions.length,
+                            });
+                        }}
+                    />
+                    <Checkbox
+                        checked={this.state.completeStatusCheckAll}
+                        onChange={(e) => {
+                            this.setState({
+                                completeStatusCheckList: e.target.checked ? completeStatusPlainOptions.map((item) => (item.value)) : [],
+                                completeStatusCheckAll: e.target.checked,
+                            });
+                        }}
+                    >
+                        全选
+                    </Checkbox>
+                </Col>
+            </Row>
+        </div>
     }
     ////缺陷分配界面
     renderSelectWorkerModal = () => {
@@ -710,6 +815,46 @@ export default class BugView extends Component {
         Store.dispatch(showBugNum(null)) ///随便派发一个值，目的是让 mainView处监听到 执行init();
     }
 
+    exportHandler = () => {
+        ///获取所有
+        return;
+        var jsonData = [
+            {
+                "name": "Google",
+                "url": "http://www.google.com"
+            },
+            {
+                "name": "Baidu",
+                "url": "http://www.baidu.com"
+            },
+            {
+                "name": "SoSo",
+                "url": "http://www.SoSo.com"
+            }
+        ]
+        var option = {};
+        option.fileName = '缺陷列表'
+        option.datas = [
+            {
+                //第一个sheet
+                sheetData: jsonData,
+                sheetName: '哈哈哈',
+                sheetFilter: ['name', 'url'],
+                sheetHeader: ['名称1', '地址1'],
+                columnWidths: ['8', '10'], // 列宽
+            },
+            {
+                //第一个sheet
+                sheetData: jsonData,
+                sheetName: '22222',
+                sheetFilter: ['name', 'url'],
+                sheetHeader: ['名称2', '地址2'],
+                columnWidths: ['8', '5'], // 列宽
+            },
+        ];
+        var toExcel = new ExportJsonExcel(option);
+        toExcel.saveExcel();
+    }
     render() {
         const columns = [
             {
@@ -878,7 +1023,10 @@ export default class BugView extends Component {
         ]
         return (
             <Fragment>
-                <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
+                <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
+                    <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
+                    <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal8: true }) }}>导出缺陷</Button>
+                </div>
                 <Table
                     bordered
                     dataSource={this.state.data}
@@ -892,6 +1040,16 @@ export default class BugView extends Component {
                     width={520}
                 >
                     {this.renderAddBugModal()}
+                </Modal>
+                <Modal
+                    title="导出Excel选项"
+                    visible={this.state.showModal8}
+                    onCancel={() => { this.setState({ showModal8: false }) }}
+                    // footer={null}
+                    onOk={() => { console.log('ok', this.state.majorCheckList, this.state.completeStatusCheckList, this.state.timeStampCheckList); }}
+                    width={520}
+                >
+                    {this.renderExportExcelView()}
                 </Modal>
                 {/* 进度界面 */}
                 <Modal
