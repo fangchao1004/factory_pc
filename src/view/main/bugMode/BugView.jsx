@@ -62,6 +62,7 @@ export default class BugView extends Component {
             // majorIndeterminate: false,
             majorCheckAll: false,
             completeStatusCheckAll: false,
+            exporting: false,
         }
     }
     componentDidMount() {
@@ -189,16 +190,18 @@ export default class BugView extends Component {
             })
         })
     }
-    getBugsInfo = () => {
-        let sqlText = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,areas.name as area_name from bugs
+    getBugsInfo = (sql = null) => {
+        if (!sql) {
+            sql = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,areas.name as area_name from bugs
         left join devices des on bugs.device_id = des.id
         left join users urs on bugs.user_id = urs.id
         left join majors mjs on bugs.major_id = mjs.id
         left join areas on des.area_id = areas.id
         where bugs.status != 4 and bugs.effective = 1
         `;
+        }
         return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -814,46 +817,95 @@ export default class BugView extends Component {
         ///每次删除
         Store.dispatch(showBugNum(null)) ///随便派发一个值，目的是让 mainView处监听到 执行init();
     }
-
-    exportHandler = () => {
+    exportHandler = async () => {
         ///获取所有
-        return;
-        var jsonData = [
-            {
-                "name": "Google",
-                "url": "http://www.google.com"
-            },
-            {
-                "name": "Baidu",
-                "url": "http://www.baidu.com"
-            },
-            {
-                "name": "SoSo",
-                "url": "http://www.SoSo.com"
-            }
-        ]
+        let mjl = this.state.majorCheckList;
+        let csl = this.state.completeStatusCheckList;
+        let tsl = this.state.timeStampCheckList;
+        let mca = this.state.majorCheckAll;
+        // console.log('获取所有ok', mjl, csl, tsl);
+        if (mjl.length === 0 || csl.length === 0) { message.error('请完善选项'); return }
+        // console.log('开始整合生成sql语句');
+        ///开始整合生成sql语句
+        let sql1 = '';///条件语句1
+        if (csl.length === 1) {
+            if (csl[0] === 4) {
+                sql1 = `and status = 4`
+            } else { sql1 = `and status != 4` }
+        }
+        let sql2 = '';///条件语句2
+        if (!mca) { sql2 = 'and (' + (mjl.map((item) => { item = 'major_id = ' + item; return item })).join(' or ') + ')'; }
+        let sql3 = '';///条件语句3
+        sql3 = `and createdAt > '${tsl[0]}' and createdAt < '${tsl[1]}'`
+        let sqlText = `select * from bugs where effective = 1 ${sql3} ${sql1} ${sql2}`
+        // console.log(sqlText);
+        let finallySql = `select t1.*,des.name device_name,areas.name area_name,majors.name major_name,users.name user_name from
+        (${sqlText}) t1
+        left join devices des on des.id = t1.device_id
+        left join areas on areas.id = des.area_id
+        left join majors on majors.id = t1.major_id
+        left join users on users.id = t1.user_id
+        order by major_id
+        `;
+        // console.log(finallySql);
+        let result = await this.getBugsInfo(finallySql);
+        if (result.length === 0) { message.warn('没有符合条件的缺陷数据'); return }
+        this.setState({ exporting: true })
+        let data = this.transConstract(result);///
         var option = {};
-        option.fileName = '缺陷列表'
-        option.datas = [
-            {
-                //第一个sheet
-                sheetData: jsonData,
-                sheetName: '哈哈哈',
-                sheetFilter: ['name', 'url'],
-                sheetHeader: ['名称1', '地址1'],
-                columnWidths: ['8', '10'], // 列宽
-            },
-            {
-                //第一个sheet
-                sheetData: jsonData,
-                sheetName: '22222',
-                sheetFilter: ['name', 'url'],
-                sheetHeader: ['名称2', '地址2'],
-                columnWidths: ['8', '5'], // 列宽
-            },
-        ];
+        option.filePath = '/Users/fangchao/Desktop/'
+        option.fileName = moment().format('YYYY-MM-DD-HH-mm-ss') + '-缺陷统计列表'
+        option.datas = data;
         var toExcel = new ExportJsonExcel(option);
         toExcel.saveExcel();
+        // console.log('data:', data);
+        // console.log('result:', result);
+        this.setState({ exporting: false, showModal8: false })
+        message.success('正在导出Excel文件，请从浏览器下载文件夹中查看');
+    }
+    transConstract = (result) => {
+        let tempList = {};
+        result.forEach(item => {
+            let tempObj = {};
+            // console.log(item);
+            tempObj.id = item.id + '';
+            tempObj.time = moment(item.createdAt).format('YYYY-MM-DD HH:mm:ss');
+            tempObj.device = item.device_name ? item.device_name : '/';
+            tempObj.uploadman = item.user_name;
+            tempObj.area = item.area_name ? item.area_name : (item.area_remark ? item.area_remark : '/')
+            tempObj.level = item.buglevel ? (item.buglevel === 1 ? '一级' : (item.buglevel === 2 ? '二级' : '三级')) : '/';
+            tempObj.content = item.title_name ? item.title_name + ' ' + JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text : JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text;
+            tempObj.major = item.major_name;
+            tempObj.status = item.status === 0 ? '待分配' : (item.status === 1 ? '维修中' : (item.status === 2 ? '专工验收中' : (item.status === 3 ? '运行验收中' : '处理完毕')));
+            tempObj.nowdoman = item.status === 2 ? '专工' : this.getusernameById(JSON.parse(item.remark)[item.status === 1 ? 0 : 2][JSON.parse(item.remark)[item.status === 1 ? 0 : 2].length - 1].to);
+            // console.log(tempObj);
+            if (tempList[item.major_name]) { tempList[item.major_name].push(tempObj) }
+            else { tempList[item.major_name] = [tempObj] }
+        });
+        // console.log(tempList);
+        let excelOptionList = [];
+        for (const key in tempList) {
+            // console.log(key);
+            // console.log(tempList[key]);
+            excelOptionList.push({
+                sheetData: tempList[key],
+                sheetName: key,
+                sheetFilter: ['id', 'time', 'device', 'uploadman', 'area', 'level', 'content', 'major', 'status', 'nowdoman'],
+                sheetHeader: ['编号', '上报时间', '设备名称', '上报人', '区域', '等级', '内容', '专业', '当前状态', '当前处理人'],
+                columnWidths: ['3', '8', '10', '5', '5', '5', '15', '5', '5', '5'], // 列宽
+            })
+        }
+        // console.log('excelOptionList:', excelOptionList);
+        return excelOptionList;
+    }
+    getusernameById = (id) => {
+        let result = '/'
+        this.state.userData.forEach((item) => {
+            if (item.id === id) {
+                result = item.name
+            }
+        })
+        return result
     }
     render() {
         const columns = [
@@ -1046,13 +1098,20 @@ export default class BugView extends Component {
                     visible={this.state.showModal8}
                     onCancel={() => { this.setState({ showModal8: false }) }}
                     // footer={null}
-                    onOk={() => { console.log('ok', this.state.majorCheckList, this.state.completeStatusCheckList, this.state.timeStampCheckList); }}
+                    footer={[
+                        <Button key='cancel' onClick={() => { this.setState({ showModal8: false }) }}>
+                            取消
+                        </Button>,
+                        <Button key='ok' type="primary" loading={this.state.exporting} onClick={this.exportHandler}>
+                            确定导出
+                        </Button>,
+                    ]}
                     width={520}
                 >
                     {this.renderExportExcelView()}
                 </Modal>
                 {/* 进度界面 */}
-                <Modal
+                < Modal
                     mask={false}
                     title="当前进度"
                     visible={this.state.showModal2}
@@ -1083,9 +1142,9 @@ export default class BugView extends Component {
                         disabled={this.checkDisable(3)}
                         onClick={() => { this.setState({ showModal6: true }) }}
                     >运行人员验收</Button>
-                </Modal>
+                </Modal >
                 {/* 分配人员操作界面 */}
-                <Drawer
+                < Drawer
                     title="分配维修人员"
                     placement='right'
                     visible={this.state.showModal3}
@@ -1093,9 +1152,9 @@ export default class BugView extends Component {
                     width={450}
                 >
                     {this.renderSelectWorkerModal()}
-                </Drawer>
+                </Drawer >
                 {/* 维修人员操作界面 */}
-                <Drawer
+                < Drawer
                     title="维修处理"
                     placement='right'
                     visible={this.state.showModal4}
@@ -1103,9 +1162,9 @@ export default class BugView extends Component {
                     width={450}
                 >
                     {this.renderWorkerModal()}
-                </Drawer>
+                </Drawer >
                 {/* 专工验收操作界面 */}
-                <Drawer
+                < Drawer
                     title="专工验收处理"
                     placement='right'
                     visible={this.state.showModal5}
@@ -1113,9 +1172,9 @@ export default class BugView extends Component {
                     width={450}
                 >
                     {this.renderManagerModal()}
-                </Drawer>
+                </Drawer >
                 {/* 运行验收操作界面 */}
-                <Drawer
+                < Drawer
                     title="运行验收处理"
                     placement='right'
                     visible={this.state.showModal6}
@@ -1123,7 +1182,7 @@ export default class BugView extends Component {
                     width={450}
                 >
                     {this.renderRunerModal()}
-                </Drawer>
+                </Drawer >
                 <Drawer
                     title="查看图片"
                     placement="left"
@@ -1135,7 +1194,7 @@ export default class BugView extends Component {
                     <div style={{ textAlign: 'center', display: this.state.showLoading ? 'block' : 'none' }}><Spin tip='努力加载中。。。' /></div>
                     <img alt='' src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} style={{ width: 430, height: 430 / 3 * 4, display: this.state.showLoading ? 'none' : 'block' }} onLoad={() => { console.log('图片加载完成'); this.setState({ showLoading: false }) }} />
                 </Drawer>
-            </Fragment>
+            </Fragment >
         );
     }
 }
