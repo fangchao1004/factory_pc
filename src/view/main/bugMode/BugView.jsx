@@ -877,7 +877,7 @@ export default class BugView extends Component {
             tempObj.content = item.title_name ? item.title_name + ' ' + JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text : JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text;
             tempObj.major = item.major_name;
             tempObj.status = item.status === 0 ? '待分配' : (item.status === 1 ? '维修中' : (item.status === 2 ? '专工验收中' : (item.status === 3 ? '运行验收中' : '处理完毕')));
-            tempObj.nowdoman = item.status === 2 ? '专工' : this.getusernameById(JSON.parse(item.remark)[item.status === 1 ? 0 : 2][JSON.parse(item.remark)[item.status === 1 ? 0 : 2].length - 1].to);
+            tempObj.nowdoman = item.status === 4 ? '/' : (item.status === 2 ? '专工' : this.getusernameById(JSON.parse(item.remark)[item.status === 1 ? 0 : 2][JSON.parse(item.remark)[item.status === 1 ? 0 : 2].length - 1].to));
             // console.log(tempObj);
             if (tempList[item.major_name]) { tempList[item.major_name].push(tempObj) }
             else { tempList[item.major_name] = [tempObj] }
