@@ -818,14 +818,11 @@ export default class BugView extends Component {
         Store.dispatch(showBugNum(null)) ///随便派发一个值，目的是让 mainView处监听到 执行init();
     }
     exportHandler = async () => {
-        ///获取所有
         let mjl = this.state.majorCheckList;
         let csl = this.state.completeStatusCheckList;
         let tsl = this.state.timeStampCheckList;
         let mca = this.state.majorCheckAll;
-        // console.log('获取所有ok', mjl, csl, tsl);
         if (mjl.length === 0 || csl.length === 0) { message.error('请完善选项'); return }
-        // console.log('开始整合生成sql语句');
         ///开始整合生成sql语句
         let sql1 = '';///条件语句1
         if (csl.length === 1) {
@@ -838,7 +835,6 @@ export default class BugView extends Component {
         let sql3 = '';///条件语句3
         sql3 = `and createdAt > '${tsl[0]}' and createdAt < '${tsl[1]}'`
         let sqlText = `select * from bugs where effective = 1 ${sql3} ${sql1} ${sql2}`
-        // console.log(sqlText);
         let finallySql = `select t1.*,des.name device_name,areas.name area_name,majors.name major_name,users.name user_name from
         (${sqlText}) t1
         left join devices des on des.id = t1.device_id
@@ -847,21 +843,17 @@ export default class BugView extends Component {
         left join users on users.id = t1.user_id
         order by major_id
         `;
-        // console.log(finallySql);
-        let result = await this.getBugsInfo(finallySql);
-        if (result.length === 0) { message.warn('没有符合条件的缺陷数据'); return }
+        let result = await this.getBugsInfo(finallySql);///获取符合条件的缺陷数据
+        if (result.length === 0) { message.warn('没有查询到符合条件的缺陷数据-请修改查询条件'); return }
         this.setState({ exporting: true })
-        let data = this.transConstract(result);///
-        var option = {};
-        option.filePath = '/Users/fangchao/Desktop/'
+        let data = this.transConstract(result);///数据结构进行转换
+        let option = {};
         option.fileName = moment().format('YYYY-MM-DD-HH-mm-ss') + '-缺陷统计列表'
         option.datas = data;
-        var toExcel = new ExportJsonExcel(option);
+        let toExcel = new ExportJsonExcel(option);
         toExcel.saveExcel();
-        // console.log('data:', data);
-        // console.log('result:', result);
         this.setState({ exporting: false, showModal8: false })
-        message.success('正在导出Excel文件，请从浏览器下载文件夹中查看');
+        message.info('正在导出Excel文件，请从浏览器下载文件夹中查看');
     }
     transConstract = (result) => {
         let tempList = {};
@@ -1077,7 +1069,7 @@ export default class BugView extends Component {
             <Fragment>
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
                     <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
-                    <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal8: true }) }}>导出缺陷</Button>
+                    {localUserInfo && JSON.parse(localUserInfo).isadmin === 1 ? <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal8: true }) }}>导出缺陷</Button> : null}
                 </div>
                 <Table
                     bordered
