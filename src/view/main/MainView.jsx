@@ -253,12 +253,8 @@ export default class MainView extends Component {
 }
 
 class ContentView extends Component {
-    constructor(props) {
-        super(props);
-        this.setState = null
-    }
-    shouldComponentUpdate(nextProps, nextState) {
-        return JSON.stringify(this.state) !== JSON.stringify(nextState)
+    shouldComponentUpdate() {
+        return false ///目的是让 MainView中重新渲染时，ContentView 始终不会被重复渲染
     }
     render() {
         return <Content style={{ background: '#fff', margin: 26, paddingTop: 20, paddingLeft: 0, paddingRight: 0, minHeight: 280, height: '100%' }}>
