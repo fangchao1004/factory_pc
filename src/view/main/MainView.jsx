@@ -238,11 +238,6 @@ export default class MainView extends Component {
                                     title={storage.getItem('userinfo') ? "用户名: " + JSON.parse(storage.getItem('userinfo')).username + "(" + JSON.parse(storage.getItem('userinfo')).name + ")" :
                                         "不存在"}
                                     content={
-                                        // <Button type='primary' style={{ width: "100%" }}
-                                        //     onClick={() => {
-                                        //         storage.clear();
-                                        //         window.location.href = "/";
-                                        //     }}>退出登录</Button>
                                         <UserMenuView />
                                     }>
                                     <Icon type="user" style={{ fontSize: 24 }} />
@@ -250,76 +245,89 @@ export default class MainView extends Component {
                             </Col>
                         </Row>
                     </Header>
-                    <Content style={{ background: '#fff', margin: 26, paddingTop: 20, paddingLeft: 0, paddingRight: 0, minHeight: 280, height: '100%' }}>
-                        <section>
-                            <Route
-                                exact
-                                path={`${this.props.match.path}`}
-                                component={() => (storage.getItem('userinfo') ? <HomePageRoot /> : <Redirect to='/' />)}
-                            />
-                            <Route
-                                exact
-                                path={`${this.props.match.path}/equipment`}
-                                component={() => (storage.getItem('userinfo') ? <EquipmentModeRoot /> : <Redirect to='/' />)}
-                            />
-                            <Route
-                                exact
-                                path={`${this.props.match.path}/staff`}
-                                component={() => (storage.getItem('userinfo') ? <StaffModeRoot /> : <Redirect to='/' />)}
-                            />
-                            <Route
-                                exact
-                                path={`${this.props.match.path}/table`}
-                                component={() => (storage.getItem('userinfo') ? <TableModeRoot /> : <Redirect to='/' />)}
-                            />
-                            <Route
-                                exact
-                                path={`${this.props.match.path}/bug`}
-                                component={() => (storage.getItem('userinfo') ? <BugModeRoot /> : <Redirect to='/' />)}
-                            />
-                            <Route
-                                exact
-                                path={`${this.props.match.path}/bugAboutMe`}
-                                component={() => (storage.getItem('userinfo') ? <BugAboutMeModeRoot /> : <Redirect to='/' />)}
-                            />
-                            <Route
-                                path={`${this.props.match.path}/usersetting`}
-                                render={props => storage.getItem('userinfo') ? <SettingViewRoot {...props} /> : <Redirect to='/' />}
-                            />
-                            <Route
-                                exact
-                                path={`${this.props.match.path}/user`}
-                                component={() => (storage.getItem('userinfo') ? <UserModeRoot /> : <Redirect to='/' />)}
-                            />
-                            <Route
-                                exact
-                                path={`${this.props.match.path}/setting/equipmentModeRoot`}
-                                component={() => (storage.getItem('userinfo') ? <SettingEquipmentModeRoot /> : <Redirect to='/' />)}
-                            />
-                            <Route
-                                exact
-                                path={`${this.props.match.path}/setting/staffModeRoot`}
-                                component={() => (storage.getItem('userinfo') ? <SettingStaffModeRoot /> : <Redirect to='/' />)}
-                            />
-                            <Route
-                                exact
-                                path={`${this.props.match.path}/setting/tableModeRoot`}
-                                component={() => (storage.getItem('userinfo') ? <SettingTableModeRoot /> : <Redirect to='/' />)}
-                            />
-                            <Route
-                                exact
-                                path={`${this.props.match.path}/transaction`}
-                                component={() => (storage.getItem('userinfo') ? <TransactionModeRoot /> : <Redirect to='/' />)}
-                            />
-                            <Route
-                                exact
-                                path={`${this.props.match.path}/car`}
-                                component={() => (storage.getItem('userinfo') ? <CarModeRoot /> : <Redirect to='/' />)}
-                            />
-                        </section>
-                    </Content>
+                    <ContentView {...this.props} />
                 </Layout>
             </Layout >
         );
+    }
+}
+
+class ContentView extends Component {
+    constructor(props) {
+        super(props);
+        this.setState = null
+    }
+    shouldComponentUpdate(nextProps, nextState) {
+        return JSON.stringify(this.state) !== JSON.stringify(nextState)
+    }
+    render() {
+        return <Content style={{ background: '#fff', margin: 26, paddingTop: 20, paddingLeft: 0, paddingRight: 0, minHeight: 280, height: '100%' }}>
+            <section>
+                <Route
+                    exact
+                    path={`${this.props.match.path}`}
+                    component={() => (storage.getItem('userinfo') ? <HomePageRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/equipment`}
+                    component={() => (storage.getItem('userinfo') ? <EquipmentModeRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/staff`}
+                    component={() => (storage.getItem('userinfo') ? <StaffModeRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/table`}
+                    component={() => (storage.getItem('userinfo') ? <TableModeRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/bug`}
+                    component={() => (storage.getItem('userinfo') ? <BugModeRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/bugAboutMe`}
+                    component={() => (storage.getItem('userinfo') ? <BugAboutMeModeRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    path={`${this.props.match.path}/usersetting`}
+                    render={props => storage.getItem('userinfo') ? <SettingViewRoot {...props} /> : <Redirect to='/' />}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/user`}
+                    component={() => (storage.getItem('userinfo') ? <UserModeRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/setting/equipmentModeRoot`}
+                    component={() => (storage.getItem('userinfo') ? <SettingEquipmentModeRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/setting/staffModeRoot`}
+                    component={() => (storage.getItem('userinfo') ? <SettingStaffModeRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/setting/tableModeRoot`}
+                    component={() => (storage.getItem('userinfo') ? <SettingTableModeRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/transaction`}
+                    component={() => (storage.getItem('userinfo') ? <TransactionModeRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/car`}
+                    component={() => (storage.getItem('userinfo') ? <CarModeRoot /> : <Redirect to='/' />)}
+                />
+            </section>
+        </Content>
     }
 }
