@@ -14,11 +14,11 @@ class CarView extends Component {
         }
     }
     componentDidMount() {
+        userinfo = storage.getItem('userinfo')
         this.init();
-        // console.log('asdasd:',userinfo);
     }
     init = async () => {
-        console.log(JSON.parse(userinfo).name);
+        // console.log(JSON.parse(userinfo).name);
         let sql1 = `select carNumber from p_car_card where employeeId =(select recordId from p_employee where name = '${JSON.parse(userinfo).name}' )`
         let mycar = await this.getCarInfo(sql1);
         // console.log('mycarInfo:', mycar);

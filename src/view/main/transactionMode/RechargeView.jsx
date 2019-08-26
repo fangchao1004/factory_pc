@@ -104,7 +104,6 @@ class RechargeView extends Component {
                     style={{ width: '40%', marginBottom: 20 }}
                     placeholder="支持人员姓名模糊查询"
                     enterButton="搜索"
-                    size="large"
                     allowClear
                     onSearch={value => this.seachPeopleHandler(value)}
                     onChange={e => { if (e.currentTarget.value === '') { this.init() } }}
