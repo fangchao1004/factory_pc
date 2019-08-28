@@ -16,6 +16,7 @@ import SettingViewRoot from './setting/SettingViewRoot';
 import TransactionModeRoot from './transactionMode/TransactionModeRoot';
 import CarModeRoot from './carMode/CarModeRoot'
 import AttendanceModeRoot from './attendanceMode/AttendanceModeRoot'
+import ScheduleRoot from './schedule/ScheduleRoot'
 import UserMenuView from './userMenu/UserMenuView'
 import HttpApi from '../util/HttpApi';
 import Store from '../../redux/store/Store';
@@ -228,6 +229,24 @@ export default class MainView extends Component {
                             <span>考勤</span>
                             <Link to={`${this.props.match.url}/attendance`} />
                         </Menu.Item> */}
+                        <SubMenu key="考勤" title={
+                            <span>
+                                <Icon type="pushpin" />
+                                <span>考勤</span>
+                            </span>
+                        }>
+                            <Menu.Item key="考勤信息">
+                                <Icon type="contacts" />
+                                <span>考勤信息</span>
+                                <Link to={`${this.props.match.url}/attendance`} />
+                            </Menu.Item>
+                            <Menu.Item key="工作排班">
+                                <Icon type="schedule" />
+                                <span>工作排班</span>
+                                <Link to={`${this.props.match.url}/schedule`} />
+                            </Menu.Item>
+                        </SubMenu>
+
                         <SubMenu key="设置" title={<span><Icon type="setting" /><span>设置</span></span>}>
                             <Menu.Item key="个人设置"><Icon type="switcher" /><span>个人设置</span><Link to={`${this.props.match.url}/usersetting`} /></Menu.Item>
                         </SubMenu>
@@ -333,6 +352,11 @@ class ContentView extends Component {
                     exact
                     path={`${this.props.match.path}/attendance`}
                     component={() => (storage.getItem('userinfo') ? <AttendanceModeRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/schedule`}
+                    component={() => (storage.getItem('userinfo') ? <ScheduleRoot /> : <Redirect to='/' />)}
                 />
             </section>
         </Content>
