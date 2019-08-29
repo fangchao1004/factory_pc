@@ -1,6 +1,7 @@
-import React, { Component } from 'react';
-import { Table, Button, Row, Col, Tag, Modal, Popover, Icon, Tooltip, Radio, message } from 'antd'
+import React, { Component, Fragment } from 'react';
+import { Table, Button, Row, Col, Tag, Modal, Popover, Icon, Tooltip, Radio, message, Popconfirm } from 'antd'
 import moment from 'moment';
+import HttpApi from '../../util/HttpApi';
 
 const content = (
     <div>
@@ -18,32 +19,36 @@ var is4 = false;///是否为 四班三倒
 var avgLength = 1; /// 一个周期中 每个班有几次重复 
 const columns = [
     {
-        key: 'time',
-        dataIndex: 'time',
-        title: '日期',
-    },
-    {
-        key: 'group_1_val',
-        dataIndex: 'group_1_lab',
-        title: '甲组',
-    }, {
-        key: 'group_2_val',
-        dataIndex: 'group_2_lab',
-        title: '乙组',
-    }, {
-        key: 'group_3_val',
-        dataIndex: 'group_3_lab',
-        title: '丙组',
-    },
-    {
-        key: 'group_4_val',
-        dataIndex: 'group_4_lab',
-        title: '丁组',
-        render: (text) => {
-            let str = '/'
-            if (text) { str = text }
-            return <div>{str}</div>
-        }
+        title: '数据预览',
+        children: [
+            {
+                key: 'time',
+                dataIndex: 'time',
+                title: '日期',
+            },
+            {
+                key: 'group_1_val',
+                dataIndex: 'group_1_lab',
+                title: '甲组',
+            }, {
+                key: 'group_2_val',
+                dataIndex: 'group_2_lab',
+                title: '乙组',
+            }, {
+                key: 'group_3_val',
+                dataIndex: 'group_3_lab',
+                title: '丙组',
+            },
+            {
+                key: 'group_4_val',
+                dataIndex: 'group_4_lab',
+                title: '丁组',
+                render: (text) => {
+                    let str = '/'
+                    if (text) { str = text }
+                    return <div>{str}</div>
+                }
+            }]
     }]
 /**
  * 创建排班表界面
@@ -73,7 +78,7 @@ class ScheduleCreateView extends Component {
                             addTagBeginKey = 8;
                             this.setState({ loopTags: sampleTags, beginTagForJia: null })
                         }}>四班三倒</Button>
-                        <Button style={{ marginLeft: 20 }} type='primary' onClick={() => {
+                        <Button disabled style={{ marginLeft: 20 }} type='primary' onClick={() => {
                             addTagBeginKey = 8;
                             this.setState({ loopTags: sampleTags2, beginTagForJia: null })
                         }}>两班倒</Button>
@@ -168,7 +173,6 @@ class ScheduleCreateView extends Component {
         addTagBeginKey++;
     }
     checkData = () => {
-        // console.log('loopTag:', this.state.loopTags, 'selectBeginKey:', this.state.beginTagForJia);
         ///检测周期数据是否合理
         let result = this.checkHandler(this.state.loopTags);
         if (!result) { message.error('周期数据不合理，请重新编辑'); return }
@@ -178,7 +182,6 @@ class ScheduleCreateView extends Component {
         this.state.loopTags.forEach((item, index) => {
             if (item.key === this.state.beginTagForJia) { selectIndex = index }
         });
-        // console.log('selectIndex:', selectIndex)///选择的对象 在数组中的索引
         ///对数组进行重新的 排序 第一位 是所选的对象
         /// 这里将数组 x4 为了方便甲乙丙丁的顺延几位的截取 形成一个新的排班数组循环
         let listx4 = [...this.state.loopTags, ...this.state.loopTags, ...this.state.loopTags, ...this.state.loopTags]
@@ -206,6 +209,7 @@ class ScheduleCreateView extends Component {
             item.time = moment().add(+index, 'day').format('YYYY-MM-DD');
             return item
         })
+        console.log('temp:', temp);
         this.setState({ showModal1: false, listOfyear: temp })
     }
     matrixList = (groups) => {
@@ -266,16 +270,71 @@ class ScheduleCreateView extends Component {
         }
         return result;
     }
+    comfrimToDB = () => {
+        // console.log('保存入库:', this.state.listOfyear);
+        let tempList = JSON.parse(JSON.stringify(this.state.listOfyear));
+        let newList = [];
+        tempList.forEach((item) => {
+            let cellList = [];
+            for (const key in item) {
+                if (key !== 'key') {
+                    if (key === 'time') { cellList.unshift(item[key]) }
+                    else { cellList.push(item[key]) }
+                }
+            }
+            newList.push(cellList);
+        })
+        // console.log(newList);
+        let resultText = (newList.map((item) => {
+            return JSON.stringify(item);
+        })).join(',').replace(/\[/g, "(").replace(/\]/g, ")")
+        // console.log(resultText);
+        this.insertDataToDB(resultText, newList[0].length);
+    }
+    insertDataToDB = (text, length) => {
+        let sql1 = `delete from schedules`
+        let sql2 = `insert into schedules 
+            (time,group_1_val,group_1_lab,group_2_val,group_2_lab,group_3_val,group_3_lab ${length === 9 ? ',group_4_val,group_4_lab' : ''})
+            values
+            ${text}`
+        HttpApi.obs({ sql: sql1 }, (res) => {
+            if (res.data.code === 0) {
+                HttpApi.obs({ sql: sql2 }, (res) => {
+                    if (res.data.code === 0) {
+                        message.success('数据保存成功');
+                        this.setState({ listOfyear: [] })
+                    } else {
+                        message.error('数据保存失败');
+                    }
+                })
+            } else { message.error('数据更新失败'); }
+        })
+    }
 
     render() {
         return (
             <div>
                 <Row>
                     <Col span={6}>
-                        <Button onClick={this.createTable} type="primary" style={{ marginBottom: 16 }}>创建表单</Button>
+                        <Button onClick={this.createTable} type="primary" style={{ marginBottom: 16 }}>创建新表单</Button>
+                    </Col>
+                    <Col span={18}>
+                        <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
+                            {this.state.listOfyear.length > 0 ? <Fragment> <Button onClick={() => { this.setState({ listOfyear: [] }) }} type="primary" style={{ marginBottom: 16, marginLeft: 30 }}>重置</Button>
+                                <Popconfirm
+                                    placement="topRight"
+                                    title={'确定要更新轮值表吗？原先的轮值表数据将会被替换'}
+                                    onConfirm={this.comfrimToDB}
+                                    okText="确定"
+                                    cancelText="取消"
+                                >
+                                    <Button type="danger" style={{ marginBottom: 16 }}>确认无误-保存入库</Button>
+                                    {/* onClick={this.comfrimToDB} */}
+                                </Popconfirm>
+                            </Fragment> : null}
+                        </div>
                     </Col>
                 </Row>
-                ScheduleCreateView 页面
                 <Modal
                     width={570}
                     title='生产部轮值排班表'

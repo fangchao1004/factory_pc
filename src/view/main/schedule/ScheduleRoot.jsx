@@ -24,13 +24,13 @@ class ScheduleRoot extends Component {
         isAdmin = JSON.parse(userinfo).isadmin === 1;
         tabListNoTitle = isAdmin ? [{
             key: 'ScheduleView',
-            tab: '排班表概况',
+            tab: '排班表信息',
         }, {
             key: 'ScheduleCreateView',
             tab: '创建排班表'
         }] : [{
             key: 'ScheduleView',
-            tab: '排班表概况',
+            tab: '排班表信息',
         }]
         this.forceUpdate();
     }
