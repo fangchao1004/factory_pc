@@ -22,12 +22,12 @@ class OneAttendanceView extends Component {
     componentDidMount() {
         // console.log('this.props:', this.props);
         this.init(1, this.props);
-        this.countHandler(this.state.monthSelect, this.props);
+        this.countHandler(this.state.monthSelect, this.props);///统计
     }
     componentWillReceiveProps(nextProps) {
         if (nextProps.show) {
             this.init(1, nextProps);
-            this.countHandler(this.state.monthSelect, nextProps);
+            this.countHandler(this.state.monthSelect, nextProps);/// 统计
         }
     }
     init = async (currentPage, props) => {
@@ -45,19 +45,26 @@ class OneAttendanceView extends Component {
         // console.log('timeList:', timeList);/// 10天的时间区间 实际显示10天 
         // console.log('name:', name);///有名称
         let result = await this.getSomeDayData('测试', timeList);/// 对象10天的考勤记录
-        // console.log('result:', result);
+        // console.log('对象10天的考勤记录:', result);
         if (result.length > 0) {
             ///如果数据存在，则开始数据结构的转换
             if (groupid === null) {
-                let sampleList = await this.changeDataConstructNormal(10, timeList, result, name);
-                this.setState({ data: sampleList.map((item, index) => { item.key = index; return item }) })
+                let sampleList = await this.changeDataConstructNormal(10, timeList, result, name);///首页10天记录
+                // console.log('某一页10天记录 普通:', sampleList);///需要进入统计函数加工
+                let sampleListWithStatus = this.countSample(false, true, sampleList);
+                // console.log('某一页10天记录 普通 有状态了:', sampleListWithStatus);
+                this.setState({ data: sampleListWithStatus.map((item, index) => { item.key = index; return item }) })
                 this.forceUpdate();
             } else { /// 是生产部的成员，有分组。进行特殊处理
                 /// 先知道 这10天区间内 该组的排班表
                 let schedule = await this.getShedule(timeList, groupid, '测试', 1);
                 // console.log('schedule123:', schedule);
                 let sampleList = this.changeDataConstructSpecial(10, timeList, result, schedule, groupid);
-                this.setState({ data: sampleList.map((item, index) => { item.key = index; return item }) })
+                // console.log('某一页10天记录 轮班:', sampleList);///需要进入统计函数加工
+                let lastdaySchedule = await this.getLastdaySchedule(moment(timeList[0]).add(-1, 'day').format('YYYY-MM-DD'), props.groupid);
+                let sampleListWithStatus = this.countSample(false, true, sampleList, lastdaySchedule);///lastdaySchedule有可能为空[];
+                // console.log('某一页10天记录 轮班 有状态了:', sampleListWithStatus);
+                this.setState({ data: sampleListWithStatus.map((item, index) => { item.key = index; return item }) })
                 this.forceUpdate();
             }
         } else {
@@ -71,9 +78,10 @@ class OneAttendanceView extends Component {
      */
     countHandler = async (monthSelect, props) => {
         // console.log('props:', props.name);///有名称
-        let thisMonth = [moment().utcOffset(0).startOf('month').format('YYYY-MM-DD'), moment().utcOffset(0).format('YYYY-MM-DD')];
-        let lastMonth = [moment().utcOffset(0).add(-1, 'month').startOf('month').format('YYYY-MM-DD'), moment().utcOffset(0).add(-1, 'month').endOf('month').format('YYYY-MM-DD')];
+        let thisMonth = [moment().utcOffset(0).startOf('month').format('YYYY-MM-DD HH:mm:ss'), moment().utcOffset(0).endOf('day').format('YYYY-MM-DD HH:mm:ss')];
+        let lastMonth = [moment().utcOffset(0).add(-1, 'month').startOf('month').format('YYYY-MM-DD HH:mm:ss'), moment().utcOffset(0).add(-1, 'month').endOf('month').format('YYYY-MM-DD HH:mm:ss')];
         let selectMonth = monthSelect === 'now' ? thisMonth : lastMonth;
+        // console.log('selectMonth:',selectMonth);
         ///查询 当月或上月的 某个人的 所有考勤记录
         let recordList = await this.getSomeDayData('测试', selectMonth);
         // console.log('考勤记录:', recordList, props.name);
@@ -82,81 +90,92 @@ class OneAttendanceView extends Component {
         // console.log('schedule:', schedule);
         let duringDate = moment(selectMonth[1]).date() - moment(selectMonth[0]).date() + 1;
         if (props.groupid === null) {///普通班 就需要独立的去查询adjustment调班表的数据再手动的去日期匹配
-            let sampleList = await this.changeDataConstructNormal(duringDate, selectMonth, recordList, props.name);
-            console.log('普通模版当月或上月（包含了调班后的结果）:', sampleList);
+            let sampleList = await this.changeDataConstructNormal(duringDate, selectMonth, recordList, props.name);///当月或上月
+            // console.log('普通模版当月或上月（包含了调班后的结果）统计:', sampleList);
             ///对模版数据进行遍历，判断当中的有打卡记录的是多少天，其中正常的，和迟到的有多少（正常和迟到的判断标准会根据对应的班次，和worktime 来判断）
-            this.countSample(1, sampleList);
+            this.countSample(true, true, sampleList);
         } else {///分组轮班
             let sampleList = this.changeDataConstructSpecial(duringDate, selectMonth, recordList, schedule, props.groupid);
-            console.log('轮班模版当月或上月（包含了调班后的结果）:', sampleList);
+            // console.log('轮班模版当月或上月（包含了调班后的结果）:', sampleList);
             let lastdaySchedule = await this.getLastdaySchedule(moment(selectMonth[0]).add(-1, 'day').format('YYYY-MM-DD'), props.groupid);
-            this.countSample(0, sampleList, lastdaySchedule[0]);
+            this.countSample(true, false, sampleList, lastdaySchedule[0]);
         }
     }
     /**
+     * 统计函数 并且给每组(天)数据 添加上status状态
+     * isCount 是否统计个数并且渲染到底部表格
      * isNormal 是否为普通班次
      * sampleList 模版数据
      * lastdaySchedule 顶部昨天班次数据
      */
-    countSample = (isNormal, sampleList, lastdaySchedule = null) => {
+    countSample = (isCount, isNormal, sampleList, lastdaySchedule = null) => {
         // console.log('lastdaySchedule:', lastdaySchedule);///当 为普通班时，不需要考虑昨天的班次
-        // console.log('sampleList:', sampleList);
+        // console.log('输入的模版:sampleList:', sampleList);
         let totallCount = 0;///总共
         let lateCount = 0;///迟到
         let lostCount = 0;///缺卡(只有一次打卡记录，默认为缺少了下班卡)
         let earlyleaveCount = 0;///早退
         let kuangGongCount = 0;///旷工
-        for (let index = 0; index < sampleList.length; index++) {
-            const item = sampleList[index];
-            const beforeOneItem = index === sampleList.length - 1 ? lastdaySchedule : sampleList[index + 1];///因为是反的，所以日期上的前一天是数组上的后一位
+        let copySampleList = JSON.parse(JSON.stringify(sampleList));
+        for (let index = 0; index < copySampleList.length; index++) {
+            const item = copySampleList[index];
+            item.status = [];
+            const beforeOneItem = index === copySampleList.length - 1 ? lastdaySchedule : copySampleList[index + 1];///因为是反的，所以日期上的前一天是数组上的后一位
             totallCount++;
             if (item.group_val === 2) {///中班 取头尾两个打卡记录。如果打卡记录只有一个就取一个
                 if (beforeOneItem.group_val === 2) {
                     /// 如果是昨天是中班，今天也是中班，那么就至少需要两个打卡记录。才算不缺卡
                     if (item.list.length === 1) {///缺卡
                         lostCount++;
-                        console.log('是昨天是中班，今天也是中班: 缺卡了', item);
+                        item.status.push('缺卡');
+                        // console.log('是昨天是中班，今天也是中班: 缺卡了', item);
                     } else if (item.list.length >= 2) {
                         let sbk = moment(item.list[0].time).utcOffset(0).format('HH:mm:ss');///今天的上班卡
                         let xbk = moment(item.list[item.list.length - 1].time).utcOffset(0).format('HH:mm:ss'); ///昨天的下班卡
                         if (sbk > item.work_time.split(',')[0]) {
                             lateCount++;  ///今天的中班迟到+1
-                            console.log('今天的中班迟到:', item);
+                            item.status.push('迟到');
+                            // console.log('今天的中班迟到:', item);
                         }
                         if (xbk < item.work_time.split(',')[1]) {
                             earlyleaveCount++; ///昨天的中班早退了+1
-                            console.log('昨天的中班早退了:', item);
+                            item.status.push('早退');
+                            // console.log('昨天的中班早退了:', item);
                         }
                     } else if (item.list.length === 0) {
                         kuangGongCount++;
-                        console.log('旷工:', item);
+                        item.status.push('旷工');
+                        // console.log('旷工:', item);
                     }
                 } else {
                     ///如果昨天不是中班，那么这是一个周期中的第一个中班，只要有一个今天的上班卡。就算不缺卡
                     if (item.list.length === 0) {///缺上班卡
                         lostCount++;
-                        console.log('第一个中班-缺上班卡:', item);
+                        item.status.push('缺卡');
+                        // console.log('第一个中班-缺上班卡:', item);
                     } else {
                         let sbk = moment(item.list[0].time).utcOffset(0).format('HH:mm:ss');///今天的上班卡
                         if (sbk > item.work_time.split(',')[0]) {
                             lateCount++;  ///今天的中班迟到+1
-                            console.log('今天的中班迟到:', item);
+                            item.status.push('迟到');
+                            // console.log('今天的中班迟到:', item);
                         }
                     }
                 }
             } else if (item.group_val === 0) {///休息 取头 (即有普通班的休息，又有轮班的休息)
-                if (isNormal === 0 && beforeOneItem && beforeOneItem.group_val === 2) {/// 如果是昨天是中班，今天是休息，那么就至少需要一个打卡记录。才算不缺卡
+                if (isNormal === true && beforeOneItem && beforeOneItem.group_val === 2) {/// 如果是昨天是中班，今天是休息，那么就至少需要一个打卡记录。才算不缺卡
                     if (item.list.length === 1) {
                         let xbk = moment(item.list[0].time).utcOffset(0).format('HH:mm:ss');
-                        console.log('如果是昨天是中班，今天是休息--------:', item);
-                        console.log('哈哈beforeOneItem-----：', beforeOneItem);
+                        // console.log('如果是昨天是中班，今天是休息--------:', item);
                         if (xbk < beforeOneItem.work_time.split(',')[1]) {
                             earlyleaveCount++; ///昨天的中班早退了+1
-                            console.log('休息日-昨天的中班早退了:', item);
+                            item.status.push('早退');
+                            // console.log('休息日-昨天的中班早退了:', item);
                         }
                     } else if (item.list.length === 0) {
                         lostCount++; ///缺一个中班的下班卡
-                        console.log('休息日-缺一个中班的下班卡:', item);
+                        item.status.push('缺卡');
+                        // console.log('休息日-缺一个中班的下班卡:', item);
                     }
                 }
             } else if (item.group_val === 5 || item.group_val === 1 || item.group_val === 3) {///普通班 早班 晚班
@@ -166,30 +185,38 @@ class OneAttendanceView extends Component {
                     let xbk = moment(item.list[0].time).utcOffset(0).format('HH:mm:ss');///今天的下班卡
                     if (sbk > item.work_time.split(',')[0]) {
                         lateCount++;  ///上班迟到+1
-                        console.log('上班迟到日期：', item);
+                        item.status.push('迟到');
+                        // console.log('上班迟到日期：', item);
                     }
                     if (xbk < item.work_time.split(',')[1]) {
                         earlyleaveCount++; ///下班早退+1
-                        console.log('下班早退日期：', item);
+                        item.status.push('早退');
+                        // console.log('下班早退日期：', item);
                     }
                 } else if (item.list.length === 1) {
                     lostCount++;///缺少下班卡 缺卡+1
-                    console.log('缺卡日期：', item);
+                    item.status.push('缺卡');
+                    // console.log('缺卡日期：', item);
                 } else if (item.list.length === 0) {
                     kuangGongCount++;
-                    console.log('旷工:', item);
+                    item.status.push('旷工');
+                    // console.log('旷工:', item);
                 }
             }
         }
-        console.log('总共:', totallCount);
-        console.log('迟到:', lateCount);
-        console.log('早退:', earlyleaveCount);
-        console.log('缺卡:', lostCount);
-        console.log('旷工:', kuangGongCount);
-        this.setState({
-            countData: [{ lab: '总共（天）', count: totallCount }, { lab: '迟到（次）', count: lateCount }, { lab: '早退（次）', count: earlyleaveCount }, { lab: '缺卡（次）', count: lostCount }, { lab: '旷工（次）', count: kuangGongCount }].map((item, index) => { item.key = index; return item })
-        })
+        // console.log('总共:', totallCount);
+        // console.log('迟到:', lateCount);
+        // console.log('早退:', earlyleaveCount);
+        // console.log('缺卡:', lostCount);
+        // console.log('旷工:', kuangGongCount);
+        if (isCount) {
+            this.setState({
+                countData: [{ lab: '总共（天）', count: totallCount }, { lab: '迟到（次）', count: lateCount }, { lab: '早退（次）', count: earlyleaveCount }, { lab: '缺卡（次）', count: lostCount }, { lab: '旷工（次）', count: kuangGongCount }].map((item, index) => { item.key = index; return item })
+            })
+        }
+        // console.log('当月或上月的统计过后:', copySampleList);
         this.forceUpdate();
+        return copySampleList;
     }
     getLastdaySchedule = (day, groupid) => {
         return new Promise((resolve, reject) => {
@@ -204,9 +231,9 @@ class OneAttendanceView extends Component {
             })
         })
     }
-    getAdjustment = (name, is_group) => {
+    getAdjustment = (name, is_group) => {///针对普通班的调班表数据 （因为轮班已经和schedule表结合联合查询了）
         return new Promise((resolve, reject) => {
-            let sql = `select * from adjustments where shift_val = 5 and is_group = ${is_group}`;
+            let sql = `select * from adjustments where is_group = ${is_group}`;
             HttpApi.obs({ sql }, (res) => {
                 let result = []
                 if (res.data.code === 0) { result = res.data.data }
@@ -265,11 +292,11 @@ class OneAttendanceView extends Component {
         let sampleList = [];
         for (let index = 0; index < day; index++) {///生成空模版
             let sampleCell = {};
-            sampleCell.end = moment(timeList[1]).add(-index, 'day').endOf('day').format('YYYY-MM-DD HH:mm:ss');
             sampleCell.start = moment(timeList[1]).add(-index, 'day').startOf('day').format('YYYY-MM-DD HH:mm:ss');
-            sampleCell.list = [];
+            sampleCell.end = moment(timeList[1]).add(-index, 'day').endOf('day').format('YYYY-MM-DD HH:mm:ss');
             sampleCell.group_val = null;
             sampleCell.group_lab = null;
+            sampleCell.list = [];
             const timeSample = moment(sampleCell.start).format('YYYY-MM-DD');
             schedule.forEach(item => {
                 if (timeSample === item.time) {
@@ -304,16 +331,17 @@ class OneAttendanceView extends Component {
         let sampleList = [];
         for (let index = 0; index < day; index++) {
             let sampleCell = {};
-            sampleCell.end = moment(timeList[1]).add(-index, 'day').endOf('day').format('YYYY-MM-DD HH:mm:ss');
             sampleCell.start = moment(timeList[1]).add(-index, 'day').startOf('day').format('YYYY-MM-DD HH:mm:ss');
-            sampleCell.list = [];
+            sampleCell.end = moment(timeList[1]).add(-index, 'day').endOf('day').format('YYYY-MM-DD HH:mm:ss');
             sampleCell.group_val = (moment(sampleCell.start).format('dddd') === '星期六' || moment(sampleCell.start).format('dddd') === '星期日') ? 0 : 5
             sampleCell.group_lab = (moment(sampleCell.start).format('dddd') === '星期六' || moment(sampleCell.start).format('dddd') === '星期日') ? '休息' : '普通班'
             sampleCell.work_time = periodsList[0][`p_time`]
+            sampleCell.list = [];
             sampleList.push(sampleCell);
         }
         resultList.forEach((item) => {
             sampleList.forEach((sample) => {
+                // console.log('考勤记录item:', item);
                 let itemTime = moment(item.time).utcOffset(0).format('YYYY-MM-DD HH:mm:ss');
                 if (itemTime > sample.start && itemTime < sample.end) {
                     sample.list.push(item);
@@ -363,6 +391,35 @@ class OneAttendanceView extends Component {
                 title: '打卡时间',
                 dataIndex: 'list',
                 render: (text, record) => {
+                    // console.log('record:', record);
+                    const statusList = record.status;
+                    let color1 = '';
+                    let color2 = '';
+                    let isLost = false;
+                    let isKuang = false;
+                    if (statusList && statusList.length > 0) {
+                        if (statusList.indexOf('迟到') !== -1) {
+                            if (record.group_val === 2) {
+                                color2 = 'red';
+                            } else {
+                                color1 = 'red';
+                            }
+                        }
+                        if (statusList.indexOf('早退') !== -1) {
+                            if (record.group_val === 2) {
+                                color1 = 'blue';
+                            } else {
+                                color2 = 'blue';
+                            }
+                        }
+                        if (statusList.indexOf('缺卡') !== -1) {
+                            isLost = true;
+                        }
+                        if (statusList.indexOf('旷工') !== -1) {
+                            isKuang = true;
+                        }
+                    }
+                    // console.log(color1,color2);
                     let newList = [];
                     if (text.length > 1) {
                         ///提取当天的头尾两个打卡数据 取两个有效的打卡数据
@@ -372,11 +429,19 @@ class OneAttendanceView extends Component {
                         newList.push(moment(text[0].time).utcOffset(0).format('HH:mm:ss'));
                     }
                     if (text.length === 0) {
+                        if (isLost) {
+                            return <Tag color="volcano">缺卡</Tag>
+                        } else if (isKuang) {
+                            return <Tag color="#f50">旷工</Tag>
+                        }
                         return <div>/</div>
                     } else if (text.length === 1) {
-                        return <div><Tag>{newList[0]}</Tag></div>
+                        if (isLost) {
+                            return <div><Tag color={color1} >{newList[0]}</Tag><Divider type="vertical" /><Tag color="volcano">缺卡</Tag> </div>
+                        }
+                        return <div><Tag color={record.group_val === 2 ? color2 : color1} >{newList[0]}</Tag></div>
                     } else {
-                        return <div><Tag>{newList[0]}</Tag><Divider type="vertical" /><Tag>{newList[1]}</Tag></div>
+                        return <div><Tag color={color1}>{newList[0]}</Tag><Divider type="vertical" /><Tag color={color2}>{newList[1]}</Tag></div>
                     }
                 }
             }
