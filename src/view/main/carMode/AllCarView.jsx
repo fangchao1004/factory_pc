@@ -61,7 +61,7 @@ export default class AllCarView extends Component {
     render() {
         const { currentPage, CarsCounts } = this.state;
         const paginationProps = {
-            page: currentPage,
+            current: currentPage,
             onChange: (page) => this.handleTableChange(page),
             total: CarsCounts,
         }

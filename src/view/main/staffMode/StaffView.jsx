@@ -80,12 +80,10 @@ class StaffView extends Component {
     }
     ///更新员工-确定
     updateStaffOnOk = (newValues) => {
-        let level_group = newValues.level_id.split('_');
+        let level_group = (newValues.level_id + '').split('_');
         ///将 组的数据 从部门 分离出来
         if (level_group.length > 1) { newValues.level_id = parseInt(level_group[0]); newValues.group_id = parseInt(level_group[1]); }
         else { newValues.group_id = null; }
-        // console.log('newValues:', newValues);
-        // return;
         newValues.isadmin = newValues.isadmin ? 1 : 0
         if (newValues.permission) newValues.permission = newValues.permission.join(',')
         HttpApi.updateUserInfo({ query: { id: this.state.updateStaffData.id }, update: newValues }, data => {

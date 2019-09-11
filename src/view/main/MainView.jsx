@@ -214,12 +214,12 @@ export default class MainView extends Component {
                             </Badge>
                             <Link to={`${this.props.match.url}/user`} />
                         </Menu.Item>
-                        {/* <Menu.Item key="交易">
+                        <Menu.Item key="交易">
                             <Icon type="money-collect" />
                             <span>消费</span>
                             <Link to={`${this.props.match.url}/transaction`} />
                         </Menu.Item>
-                        <Menu.Item key="车辆">
+                        {/* <Menu.Item key="车辆">
                             <Icon type="car" />
                             <span>车辆</span>
                             <Link to={`${this.props.match.url}/car`} />

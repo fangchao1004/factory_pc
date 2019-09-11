@@ -18,6 +18,7 @@ class RechargeView extends Component {
         data.map((item, index) => { return item.key = index })
         this.setState({ data })
     }
+    ///这里要做分页查询
     getAllAcountInfo = () => {
         return new Promise((resolve, reject) => {
             let result = [];

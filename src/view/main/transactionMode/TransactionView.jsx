@@ -91,7 +91,7 @@ export default class TransactionView extends Component {
                 },
                 defaultSortOrder: 'descend',
                 render: (text) => {
-                    return moment(text).format('YYYY-MM-DD HH:mm:ss');
+                    return moment(text).utcOffset(0).format('YYYY-MM-DD HH:mm:ss');
                 }
             },
             {

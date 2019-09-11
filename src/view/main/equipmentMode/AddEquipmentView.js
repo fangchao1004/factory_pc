@@ -15,7 +15,7 @@ function AddEquipmentForm(props) {
     const nfcOptions = props.nfcs.map(nfc => <Select.Option value={nfc.id} key={nfc.id}>{nfc.name}</Select.Option>)
 
     return <Form>
-         <Form.Item label="区域" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+        <Form.Item label="区域" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('area_id', {
                 rules: [{ required: true, message: '请选择设备区域' }]
             })(<Select>{areaOptions}</Select>)}
@@ -58,17 +58,17 @@ export default function AddEquipmentView(props) {
     const [nfcs, setNfcs] = React.useState(null)
     const [areas, setAreas] = React.useState(null)
     React.useEffect(() => {
-        HttpApi.getDeviceTypeInfo({}, data => {
+        HttpApi.getDeviceTypeInfo({ effective: 1 }, data => {
             if (data.data.code === 0) {
                 setTypes(data.data.data)
             }
         })
-        HttpApi.getNFCInfo({ type: 2 }, data => {
+        HttpApi.getNFCInfo({ type: 2, effective: 1 }, data => {
             if (data.data.code === 0) {
                 setNfcs(data.data.data)
             }
         })
-        HttpApi.getDeviceAreaInfo({}, data => {
+        HttpApi.getDeviceAreaInfo({ effective: 1 }, data => {
             if (data.data.code === 0) {
                 setAreas(data.data.data)
             }

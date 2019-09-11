@@ -1,18 +1,22 @@
 import React, { Component } from 'react'
-import { Table, Button, message, Input } from 'antd'
+import { Table, Button, message, Input, Drawer } from 'antd'
 import HttpApi from '../../util/HttpApi'
+import OneAttendanceView from './OneAttendanceView'
+import moment from 'moment'
 var level_filter = [];///用于筛选任务专业的数据 选项
 const { Search } = Input;
 
+var OneAttendanceData;
 class AttendanceView extends Component {
 
-    state = { users: null }
+    state = { users: null, drawerVisible: false }
 
     componentDidMount() {
         this.getUsersData()
     }
     async getUsersData() {
         level_filter.length = 0;
+
         let levelData = await this.getLevelInfo();
         levelData.forEach((item) => { level_filter.push({ text: item.name, value: item.id }) })
 
@@ -86,10 +90,62 @@ class AttendanceView extends Component {
             })
         })
     }
-    checkOneHistory = (record) => {
-        console.log('record:', record);
+    checkOneHistory = async (record) => {
+        // console.log('record:', record);
+        let allCount = await this.getAllCount();
+        if (allCount > 0) {
+            let lastRecord = await this.getLastRecord();
+            let firstRecord = await this.getFirstRecord();
+            ///相差天数
+            let dayCount = (moment(lastRecord.time).utcOffset(0).startOf('day').valueOf() - moment(firstRecord.time).utcOffset(0).startOf('day').valueOf()) / (1000 * 60 * 60 * 24);
+            OneAttendanceData = { 'name': record.name, 'show': true, 'lastTime': lastRecord.time, dayCount, 'groupid': record.group_id }
+            this.setState({ drawerVisible: true })
+        } else {
+            message.warn('暂无该用户考勤信息');
+        }
     }
-
+    getLastRecord = () => {
+        return new Promise((resolve, reject) => {
+            let sql = `select * from records where name = '测试' order by id desc limit 1`
+            HttpApi.obsForks({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    ///获取当前人员的最新一次的打卡时刻
+                    result = res.data.data[0];
+                }
+                resolve(result);
+            })
+        })
+    }
+    getFirstRecord = () => {
+        return new Promise((resolve, reject) => {
+            let sql = `select * from records where name = '测试' limit 1`
+            HttpApi.obsForks({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    ///获取当前人员的最新一次的打卡时刻
+                    result = res.data.data[0];
+                }
+                resolve(result);
+            })
+        })
+    }
+    getAllCount = () => {
+        return new Promise((resolve, reject) => {
+            let sql = `select count(*) count from records where name = '测试' `
+            HttpApi.obsForks({ sql }, (res) => {
+                let result = 0;
+                if (res.data.code === 0) {
+                    result = res.data.data[0].count;
+                }
+                resolve(result);
+            })
+        })
+    }
+    onClose = () => {
+        OneAttendanceData = { 'show': false }
+        this.setState({ drawerVisible: false })
+    }
     render() {
         const columns = [
             {
@@ -150,6 +206,7 @@ class AttendanceView extends Component {
             }
         ];
 
+
         return (
             <div>
                 <Search style={{ width: 400 }} allowClear placeholder="支持姓名模糊查询" onSearch={value => this.onSearch(value)} onChange={e => this.onChange(e.currentTarget.value)} enterButton />
@@ -159,7 +216,17 @@ class AttendanceView extends Component {
                     dataSource={this.state.users}
                     columns={columns}
                 />
-            </div>
+                <Drawer
+                    width={700}
+                    title="考勤记录"
+                    placement="left"
+                    closable={true}
+                    onClose={this.onClose}
+                    visible={this.state.drawerVisible}
+                >
+                    <OneAttendanceView {...OneAttendanceData} />
+                </Drawer>
+            </div >
         )
     }
 }
