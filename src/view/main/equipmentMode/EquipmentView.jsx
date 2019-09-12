@@ -67,8 +67,9 @@ class EquipmentView extends Component {
         this.setState({ addEquipmentVisible: true })
     }
     addEquipmentOk = (newValues) => {
-        newValues.status = 1 // 默认设置设备为 正常 状态
+        newValues.status = 3 // 默认设置设备为 1正常 3待检 状态
         // console.log(newValues)
+        // return;
         HttpApi.addDeviceInfo(newValues, data => {
             if (data.data.code === 0) {
                 this.setState({ addEquipmentVisible: false })
@@ -156,7 +157,7 @@ class EquipmentView extends Component {
                     <div style={{ textAlign: 'center' }}>
                         {
                             this.state.isAdmin ?
-                                <Popconfirm title="确定要删除该设备吗?" onConfirm={()=>{this.deleteEquipmentConfirm(record)}}>
+                                <Popconfirm title="确定要删除该设备吗?" onConfirm={() => { this.deleteEquipmentConfirm(record) }}>
                                     <Button size="small" type="danger">删除</Button>
                                 </Popconfirm>
                                 : null
@@ -204,6 +205,7 @@ class EquipmentView extends Component {
                     width={600}
                 >
                     {this.renderDeviceRecordsView()}
+                    <Divider orientation="left"></Divider>
                     {this.renderDevicePieView()}
                     <Drawer
                         title={<div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', }}>
