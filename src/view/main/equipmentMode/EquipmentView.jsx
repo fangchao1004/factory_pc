@@ -3,6 +3,7 @@ import { Table, Button, Row, Col, Drawer, Icon, message, Popconfirm, Divider, Ta
 import HttpApi from '../../util/HttpApi';
 import moment from 'moment';
 import AddEquipmentView from './AddEquipmentView';
+import UpdateEquipmentView from './UpdateEquipmentView';
 import PieViewOfOneDeStus from './PieViewOfOneDeStus';
 import OneRecordDetialView from './OneRecordDetialView'
 
@@ -22,8 +23,10 @@ class EquipmentView extends Component {
             oneRecordData: {},
             recordView: null,
             addEquipmentVisible: false,
+            updateEquipmentVisible: false,
             isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin,
             pieDeviceId: null,
+            oneDeviceInfo: null,
         }
     }
     componentDidMount() {
@@ -83,6 +86,20 @@ class EquipmentView extends Component {
     addEquipmentCancel = () => {
         this.setState({ addEquipmentVisible: false })
     }
+    updateEquipmentOk = (newValues) => {
+        HttpApi.updateDeviceInfo({ query: { id: this.state.oneDeviceInfo.id }, update: newValues }, (res) => {
+            if (res.data.code === 0) {
+                this.setState({ updateEquipmentVisible: false })
+                this.init();
+                message.success('更新设备信息成功');
+            } else {
+                message.error(res.data.data)
+            }
+        })
+    }
+    updateEquipmentCancel = () => {
+        this.setState({ updateEquipmentVisible: false })
+    }
     deleteEquipmentConfirm = (record) => {
         // console.log('确定删除 某个设备:', record.id);
         HttpApi.obs({ sql: `update devices set effective = 0 where id = ${record.id} ` }, (data) => {
@@ -92,6 +109,12 @@ class EquipmentView extends Component {
             } else {
                 message.error(data.data.data)
             }
+        })
+    }
+    changeDeviceInfo = (record) => {
+        this.setState({
+            oneDeviceInfo: record,
+            updateEquipmentVisible: true
         })
     }
     render() {
@@ -134,12 +157,13 @@ class EquipmentView extends Component {
                     else if (text === 2) { str = '故障'; strColor = '#FF0000' }
                     else { str = '待检'; strColor = 'gray' }
                     return <Tag style={{ cursor: 'pointer' }} color={strColor} onClick={() => {
-                        if (text === 2) { this.openLastRecord(record) } else { message.success('正常') }
+                        if (text === 2) { this.openLastRecord(record) } else if (text === 1) { message.success('正常') }
+                        else if (text === 3) { message.info('待检') }
                     }}>{str}</Tag>
                 }
             },
             {
-                title: '巡检时间',
+                title: '巡检时间 (或 状态更新时间)',
                 dataIndex: 'updatedAt',
                 sorter: (a, b) => {
                     return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
@@ -157,9 +181,13 @@ class EquipmentView extends Component {
                     <div style={{ textAlign: 'center' }}>
                         {
                             this.state.isAdmin ?
-                                <Popconfirm title="确定要删除该设备吗?" onConfirm={() => { this.deleteEquipmentConfirm(record) }}>
-                                    <Button size="small" type="danger">删除</Button>
-                                </Popconfirm>
+                                <span>
+                                    <Popconfirm title="确定要删除该设备吗?" onConfirm={() => { this.deleteEquipmentConfirm(record) }}>
+                                        <Button size="small" type="danger">删除</Button>
+                                    </Popconfirm>
+                                    <Divider type="vertical" />
+                                    <Button size="small" type='ghost' onClick={() => { this.changeDeviceInfo(record) }} >修改</Button>
+                                </span>
                                 : null
                         }
                         {
@@ -235,6 +263,7 @@ class EquipmentView extends Component {
                     <OneRecordDetialView renderData={this.state.oneRecordData} />
                 </Drawer>
                 <AddEquipmentView visible={this.state.addEquipmentVisible} onOk={this.addEquipmentOk} onCancel={this.addEquipmentCancel} />
+                <UpdateEquipmentView visible={this.state.updateEquipmentVisible} device={this.state.oneDeviceInfo} onOk={this.updateEquipmentOk} onCancel={this.updateEquipmentCancel} />
             </div>
         );
     }
@@ -308,6 +337,7 @@ class EquipmentView extends Component {
     ///3 右边的独立的一级抽屉，显示该设备最新一次的record记录 
     openDrawer = async (record, v) => {
         // console.log('record:',record);
+        if (!record) { message.warn('无记录数据'); return }
         if (record.device_status === 1) {
             message.success('正常');
             return;
