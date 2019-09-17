@@ -21,7 +21,12 @@ export default class TransactionView extends Component {
     }
     initOtherConfigData = async () => {
         let filterData = await this.getTransactionType();
-        this.setState({ filterData })
+        // console.log('filterData:', filterData);
+        let tempList = [];
+        filterData.forEach((item) => {
+            if (item.text && item.value) { tempList.push(item) }
+        })
+        this.setState({ filterData: tempList })
     }
     getTransactionType = () => {
         return new Promise((resolve, reject) => {
@@ -41,13 +46,13 @@ export default class TransactionView extends Component {
         userinfo = storage.getItem('userinfo')
         let isAdmin = JSON.parse(userinfo).isadmin === 1;
         let data = [];
-        if(isAdmin){
+        if (isAdmin) {
             data = await this.getAllTransactionInfo();
-        }else{
-            data =  await this.getSomeOneTransactionInfo(JSON.parse(userinfo).name);
+        } else {
+            data = await this.getSomeOneTransactionInfo(JSON.parse(userinfo).name);
         }
         data.map((item, index) => { return item.key = index })
-        this.setState({ data, isAdmin})
+        this.setState({ data, isAdmin })
     }
     getAllTransactionInfo = () => {
         return new Promise((resolve, reject) => {

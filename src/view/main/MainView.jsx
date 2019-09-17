@@ -17,6 +17,7 @@ import TransactionModeRoot from './transactionMode/TransactionModeRoot';
 import CarModeRoot from './carMode/CarModeRoot'
 import AttendanceModeRoot from './attendanceMode/AttendanceModeRoot'
 import ScheduleRoot from './schedule/ScheduleRoot'
+import TansactionApplyModeRoot from './tansactionApplyMode/TansactionApplyModeRoot'
 import UserMenuView from './userMenu/UserMenuView'
 import HttpApi from '../util/HttpApi';
 import Store from '../../redux/store/Store';
@@ -214,21 +215,23 @@ export default class MainView extends Component {
                             </Badge>
                             <Link to={`${this.props.match.url}/user`} />
                         </Menu.Item>
-                        <Menu.Item key="交易">
-                            <Icon type="money-collect" />
-                            <span>消费</span>
-                            <Link to={`${this.props.match.url}/transaction`} />
-                        </Menu.Item>
-                        {/* <Menu.Item key="车辆">
-                            <Icon type="car" />
-                            <span>车辆</span>
-                            <Link to={`${this.props.match.url}/car`} />
-                        </Menu.Item> */}
-                        {/* <Menu.Item key="考勤">
-                            <Icon type="contacts" />
-                            <span>考勤</span>
-                            <Link to={`${this.props.match.url}/attendance`} />
-                        </Menu.Item> */}
+                        <SubMenu key="消费" title={
+                            <span>
+                                <Icon type="money-collect" />
+                                <span>消费</span>
+                            </span>
+                        }>
+                            <Menu.Item key="消费记录">
+                                <Icon type="ordered-list" />
+                                <span>消费记录</span>
+                                <Link to={`${this.props.match.url}/transaction`} />
+                            </Menu.Item>
+                            <Menu.Item key="消费申请">
+                                <Icon type="form" />
+                                <span>消费申请</span>
+                                <Link to={`${this.props.match.url}/applytrans`} />
+                            </Menu.Item>
+                        </SubMenu>
                         <SubMenu key="考勤" title={
                             <span>
                                 <Icon type="pushpin" />
@@ -246,7 +249,11 @@ export default class MainView extends Component {
                                 <Link to={`${this.props.match.url}/schedule`} />
                             </Menu.Item>
                         </SubMenu>
-
+                        {/* <Menu.Item key="车辆">
+                            <Icon type="car" />
+                            <span>车辆</span>
+                            <Link to={`${this.props.match.url}/car`} />
+                        </Menu.Item> */}
                         <SubMenu key="设置" title={<span><Icon type="setting" /><span>设置</span></span>}>
                             <Menu.Item key="个人设置"><Icon type="switcher" /><span>个人设置</span><Link to={`${this.props.match.url}/usersetting`} /></Menu.Item>
                         </SubMenu>
@@ -342,6 +349,11 @@ class ContentView extends Component {
                     exact
                     path={`${this.props.match.path}/transaction`}
                     component={() => (storage.getItem('userinfo') ? <TransactionModeRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/applytrans`}
+                    component={() => (storage.getItem('userinfo') ? <TansactionApplyModeRoot /> : <Redirect to='/' />)}
                 />
                 <Route
                     exact
