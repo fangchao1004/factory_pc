@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Table, Button, Popconfirm, Divider, Tag, message } from 'antd';
 import HttpApi from '../../util/HttpApi';
 import moment from 'moment'
+import uuidv1 from 'uuid/v1'
 const storage = window.localStorage;
 var foodresult = [];
 const status_filter = [{ text: '待审批', value: 0 }, { text: '通过', value: 1 }, { text: '拒绝', value: 2 }]
@@ -11,7 +12,7 @@ const status_filter = [{ text: '待审批', value: 0 }, { text: '通过', value:
 class ApproveTrans extends Component {
     constructor(props) {
         super(props);
-        this.state = { data: [] }
+        this.state = { data: [], loading: false }
     }
     componentDidMount() {
         this.init();
@@ -33,9 +34,10 @@ class ApproveTrans extends Component {
     }
     getApplyRecordsInfo = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select applyRecords.*,u1.name apply_name,u2.name approve_name from applyRecords
+            let sql = `select applyRecords.*,u1.name apply_name,u2.name approve_name,levels.name level_name from applyRecords
             left join users u1 on u1.id = applyRecords.apply_id
             left join users u2 on u2.id = applyRecords.approve_id
+            left join levels on levels.id = u1.level_id
             order by applyRecords.id desc`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -45,15 +47,132 @@ class ApproveTrans extends Component {
         })
     }
     okHandler = async (record) => {
+        this.setState({ loading: true })
+        // console.log('record:', record);
+        // return;
         let result = await this.updateHandler(1, record.id);
-        if (result === 0) { message.success('审批成功'); this.init(); this.updateCardHandler(); } else { message.error('操作失败') }
+        if (result === 0) { this.updateCardAndTranHandler(record.level_name, record.total_price); this.init(); } else { message.error('操作失败') }
     }
     refuseHandler = async (record) => {
         let result = await this.updateHandler(2, record.id);
-        if (result === 0) { message.success('审批成功'); this.init() } else { message.error('操作失败') }
+        if (result === 0) { message.success('审批成功-申请驳回'); this.init() } else { message.error('操作失败') }
     }
-    updateCardHandler = () => {
-        console.log('审批通过，修改对应卡的金额');
+    /**
+     * 更新card表数据
+     */
+    updateCardAndTranHandler = async (level_name, add_price) => {
+        let cardName = level_name + '餐卡';
+        // console.log('审批通过，修改对应卡的金额', cardName, add_price);
+        let accountResult = await this.getAccount('朱桂庭');///cardName 根据cardName 去找对应的账户信息
+        // console.log('accountResult:', accountResult);
+        if (accountResult.length > 0) {
+            let cardID = accountResult[0].CardID;
+            let cardResult = await this.getCard(cardID);
+            // console.log('卡数据:', cardResult[0]);
+            let old_balance = cardResult[0].Balance;
+            let finally_balance = cardResult[0].Balance + add_price;
+            let chargeResult = await this.cardHandler(cardResult[0], finally_balance);/// 改变的是card的数据；
+            if (chargeResult === 0) {/// card表中 数据已经改变好了，然后改变 Transaction 表
+                let transactionID = await this.insertTranGetTranID(cardResult[0]);
+                // console.log('transactionID:', transactionID);
+                if (transactionID) {/// 如果插入成功，获取 TransactionID
+                    let data = {};
+                    data.TransactionID = transactionID;/// 交易id
+                    data.Balance = old_balance;///交易前余额
+                    data.RequestTransactionAmount = add_price;///预计交易额
+                    data.ActualTransactionAmount = add_price;///实际交易额
+                    data.FinalBalance = finally_balance;///交易后的余额
+                    data.IsConsumption = 0;///是否为消费
+                    data.TransactionWalletType = 2;/// 1现金 2补贴
+                    data.Increase = 1;/// 增1/减0
+                    data.TransactionTime = moment().format("YYYY-MM-DDTHH:mm:ss.SSS") + 'Z';///交易时间
+                    data.CreateTime = cardResult[0].CreateTime;
+                    data.TransactionType = 528;
+                    data.TransactionDesc = '单位补贴';
+                    // console.log('data:', data);
+                    let result = await this.insertTranDetail(data);///插入 消费详情表
+                    if (result === 0) {
+                        message.success('餐卡补贴已经发放成功!');
+                    } else {
+                        message.error('餐卡补贴已经发放失败!');
+                    }
+                    this.setState({ loading: false })
+                }
+            } else {
+                message.error('餐卡金额更新失败');
+                this.setState({ loading: false })
+            }
+        } else {
+            message.error('未查询到对应部门的餐卡');
+            this.setState({ loading: false })
+        }
+    }
+    /**
+     * 更新Card表
+     */
+    cardHandler = (card, finally_balance) => {
+        let chargeTime = moment().format("YYYY-MM-DDTHH:mm:ss.SSS") + 'Z'
+        return new Promise((resolve, reject) => {
+            let sql = `UPDATE Card SET Balance = ${finally_balance},
+            UpdateTime = '${chargeTime}',
+            LastRechargeTime = '${chargeTime}'  WHERE CardID = ${card.CardID}`;
+            HttpApi.obsForss({ sql }, (res) => {
+                resolve(res.data.code);
+            })
+        })
+    }
+    /**
+     * 插入 Transaction 表，并获取新增的 主键 TransactionID,作为 插入 TransactionDetail表的 TransactionID 参数
+     */
+    insertTranGetTranID = (cardInfo) => {///插入交易表获取交易表的id,再进行交易详情表的插入
+        return new Promise((resolve, reject) => {
+            let result = null;
+            let sql = `INSERT INTO [Transaction] (TransactionNumber,TransactionType,AccountID,CardID,ClientType,CardNo,CardLevelID,CardLevelName) 
+            VALUES('${uuidv1()}',2,${cardInfo.AccountID},${cardInfo.CardID},0,${cardInfo.CardNo},${cardInfo.LevelID},'${cardInfo.LevelName}') 
+            select @@identity`///插入一条数据后获取该数据的主键select @@identity
+            HttpApi.obsForss({ sql }, (res) => {
+                if (res.data.code === 0) {
+                    result = res.data.data[0][''];
+                }
+                resolve(result);
+            })
+        })
+    }
+    /**
+     * 插入 TransactionDetail表
+     */
+    insertTranDetail = (data) => {///插入交易表获取交易表的id,再进行交易详情表的插入
+        return new Promise((resolve, reject) => {
+            let sql = `INSERT INTO [TransactionDetail] (TransactionID,Balance,RequestTransactionAmount,ActualTransactionAmount,FinalBalance,IsConsumption,TransactionWalletType,Increase,TransactionTime,CreateTime,TransactionType,TransactionDesc) 
+            VALUES( ${data.TransactionID},${data.Balance},${data.RequestTransactionAmount},${data.ActualTransactionAmount},${data.FinalBalance},${data.IsConsumption},${data.TransactionWalletType},${data.Increase},'${data.TransactionTime}','${data.CreateTime}',${data.TransactionType},'${data.TransactionDesc}') `
+            HttpApi.obsForss({ sql }, (res) => {
+                resolve(res.data.code);
+            })
+        })
+    }
+    getCard = (cardID) => {
+        return new Promise((resolve, reject) => {
+            let result = [];
+            let sql = `SELECT * FROM Card where cardID = '${cardID}' `
+            HttpApi.obsForss({ sql }, (res) => {
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
+    getAccount = (name) => {
+        return new Promise((resolve, reject) => {
+            let result = [];
+            let sql = `SELECT * FROM Account where AccountName = '${name}' `
+            HttpApi.obsForss({ sql }, (res) => {
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
     }
     updateHandler = (status, id) => {
         return new Promise((resolve, reject) => {
@@ -64,6 +183,7 @@ class ApproveTrans extends Component {
             })
         })
     }
+
     render() {
         const columns = [
             {
@@ -155,6 +275,7 @@ class ApproveTrans extends Component {
                     <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>申请记录</h2>
                 </div>
                 <Table
+                    loading={this.state.loading}
                     style={{ marginTop: 20 }}
                     bordered
                     dataSource={this.state.data}

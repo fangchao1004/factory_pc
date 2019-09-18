@@ -20,6 +20,7 @@
     "redux": "^4.0.4",
     "redux-devtools-extension": "^2.13.8",
     "socket.io-client": "^2.2.0",
+    "uuid": "^3.3.3",
     "yarn": "^1.15.2"
   },
   "scripts": {
