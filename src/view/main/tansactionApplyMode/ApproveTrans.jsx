@@ -4,15 +4,17 @@ import HttpApi from '../../util/HttpApi';
 import moment from 'moment'
 import uuidv1 from 'uuid/v1'
 const storage = window.localStorage;
+var userinfo;
 var foodresult = [];
 const status_filter = [{ text: '待审批', value: 0 }, { text: '通过', value: 1 }, { text: '拒绝', value: 2 }]
 /**
- * 批准界面
+ * 消费审批界面
  */
 class ApproveTrans extends Component {
     constructor(props) {
         super(props);
         this.state = { data: [], loading: false }
+        userinfo = storage.getItem('userinfo')
     }
     componentDidMount() {
         this.init();
@@ -266,22 +268,25 @@ class ApproveTrans extends Component {
                         {text ? text : '/'}
                     </div>
                 }
-            },
-            {
-                title: '操作',
-                width: 180,
-                render: (text, record) => {
-                    return <div>
-                        <Popconfirm disabled={record.status !== 0} title="确认审批通过吗?" onConfirm={() => { this.okHandler(record) }}>
-                            <Button disabled={record.status !== 0} type={'primary'}>通过</Button>
-                        </Popconfirm>
-                        <Divider type="vertical" />
-                        <Popconfirm disabled={record.status !== 0} title="确认拒绝吗?" onConfirm={() => { this.refuseHandler(record) }}>
-                            <Button disabled={record.status !== 0} type={'danger'}>拒绝</Button>
-                        </Popconfirm>
-                    </div>
-                }
             }]
+        const operationObj = {
+            title: '操作',
+            width: 180,
+            render: (text, record) => {
+                return <div>
+                    <Popconfirm disabled={record.status !== 0} title="确认审批通过吗?" onConfirm={() => { this.okHandler(record) }}>
+                        <Button disabled={record.status !== 0} type={'primary'}>通过</Button>
+                    </Popconfirm>
+                    <Divider type="vertical" />
+                    <Popconfirm disabled={record.status !== 0} title="确认拒绝吗?" onConfirm={() => { this.refuseHandler(record) }}>
+                        <Button disabled={record.status !== 0} type={'danger'}>拒绝</Button>
+                    </Popconfirm>
+                </div>
+            }
+        }
+        if (JSON.parse(userinfo).permission.indexOf('2') !== -1) {
+            columns.push(operationObj);
+        }
         return (
             <div>
                 <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>申请记录</h2>

@@ -18,7 +18,7 @@ export default class UserMenuView extends Component {
         }
     }
     componentDidMount() {
-        console.log('userinfo:', userinfo);
+        // console.log('userinfo:', userinfo);
     }
     noticeRender = () => {
         return <div>

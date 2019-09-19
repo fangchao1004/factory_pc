@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Card } from 'antd';
-import TransactionView from './TransactionView';
-import RechargeView from './RechargeView'
+import TransactionView from './TransactionViewNew';
+import RechargeView from './RechargeViewNew'
 const storage = window.localStorage;
 var userinfo = null
 var isAdmin = false;

@@ -2,7 +2,7 @@ import React from 'react'
 import { Modal, Form, Input, Select, Switch, TreeSelect } from 'antd'
 import HttpApi from '../../util/HttpApi'
 
-const permissionOptions = [{ name: '专工权限', value: 0 }, { name: '运行权限', value: 1 }].map(
+const permissionOptions = [{ name: '专工权限', value: 0 }, { name: '运行权限', value: 1 }, { name: '消费审批权限', value: 2 }].map(
     permission => <Select.Option value={permission.value} key={permission.value}>{permission.name}</Select.Option>
 )
 
