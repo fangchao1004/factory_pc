@@ -2,10 +2,14 @@ import React, { Component } from 'react';
 import { Card } from 'antd';
 import ApplyTrans from './ApplyTrans';
 import ApproveTrans from './ApproveTrans'
-const storage = window.localStorage;
-var userinfo = null
-var isAdmin = false;
-var tabListNoTitle = [];
+
+const tabListNoTitle = [{
+    key: 'ApplyTrans',
+    tab: '消费申请',
+}, {
+    key: 'ApproveTrans',
+    tab: '消费审批'
+}];
 
 const contentListNoTitle = {
     ApplyTrans: <ApplyTrans />,
@@ -13,22 +17,6 @@ const contentListNoTitle = {
 };
 
 class TansactionApplyModeRoot extends Component {
-
-    componentDidMount() {
-        userinfo = storage.getItem('userinfo');
-        isAdmin = JSON.parse(userinfo).isadmin === 1;
-        tabListNoTitle = isAdmin ? [{
-            key: 'ApplyTrans',
-            tab: '消费申请',
-        }, {
-            key: 'ApproveTrans',
-            tab: '消费审批'
-        }] : [{
-            key: 'ApplyTrans',
-            tab: '消费记录',
-        }]
-        this.forceUpdate();
-    }
 
     state = {
         key: 'ApplyTrans',

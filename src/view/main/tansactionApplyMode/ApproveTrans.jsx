@@ -48,10 +48,7 @@ class ApproveTrans extends Component {
     }
     okHandler = async (record) => {
         this.setState({ loading: true })
-        // console.log('record:', record);
-        // return;
-        let result = await this.updateHandler(1, record.id);
-        if (result === 0) { this.updateCardAndTranHandler(record.level_name, record.total_price); this.init(); } else { message.error('操作失败') }
+        this.updateCardAndTranHandler(record);
     }
     refuseHandler = async (record) => {
         let result = await this.updateHandler(2, record.id);
@@ -60,11 +57,11 @@ class ApproveTrans extends Component {
     /**
      * 更新card表数据
      */
-    updateCardAndTranHandler = async (level_name, add_price) => {
-        let cardName = level_name + '餐卡';
+    updateCardAndTranHandler = async (record) => {
+        let cardName = record.level_name + '餐卡';
+        let add_price = record.total_price;
         // console.log('审批通过，修改对应卡的金额', cardName, add_price);
-        let accountResult = await this.getAccount('朱桂庭');///cardName 根据cardName 去找对应的账户信息
-        // console.log('accountResult:', accountResult);
+        let accountResult = await this.getAccount(cardName);///朱桂庭 cardName 根据cardName 去找对应的账户信息
         if (accountResult.length > 0) {
             let cardID = accountResult[0].CardID;
             let cardResult = await this.getCard(cardID);
@@ -93,6 +90,9 @@ class ApproveTrans extends Component {
                     let result = await this.insertTranDetail(data);///插入 消费详情表
                     if (result === 0) {
                         message.success('餐卡补贴已经发放成功!');
+                        this.updateHandler(1, record.id);
+                        let result = await this.updateHandler(1, record.id);
+                        if (result === 0) { this.init(); } else { message.error('申请记录状态操作失败') }
                     } else {
                         message.error('餐卡补贴已经发放失败!');
                     }
@@ -103,7 +103,7 @@ class ApproveTrans extends Component {
                 this.setState({ loading: false })
             }
         } else {
-            message.error('未查询到对应部门的餐卡');
+            message.error('未查询到对应部门的餐卡-请先添加对应餐卡');
             this.setState({ loading: false })
         }
     }
@@ -174,6 +174,9 @@ class ApproveTrans extends Component {
             })
         })
     }
+    /**
+     * 更新xiaomu数据库中 applyRecords 的值
+     */
     updateHandler = (status, id) => {
         return new Promise((resolve, reject) => {
             let sql = `UPDATE applyRecords SET status=${status}, approve_id=${JSON.parse(storage.getItem('userinfo')).id}, approve_time='${moment().format('YYYY-MM-DD HH:mm:ss')}'
@@ -198,6 +201,15 @@ class ApproveTrans extends Component {
             {
                 title: '申请人',
                 dataIndex: 'apply_name',
+            },
+            {
+                title: '所属部门',
+                dataIndex: 'level_name',
+                render: (text) => {
+                    return <div>
+                        {text ? text : '/'}
+                    </div>
+                }
             },
             {
                 title: '人数',
@@ -257,6 +269,7 @@ class ApproveTrans extends Component {
             },
             {
                 title: '操作',
+                width: 180,
                 render: (text, record) => {
                     return <div>
                         <Popconfirm disabled={record.status !== 0} title="确认审批通过吗?" onConfirm={() => { this.okHandler(record) }}>
@@ -271,9 +284,7 @@ class ApproveTrans extends Component {
             }]
         return (
             <div>
-                <div>
-                    <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>申请记录</h2>
-                </div>
+                <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>申请记录</h2>
                 <Table
                     loading={this.state.loading}
                     style={{ marginTop: 20 }}

@@ -134,15 +134,20 @@ export default class TransactionView extends Component {
         ]
         return (
             <div>
-                {this.state.isAdmin ?
-                    <Search
-                        style={{ width: '40%', marginBottom: 20 }}
-                        placeholder="支持人员姓名模糊查询"
-                        enterButton="搜索"
-                        allowClear
-                        onSearch={value => this.seachPeopleHandler(value)}
-                        onChange={e => { if (e.currentTarget.value === '') { this.init() } }}
-                    /> : null}
+                {userinfo && JSON.parse(userinfo).isadmin ?
+                    <div>
+                        <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>员工消费记录</h2>
+                        <Search
+                            style={{ width: '40%', marginBottom: 20 }}
+                            placeholder="支持人员姓名模糊查询"
+                            enterButton="搜索"
+                            allowClear
+                            onSearch={value => this.seachPeopleHandler(value)}
+                            onChange={e => { if (e.currentTarget.value === '') { this.init() } }}
+                        />
+                    </div> :
+                    <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>个人消费记录</h2>
+                }
                 <Table
                     bordered
                     dataSource={this.state.data}
