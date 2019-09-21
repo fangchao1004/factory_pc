@@ -7,7 +7,7 @@ const storage = window.localStorage;
 var level_filter = [];///用于筛选任务专业的数据 选项
 var userinfo;
 
-export default class TransactionView1 extends Component {
+export default class TransactionViewNew extends Component {
     constructor(props) {
         super(props);
         this.state = {

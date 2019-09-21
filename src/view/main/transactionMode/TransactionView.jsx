@@ -12,7 +12,8 @@ export default class TransactionView extends Component {
         this.state = {
             data: [],
             filterData: [],
-            isAdmin: false
+            isAdmin: false,
+            loading: true,
         }
     }
     componentDidMount() {
@@ -52,7 +53,7 @@ export default class TransactionView extends Component {
             data = await this.getSomeOneTransactionInfo(JSON.parse(userinfo).name);
         }
         data.map((item, index) => { return item.key = index })
-        this.setState({ data, isAdmin })
+        this.setState({ data, isAdmin, loading: false })
     }
     getAllTransactionInfo = () => {
         return new Promise((resolve, reject) => {
@@ -135,10 +136,10 @@ export default class TransactionView extends Component {
         return (
             <div>
                 {userinfo && JSON.parse(userinfo).isadmin ?
-                    <div>
+                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>员工消费记录</h2>
                         <Search
-                            style={{ width: '40%', marginBottom: 20 }}
+                            style={{ width: '40%'}}
                             placeholder="支持人员姓名模糊查询"
                             enterButton="搜索"
                             allowClear
@@ -149,6 +150,8 @@ export default class TransactionView extends Component {
                     <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>个人消费记录</h2>
                 }
                 <Table
+                    loading={this.state.loading}
+                    style={{ marginTop: 20 }}
                     bordered
                     dataSource={this.state.data}
                     columns={columns}

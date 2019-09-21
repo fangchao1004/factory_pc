@@ -36,15 +36,15 @@ class OneAttendanceView extends Component {
         // console.log('periodsList:', periodsList);
         let { name, lastTime, dayCount, groupid } = props /// lastTime 该人员最新的一次考勤打卡记录
         // if (groupid === null) { periods = periodsList[1] } else { periods = periodsList[0] }///上下班的标准时刻表
-        // console.log('dayCount:', dayCount);
+        console.log('dayCount:', dayCount);
         this.setState({ dayCount })///总共有多少天的考勤记录
         // console.log('name:', name, 'lastTime:', lastTime, 'dayCount:', dayCount, 'groupid:', groupid);
         let topTimeOnTable = moment(lastTime).add(-((currentPage - 1) * 10), 'day').utcOffset(0).endOf('day').format('YYYY-MM-DD HH:mm:ss');/// 分页后 每一页的第一条数据
         let bottomTimeOnTable = moment(topTimeOnTable).add(-9, 'day').startOf('day').format('YYYY-MM-DD HH:mm:ss')
         let timeList = [bottomTimeOnTable, topTimeOnTable]
         // console.log('timeList:', timeList);/// 10天的时间区间 实际显示10天 
-        // console.log('name:', name);///有名称
-        let result = await this.getSomeDayData('测试', timeList);/// 对象10天的考勤记录
+        // console.log('有名称 name:1', name);///有名称
+        let result = await this.getSomeDayData(name, timeList);/// 对象10天的考勤记录
         // console.log('对象10天的考勤记录:', result);
         if (result.length > 0) {
             ///如果数据存在，则开始数据结构的转换
@@ -57,7 +57,8 @@ class OneAttendanceView extends Component {
                 this.forceUpdate();
             } else { /// 是生产部的成员，有分组。进行特殊处理
                 /// 先知道 这10天区间内 该组的排班表
-                let schedule = await this.getShedule(timeList, groupid, '测试', 1);
+                // console.log('有名称 name:2', name);///有名称
+                let schedule = await this.getShedule(timeList, groupid, name, 1);
                 // console.log('schedule123:', schedule);
                 let sampleList = this.changeDataConstructSpecial(10, timeList, result, schedule, groupid);
                 // console.log('某一页10天记录 轮班:', sampleList);///需要进入统计函数加工
@@ -77,16 +78,17 @@ class OneAttendanceView extends Component {
      * 需要获取，当月 或 上月的考勤记录，再结合上（某人的最终的排班表-（schedules+adjustments））
      */
     countHandler = async (monthSelect, props) => {
-        // console.log('props:', props.name);///有名称
+        // console.log('有名称 props:', props.name);///有名称
+        let name = props.name;
         let thisMonth = [moment().utcOffset(0).startOf('month').format('YYYY-MM-DD HH:mm:ss'), moment().utcOffset(0).endOf('day').format('YYYY-MM-DD HH:mm:ss')];
         let lastMonth = [moment().utcOffset(0).add(-1, 'month').startOf('month').format('YYYY-MM-DD HH:mm:ss'), moment().utcOffset(0).add(-1, 'month').endOf('month').format('YYYY-MM-DD HH:mm:ss')];
         let selectMonth = monthSelect === 'now' ? thisMonth : lastMonth;
         // console.log('selectMonth:',selectMonth);
         ///查询 当月或上月的 某个人的 所有考勤记录
-        let recordList = await this.getSomeDayData('测试', selectMonth);
+        let recordList = await this.getSomeDayData(name, selectMonth);
         // console.log('考勤记录:', recordList, props.name);
         /// 利用selectMonth 时间区间 生成模版 对所有的考勤数据 根据日期进行分组 如果不是轮班分组就为[] 就需要独立的去查询adjustment调班表的数据再手动的去日期匹配
-        let schedule = await this.getShedule(selectMonth, props.groupid, '测试', 1);
+        let schedule = await this.getShedule(selectMonth, props.groupid, name, 1);
         // console.log('schedule:', schedule);
         let duringDate = moment(selectMonth[1]).date() - moment(selectMonth[0]).date() + 1;
         if (props.groupid === null) {///普通班 就需要独立的去查询adjustment调班表的数据再手动的去日期匹配
@@ -324,7 +326,7 @@ class OneAttendanceView extends Component {
         return sampleList;
     }
     changeDataConstructNormal = async (day, timeList, resultList, name) => {
-        // console.log('changeDataConstructNormal name', name);///有名称
+        // console.log('有名称 changeDataConstructNormal name', name);///有名称
         ///创建数据模板 针对一般的员工(group_id = null) 不涉及中班跨天问题
         // console.log('时间区间:', timeList);
         /// 由于没有schedule数据 所有没有调班信息。要后面手动的取查，再匹配替换
@@ -348,7 +350,7 @@ class OneAttendanceView extends Component {
                 }
             })
         })
-        let adjustments = await this.getAdjustment('测试', 0);
+        let adjustments = await this.getAdjustment(name, 0);
         let sampleList2 = this.combinSampleAndAjust(sampleList, adjustments);///结合模版和调整表 得到最后的模版
         return sampleList2;
     }

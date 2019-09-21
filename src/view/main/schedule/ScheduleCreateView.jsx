@@ -209,7 +209,7 @@ class ScheduleCreateView extends Component {
             item.time = moment().add(+index, 'day').format('YYYY-MM-DD');
             return item
         })
-        console.log('temp:', temp);
+        // console.log('temp:', temp);
         this.setState({ showModal1: false, listOfyear: temp })
     }
     matrixList = (groups) => {

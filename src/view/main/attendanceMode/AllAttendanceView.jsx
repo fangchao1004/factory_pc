@@ -92,10 +92,10 @@ class AttendanceView extends Component {
     }
     checkOneHistory = async (record) => {
         // console.log('record:', record);
-        let allCount = await this.getAllCount();
+        let allCount = await this.getAllCount(record.name);
         if (allCount > 0) {
-            let lastRecord = await this.getLastRecord();
-            let firstRecord = await this.getFirstRecord();
+            let lastRecord = await this.getLastRecord(record.name);
+            let firstRecord = await this.getFirstRecord(record.name);
             ///相差天数
             let dayCount = (moment(lastRecord.time).utcOffset(0).startOf('day').valueOf() - moment(firstRecord.time).utcOffset(0).startOf('day').valueOf()) / (1000 * 60 * 60 * 24);
             OneAttendanceData = { 'name': record.name, 'show': true, 'lastTime': lastRecord.time, dayCount, 'groupid': record.group_id }
@@ -104,9 +104,9 @@ class AttendanceView extends Component {
             message.warn('暂无该用户考勤信息');
         }
     }
-    getLastRecord = () => {
+    getLastRecord = (name) => {
         return new Promise((resolve, reject) => {
-            let sql = `select * from records where name = '测试' order by id desc limit 1`
+            let sql = `select * from records where name = '${name}' order by id desc limit 1`
             HttpApi.obsForks({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -117,9 +117,9 @@ class AttendanceView extends Component {
             })
         })
     }
-    getFirstRecord = () => {
+    getFirstRecord = (name) => {
         return new Promise((resolve, reject) => {
-            let sql = `select * from records where name = '测试' limit 1`
+            let sql = `select * from records where name = '${name}' limit 1`
             HttpApi.obsForks({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -130,9 +130,9 @@ class AttendanceView extends Component {
             })
         })
     }
-    getAllCount = () => {
+    getAllCount = (name) => {
         return new Promise((resolve, reject) => {
-            let sql = `select count(*) count from records where name = '测试' `
+            let sql = `select count(*) count from records where name = '${name}' `
             HttpApi.obsForks({ sql }, (res) => {
                 let result = 0;
                 if (res.data.code === 0) {

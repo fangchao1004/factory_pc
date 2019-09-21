@@ -67,11 +67,12 @@ class ApproveTrans extends Component {
         if (accountResult.length > 0) {
             let cardID = accountResult[0].CardID;
             let cardResult = await this.getCard(cardID);
-            // console.log('卡数据:', cardResult[0]);
+            let AccountID = accountResult[0].AccountID;
             let old_balance = cardResult[0].Balance;
             let finally_balance = cardResult[0].Balance + add_price;
-            let chargeResult = await this.cardHandler(cardResult[0], finally_balance);/// 改变的是card的数据；
-            if (chargeResult === 0) {/// card表中 数据已经改变好了，然后改变 Transaction 表
+            let chargeResultcard = await this.updateCardHandler(cardResult[0], finally_balance);/// 改变的是card的数据；
+            let chargeResultaccount = await this.updateAccountCash(AccountID, finally_balance);///还要改变 Account账户中的 现金余额项。（）。金额要和Card 中和 TransactionDetail交易详情中 三者一致
+            if (chargeResultcard === 0 && chargeResultaccount === 0) {/// Card表 和 Account表 中 数据已经改变好了，然后改变 Transaction 表
                 let transactionID = await this.insertTranGetTranID(cardResult[0]);
                 // console.log('transactionID:', transactionID);
                 if (transactionID) {/// 如果插入成功，获取 TransactionID
@@ -86,8 +87,10 @@ class ApproveTrans extends Component {
                     data.Increase = 1;/// 增1/减0
                     data.TransactionTime = moment().format("YYYY-MM-DDTHH:mm:ss.SSS") + 'Z';///交易时间
                     data.CreateTime = cardResult[0].CreateTime;
-                    data.TransactionType = 528;
-                    data.TransactionDesc = '单位补贴';
+                    // data.TransactionType = 528;
+                    // data.TransactionDesc = '单位补贴';
+                    data.TransactionType = 272;
+                    data.TransactionDesc = '现金充值';
                     // console.log('data:', data);
                     let result = await this.insertTranDetail(data);///插入 消费详情表
                     if (result === 0) {
@@ -101,7 +104,7 @@ class ApproveTrans extends Component {
                     this.setState({ loading: false })
                 }
             } else {
-                message.error('餐卡金额更新失败');
+                message.error('餐卡金额或账户金额更新失败');
                 this.setState({ loading: false })
             }
         } else {
@@ -112,12 +115,24 @@ class ApproveTrans extends Component {
     /**
      * 更新Card表
      */
-    cardHandler = (card, finally_balance) => {
+    updateCardHandler = (card, finally_balance) => {
         let chargeTime = moment().format("YYYY-MM-DDTHH:mm:ss.SSS") + 'Z'
         return new Promise((resolve, reject) => {
             let sql = `UPDATE Card SET Balance = ${finally_balance},
             UpdateTime = '${chargeTime}',
             LastRechargeTime = '${chargeTime}'  WHERE CardID = ${card.CardID}`;
+            HttpApi.obsForss({ sql }, (res) => {
+                resolve(res.data.code);
+            })
+        })
+    }
+    /**
+     * 更新Account表
+     */
+    updateAccountCash = (AccountID, CashBalance) => {
+        return new Promise((resolve, reject) => {
+            let sql = `UPDATE Account SET CashBalance = ${CashBalance}
+            WHERE AccountID = ${AccountID}`;
             HttpApi.obsForss({ sql }, (res) => {
                 resolve(res.data.code);
             })
@@ -164,6 +179,9 @@ class ApproveTrans extends Component {
             })
         })
     }
+    /**
+     * 根据 名称 来查询对应的账户
+     */
     getAccount = (name) => {
         return new Promise((resolve, reject) => {
             let result = [];
