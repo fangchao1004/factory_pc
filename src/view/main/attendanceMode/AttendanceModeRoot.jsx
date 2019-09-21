@@ -4,7 +4,7 @@ import AllAttendanceView from './AllAttendanceView'
 
 const tabListNoTitle = [{
     key: 'AllAttendanceView',
-    tab: '全部考勤信息',
+    tab: '考勤信息',
 }];
 
 const contentListNoTitle = {

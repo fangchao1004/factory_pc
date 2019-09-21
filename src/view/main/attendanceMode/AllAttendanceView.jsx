@@ -5,12 +5,16 @@ import OneAttendanceView from './OneAttendanceView'
 import moment from 'moment'
 var level_filter = [];///用于筛选任务专业的数据 选项
 const { Search } = Input;
+const storage = window.localStorage;
+var userinfo;
 
 var OneAttendanceData;
 class AttendanceView extends Component {
-
-    state = { users: null, drawerVisible: false }
-
+    constructor(props) {
+        super(props);
+        this.state = { users: null, drawerVisible: false }
+        userinfo = storage.getItem('userinfo')
+    }
     componentDidMount() {
         this.getUsersData()
     }
@@ -44,7 +48,7 @@ class AttendanceView extends Component {
         return new Promise((resolve, reject) => {
             let sql = `select users.*,levels.name as level_name from users 
             left join levels on levels.id = users.level_id
-            where users.effective = 1
+            where users.effective = 1 ${JSON.parse(userinfo).isadmin === 1 ? '' : "and users.name = '" + JSON.parse(userinfo).name + "'"}
             order by level_id`;
             let result = [];
             HttpApi.obs({ sql }, (res) => {
@@ -209,7 +213,13 @@ class AttendanceView extends Component {
 
         return (
             <div>
-                <Search style={{ width: 400 }} allowClear placeholder="支持姓名模糊查询" onSearch={value => this.onSearch(value)} onChange={e => this.onChange(e.currentTarget.value)} enterButton />
+                {userinfo && JSON.parse(userinfo).isadmin ?
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>员工考勤记录</h2>
+                        <Search style={{ width: 400 }} allowClear placeholder="支持姓名模糊查询" onSearch={value => this.onSearch(value)} onChange={e => this.onChange(e.currentTarget.value)} enterButton />
+                    </div> :
+                    <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>个人考勤记录</h2>
+                }
                 <Table
                     style={{ marginTop: 20 }}
                     bordered

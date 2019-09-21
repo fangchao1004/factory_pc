@@ -14,7 +14,7 @@ export default function UserSettingView(props) {
             // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
             // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
             // { title: '更新', description: '1.0.9 添加设备信息修改功能' }
-            { title: '更新', description: '消费审批' }
+            // { title: '更新', description: '消费审批' }
         ]
         setData(listData)
     }, [])

@@ -137,7 +137,7 @@ export default class TransactionView extends Component {
             <div>
                 {userinfo && JSON.parse(userinfo).isadmin ?
                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>员工消费记录</h2>
+                        <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>所有消费记录</h2>
                         <Search
                             style={{ width: '40%'}}
                             placeholder="支持人员姓名模糊查询"
