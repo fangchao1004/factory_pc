@@ -9,7 +9,7 @@ const Option = Select.Option;
 // { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" }, { "value": "7", "text": "表单类型" }];
 
 const optionsData = [{ "value": "4", "text": "多选" }, { "value": "7", "text": "表单类型" }];
-////测试数据， 实际数据要从设备类型表device_type表中获取
+////测试数据， 实际数据要从巡检点类型表device_type表中获取
 // var titleData = [{ "value": "1", "text": "水表报告单" }, { "value": "2", "text": "电表报告单" }, { "value": "3", "text": "锅炉报告单" }]
 // var titleData = [];
 
@@ -22,7 +22,7 @@ export default class EditableTable extends Component {
     this.state = {
       titleData: [],
       uploadLoading: false,
-      // sample_type_title:'1',////模板所对应的设备类型
+      // sample_type_title:'1',////模板所对应的巡检点类型
       dataSource: [{
         key: '0',
         title_name: '表头',

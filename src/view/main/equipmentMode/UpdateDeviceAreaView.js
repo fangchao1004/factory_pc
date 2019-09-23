@@ -10,10 +10,10 @@ import { Modal, Form, Input } from 'antd'
 function UpdateStaffForm(props) {
     const { getFieldDecorator } = props.form
     return <Form>
-        <Form.Item label="设备区域名称:" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+        <Form.Item label="巡检点区域名称:" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('name', {
                 initialValue: props.staff.name,
-                rules: [{ required: true, message: '请输入设备类型名称' }]
+                rules: [{ required: true, message: '请输入巡检点类型名称' }]
             })(<Input></Input>)}
         </Form.Item>
     </Form>
@@ -43,7 +43,7 @@ export default function UpdateStaffView(props) {
             }
         })
     }
-    return <Modal centered onOk={handlerOk} title="修改设备区域"
+    return <Modal centered onOk={handlerOk} title="修改巡检点区域"
         onCancel={props.onCancel}
         visible={props.visible}>
         <StaffForm ref={staffFormRef} staff={props.staff}></StaffForm>

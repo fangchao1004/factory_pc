@@ -4,9 +4,9 @@ import { Modal, Form, Input } from 'antd'
 function AddDeviceTypeFrom(props) {
     const { getFieldDecorator } = props.form
     return <Form>
-        <Form.Item label="设备区域名称:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
+        <Form.Item label="巡检点区域名称:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('name', {
-                rules: [{ required: true, message: '请输入设备区域名称' }]
+                rules: [{ required: true, message: '请输入巡检点区域名称' }]
             })(<Input></Input>)}
         </Form.Item>
     </Form>
@@ -23,7 +23,7 @@ export default function AddDeviceTypeView(props) {
             }
         })
     }
-    return <Modal centered onOk={handlerOk} title="添加设备区域"
+    return <Modal centered onOk={handlerOk} title="添加巡检点区域"
         onCancel={props.onCancel}
         visible={props.visible}>
         <DeviceTypeForm ref={staffFormRef}></DeviceTypeForm>

@@ -1,8 +1,8 @@
 import React from 'react'
-import { Modal, Form, Input, Select, DatePicker, Switch, Button } from 'antd'
+import { Modal, Form, Input, Select, DatePicker, Switch, Button, Divider, Steps } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
-
+const { Step } = Steps;
 /**
  * 我分配给别人的任务 详情界面 表单
  * 
@@ -21,9 +21,9 @@ function UpdateTaskForm(props) {
     let isMessageflag = props.task.isMessage === 1;
     // console.log('当前任务的默认是否发送短信:',isMessageflag);
     const [isMess, setIsMess] = React.useState(isMessageflag);
-    React.useEffect(()=>{
+    React.useEffect(() => {
         setIsMess(isMessageflag);
-    },[isMessageflag]) 
+    }, [isMessageflag])
     return <Form>
         <Form.Item label="执行人" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('to', {
@@ -33,13 +33,13 @@ function UpdateTaskForm(props) {
                 option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
             } optionFilterProp="children" placeholder="请选择执行人">{userOptions}</Select>)}
         </Form.Item>
-        <Form.Item label="主题" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+        <Form.Item label="任务主题" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('title', {
                 initialValue: props.task.title,
                 rules: [{ required: true, message: '请输入任务主题' }]
             })(<Input disabled={!isEditable || isExtra} placeholder="请输入任务主题"></Input>)}
         </Form.Item>
-        <Form.Item label="内容" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+        <Form.Item label="任务内容" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('content', {
                 initialValue: props.task.content,
                 rules: [{ required: true, message: '请输入任务内容' }]
@@ -80,6 +80,10 @@ function disabledDate(current) {
     // console.log('disabledDate current:',current); subtract(1, 'day')
     return current && current < moment().endOf('day');
 }
+
+// function renderStatusX(status){
+//     return <Button>123-{status}</Button>
+// }
 
 const TaskForm = Form.create({ name: 'staffForm' })(UpdateTaskForm)
 
@@ -152,7 +156,7 @@ export default function PreviewTaskView(props) {
     return <Modal width={700}
         centered
         // onOk={handlerOk}
-        title="任务详情"
+        title="任务详情zzz"
         onCancel={() => {
             props.onCancel();
             setIsEditeable(false);
@@ -172,5 +176,11 @@ export default function PreviewTaskView(props) {
             </div>
         }>
         <TaskForm ref={staffFormRef} isEditable={isEditable} isExtra={isExtra} users={users} task={props.staff}></TaskForm>
+        <Divider orientation="left">当前进度</Divider>
+        {/* <Steps direction="vertical" size="small" current={1}>
+            <Step title='任务分配' description={renderStatusX(0)} />
+            <Step title='处理过程' description={renderStatusX(1)} />
+            <Step title='已完成' description={renderStatusX(2)} />
+        </Steps> */}
     </Modal>
 }

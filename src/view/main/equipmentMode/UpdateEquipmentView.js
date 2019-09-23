@@ -18,13 +18,13 @@ function UpdateEquipmentForm(props) {
         <Form.Item label="区域" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('area_id', {
                 initialValue: props.device.area_id,
-                rules: [{ required: true, message: '请选择设备区域' }]
+                rules: [{ required: true, message: '请选择巡检点区域' }]
             })(<Select>{areaOptions}</Select>)}
         </Form.Item>
-        <Form.Item label="设备类型" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+        <Form.Item label="巡检点类型" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('type_id', {
                 initialValue: props.device.type_id,
-                rules: [{ required: true, message: '请选择设备类型' }]
+                rules: [{ required: true, message: '请选择巡检点类型' }]
             })(<Select>{typeOptions}</Select>)}
         </Form.Item>
         <Form.Item label="NFC" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
@@ -33,10 +33,10 @@ function UpdateEquipmentForm(props) {
                 rules: [{ required: true, message: '请选择设备NFC' }]
             })(<Select>{nfcOptions}</Select>)}
         </Form.Item>
-        <Form.Item label="设备名称" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+        <Form.Item label="巡检点名称" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('name', {
                 initialValue: props.device.name,
-                rules: [{ required: true, message: '请输入设备名称' }]
+                rules: [{ required: true, message: '请输入巡检点名称' }]
             })(<Input></Input>)}
         </Form.Item>
         <Form.Item label="设备状态" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>

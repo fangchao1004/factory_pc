@@ -859,7 +859,6 @@ export default class BugView extends Component {
         let tempList = {};
         result.forEach(item => {
             let tempObj = {};
-            // console.log(item);
             tempObj.id = item.id + '';
             tempObj.time = moment(item.createdAt).format('YYYY-MM-DD HH:mm:ss');
             tempObj.device = item.device_name ? item.device_name : '/';
@@ -869,8 +868,7 @@ export default class BugView extends Component {
             tempObj.content = item.title_name ? item.title_name + ' ' + JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text : JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text;
             tempObj.major = item.major_name;
             tempObj.status = item.status === 0 ? '待分配' : (item.status === 1 ? '维修中' : (item.status === 2 ? '专工验收中' : (item.status === 3 ? '运行验收中' : '处理完毕')));
-            tempObj.nowdoman = item.status === 4 ? '/' : (item.status === 2 ? '专工' : this.getusernameById(JSON.parse(item.remark)[item.status === 1 ? 0 : 2][JSON.parse(item.remark)[item.status === 1 ? 0 : 2].length - 1].to));
-            // console.log(tempObj);
+            tempObj.nowdoman = item.status === 4 || item.status === 0 ? '/' : (item.status === 2 ? '专工' : this.getusernameById(JSON.parse(item.remark)[item.status === 1 ? 0 : 2][JSON.parse(item.remark)[item.status === 1 ? 0 : 2].length - 1].to));
             if (tempList[item.major_name]) { tempList[item.major_name].push(tempObj) }
             else { tempList[item.major_name] = [tempObj] }
         });
@@ -883,7 +881,7 @@ export default class BugView extends Component {
                 sheetData: tempList[key],
                 sheetName: key,
                 sheetFilter: ['id', 'time', 'device', 'uploadman', 'area', 'level', 'content', 'major', 'status', 'nowdoman'],
-                sheetHeader: ['编号', '上报时间', '设备名称', '上报人', '区域', '等级', '内容', '专业', '当前状态', '当前处理人'],
+                sheetHeader: ['编号', '上报时间', '巡检点名称', '上报人', '区域', '等级', '内容', '专业', '当前状态', '当前处理人'],
                 columnWidths: ['3', '8', '10', '5', '5', '5', '15', '5', '5', '5'], // 列宽
             })
         }

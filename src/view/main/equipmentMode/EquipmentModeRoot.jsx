@@ -6,15 +6,15 @@ import EquipmentAreaView from './EquipmentAreaView'
 
 const tabListNoTitle = [{
     key: 'EquipmentView',
-    tab: '设备管理',
+    tab: '巡检点管理',
 }];
 
 const tabListNoTitle2 = [{
     key: 'EquipmentTypeView',
-    tab: '设备类型管理',
+    tab: '巡检点类型管理',
 }, {
     key: 'EquipmentAreaView',
-    tab: '设备区域管理',
+    tab: '巡检区域管理',
 }];
 
 const contentListNoTitle = {

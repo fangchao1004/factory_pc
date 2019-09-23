@@ -40,7 +40,7 @@ class TableTypeView extends Component {
             //     )
             // },
             {
-                title: '设备类型名',
+                title: '巡检点类型名',
                 dataIndex: 'name',
                 width: '20%',
                 render: (text, record) => (

@@ -8,7 +8,7 @@ import PieViewOfOneDeStus from './PieViewOfOneDeStus';
 import OneRecordDetialView from './OneRecordDetialView'
 
 var device_status_filter = [{ text: '正常', value: 1 }, { text: '故障', value: 2 }, { text: '待检', value: 3 }];///用于筛选设备状态的数据 选项
-var device_type_data_filter = []; ///用于筛选设备类型的数据 选项
+var device_type_data_filter = []; ///用于筛选巡检点类型的数据 选项
 var area_data_filter = []; ///用于筛选区域的数据 选项
 
 class EquipmentView extends Component {
@@ -120,7 +120,7 @@ class EquipmentView extends Component {
     render() {
         const columns = [
             {
-                title: '设备名称',
+                title: '巡检点名称',
                 dataIndex: 'name',
                 render: (text, record) => (
                     <div>{text}</div>
@@ -136,7 +136,7 @@ class EquipmentView extends Component {
                 )
             },
             {
-                title: '设备类型',
+                title: '巡检点类型',
                 dataIndex: 'device_type_name',
                 filters: device_type_data_filter,
                 onFilter: (value, record) => record.type_id === value,
@@ -207,7 +207,7 @@ class EquipmentView extends Component {
                     this.state.isAdmin ? (<Row>
                         <Col span={6}>
                             <Button onClick={this.addEquipment} type="primary" style={{ marginBottom: 16 }}>
-                                添加设备
+                                添加巡检点
                              </Button>
                         </Col>
                     </Row>) : null

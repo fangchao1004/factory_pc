@@ -39,7 +39,7 @@ class EquipmentTypeView extends Component {
             //     )
             // },
             {
-                title: '设备类型名',
+                title: '巡检点类型名',
                 dataIndex: 'name',
                 width: '20%',
                 render: (text, record) => (
@@ -73,7 +73,7 @@ class EquipmentTypeView extends Component {
                 <Row>
                     <Col span={6}>
                         <Button onClick={this.handleAdd} type="primary" style={{ marginBottom: 16 }}>
-                            添加设备类型
+                            添加巡检点类型
                          </Button>
                     </Col>
                 </Row>

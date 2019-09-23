@@ -83,7 +83,7 @@ class EquipmentTypeView extends Component {
             //     )
             // },
             {
-                title: '设备类型',
+                title: '巡检点类型',
                 dataIndex: 'name',
                 render: (text, record) => (
                     <div>{text}</div>
@@ -102,7 +102,7 @@ class EquipmentTypeView extends Component {
                 width: 150,
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
-                        <Popconfirm title="确定要删除该设备类型吗?" onConfirm={this.deleteStaffConfirm.bind(null, record)}>
+                        <Popconfirm title="确定要删除该巡检点类型吗?" onConfirm={this.deleteStaffConfirm.bind(null, record)}>
                             <Button size="small" type="danger">删除</Button>
                         </Popconfirm>
                         <Divider type="vertical" />
@@ -117,7 +117,7 @@ class EquipmentTypeView extends Component {
                 <Row>
                     <Col span={6}>
                         <Button onClick={this.addStaff} type="primary" style={{ marginBottom: 16 }}>
-                            添加设备类型
+                            添加巡检点类型
                          </Button>
                     </Col>
                 </Row>

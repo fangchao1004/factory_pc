@@ -168,10 +168,10 @@ export default class MainView extends Component {
                             <span>首页</span>
                             <Link to={`${this.props.match.url}`} />
                         </Menu.Item>
-                        <SubMenu key="巡检平台" title={<span><Icon type="scan" /><span>巡检</span></span>}>
+                        <SubMenu key="巡检点" title={<span><Icon type="scan" /><span>巡检</span></span>}>
                             <Menu.Item key="设备">
                                 <Icon type="switcher" />
-                                <span>巡检设备</span>
+                                <span>巡检点</span>
                                 <Link to={`${this.props.match.url}/equipment`} />
                             </Menu.Item>
                             {this.state.isAdmin ?
@@ -183,7 +183,7 @@ export default class MainView extends Component {
                         </SubMenu>
                         <SubMenu key="缺陷" title={
                             <span>
-                                <Icon type="scan" />
+                                <Icon type="reconciliation" />
                                 <span>缺陷</span>
                                 <Badge dot={this.state.aboutMeBugNum > 0} style={{ marginLeft: 30 }}>
                                 </Badge>

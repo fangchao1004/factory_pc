@@ -8,7 +8,7 @@ class HomePageView extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            groupData: [], ////根据设备类型分组后的数据
+            groupData: [], ////根据巡检点类型分组后的数据
         }
     }
     componentDidMount() {

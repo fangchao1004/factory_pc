@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { Row, Col, Table, Button, message, Tag, Popconfirm, Divider } from 'antd'
 import HttpApi from '../../util/HttpApi'
-import AddStaffView from './AddTaskView';
-import UpdateStaffView from './PreviewTaskView'
+import AddTaskView from './AddTaskView';
+import PreviewTaskView from './PreviewTaskView'
 import moment from 'moment'
 import Store from '../../../redux/store/Store';
 import { showTaskNum } from '../../../redux/actions/TaskAction';
@@ -336,8 +336,8 @@ class TaskFromMeView extends Component {
                     dataSource={this.state.tasks}
                     columns={columns}
                 />
-                <AddStaffView onOk={this.addStaffOnOk} onCancel={this.addStaffOnCancel} visible={this.state.addStaffVisible} />
-                <UpdateStaffView staff={this.state.updateStaffData} onOk={this.updateStaffOnOk}
+                <AddTaskView onOk={this.addStaffOnOk} onCancel={this.addStaffOnCancel} visible={this.state.addStaffVisible} />
+                <PreviewTaskView staff={this.state.updateStaffData} onOk={this.updateStaffOnOk}
                     onCancel={this.updateStaffOnCancel} visible={this.state.updateStaffVisible} />
             </div>
         )
