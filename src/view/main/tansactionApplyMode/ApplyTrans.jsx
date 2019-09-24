@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Col, Row, Button, Select, InputNumber, Popconfirm, message } from 'antd';
+import { Col, Row, Button, Select, InputNumber, Popconfirm, message, Input } from 'antd';
 import moment from 'moment';
 import HttpApi from '../../util/HttpApi'
 const storage = window.localStorage;
@@ -15,6 +15,7 @@ class ApproveTrans extends Component {
             foods: [],
             peopleNum: 2,
             selectfoods: ['2'],///默认选择2 午餐
+            remarkText: null,
         }
     }
     componentDidMount() {
@@ -36,13 +37,14 @@ class ApproveTrans extends Component {
         })
     }
     applyHandler = () => {
+        if (this.state.remarkText === null || this.state.remarkText === '') { message.error('请说明具体事由'); return; }
         // console.log('applyHandler', this.state.selectfoods, this.state.peopleNum, moment().format('YYYY-MM-DD'), JSON.parse(storage.getItem('userinfo')).name);
         if (this.state.selectfoods.length === 0) { message.error('请选择消费类型'); return }
         let total_price = this.getTotalPrice(this.state.selectfoods, result, this.state.peopleNum);
         let apply_id = JSON.parse(storage.getItem('userinfo')).id;
         let apply_time = moment().format('YYYY-MM-DD HH:mm:ss');
         let type = this.state.selectfoods.join(',')
-        let sql = `insert into applyRecords(total_price,apply_id,apply_time,type,people_count) values (${total_price},${apply_id},'${apply_time}','${type}',${this.state.peopleNum}) `;
+        let sql = `insert into applyRecords(total_price,apply_id,apply_time,type,people_count,remark) values (${total_price},${apply_id},'${apply_time}','${type}',${this.state.peopleNum},'${this.state.remarkText}') `;
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) { message.success('申请提交成功') } else { message.error('申请提交失败') }
         })
@@ -115,6 +117,18 @@ class ApproveTrans extends Component {
                             </Col>
                                 <Col span={18}>
                                     {JSON.parse(storage.getItem('userinfo')).name}
+                                </Col>
+                            </Row>
+                        </Col>
+                    </Row>
+                    <Row style={{ marginTop: 20 }}>
+                        <Col span={12}>
+                            <Row>
+                                <Col span={6}>
+                                    具体事由:
+                            </Col>
+                                <Col span={18}>
+                                    <Input style={{ width: '70%' }} placeholder="说明相关情况" value={this.state.remarkText} onChange={(e) => { this.setState({ remarkText: e.target.value }) }} />
                                 </Col>
                             </Row>
                         </Col>

@@ -256,6 +256,10 @@ class ApproveTrans extends Component {
                 dataIndex: 'total_price',
             },
             {
+                title: '具体事由',
+                dataIndex: 'remark',
+            },
+            {
                 title: '当前状态',
                 dataIndex: 'status',
                 filters: status_filter,
