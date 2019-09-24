@@ -6,9 +6,9 @@ import HttpApi from '../../util/HttpApi'
 const Option = Select.Option;
 
 // const optionsData = [{ "value": "1", "text": "文本输入框" }, { "value": "2", "text": "数字输入框" }, { "value": "3", "text": "单选" },
-// { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" }, { "value": "7", "text": "表单类型" }];
+// { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" }, { "value": "7", "text": "表单类型",{ "value": "10", "text": "测温组件" }, { "value": "11", "text": "测震组件" } }];
 
-const optionsData = [{ "value": "4", "text": "多选" }, { "value": "7", "text": "表单类型" }];
+const optionsData = [{ "value": "2", "text": "数字输入框" }, { "value": "4", "text": "多选" }, { "value": "7", "text": "表单类型" }, { "value": "10", "text": "测温组件" }, { "value": "11", "text": "测震组件" }];
 ////测试数据， 实际数据要从巡检点类型表device_type表中获取
 // var titleData = [{ "value": "1", "text": "水表报告单" }, { "value": "2", "text": "电表报告单" }, { "value": "3", "text": "锅炉报告单" }]
 // var titleData = [];
@@ -200,7 +200,6 @@ export default class EditableTable extends Component {
                 <Button type='primary' loading={this.state.uploadLoading}>确定保存</Button>
               </Popconfirm>
             </div>
-
           }
         >
           {this.state.sampleView}
@@ -267,7 +266,6 @@ export default class EditableTable extends Component {
   }
 
   checkDataConstruct = () => {
-    // console.log(this.state.dataSource);
     let isCompleteFlag = true;
     this.state.dataSource.forEach(element => {
       if (element.key === '0' && !element.extra_value) {
@@ -319,7 +317,8 @@ export default class EditableTable extends Component {
     sample_data.table_name = table_name;
     sample_data.content = JSON.stringify(contentArr);
 
-    // console.log("模版数据L：",sample_data);
+    // console.log("模版数据L：", sample_data);
+    // return;
     HttpApi.uploadSample(sample_data, (res) => {
       // console.log(res);
       if (res.data.code === 0) {

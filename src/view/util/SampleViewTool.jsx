@@ -1,10 +1,11 @@
-import { List, InputItem, Radio, Checkbox, TextareaItem, Button } from 'antd-mobile';
+import { List, InputItem, Radio, Checkbox, TextareaItem } from 'antd-mobile';
+import { Input, Button } from 'antd'
 import React from "react";
 const RadioItem = Radio.RadioItem;
 const CheckboxItem = Checkbox.CheckboxItem;
 
 // const optionsData = [{ "value": "1", "text": "文本输入框" }, { "value": "2", "text": "数字输入框" }, { "value": "3", "text": "单选" },
-// { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" }];
+// { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" },{ "value": "10", "text": "测温组件" }, { "value": "11", "text": "测震组件" }];
 
 /**
  * 模板表渲染器
@@ -99,6 +100,28 @@ export default class SampleViewTool {
                 </div>
             </div>
         }
+        let renderCollectTem = (element) => {
+            return <div key={element.key} >
+                <List>
+                    {element.title_name}
+                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <Input style={{ width: '40%', marginLeft: 80 }} disabled placeholder={'所测温度数据'}></Input>
+                        <Button style={{ width: 100, marginLeft: 50, height: 30, }} >开始测量</Button>
+                    </div>
+                </List>
+            </div>
+        }
+        let renderCollectShake = (element) => {
+            return <div key={element.key} >
+                <List>
+                    {element.title_name}
+                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <Input style={{ width: '40%', marginLeft: 80 }} disabled placeholder={'所测震动数据'}></Input>
+                        <Button style={{ width: 100, marginLeft: 50, height: 30, }} >开始测量</Button>
+                    </div>
+                </List>
+            </div>
+        }
 
         // console.log('待渲染数据：', dataSource);
         let viewArr = [];
@@ -118,11 +141,15 @@ export default class SampleViewTool {
                     viewArr.push(renderImagePicker(element))
                 } else if (element.type_id === "7") {
                     viewArr.push(renderTitle(element))
+                } else if (element.type_id === "10") {
+                    viewArr.push(renderCollectTem(element))
+                } else if (element.type_id === "11") {
+                    viewArr.push(renderCollectShake(element))
                 }
             });
         }
 
-        viewArr.push(<Button key={"btn0"} type='primary' style={{ marginTop: 20 }}>确定上传</Button>)
+        // viewArr.push(<Button key={"btn0"} type='primary' style={{ marginTop: 20 }}>确定上传</Button>)
         return <div style={{ width: 400, alignItems: 'center' }}>{viewArr}</div>
     }
 
