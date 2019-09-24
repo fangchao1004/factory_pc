@@ -17,15 +17,22 @@ var task_status_filter = [{ text: '已完成', value: 1 }, { text: '未完成', 
  * 我发起的任务 界面
  */
 class TaskFromMeView extends Component {
-
-    state = { tasks: null, addStaffVisible: false, updateStaffVisible: false, updateStaffData: null }
-
+    constructor(props) {
+        super(props);
+        userinfo = JSON.parse(storage.getItem("userinfo"))
+        this.state = {
+            tasks: null,
+            addTaskVisible: false,
+            updateTaskVisible: false,
+            updateTaskData: null,
+            lastTimeSelectIndex: null///上次选中的是哪一个record
+        }
+    }
     componentDidMount() {
-        this.getTasksData()
+        this.init()
         allDoThingManIdArr.length = 0;
     }
-    async getTasksData() {
-        userinfo = JSON.parse(storage.getItem("userinfo"))
+    init = async () => {
         let tasksData = await this.getTaskInfo()
         tasksData.forEach(element => {
             element.toArr = element.to.substring(1, element.to.length - 1).split(','); ///字符串元素数字
@@ -43,11 +50,17 @@ class TaskFromMeView extends Component {
             }
             item.toArrname = toArrname;
         }
+        let finallyTasksData = tasksData.map(user => {
+            user.key = user.id
+            return user
+        }).reverse();
+
+        if (this.state.updateTaskVisible) {///如果当前更新界面已经显示
+            let newRecordAfterUpdateStepRemak = tasksData[this.state.lastTimeSelectIndex];
+            this.setState({ updateTaskData: newRecordAfterUpdateStepRemak });
+        }
         this.setState({
-            tasks: tasksData.map(user => {
-                user.key = user.id
-                return user
-            }).reverse()
+            tasks: finallyTasksData
         })
     }
 
@@ -75,18 +88,21 @@ class TaskFromMeView extends Component {
 
     getTaskInfo = () => {
         return new Promise((resolve, reject) => {
-            HttpApi.getTaskInfo({ from: userinfo.id, effective: 1 }, data => {
+            let sql = `select * from tasks where tasks.from = ${userinfo.id} and effective = 1 order by id desc`;
+            HttpApi.obs({ sql }, (data) => {
+                let result = [];
                 if (data.data.code === 0) {
-                    resolve(data.data.data)
+                    result = data.data.data
                 }
+                resolve(result)
             })
         })
     }
 
-    addStaff = () => {
-        this.setState({ addStaffVisible: true })
+    addTask = () => {
+        this.setState({ addTaskVisible: true })
     }
-    addStaffOnOk = (newValues) => {
+    addTaskOnOk = (newValues) => {
         var toIds = []
         newValues.to.forEach(toItem => {
             let items = toItem.split('-')
@@ -94,16 +110,23 @@ class TaskFromMeView extends Component {
                 toIds.push(items[1])
             }
         })
+        let stepRemark = {};
+        stepRemark['0'] = [{ from: userinfo.id + '', to: toIds.join(','), remark: null, time: moment().format('YYYY-MM-DD HH:mm:ss') }]
+        stepRemark['1'] = [];
+
         newValues.status = 0;
         newValues.from = userinfo.id
         newValues.to = "," + toIds.join(',') + ","
         newValues.overTime = newValues.overTime.endOf('day').valueOf()
         newValues.isMessage = newValues.isMessage ? 1 : 0;
+        newValues.step_remark = JSON.stringify(stepRemark);
+        // console.log('newValues:', newValues);
+        // return;
         HttpApi.addTaskInfo(newValues, data => {
             if (data.data.code === 0) {
-                this.setState({ addStaffVisible: false })
+                this.setState({ addTaskVisible: false })
                 message.success('添加成功')
-                this.getTasksData()
+                this.init()
                 ///新建任务的时候 如果分配人员中有自己 立刻刷新
                 if (toIds.indexOf(userinfo.id + '') !== -1) {
                     this.updateDataByRedux()
@@ -121,21 +144,21 @@ class TaskFromMeView extends Component {
             }
         })
     }
-    addStaffOnCancel = () => {
-        this.setState({ addStaffVisible: false })
+    addTaskOnCancel = () => {
+        this.setState({ addTaskVisible: false })
     }
-    updateStaff(record) {
-        // console.log('record ：：：', record)
-        this.setState({ updateStaffVisible: true, updateStaffData: record })
+    updateStaff(record, index) {
+        // console.log('record ：：：', record, index)
+        this.setState({ updateTaskVisible: true, updateTaskData: record, lastTimeSelectIndex: index })
     }
     /**
      * 确定修改任务。
      */
-    updateStaffOnOk = (newValues) => {
-        HttpApi.updateTaskInfo({ query: { id: this.state.updateStaffData.id }, update: newValues }, data => {
+    updateTaskOnOk = (newValues, updateTaskVisible = false) => {
+        HttpApi.updateTaskInfo({ query: { id: this.state.updateTaskData.id }, update: newValues }, data => {
             if (data.data.code === 0) {
-                this.setState({ updateStaffVisible: false })
-                this.getTasksData()
+                this.setState({ updateTaskVisible })
+                this.init()
                 message.success('任务修改成功')
                 let usersIdArr = newValues.to.split(',');
                 usersIdArr.shift();
@@ -154,7 +177,7 @@ class TaskFromMeView extends Component {
         })
     }
     updateStaffOnCancel = () => {
-        this.setState({ updateStaffVisible: false })
+        this.setState({ updateTaskVisible: false })
     }
     deleteStaffConfirm = (record) => {
         // console.log(record);
@@ -163,7 +186,7 @@ class TaskFromMeView extends Component {
         HttpApi.updateTaskInfo({ query: { id: record.id }, update: { effective: 0 } }, (res) => {
             if (res.data.code === 0) {
                 message.success('删除成功')
-                this.getTasksData()
+                this.init()
                 ////当删除的任务中 执行人包含自己的时候，立即刷新
                 if (record.to.substring(1, record.to.length - 1).split(',').indexOf(userinfo.id + '') !== -1) {
                     this.updateDataByRedux()
@@ -310,13 +333,13 @@ class TaskFromMeView extends Component {
                 title: '操作',
                 dataIndex: 'actions',
                 width: 150,
-                render: (text, record) => (
+                render: (text, record, index) => (
                     <div style={{ textAlign: 'center' }}>
                         <Popconfirm title="确定要删除该任务吗?" onConfirm={this.deleteStaffConfirm.bind(null, record)}>
                             <Button size="small" type="danger">删除</Button>
                         </Popconfirm>
                         <Divider type="vertical" />
-                        <Button size="small" type="primary" onClick={this.updateStaff.bind(this, record)}>详情</Button>
+                        <Button size="small" type="primary" onClick={this.updateStaff.bind(this, record, index)}>详情</Button>
                     </div>
                 )
             }
@@ -326,7 +349,7 @@ class TaskFromMeView extends Component {
             <div>
                 <Row>
                     <Col span={6}>
-                        <Button type="primary" style={{ marginBottom: 16 }} onClick={this.addStaff.bind(this)}>
+                        <Button type="primary" style={{ marginBottom: 16 }} onClick={this.addTask.bind(this)}>
                             新建任务
                          </Button>
                     </Col>
@@ -336,9 +359,9 @@ class TaskFromMeView extends Component {
                     dataSource={this.state.tasks}
                     columns={columns}
                 />
-                <AddTaskView onOk={this.addStaffOnOk} onCancel={this.addStaffOnCancel} visible={this.state.addStaffVisible} />
-                <PreviewTaskView staff={this.state.updateStaffData} onOk={this.updateStaffOnOk}
-                    onCancel={this.updateStaffOnCancel} visible={this.state.updateStaffVisible} />
+                <AddTaskView onOk={this.addTaskOnOk} onCancel={this.addTaskOnCancel} visible={this.state.addTaskVisible} />
+                <PreviewTaskView task={this.state.updateTaskData} onOk={this.updateTaskOnOk}
+                    onCancel={this.updateStaffOnCancel} visible={this.state.updateTaskVisible} />
             </div>
         )
     }

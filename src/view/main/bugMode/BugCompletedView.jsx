@@ -41,10 +41,10 @@ export default class BugCompletedView extends Component {
             area_remark: null,
             bug_text: null,
         }
+        localUserInfo = storage.getItem('userinfo');
     }
     componentDidMount() {
         this.init();
-        localUserInfo = storage.getItem('userinfo');
     }
     init = async () => {
         major_filter.length = 0;

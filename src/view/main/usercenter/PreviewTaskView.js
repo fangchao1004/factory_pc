@@ -1,8 +1,10 @@
-import React from 'react'
-import { Modal, Form, Input, Select, DatePicker, Switch, Button, Divider, Steps } from 'antd'
+import React, { Fragment } from 'react'
+import { Modal, Form, Input, Select, DatePicker, Switch, Button, Divider, Steps, message } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 const { Step } = Steps;
+const storage = window.localStorage;
+var userinfo;
 /**
  * 我分配给别人的任务 详情界面 表单
  * 
@@ -10,7 +12,8 @@ const { Step } = Steps;
  */
 function UpdateTaskForm(props) {
     const isEditable = props.isEditable
-    const isExtra = props.isExtra
+    const isStaffEditable = props.isStaffEditable
+    const isExtra = props.isExtrad
     const { getFieldDecorator } = props.form
     const userOptions = props.users.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
     const tos = props.task.to.split(',').map(item => parseInt(item))
@@ -29,7 +32,7 @@ function UpdateTaskForm(props) {
             {getFieldDecorator('to', {
                 initialValue: tos,
                 rules: [{ required: true, message: '请选择执行人' }]
-            })(<Select disabled={!isEditable || isExtra} showSearch mode="multiple" filterOption={(input, option) =>
+            })(<Select disabled={!isStaffEditable || isExtra} showSearch mode="multiple" filterOption={(input, option) =>
                 option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
             } optionFilterProp="children" placeholder="请选择执行人">{userOptions}</Select>)}
         </Form.Item>
@@ -81,17 +84,18 @@ function disabledDate(current) {
     return current && current < moment().endOf('day');
 }
 
-// function renderStatusX(status){
-//     return <Button>123-{status}</Button>
-// }
+
 
 const TaskForm = Form.create({ name: 'staffForm' })(UpdateTaskForm)
 
 export default function PreviewTaskView(props) {
-    const staffFormRef = React.useRef(null)
+    userinfo = JSON.parse(storage.getItem("userinfo"))
+    const TaskFormRef = React.useRef(null)
     const [users, setUsers] = React.useState(null)
     const [isEditable, setIsEditeable] = React.useState(false);///是否可编辑
     const [isExtra, setIsExtra] = React.useState(false);///是否为 追加任务的情况
+    const [isStaffEditable, setStaffIsEditeable] = React.useState(false);///人员是否可编辑
+    const [remarkText, setRemarkText] = React.useState(null);///备注文本的值
     React.useEffect(() => {
         HttpApi.getUserInfo({}, data => {
             if (data.data.code === 0) {
@@ -100,14 +104,14 @@ export default function PreviewTaskView(props) {
         })
     }, [])
     React.useEffect(() => {
-        if (staffFormRef && staffFormRef.current)
-            staffFormRef.current.resetFields();
-    }, [props.staff])
+        if (TaskFormRef && TaskFormRef.current)
+            TaskFormRef.current.resetFields();
+    }, [props.task])
     /**
      * 确定修改
      */
     const handlerOk = () => {
-        staffFormRef.current.validateFields((error, values) => {
+        TaskFormRef.current.validateFields((error, values) => {
             if (!error) {
                 let newValues = {
                     to: "," + values.to.join(',') + ",",
@@ -127,7 +131,7 @@ export default function PreviewTaskView(props) {
      * 确定追加
      */
     const handlerAdd = () => {
-        staffFormRef.current.validateFields((error, values) => {
+        TaskFormRef.current.validateFields((error, values) => {
             if (!error) {
                 // console.log("确定追加:", values);
                 let newRemark = null;
@@ -152,35 +156,140 @@ export default function PreviewTaskView(props) {
             }
         })
     }
-    // console.log('props.staff.status:', props.staff);
+
+    /**
+     * 渲染步骤条中的组件
+     * @param {*} statusValue 
+     */
+    const renderStatusX = (statusValue) => {
+        let taskRecord = props.task;
+        if (!taskRecord) { return }
+        let oneStepContent = [];///每一步的所以内容
+        if (taskRecord.step_remark) {
+            let stepRemarkObj = JSON.parse(taskRecord.step_remark);
+            // console.log("每一步的操作流程数据：", stepRemarkObj[statusValue]);
+            if (stepRemarkObj[statusValue]) {
+                let renderArr = stepRemarkObj[statusValue];
+                renderArr.forEach((item, index) => {
+                    let text = ''
+                    let remarkText = item.remark ? item.remark : '';
+                    let comArr = [];///组件数组
+                    if (item.to || item.to >= 0) {
+                        text = <Fragment><span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{item.time}</span>
+                            <span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{' ' + getLocalUserName(item.from)}</span>
+                            <span> 分配给 </span>
+                            <span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{' ' + getLocalUserName(item.to)}</span>
+                            {remarkText ? <span style={{ color: '#888888' }}> 备注: </span> : null}
+                            <span style={{ color: renderArr.length - 1 === index ? 'orange' : '#888888' }}>{remarkText}</span>
+                        </Fragment>
+                    } else {
+                        text = <Fragment><span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{item.time}</span>
+                            <span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{' ' + getLocalUserName(item.from)}</span>
+                            {remarkText ? <span style={{ color: '#888888' }}> 备注: </span> : null}
+                            <span style={{ color: renderArr.length - 1 === index ? 'orange' : '#888888' }}>{remarkText}</span>
+                        </Fragment>
+                    }
+                    oneStepContent.push(<div key={index}>
+                        {text}
+                        {comArr}
+                    </div>)
+                })
+            }
+        }
+        return oneStepContent
+    }
+
+    /**
+     * 更新步骤数据 类似于修改
+     * @param {Number} currentStep  当前所在步骤  0是分配完成 1是执行人的备注
+     */
+    const updateStepRemark = (currentStep) => {
+        if (!props.task.step_remark) { message.warning('老的任务数据中-不包含步骤数据-请创建新的任务'); return }
+        TaskFormRef.current.validateFields((error, values) => {
+            if (!error) {
+                // console.log("确定追加:", props.task.step_remark);
+                let toStr = values.to.join(',');
+                let oldStepRemarkCopy = JSON.parse(props.task.step_remark);
+                let currentList = oldStepRemarkCopy[currentStep]
+                currentList.push({ from: userinfo.id + '', to: toStr, remark: remarkText, time: moment().format('YYYY-MM-DD HH:mm:ss') });
+                // console.log('currentList:', currentList);
+                oldStepRemarkCopy[currentStep] = currentList;
+                let newValues = {
+                    to: "," + values.to.join(',') + ",",
+                    title: values.title,
+                    content: values.content,
+                    overTime: values.overTime.toDate().getTime(),
+                    isMessage: values.isMessage ? 1 : 0,
+                    remark: values.remark,
+                    step_remark: JSON.stringify(oldStepRemarkCopy)
+                }
+                // console.log('newValues:', newValues);
+                props.onOk(newValues, true);
+                setIsEditeable(false)
+                setIsExtra(false)
+                setStaffIsEditeable(false);
+            }
+        })
+    }
+
+    /**
+     * 将用户id的字符串转换成用户名称
+     * @param {String} userid 
+     */
+    const getLocalUserName = (userid) => {
+        if (!users) { return }
+        let useridArr = userid.split(',');
+        let usernameArr = [];
+        users.forEach((item) => {
+            useridArr.forEach((userid) => {
+                if (item.id + '' === userid + '') {
+                    usernameArr.push(item.name);
+                }
+            })
+        })
+        return usernameArr.join(',')
+    }
+
+    // console.log('props.task.status:', props.task);
     return <Modal width={700}
         centered
         // onOk={handlerOk}
-        title="任务详情zzz"
+        title="任务详情"
         onCancel={() => {
             props.onCancel();
             setIsEditeable(false);
             setIsExtra(false);
-        }}
+            setStaffIsEditeable(false);
+        }}/// 右上角 关闭按钮
         visible={props.visible}
         footer={
-            <div>
-                <Button onClick={() => { props.onCancel(); setIsEditeable(false); setIsExtra(false) }}>取消</Button>
-                {isEditable ? null :
-                    (props.staff && props.staff.status === 0 ?
-                        <Button type={'danger'} onClick={() => { setIsEditeable(true); setIsExtra(false); }}>修改任务</Button> :
-                        <Button type={'danger'} onClick={() => { setIsEditeable(true); setIsExtra(true); }}>追加任务</Button>)}
-
-                {isEditable ? (isExtra ? <Button type={'primary'} onClick={handlerAdd}>确定追加</Button> : <Button type={'primary'} onClick={handlerOk}>确定修改</Button>)
-                    : null}
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div>
+                    {!isStaffEditable ?
+                        <Button disabled={props.task && props.task.status === 1} onClick={() => { setStaffIsEditeable(true); setIsExtra(false); setRemarkText(null) }}>人员重新分配</Button> :
+                        <div style={{ flexDirection: 'column' }}>
+                            <Button type='primary' onClick={() => { setStaffIsEditeable(false); setIsExtra(false); updateStepRemark(0); }}>确认分配</Button>
+                            <Input style={{ width: 300, marginLeft: 30 }} placeholder="可以输入备注说明" value={remarkText} onChange={(e) => { setRemarkText(e.target.value) }} />
+                        </div>
+                    }
+                </div>
+                <div>
+                    <Button onClick={() => { props.onCancel(); setIsEditeable(false); setIsExtra(false); setStaffIsEditeable(false); }}>取消</Button>
+                    {isEditable ? null :
+                        (props.task && props.task.status === 1 ?
+                            <Button type={'danger'} onClick={() => { setIsEditeable(true); setIsExtra(true); }}>追加任务内容</Button> :
+                            <Button type={'danger'} onClick={() => { setIsEditeable(true); setIsExtra(false); }}>修改任务内容</Button>)}
+                    {isEditable ? (isExtra ? <Button type={'primary'} onClick={handlerAdd}>确定追加</Button> : <Button type={'primary'} onClick={handlerOk}>确定修改</Button>)
+                        : null}
+                </div>
             </div>
         }>
-        <TaskForm ref={staffFormRef} isEditable={isEditable} isExtra={isExtra} users={users} task={props.staff}></TaskForm>
+        <TaskForm ref={TaskFormRef} isEditable={isEditable} isStaffEditable={isStaffEditable} isExtra={isExtra} users={users} task={props.task}></TaskForm>
         <Divider orientation="left">当前进度</Divider>
-        {/* <Steps direction="vertical" size="small" current={1}>
+        <Steps direction="vertical" size="small" current={props.task && props.task.status + 1}>
             <Step title='任务分配' description={renderStatusX(0)} />
             <Step title='处理过程' description={renderStatusX(1)} />
-            <Step title='已完成' description={renderStatusX(2)} />
-        </Steps> */}
+            <Step title='已完成' />
+        </Steps>
     </Modal>
 }
