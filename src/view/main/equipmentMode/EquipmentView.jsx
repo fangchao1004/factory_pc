@@ -105,7 +105,7 @@ class EquipmentView extends Component {
         // console.log('确定删除 某个设备:', record.id);
         HttpApi.obs({ sql: `update devices set effective = 0 where id = ${record.id} ` }, (data) => {
             if (data.data.code === 0) {
-                message.success('删除设备成功')
+                message.success('删除巡检点成功')
                 this.init();
             } else {
                 message.error(data.data.data)
