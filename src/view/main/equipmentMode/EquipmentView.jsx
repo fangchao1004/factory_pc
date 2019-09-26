@@ -55,7 +55,8 @@ class EquipmentView extends Component {
     }
     getBugsInfo = (bug_id_arr) => {
         return new Promise((resolve, reject) => {
-            let sql = 'select bugs.*,mjs.name as major_name from bugs left join majors mjs on mjs.id = bugs.major_id where bugs.id in (' + bug_id_arr.join(',') + ') and effective = 1';
+            let sql = `select bugs.*,mjs.name as major_name from bugs left join majors mjs on mjs.id = bugs.major_id 
+            where bugs.id in (${bug_id_arr.join(',')}) and bugs.effective = 1`;
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -157,7 +158,8 @@ class EquipmentView extends Component {
                     else if (text === 2) { str = '故障'; strColor = '#FF0000' }
                     else { str = '待检'; strColor = 'gray' }
                     return <Tag style={{ cursor: 'pointer' }} color={strColor} onClick={() => {
-                        if (text === 2) { this.openLastRecord(record) } else if (text === 1) { message.success('正常') }
+                        if (text === 2 || text===1) { this.openLastRecord(record) } 
+                        // else if (text === 1) { message.success('正常') }
                         else if (text === 3) { message.info('待检') }
                     }}>{str}</Tag>
                 }
@@ -338,17 +340,22 @@ class EquipmentView extends Component {
     openDrawer = async (record, v) => {
         // console.log('record:',record);
         if (!record) { message.warn('无记录数据'); return }
-        if (record.device_status === 1) {
-            message.success('正常');
-            return;
-        }
+        // if (record.device_status === 1) {
+        //     message.success('正常');
+        //     return;
+        // }
+        // console.log('JSON.parse(record.content):', JSON.parse(record.content));
         ///对record.content内容进行处理。
         let bug_id_arr = [];
         let bug_key_id_arr = [];///key标题和bugId的对应关系
+        let collectAndInputDataList = [];/// 采集组件 和 输入组件 对应的
         JSON.parse(record.content).forEach((item) => {
             if (item.bug_id !== null) {
                 bug_id_arr.push(item.bug_id);
                 bug_key_id_arr.push({ key: item.key, bug_id: item.bug_id });
+            }
+            if (item.type_id === '2' || item.type_id === '10' || item.type_id === '11') {
+                collectAndInputDataList.push(item);
             }
         })
         let bugs_info_arr = await this.getBugsInfo(bug_id_arr);
@@ -360,11 +367,15 @@ class EquipmentView extends Component {
                 }
             })
         })
+        // console.log('待渲染的缺陷数据:', bugs_info_arr);
+        // console.log('待渲染的测量数据和输入数据:', collectAndInputDataList);
+
         let oneRecordData = {
             table_name: record.table_name,
             device_name: record.device_name,
             user_name: record.user_name,
-            content: bugs_info_arr,
+            content: bugs_info_arr,///bugs数据
+            collect: collectAndInputDataList,///采集的数据
             updatedAt: record.updatedAt
         }
         if (v === 2) {

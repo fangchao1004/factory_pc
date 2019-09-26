@@ -1,11 +1,13 @@
 import React, { Component, Fragment } from 'react';
-import { Checkbox, Input } from 'antd';
+import { Checkbox, Input, Divider, Row, Col } from 'antd';
 import { Testuri } from '../../util/HttpApi';
 
 const { TextArea } = Input;
 /**
  * 一次record记录中所包含的bugs的详情
  * 位于抽屉界面显示
+ * 
+ * bugs数据+采集数据改造
  */
 class OneRecordDetialView extends Component {
     constructor(props) {
@@ -27,9 +29,15 @@ class OneRecordDetialView extends Component {
         if (!this.state.renderData) { return }
         let titleComponent = this.renderTitleView();
         let bugContentComponent = this.renderBugView();
+        let collectContentComponent = this.renderCollectView();
         return (<Fragment>
             {titleComponent}
+            {this.state.renderData.content.length > 0 ?
+                <Divider orientation="left">缺陷展示:</Divider> : null}
             {bugContentComponent}
+            {this.state.renderData.collect.length > 0 ?
+                <Divider orientation="left">采集数据:</Divider> : null}
+            {collectContentComponent}
         </Fragment>)
     }
     ///渲染标题
@@ -44,7 +52,8 @@ class OneRecordDetialView extends Component {
     }
     ///渲染bug界面
     renderBugView = () => {
-        // console.log('渲染bug界面', this.state.renderData.content);
+        console.log('渲染bug界面', this.state.renderData.content);
+
         ///将content中，bug_id 值不为null都的提取处理
         this.state.renderData.content.sort((a, b) => {
             return parseInt(a.key) - parseInt(b.key)
@@ -61,6 +70,24 @@ class OneRecordDetialView extends Component {
             result.push(oneBugContent);
         }
         return result
+    }
+    ///渲染采集界面
+    renderCollectView = () => {
+        console.log('渲染采集界面', this.state.renderData.collect);
+        let oneBugContent = [];
+        this.state.renderData.collect.forEach(element => {
+            oneBugContent.push(<div key={element.key} style={{ borderBottomStyle: 'solid', borderBottomColor: '#d0d0d0', borderBottomWidth: 1,marginBottom:20 }} >
+                <Row>
+                    <Col span={12} style={{ color: '#40A9FF' }}>
+                        {element.key + '. ' + element.title_name}
+                    </Col>
+                    <Col span={12} >
+                        {element.value}
+                    </Col>
+                </Row>
+            </div>)
+        });
+        return oneBugContent
     }
     ///渲染那些选中的选项
     renderOneSelectOption = (content) => {
