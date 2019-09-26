@@ -33,7 +33,7 @@ export default class LoginView extends React.Component {
             // console.log("获取storage", storage.getItem('userinfo'));
             this.props.history.push('/mainView')
           } else {
-            message.error("用户名/密码错误了")
+            message.error("用户名/密码错误了啊")
           }
         })
       }
