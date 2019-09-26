@@ -184,7 +184,7 @@ class EquipmentView extends Component {
                         {
                             this.state.isAdmin ?
                                 <span>
-                                    <Popconfirm title="确定要删除该设备吗?" onConfirm={() => { this.deleteEquipmentConfirm(record) }}>
+                                    <Popconfirm title="确定要删除该巡检点吗?" onConfirm={() => { this.deleteEquipmentConfirm(record) }}>
                                         <Button size="small" type="danger">删除</Button>
                                     </Popconfirm>
                                     <Divider type="vertical" />
