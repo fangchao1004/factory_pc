@@ -1054,7 +1054,7 @@ export default class BugView extends Component {
                         {JSON.parse(localUserInfo).isadmin === 1 ?
                             <Fragment>
                                 <Divider type="vertical" />
-                                <Popconfirm title="确定要删除该专业吗?" onConfirm={() => { this.deleteBugsHandler(record); }}>
+                                <Popconfirm title="确定要删除该缺陷吗?" onConfirm={() => { this.deleteBugsHandler(record); }}>
                                     <Button size="small" type="danger">删除</Button>
                                 </Popconfirm>
                             </Fragment> : null
