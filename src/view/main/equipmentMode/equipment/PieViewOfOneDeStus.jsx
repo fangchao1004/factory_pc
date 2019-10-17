@@ -3,7 +3,7 @@ import { Chart, Geom, Tooltip, Coord, Label } from "bizcharts";
 import DataSet from "@antv/data-set";
 import { Radio, Popover, Icon, Empty } from 'antd'
 import moment from 'moment'
-import HttpApi from '../../util/HttpApi';
+import HttpApi from '../../../util/HttpApi';
 
 const content = (
     <div>
@@ -57,11 +57,11 @@ class PieViewOfOneDeStus extends Component {
     getRecordInfo = (dayOfBegin, dayOfEnd) => {
         return new Promise((resolve, reject) => {
             let result = [];
-            let sql1 = " select device_status, count(device_status) as count_device_status from records "
-            let sql2 = " where createdAt > \"" + dayOfBegin + "\" and createdAt < \"" + dayOfEnd + "\" and device_id = " + device_id
-            let sql3 = " group by device_status"
-            let sqlText = sql1 + sql2 + sql3;
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            let sql = `select device_status, count(device_status) as count_device_status from records
+            where effective = 1 and createdAt > "${dayOfBegin}" and createdAt < "${dayOfEnd}" and device_id = "${device_id}"
+            group by device_status
+            `
+            HttpApi.obs({ sql }, (res) => {
                 if (res.data.code === 0) {
                     result = res.data.data;
                 } else {

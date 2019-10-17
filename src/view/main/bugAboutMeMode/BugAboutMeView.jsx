@@ -275,6 +275,7 @@ export default class BugAboutMeView extends Component {
                 </Col>
                 <Col span={18}>
                     <TreeSelect
+                        showSearch
                         value={this.state.user_select_title}
                         style={{ width: '100%' }}
                         treeNodeFilterProp="title"
@@ -851,7 +852,7 @@ export default class BugAboutMeView extends Component {
                         {JSON.parse(localUserInfo).isadmin === 1 ?
                             <Fragment>
                                 <Divider type="vertical" />
-                                <Popconfirm title="确定要删除该专业吗?" onConfirm={() => { this.deleteBugsHandler(record); }}>
+                                <Popconfirm title="确定要删除该缺陷吗?" onConfirm={() => { this.deleteBugsHandler(record); }}>
                                     <Button size="small" type="danger">删除</Button>
                                 </Popconfirm>
                             </Fragment> : null

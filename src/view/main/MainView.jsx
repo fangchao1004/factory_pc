@@ -7,9 +7,6 @@ import EquipmentModeRoot from './equipmentMode/EquipmentModeRoot'
 import StaffModeRoot from './staffMode/StaffModeRoot'
 import TableModeRoot from './tableMode/TableModeRoot';
 import UserModeRoot from './usercenter/UserModeRoot'
-import SettingEquipmentModeRoot from './settingMode/settingEquipmentMode/SettingEquipmentModeRoot';
-import SettingStaffModeRoot from './settingMode/settingStaffMode/SettingStaffModeRoot';
-import SettingTableModeRoot from './settingMode/settingTableMode/SettingTableModeRoot';
 import BugModeRoot from './bugMode/BugModeRoot';
 import BugAboutMeModeRoot from './bugAboutMeMode/BugAboutMeModeRoot';
 import SettingViewRoot from './setting/SettingViewRoot';
@@ -329,21 +326,6 @@ class ContentView extends Component {
                     exact
                     path={`${this.props.match.path}/user`}
                     component={() => (storage.getItem('userinfo') ? <UserModeRoot /> : <Redirect to='/' />)}
-                />
-                <Route
-                    exact
-                    path={`${this.props.match.path}/setting/equipmentModeRoot`}
-                    component={() => (storage.getItem('userinfo') ? <SettingEquipmentModeRoot /> : <Redirect to='/' />)}
-                />
-                <Route
-                    exact
-                    path={`${this.props.match.path}/setting/staffModeRoot`}
-                    component={() => (storage.getItem('userinfo') ? <SettingStaffModeRoot /> : <Redirect to='/' />)}
-                />
-                <Route
-                    exact
-                    path={`${this.props.match.path}/setting/tableModeRoot`}
-                    component={() => (storage.getItem('userinfo') ? <SettingTableModeRoot /> : <Redirect to='/' />)}
                 />
                 <Route
                     exact

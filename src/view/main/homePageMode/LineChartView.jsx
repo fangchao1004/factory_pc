@@ -92,10 +92,13 @@ class LineChartView extends Component {
         let endOfToday = moment().endOf('day').format('YYYY-MM-DD HH:mm:ss');
         // console.log(startOfToday,endOfToday);
         return new Promise((resolve, reject) => {
-            let sql1 = ' select count(*) as todayDetectCount  from (select distinct rds.device_id from records rds'
-            let sql2 = ' where rds.createdAt > "' + startOfToday + '" and rds.createdAt < "' + endOfToday + '") t1 ';
-            let sqlText = sql1 + sql2;
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            // let sql1 = ' select count(*) as todayDetectCount  from (select distinct rds.device_id from records rds'
+            // let sql2 = ' where rds.createdAt > "' + startOfToday + '" and rds.createdAt < "' + endOfToday + '") t1 ';
+            // let sqlText = sql1 + sql2;
+            let sql = `select count(*) as todayDetectCount  from (select distinct rds.device_id from records rds
+                where rds.createdAt > "${startOfToday}" and rds.createdAt < "${endOfToday}") t1 
+            `
+            HttpApi.obs({ sql }, (res) => {
                 let result = null;
                 if (res.data.code === 0) {
                     result = res.data.data[0]
@@ -109,7 +112,7 @@ class LineChartView extends Component {
         const dv = ds.createView().source(this.state.data);
         dv.transform({
             type: "fold",
-            fields: ["总共","巡检", "故障"],
+            fields: ["总共", "巡检", "故障"],
             // 展开字段集
             key: "status",
             // key字段

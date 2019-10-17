@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Table, Button, Row, Col, Drawer, Icon, message, Popconfirm, Divider, Tag } from 'antd'
-import HttpApi from '../../util/HttpApi';
+import HttpApi from '../../../util/HttpApi';
 import moment from 'moment';
 import AddEquipmentView from './AddEquipmentView';
 import UpdateEquipmentView from './UpdateEquipmentView';
@@ -34,9 +34,37 @@ class EquipmentView extends Component {
     }
     init = async () => {
         let devicesInfo = await this.getDevicesInfo();
+        let devicesTypeInfo = await this.getDevicesTypeInfo();
+        let areasInfo = await this.getAreasInfo();
+        area_data_filter = areasInfo.map((item) => { return { text: item.name, value: item.id } })
+        device_type_data_filter = devicesTypeInfo.map((item) => { return { text: item.name, value: item.id } })
         devicesInfo.map((item) => item.key = item.id + '')
         this.setState({
             dataSource: devicesInfo
+        })
+    }
+    getAreasInfo = () => {
+        return new Promise((resolve, reject) => {
+            let sql = `select * from areas where effective = 1`;
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
+    getDevicesTypeInfo = () => {
+        return new Promise((resolve, reject) => {
+            let sql = `select * from device_types where effective = 1`;
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
         })
     }
     getDevicesInfo = () => {
@@ -158,7 +186,7 @@ class EquipmentView extends Component {
                     else if (text === 2) { str = '故障'; strColor = '#FF0000' }
                     else { str = '待检'; strColor = 'gray' }
                     return <Tag style={{ cursor: 'pointer' }} color={strColor} onClick={() => {
-                        if (text === 2 || text===1) { this.openLastRecord(record) } 
+                        if (text === 2 || text === 1) { this.openLastRecord(record) }
                         // else if (text === 1) { message.success('正常') }
                         else if (text === 3) { message.info('待检') }
                     }}>{str}</Tag>
@@ -279,12 +307,17 @@ class EquipmentView extends Component {
 
     getLastRecordData = (device_id) => {
         return new Promise((resolve, reject) => {
-            let sql1 = ' select rds.*,users.name as user_name,devices.name as device_name,device_types.name as device_type_name from records rds'
-            let sql2 = ' left join users on users.id = rds.user_id left join devices on devices.id = rds.device_id'
-            let sql3 = ' left join device_types on device_types.id = rds.device_type_id where device_id = ' + device_id + ' order by id desc limit 1'
-            let sqlText = sql1 + sql2 + sql3;
+            // let sql1 = ' select rds.*,users.name as user_name,devices.name as device_name,device_types.name as device_type_name from records rds'
+            // let sql2 = ' left join users on users.id = rds.user_id left join devices on devices.id = rds.device_id'
+            // let sql3 = ' left join device_types on device_types.id = rds.device_type_id where device_id = ' + device_id + ' and rds.effective = 1 order by id desc limit 1'
+            // let sqlText = sql1 + sql2 + sql3;
+            let sql = `select rds.*,users.name as user_name,devices.name as device_name,device_types.name as device_type_name from records rds
+            left join (select * from users where effective =1) users on users.id = rds.user_id left join devices on devices.id = rds.device_id
+            left join (select * from device_types where effective =1) device_types on device_types.id = rds.device_type_id 
+            where device_id = "${device_id}" and rds.effective = 1 order by id desc limit 1
+            `
             let result = {};
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
                 if (res.data.code === 0) {
                     result = res.data.data[0]
                 }
@@ -307,11 +340,14 @@ class EquipmentView extends Component {
     }
     getOneDeviceAllRecords = (device_id) => {
         return new Promise((resolve, reject) => {
-            let sql1 = ' select rds.*,us.name as user_name,des.name as device_name,dts.name as device_type_name from records rds left join users us on us.id = rds.user_id ';
-            let sql2 = ' left join devices des on des.id = rds.device_id left join device_types dts on dts.id = rds.device_type_id where device_id = ' + device_id + ' order by rds.id desc ';
-            let sqlText = sql1 + sql2;
+            let sql = `select rds.*,us.name as user_name,des.name as device_name,dts.name as device_type_name from records rds 
+            left join (select * from users where effective = 1) us on us.id = rds.user_id
+            left join (select * from devices where effective = 1) des on des.id = rds.device_id 
+            left join (select * from device_types where effective = 1) dts on dts.id = rds.device_type_id 
+            where device_id = "${device_id}" and rds.effective = 1 order by rds.id desc 
+            `
             let result = [];
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
                 if (res.data.code === 0) {
                     result = res.data.data
                 }

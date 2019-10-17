@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { Checkbox, Input, Divider, Row, Col } from 'antd';
-import { Testuri } from '../../util/HttpApi';
+import { Testuri } from '../../../util/HttpApi';
 
 const { TextArea } = Input;
 /**
@@ -76,13 +76,14 @@ class OneRecordDetialView extends Component {
         console.log('渲染采集界面', this.state.renderData.collect);
         let oneBugContent = [];
         this.state.renderData.collect.forEach(element => {
-            oneBugContent.push(<div key={element.key} style={{ borderBottomStyle: 'solid', borderBottomColor: '#d0d0d0', borderBottomWidth: 1,marginBottom:20 }} >
+            oneBugContent.push(<div key={element.key} style={{ borderBottomStyle: 'solid', borderBottomColor: '#d0d0d0', borderBottomWidth: 1, marginBottom: 20 }} >
                 <Row>
                     <Col span={12} style={{ color: '#40A9FF' }}>
                         {element.key + '. ' + element.title_name}
                     </Col>
                     <Col span={12} >
-                        {element.value}
+                        {element.type_id === '11' ? parseFloat(element.value / 1000).toFixed(3)
+                            : element.value}
                     </Col>
                 </Row>
             </div>)

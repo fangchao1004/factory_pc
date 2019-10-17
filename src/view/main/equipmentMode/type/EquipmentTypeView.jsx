@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Table, Button, Row, Col, message, Popconfirm, Divider } from 'antd'
-import HttpApi from '../../util/HttpApi';
+import HttpApi from '../../../util/HttpApi';
 import AddDeviceTypeView from './AddDeviceTypeView';
 import UpdateDeviceTypeView from './UpdateDeviceTypeView';
 

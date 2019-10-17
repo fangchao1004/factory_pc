@@ -299,7 +299,6 @@ export default class EditableTable extends Component {
     this.setState({
       uploadLoading: true
     })
-    // console.log(this.state.dataSource);
     let device_type_id;
     let table_name;
     let contentArr = [];

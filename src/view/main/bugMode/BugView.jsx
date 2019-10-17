@@ -400,6 +400,7 @@ export default class BugView extends Component {
                 </Col>
                 <Col span={18}>
                     <TreeSelect
+                        showSearch
                         value={this.state.user_select_title}
                         style={{ width: '100%' }}
                         treeNodeFilterProp="title"
