@@ -3,7 +3,6 @@ import HttpApi from '../../../util/HttpApi';
 import { Table, Popconfirm, Button, Divider, Row, Col, message } from 'antd';
 import moment from 'moment'
 import AddArea3View from './AddArea3View';
-import { async } from 'q';
 import UpdateArea3View from './UpdateArea3View';
 
 
