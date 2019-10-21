@@ -8,6 +8,7 @@ var major_filter = [];///用于筛选任务专业的数据 选项
 var storage = window.localStorage;
 var localUserInfo = '';
 var userOptions = [];///人员选项
+const bug_level_filters = [{ text: '一级', value: '1' }, { text: '二级', value: '2' }, { text: '三级', value: '3' }, { text: '/', value: 'null' }]
 const bug_level_Options = [{ id: 1, name: '一级' }, { id: 2, name: '二级' }, { id: 3, name: '三级' }].map(bug_level => <Select.Option value={bug_level.id} key={bug_level.id}>{bug_level.name}</Select.Option>)
 var major_Options = [];///专业选项
 
@@ -629,6 +630,8 @@ export default class BugAboutMeCompletedView extends Component {
             },
             {
                 key: 'buglevel', dataIndex: 'buglevel', title: '等级',
+                filters: bug_level_filters,
+                onFilter: (value, record) => record.buglevel + '' === value,
                 render: (text) => {
                     let result = null;
                     let resultCom = '/'
