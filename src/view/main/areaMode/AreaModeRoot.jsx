@@ -1,27 +1,37 @@
 import React, { Component } from 'react';
 import { Card } from 'antd';
-import EquipmentView from './equipment/EquipmentView'
-import EquipmentTypeView from './type/EquipmentTypeView'
+import EquipmentArea1View from './area1/EquipmentArea1View'
+import EquipmentArea2View from './area2/EquipmentArea2View'
+import EquipmentArea3View from './area3/EquipmentArea3View'
+import TreeView from './tree/TreeView'
 
 const tabListNoTitle = [{
-    key: 'EquipmentView',
-    tab: '巡检点管理',
+    key: 'TreeView',
+    tab: '分级展示',
 }];
 
 const tabListNoTitle2 = [{
-    key: 'EquipmentTypeView',
-    tab: '巡检点类型管理',
+    key: 'EquipmentArea1View',
+    tab: '一级巡检区域',
+}, {
+    key: 'EquipmentArea2View',
+    tab: '二级巡检位置',
+}, {
+    key: 'EquipmentArea3View',
+    tab: '三级设备范围',
 }];
 
 const contentListNoTitle = {
-    EquipmentView: <EquipmentView />,
-    EquipmentTypeView: <EquipmentTypeView />,
+    TreeView: <TreeView />,
+    EquipmentArea1View: <EquipmentArea1View />,
+    EquipmentArea2View: <EquipmentArea2View />,
+    EquipmentArea3View: <EquipmentArea3View />,
 };
 
-class EquipmentModeRoot extends Component {
+class AreaModeRoot extends Component {
     state = {
-        key: 'EquipmentView',
-        noTitleKey: 'EquipmentView',
+        key: 'TreeView',
+        noTitleKey: 'TreeView',
         isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin
     }
 
@@ -52,4 +62,4 @@ class EquipmentModeRoot extends Component {
     }
 }
 
-export default EquipmentModeRoot;
+export default AreaModeRoot;

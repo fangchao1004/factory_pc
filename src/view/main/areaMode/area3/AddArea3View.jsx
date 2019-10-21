@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Modal, Form, Input, TreeSelect } from 'antd';
 import HttpApi from '../../../util/HttpApi';
+import { transfromDataTo2level } from '../../../util/Tool'
 
 
 var treeData = [];
@@ -13,7 +14,6 @@ export default class AddArea3View extends Component {
         super(props);
         this.state = {
             visible: false,
-            area1Data: [],
         }
     }
     componentWillReceiveProps(nextProps) {
@@ -27,44 +27,9 @@ export default class AddArea3View extends Component {
     init = async () => {
         let area12result = await this.getArea12options();
         // console.log('area12result:', area12result);
-        let jsonList = this.transfromData(area12result);
+        let jsonList = transfromDataTo2level(area12result);
         treeData = jsonList
         this.forceUpdate();
-    }
-    /**
-     * 数据结构转换-为了适应树选择器
-     */
-    transfromData = (area12result) => {
-        let tempObj = {};
-        area12result.forEach((item) => {
-            if (tempObj[item.area1_id]) { /// 如果它已经有了某个一级属性
-                if (item.area2_id)
-                    tempObj[item.area1_id].children.push({ value: item.area1_id + '-' + item.area2_id, title: item.area2_name, key: item.area1_id + '-' + item.area2_id })
-            } else {
-                if (item.area2_id) { /// 有二级
-                    tempObj[item.area1_id] = {
-                        title: item.area1_name,
-                        value: item.area1_id + '',
-                        key: item.area1_id + '',
-                        selectable: false,
-                        children: [{ value: item.area1_id + '-' + item.area2_id, title: item.area2_name, key: item.area1_id + '-' + item.area2_id }]
-                    }
-                } else { /// 没有二级
-                    tempObj[item.area1_id] = {
-                        title: item.area1_name,
-                        value: item.area1_id + '',
-                        key: item.area1_id + '',
-                        selectable: false,
-                        children: []
-                    };
-                }
-            }
-        })
-        let jsonList = [];
-        for (let key in tempObj) {
-            jsonList.push(tempObj[key]);
-        }
-        return jsonList;
     }
     getArea12options = () => {
         return new Promise((resolve, reject) => {

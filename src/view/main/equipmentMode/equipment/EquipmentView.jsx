@@ -9,7 +9,7 @@ import OneRecordDetialView from './OneRecordDetialView'
 
 var device_status_filter = [{ text: '正常', value: 1 }, { text: '故障', value: 2 }, { text: '待检', value: 3 }];///用于筛选设备状态的数据 选项
 var device_type_data_filter = []; ///用于筛选巡检点类型的数据 选项
-var area_data_filter = []; ///用于筛选区域的数据 选项
+// var area_data_filter = []; ///用于筛选区域的数据 选项
 
 class EquipmentView extends Component {
     constructor(props) {
@@ -35,26 +35,32 @@ class EquipmentView extends Component {
     init = async () => {
         let devicesInfo = await this.getDevicesInfo();
         let devicesTypeInfo = await this.getDevicesTypeInfo();
-        let areasInfo = await this.getAreasInfo();
-        area_data_filter = areasInfo.map((item) => { return { text: item.name, value: item.id } })
+        // let areasInfo = await this.getAreasInfo();
+        // console.log('areasInfo:', areasInfo);
+        // area_data_filter = areasInfo.map((item) => { return { text: item.name, value: item.id } })
         device_type_data_filter = devicesTypeInfo.map((item) => { return { text: item.name, value: item.id } })
         devicesInfo.map((item) => item.key = item.id + '')
         this.setState({
             dataSource: devicesInfo
         })
     }
-    getAreasInfo = () => {
-        return new Promise((resolve, reject) => {
-            let sql = `select * from areas where effective = 1`;
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
+    // getAreasInfo = () => {
+    //     return new Promise((resolve, reject) => {
+    //         let sql = `select area_3.id as area3_id, area_3.name as area3_name, area_2.id as area2_id, area_2.name as area2_name
+    //         ,area_1.id as area1_id, area_1.name as area1_name, concat(area_1.id,'-',area_2.id,'-',area_3.id) as all_area_id, concat(area_1.name,'-',area_2.name,'-',area_3.name) as all_area_name from area_3
+    //         left join (select * from area_2) area_2 on area_2.id = area_3.area2_id
+    //         left join (select * from area_1) area_1 on area_1.id = area_2.area1_id
+    //         where area_3.effective = 1
+    //         `;
+    //         HttpApi.obs({ sql }, (res) => {
+    //             let result = [];
+    //             if (res.data.code === 0) {
+    //                 result = res.data.data
+    //             }
+    //             resolve(result);
+    //         })
+    //     })
+    // }
     getDevicesTypeInfo = () => {
         return new Promise((resolve, reject) => {
             let sql = `select * from device_types where effective = 1`;
@@ -69,8 +75,10 @@ class EquipmentView extends Component {
     }
     getDevicesInfo = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select des.*,dts.name as device_type_name,areas.name as area_name,nfcs.name as nfc_name from devices des
-            left join device_types dts on dts.id = des.type_id left join areas on areas.id = des.area_id left join nfcs on nfcs.id = des.nfc_id
+            let sql = `select des.*,dts.name as device_type_name,area_3.name as area_name,nfcs.name as nfc_name from devices des
+            left join (select * from device_types where effective = 1) dts on dts.id = des.type_id 
+            left join (select * from area_3 where effective = 1) area_3 on area_3.id = des.area_id 
+            left join nfcs on nfcs.id = des.nfc_id
             where des.effective = 1`;
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -83,7 +91,8 @@ class EquipmentView extends Component {
     }
     getBugsInfo = (bug_id_arr) => {
         return new Promise((resolve, reject) => {
-            let sql = `select bugs.*,mjs.name as major_name from bugs left join majors mjs on mjs.id = bugs.major_id 
+            let sql = `select bugs.*,mjs.name as major_name from bugs 
+            left join (select * from majors) mjs on mjs.id = bugs.major_id 
             where bugs.id in (${bug_id_arr.join(',')}) and bugs.effective = 1`;
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -156,9 +165,9 @@ class EquipmentView extends Component {
                 )
             },
             {
-                title: '区域',
+                title: '具体设备范围',
                 dataIndex: 'area_name',
-                filters: area_data_filter,
+                // filters: area_data_filter,
                 onFilter: (value, record) => record.area_id === value,
                 render: (text, record) => (
                     <div>{text}</div>
@@ -329,7 +338,7 @@ class EquipmentView extends Component {
     ///查询某个设备的所有record记录数据
     openModalHandler = async (record) => {
         ///查询数据库中某个设备的所有record记录
-        let OneDeviceAllRecords = await this.getOneDeviceAllRecords(record.id);
+        let OneDeviceAllRecords = await HttpApi.getOneDeviceAllRecords(record.id);
         OneDeviceAllRecords.map((item) => item.key = item.id + '')
         ///获取了当前的设备id
         this.setState({
@@ -338,23 +347,7 @@ class EquipmentView extends Component {
             deviceRecords: OneDeviceAllRecords,
         })
     }
-    getOneDeviceAllRecords = (device_id) => {
-        return new Promise((resolve, reject) => {
-            let sql = `select rds.*,us.name as user_name,des.name as device_name,dts.name as device_type_name from records rds 
-            left join (select * from users where effective = 1) us on us.id = rds.user_id
-            left join (select * from devices where effective = 1) des on des.id = rds.device_id 
-            left join (select * from device_types where effective = 1) dts on dts.id = rds.device_type_id 
-            where device_id = "${device_id}" and rds.effective = 1 order by rds.id desc 
-            `
-            let result = [];
-            HttpApi.obs({ sql }, (res) => {
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
+
 
     onCloseDrawer = () => {
         this.setState({

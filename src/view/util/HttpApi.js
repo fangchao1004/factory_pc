@@ -412,6 +412,49 @@ class HttpApi {
         })
     }
 
+    /**
+     * 获取一二三级 区域数据
+     * 需要后续数据结构的转换 才能成为树形结构
+     */
+    static getArea123Info() {
+        return new Promise((resolve, reject) => {
+            let sql = `select area_1.id as area1_id , area_1.name as area1_name, area_2.id as area2_id ,area_2.name as area2_name,area_3.id as area3_id,area_3.name as area3_name from area_1
+            left join (select * from area_2 where effective = 1)area_2 on area_1.id = area_2.area1_id
+            left join (select * from area_3 where effective = 1)area_3 on area_2.id = area_3.area2_id
+            where area_1.effective = 1
+            order by area_1.id`;
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result)
+            })
+        })
+    }
+
+    /**
+    * 获取一个设备的所有record
+    * @param {*} device_id 
+    */
+    static getOneDeviceAllRecords(device_id) {
+        return new Promise((resolve, reject) => {
+            let sql = `select rds.*,us.name as user_name,des.name as device_name,dts.name as device_type_name from records rds 
+        left join (select * from users where effective = 1) us on us.id = rds.user_id
+        left join (select * from devices where effective = 1) des on des.id = rds.device_id 
+        left join (select * from device_types where effective = 1) dts on dts.id = rds.device_type_id 
+        where device_id = "${device_id}" and rds.effective = 1 order by rds.id desc 
+        `
+            let result = [];
+            HttpApi.obs({ sql }, (res) => {
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
+
 }
 
 export default HttpApi

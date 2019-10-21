@@ -619,7 +619,7 @@ export default class BugAboutMeCompletedView extends Component {
                 key: 'user_name', dataIndex: 'user_name', title: '上报人',
             },
             {
-                key: 'area_remark', dataIndex: 'area_remark', title: '区域',
+                key: 'area_remark', dataIndex: 'area_remark', title: '具体设备范围',
                 render: (text, record) => {
                     let result = '/'
                     if (text) { result = text }

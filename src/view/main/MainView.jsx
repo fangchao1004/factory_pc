@@ -4,6 +4,7 @@ import { Route, Link, Redirect } from 'react-router-dom'
 import logopng from '../../assets/logo.png'
 import HomePageRoot from './homePageMode/HomePageRoot';
 import EquipmentModeRoot from './equipmentMode/EquipmentModeRoot'
+import AreaModeRoot from './areaMode/AreaModeRoot'
 import StaffModeRoot from './staffMode/StaffModeRoot'
 import TableModeRoot from './tableMode/TableModeRoot';
 import UserModeRoot from './usercenter/UserModeRoot'
@@ -177,6 +178,11 @@ export default class MainView extends Component {
                                     <span>巡检表单</span>
                                     <Link to={`${this.props.match.url}/table`} />
                                 </Menu.Item> : null}
+                            <Menu.Item key="巡检区域">
+                                <Icon type="environment" />
+                                <span>巡检区域</span>
+                                <Link to={`${this.props.match.url}/area`} />
+                            </Menu.Item>
                         </SubMenu>
                         <SubMenu key="缺陷" title={
                             <span>
@@ -297,6 +303,11 @@ class ContentView extends Component {
                     exact
                     path={`${this.props.match.path}/equipment`}
                     component={() => (storage.getItem('userinfo') ? <EquipmentModeRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/area`}
+                    component={() => (storage.getItem('userinfo') ? <AreaModeRoot /> : <Redirect to='/' />)}
                 />
                 <Route
                     exact

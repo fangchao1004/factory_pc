@@ -5,6 +5,7 @@ import HttpApi, { Testuri } from '../../util/HttpApi'
 import moment from 'moment'
 import Store from '../../../redux/store/Store';
 import { showBugNum } from '../../../redux/actions/BugAction';
+import { transfromDataTo3level } from '../../util/Tool'
 
 const CheckboxGroup = Checkbox.Group;
 const majorPlainOptions = [];
@@ -15,11 +16,15 @@ const { TextArea } = Input;
 var major_filter = [];///用于筛选任务专业的数据 选项
 const status_filter = [{ text: '待分配', value: 0 }, { text: '维修中', value: 1 },
 { text: '专工验收中', value: 2 }, { text: '运行验收中', value: 3 }];///用于筛选状态的数据
-var storage = window.localStorage;
-var localUserInfo = '';
+const bug_level_filters = [{ text: '一级', value: '1' }, { text: '二级', value: '2' }, { text: '三级', value: '3' }, { text: '/', value: 'null' }]
 const bug_level_Options = [{ id: 1, name: '一级' }, { id: 2, name: '二级' }, { id: 3, name: '三级' }].map(bug_level => <Select.Option value={bug_level.id} key={bug_level.id}>{bug_level.name}</Select.Option>)
+var uploader_filter = [];///用于筛选上传者的数据 选项
 var major_Options = [];///专业选项
 var runner_Options = [];///运行选项
+var area123_List = [];///三级区域选项 (树形结构 利用TreeSelect组件 直接提供对应的json数据结构)
+
+var storage = window.localStorage;
+var localUserInfo = '';
 
 export default class BugView extends Component {
     constructor(props) {
@@ -53,6 +58,7 @@ export default class BugView extends Component {
             major_select_id: null,
             area_remark: null,
             bug_text: null,
+            area_id: null,/// 独立的缺陷 也要添加上 area_id
 
             userLevels: [],
             ///导出Excel部分
@@ -80,11 +86,15 @@ export default class BugView extends Component {
     init = async () => {
         major_filter.length = 0;
         majorPlainOptions.length = 0;
+        uploader_filter.length = 0;
         let marjorData = await this.getMajorInfo();
         marjorData.forEach((item) => {
             major_filter.push({ text: item.name, value: item.id });
             majorPlainOptions.push({ label: item.name, value: item.id })
         })
+        let uploaderData = await this.getUploaderInfo();
+        uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
+
         // console.log('marjorData:', marjorData);
         major_Options = marjorData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
 
@@ -113,6 +123,9 @@ export default class BugView extends Component {
         })
         // console.log(userLevels);
 
+        let result = await HttpApi.getArea123Info();
+        area123_List = transfromDataTo3level(result);/// 获取三级区域数据后，给添加的区域的对话框中，选择区域的树形组件添加数据源
+
         // userOptions = userData.map(user => <Select.Option value={user.id} key={user.id}>{user.name}</Select.Option>)
         this.setState({
             data: finallyData,
@@ -124,8 +137,9 @@ export default class BugView extends Component {
         return new Promise((resolve, reject) => {
             // let sqlText = 'select * from users order by convert(name using gbk) ASC'
             let sqlText = `select distinct users.level_id, users.level_id as 'value',levels.name as title from users
-            left join levels
+            left join (select * from levels where effective = 1)levels
             on levels.id = users.level_id
+            where users.effective = 1
             order by level_id`
             HttpApi.obs({ sql: sqlText }, (res) => {
                 let result = [];
@@ -139,7 +153,7 @@ export default class BugView extends Component {
     getRunnerInfo = () => {
         return new Promise((resolve, reject) => {
             // let sqlText = 'select * from users order by convert(name using gbk) ASC'
-            let sqlText = `select * from users where permission like '%1%'`
+            let sqlText = `select * from users where permission like '%1%' and effective = 1`
             HttpApi.obs({ sql: sqlText }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -153,8 +167,9 @@ export default class BugView extends Component {
         return new Promise((resolve, reject) => {
             // let sqlText = 'select * from users order by convert(name using gbk) ASC'
             let sqlText = `select users.*,users.name as title,levels.name level_name,  CONCAT(users.level_id,'-',users.id) 'key',CONCAT(users.level_id,'-',users.id) 'value' from users
-            left join levels
+            left join (select * from levels where effective = 1)levels
             on users.level_id = levels.id
+            where users.effective = 1
             order by users.level_id`
             HttpApi.obs({ sql: sqlText }, (res) => {
                 let result = [];
@@ -165,10 +180,29 @@ export default class BugView extends Component {
             })
         })
     }
-    getMajorInfo = () => {
-        let sqlText = 'select m.id,m.name from majors m'
+    /**
+     * 查询上传者 去重
+     * 未完成的缺陷
+     */
+    getUploaderInfo = () => {
+        let sql = `select distinct(users.name) as user_name,bugs.user_id from bugs
+        left join (select * from users where effective = 1) users
+        on users.id = bugs.user_id
+        where bugs.effective = 1 and bugs.status !=4`
         return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
+    getMajorInfo = () => {
+        let sql = `select m.id,m.name from majors m where effective = 1`
+        return new Promise((resolve, reject) => {
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -178,10 +212,9 @@ export default class BugView extends Component {
         })
     }
     getOneBugInfo = (bug_id) => {
-        let sql1 = ' select bugs.* from bugs where id = ' + bug_id;
-        let sqlText = sql1;
+        let sql = `select bugs.* from bugs where id = ${bug_id} and effective = 1`;
         return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
                 let result = null;
                 if (res.data.code === 0) {
                     result = res.data.data[0]
@@ -192,11 +225,11 @@ export default class BugView extends Component {
     }
     getBugsInfo = (sql = null) => {
         if (!sql) {
-            sql = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,areas.name as area_name from bugs
-        left join devices des on bugs.device_id = des.id
-        left join users urs on bugs.user_id = urs.id
-        left join majors mjs on bugs.major_id = mjs.id
-        left join areas on des.area_id = areas.id
+            sql = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,area_3.name as area_name from bugs
+        left join (select * from devices where effective = 1) des on bugs.device_id = des.id
+        left join (select * from users where effective = 1) urs on bugs.user_id = urs.id
+        left join (select * from majors where effective = 1) mjs on bugs.major_id = mjs.id
+        left join (select * from area_3 where effective = 1) area_3 on des.area_id = area_3.id
         where bugs.status != 4 and bugs.effective = 1
         `;
         }
@@ -259,10 +292,23 @@ export default class BugView extends Component {
             </Row>
             <Row gutter={16} style={{ marginTop: 20 }}>
                 <Col span={4}>
-                    <span>所在区域:</span>
+                    <span>所在范围:</span>
                 </Col>
                 <Col span={18}>
-                    <Input value={this.state.area_remark} style={{ width: '100%' }} placeholder='请填写位置信息' onChange={(e) => { this.setState({ area_remark: e.target.value }) }} allowClear></Input>
+                    <TreeSelect
+                        style={{ width: '100%' }}
+                        treeNodeFilterProp="title"
+                        showSearch
+                        dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                        treeData={area123_List}
+                        placeholder="请选择在范围"
+                        onChange={(v, e) => {
+                            this.setState({
+                                area_remark: e[0],
+                                area_id: v.split('-')[2]
+                            })
+                        }}
+                    />
                 </Col>
             </Row>
             <Row gutter={16} style={{ marginTop: 20 }}>
@@ -293,6 +339,7 @@ export default class BugView extends Component {
                             valueObj.content = JSON.stringify({ select: '', text: this.state.bug_text, imgs: [] });
                             valueObj.buglevel = this.state.bug_level_select_id;
                             valueObj.area_remark = this.state.area_remark;
+                            valueObj.area_id = this.state.area_id;
                             valueObj.status = 0;
                             HttpApi.addBugInfo(valueObj, (res) => {
                                 if (res.data.code === 0) { message.success('上传成功'); this.init(); this.setState({ showModal7: false }) }
@@ -836,11 +883,10 @@ export default class BugView extends Component {
         let sql3 = '';///条件语句3
         sql3 = `and createdAt > '${tsl[0]}' and createdAt < '${tsl[1]}'`
         let sqlText = `select * from bugs where effective = 1 ${sql3} ${sql1} ${sql2}`
-        let finallySql = `select t1.*,des.name device_name,areas.name area_name,majors.name major_name,users.name user_name from
-        (${sqlText}) t1
-        left join devices des on des.id = t1.device_id
-        left join areas on areas.id = des.area_id
-        left join majors on majors.id = t1.major_id
+        let finallySql = `select t1.*,des.name device_name,area_3.name area_name,majors.name major_name,users.name user_name from (${sqlText}) t1
+        left join (select * from devices where effective = 1) des on des.id = t1.device_id
+        left join (select * from area_3 where effective = 1) area_3 on area_3.id = des.area_id
+        left join (select * from majors where effective = 1) majors on majors.id = t1.major_id
         left join users on users.id = t1.user_id
         order by major_id
         `;
@@ -926,9 +972,11 @@ export default class BugView extends Component {
             },
             {
                 key: 'user_name', dataIndex: 'user_name', title: '上报人',
+                filters: uploader_filter,
+                onFilter: (value, record) => record.user_id === value,
             },
             {
-                key: 'area_remark', dataIndex: 'area_remark', title: '区域',
+                key: 'area_remark', dataIndex: 'area_remark', title: '具体设备范围',
                 render: (text, record) => {
                     let result = '/'
                     if (text) { result = text }
@@ -938,7 +986,10 @@ export default class BugView extends Component {
             },
             {
                 key: 'buglevel', dataIndex: 'buglevel', title: '等级',
+                filters: bug_level_filters,
+                onFilter: (value, record) => record.buglevel + '' === value,
                 render: (text) => {
+                    // console.log(text);
                     let result = null;
                     let resultCom = '/'
                     let color = '#505659';

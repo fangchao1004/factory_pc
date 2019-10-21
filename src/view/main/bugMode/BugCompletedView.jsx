@@ -8,8 +8,10 @@ var major_filter = [];///用于筛选任务专业的数据 选项
 var storage = window.localStorage;
 var localUserInfo = '';
 var userOptions = [];///人员选项
+const bug_level_filters = [{ text: '一级', value: '1' }, { text: '二级', value: '2' }, { text: '三级', value: '3' }, { text: '/', value: 'null' }]
 const bug_level_Options = [{ id: 1, name: '一级' }, { id: 2, name: '二级' }, { id: 3, name: '三级' }].map(bug_level => <Select.Option value={bug_level.id} key={bug_level.id}>{bug_level.name}</Select.Option>)
 var major_Options = [];///专业选项
+var uploader_filter = [];///用于筛选上传者的数据 选项
 
 export default class BugCompletedView extends Component {
     constructor(props) {
@@ -48,10 +50,14 @@ export default class BugCompletedView extends Component {
     }
     init = async () => {
         major_filter.length = 0;
+        uploader_filter.length = 0;
         let marjorData = await this.getMajorInfo();
         marjorData.forEach((item) => { major_filter.push({ text: item.name, value: item.id }) })
         // console.log('marjorData:', marjorData);
         major_Options = marjorData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
+
+        let uploaderData = await this.getUploaderInfo();
+        uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
 
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
         finallyData.forEach((item) => { item.key = item.id + '' })
@@ -77,7 +83,7 @@ export default class BugCompletedView extends Component {
         })
     }
     getMajorInfo = () => {
-        let sqlText = 'select m.id,m.name from majors m'
+        let sqlText = 'select m.id,m.name from majors m where effective = 1'
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql: sqlText }, (res) => {
                 let result = [];
@@ -88,11 +94,29 @@ export default class BugCompletedView extends Component {
             })
         })
     }
-    getOneBugInfo = (bug_id) => {
-        let sql1 = ' select bugs.* from bugs where id = ' + bug_id;
-        let sqlText = sql1;
+    /**
+     * 查询上传者 去重
+     * 已完成的缺陷
+     */
+    getUploaderInfo = () => {
+        let sql = `select distinct(users.name) as user_name,bugs.user_id from bugs
+        left join (select * from users where effective = 1) users
+        on users.id = bugs.user_id
+        where bugs.effective = 1 and bugs.status = 4`
         return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
+    getOneBugInfo = (bug_id) => {
+        let sql = `select bugs.* from bugs where id = ${bug_id} and effective = 1`;
+        return new Promise((resolve, reject) => {
+            HttpApi.obs({ sql }, (res) => {
                 let result = null;
                 if (res.data.code === 0) {
                     result = res.data.data[0]
@@ -102,11 +126,11 @@ export default class BugCompletedView extends Component {
         })
     }
     getBugsInfo = () => {
-        let sqlText = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,areas.name as area_name from bugs
-        left join devices des on bugs.device_id = des.id
-        left join users urs on bugs.user_id = urs.id
-        left join majors mjs on bugs.major_id = mjs.id
-        left join areas on des.area_id = areas.id
+        let sqlText = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,area_3.name as area_name from bugs
+        left join (select * devices where effective = 1) des on bugs.device_id = des.id
+        left join (select * users where effective = 1) urs on bugs.user_id = urs.id
+        left join (select * majors where effective = 1) mjs on bugs.major_id = mjs.id
+        left join (select * area_3 where effective = 1) area_3 on des.area_id = areas.id
         where bugs.status = 4 and bugs.effective = 1
         `;
         return new Promise((resolve, reject) => {
@@ -624,9 +648,11 @@ export default class BugCompletedView extends Component {
             },
             {
                 key: 'user_name', dataIndex: 'user_name', title: '上报人',
+                filters: uploader_filter,
+                onFilter: (value, record) => record.user_id === value,
             },
             {
-                key: 'area_remark', dataIndex: 'area_remark', title: '区域',
+                key: 'area_remark', dataIndex: 'area_remark', title: '具体设备范围',
                 render: (text, record) => {
                     let result = '/'
                     if (text) { result = text }
@@ -636,6 +662,8 @@ export default class BugCompletedView extends Component {
             },
             {
                 key: 'buglevel', dataIndex: 'buglevel', title: '等级',
+                filters: bug_level_filters,
+                onFilter: (value, record) => record.buglevel + '' === value,
                 render: (text) => {
                     let result = null;
                     let resultCom = '/'

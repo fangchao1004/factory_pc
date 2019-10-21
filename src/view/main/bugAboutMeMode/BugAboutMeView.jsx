@@ -98,8 +98,7 @@ export default class BugAboutMeView extends Component {
         return new Promise((resolve, reject) => {
             // let sql = 'select * from users order by convert(name using gbk) ASC'
             let sql = `select distinct users.level_id, users.level_id as 'value',levels.name as title from users
-            left join levels
-            on levels.id = users.level_id
+            left join (select * from levels where effective = 1)levels on levels.id = users.level_id
             order by level_id`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -113,7 +112,7 @@ export default class BugAboutMeView extends Component {
     getRunnerInfo = () => {
         return new Promise((resolve, reject) => {
             // let sqlText = 'select * from users order by convert(name using gbk) ASC'
-            let sqlText = `select * from users where permission like '%1%'`
+            let sqlText = `select * from users where permission like '%1%' and effective = 1`
             HttpApi.obs({ sql: sqlText }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -127,7 +126,7 @@ export default class BugAboutMeView extends Component {
         return new Promise((resolve, reject) => {
             // let sql = 'select * from users order by convert(name using gbk) ASC'
             let sql = `select users.*,users.name as title,levels.name level_name,  CONCAT(users.level_id,'-',users.id) 'key',CONCAT(users.level_id,'-',users.id) 'value' from users
-            left join levels
+            left join (select * from levels where effective = 1) levels
             on users.level_id = levels.id
             order by users.level_id`
             HttpApi.obs({ sql }, (res) => {
@@ -140,7 +139,7 @@ export default class BugAboutMeView extends Component {
         })
     }
     getMajorInfo = () => {
-        let sql = 'select m.id,m.name from majors m'
+        let sql = 'select m.id,m.name from majors m where effective = 1'
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -152,7 +151,7 @@ export default class BugAboutMeView extends Component {
         })
     }
     getOneBugInfo = (bug_id) => {
-        let sql = ' select bugs.* from bugs where id = ' + bug_id;
+        let sql = `select bugs.* from bugs where id = ${bug_id} and effective = 1`;
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = null;
@@ -725,7 +724,7 @@ export default class BugAboutMeView extends Component {
                 key: 'user_name', dataIndex: 'user_name', title: '上报人',
             },
             {
-                key: 'area_remark', dataIndex: 'area_remark', title: '区域',
+                key: 'area_remark', dataIndex: 'area_remark', title: '具体设备范围',
                 render: (text, record) => {
                     let result = '/'
                     if (text) { result = text }
