@@ -306,7 +306,7 @@ class ApproveTrans extends Component {
                 </div>
             }
         }
-        if (JSON.parse(userinfo).permission.indexOf('2') !== -1) {
+        if (JSON.parse(userinfo).permission && JSON.parse(userinfo).permission.indexOf('2') !== -1) {
             columns.push(operationObj);
         }
         return (
