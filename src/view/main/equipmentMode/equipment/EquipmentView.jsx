@@ -6,6 +6,7 @@ import AddEquipmentView from './AddEquipmentView';
 import UpdateEquipmentView from './UpdateEquipmentView';
 import PieViewOfOneDeStus from './PieViewOfOneDeStus';
 import OneRecordDetialView from './OneRecordDetialView'
+import LineViewOfCollection from './LineViewOfCollection';
 
 var device_status_filter = [{ text: '正常', value: 1 }, { text: '故障', value: 2 }, { text: '待检', value: 3 }];///用于筛选设备状态的数据 选项
 var device_type_data_filter = []; ///用于筛选巡检点类型的数据 选项
@@ -274,6 +275,8 @@ class EquipmentView extends Component {
                     {this.renderDeviceRecordsView()}
                     <Divider orientation="left"></Divider>
                     {this.renderDevicePieView()}
+                    <Divider orientation="left"></Divider>
+                    {this.renderCollectionLineView()}
                     <Drawer
                         title={<div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', }}>
                             <span>当次记录</span>
@@ -466,8 +469,18 @@ class EquipmentView extends Component {
         />
     }
 
+    /**
+     * 当前设备的状态统计饼图
+     */
     renderDevicePieView = () => {
         return <PieViewOfOneDeStus pieDeviceId={this.state.pieDeviceId} isShow={this.state.drawerVisible1} />
+    }
+
+    /**
+     * 当前设备的 采集数据的折线图
+     */
+    renderCollectionLineView = () => {
+        return <LineViewOfCollection deviceId={this.state.pieDeviceId} isShow={this.state.drawerVisible1} />
     }
 }
 

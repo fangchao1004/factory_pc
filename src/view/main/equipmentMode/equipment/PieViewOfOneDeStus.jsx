@@ -64,8 +64,6 @@ class PieViewOfOneDeStus extends Component {
             HttpApi.obs({ sql }, (res) => {
                 if (res.data.code === 0) {
                     result = res.data.data;
-                } else {
-                    // console.log(res.data.data);
                 }
                 resolve(result);
             })
@@ -77,15 +75,15 @@ class PieViewOfOneDeStus extends Component {
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ fontSize: 16, fontWeight: 500, color: '#000000' }}>设备状态统计图</span>
                 <div>
+                    <Popover content={content} title="日期说明">
+                        <Icon type="info-circle" theme="twoTone" style={{ fontSize: 20, marginRight: 20 }} />
+                    </Popover>
                     <Radio.Group defaultValue={7} buttonStyle="solid" onChange={this.dateChange}>
                         <Radio.Button value={7}>近一周</Radio.Button>
                         <Radio.Button value={30}>近一月</Radio.Button>
                         <Radio.Button value={90}>近三月</Radio.Button>
                         <Radio.Button value={180}>近半年</Radio.Button>
                     </Radio.Group>
-                    <Popover content={content} title="日期说明">
-                        <Icon type="info-circle" theme="twoTone" style={{ fontSize: 20, marginLeft: 20 }} />
-                    </Popover>
                 </div>
             </div>
         )

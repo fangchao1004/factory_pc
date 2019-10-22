@@ -182,3 +182,40 @@ export function renderTreeNodeListByData(dataList) {
     return nodeList
 }
 
+/**
+ * 将recordlist的数据结构--转换成-采集数据的数组
+ */
+export function transfromDataToCollectionList(recordList) {
+    let tempObj = {};
+    recordList.forEach((recordItem) => {
+        let oneRecordContentJson = JSON.parse(recordItem.content);
+        oneRecordContentJson.forEach((item) => { /// item 每一项 每一题
+            if (item.type_id === '10' || item.type_id === '11') {
+                // console.log('tempObj[item.key]:', tempObj[item.key]);
+                let value = item.type_id === '11' ? (item.value / 1000) + '' : item.value
+                if (tempObj[item.key]) {
+                    tempObj[item.key].list.unshift(value);
+                } else {
+                    tempObj[item.key] = {
+                        list: [value],
+                        name: item.title_name
+                    };
+                }
+            }
+        })
+    })
+    let tempList = [];
+    for (let key in tempObj) {
+        let oneItem = tempObj[key];
+        // console.log(oneItem);
+        oneItem.list.forEach((value, index) => {
+            tempList.push({
+                index: '第' + (index + 1) + '次',
+                collectionValue: parseFloat(value),
+                itemName: oneItem.name
+            });
+        })
+    }
+    return tempList;
+}
+
