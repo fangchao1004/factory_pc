@@ -76,7 +76,7 @@ class TimeView extends Component {
                 <Table
                     bordered
                     columns={columns}
-                    dataSource={data}
+                    dataSource={data.map((item, index) => { item.key = index + ''; return item })}
                 />
             </div>
         );
