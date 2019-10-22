@@ -168,7 +168,13 @@ export function renderTreeNodeListByData(dataList) {
                                 return <TreeNode title={omitTextLength(area3Item.title, 25)} key={area3Item.key} selectable={false} icon={<Icon type="environment" />}>
                                     {area3Item.children.length > 0 ?
                                         area3Item.children.map(deviceItem => {
-                                            return <TreeNode {...deviceItem} icon={<Icon type="laptop" style={{ color: '#198FFF' }} />} ></TreeNode>
+                                            let color = '#33CC66' /// 绿色 正常
+                                            if (deviceItem.status === 2) {
+                                                color = '#FF0000' /// 红色 故障
+                                            } else if (deviceItem.status === 3) {
+                                                color = '#AAAAAA' /// 灰色 待检
+                                            }
+                                            return <TreeNode {...deviceItem} icon={<Icon type="laptop" style={{ color }} />} ></TreeNode>
                                         })
                                         : null}
                                 </TreeNode>

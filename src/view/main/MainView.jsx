@@ -5,6 +5,7 @@ import logopng from '../../assets/logo.png'
 import HomePageRoot from './homePageMode/HomePageRoot';
 import EquipmentModeRoot from './equipmentMode/EquipmentModeRoot'
 import AreaModeRoot from './areaMode/AreaModeRoot'
+import TimeModeRoot from './timeMode/TimeModeRoot'
 import StaffModeRoot from './staffMode/StaffModeRoot'
 import TableModeRoot from './tableMode/TableModeRoot';
 import UserModeRoot from './usercenter/UserModeRoot'
@@ -183,6 +184,11 @@ export default class MainView extends Component {
                                 <span>巡检区域</span>
                                 <Link to={`${this.props.match.url}/area`} />
                             </Menu.Item>
+                            <Menu.Item key="巡检时间段">
+                                <Icon type="clock-circle" />
+                                <span>巡检时间段</span>
+                                <Link to={`${this.props.match.url}/time`} />
+                            </Menu.Item>
                         </SubMenu>
                         <SubMenu key="缺陷" title={
                             <span>
@@ -308,6 +314,11 @@ class ContentView extends Component {
                     exact
                     path={`${this.props.match.path}/area`}
                     component={() => (storage.getItem('userinfo') ? <AreaModeRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/time`}
+                    component={() => (storage.getItem('userinfo') ? <TimeModeRoot /> : <Redirect to='/' />)}
                 />
                 <Route
                     exact
