@@ -107,12 +107,12 @@ class LineViewOfCollection extends Component {
 
     render() {
         return (
-            <div style={{ backgroundColor: '#FAFAFA', height: 650, width: '100%', borderStyle: 'solid', borderColor: '#E6E6E7', borderWidth: 1 }}>
+            <div style={{ backgroundColor: '#FAFAFA', height: 700, width: '100%', borderStyle: 'solid', borderColor: '#E6E6E7', borderWidth: 1 }}>
                 {this.getDateSelect()}
                 {this.state.renderLineData.length > 0 ?
                     <div>
                         <Chart height={500} data={this.state.renderLineData} scale={cols} style={{ backgroundColor: '#ffffff' }} >
-                            <Legend layout={'vertical'} />
+                            <Legend layout={'vertical'} useHtml={true} />
                             <Axis name="index" />
                             <Axis
                                 name="collectionValue"
