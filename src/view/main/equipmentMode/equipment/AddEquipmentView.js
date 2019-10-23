@@ -113,9 +113,9 @@ export default class AddEquipmentView extends Component {
     onOkHandler = () => {
         this.refs.EquipmentFormRef.validateFields((error, values) => {
             if (!error) {
-                console.log('OK：', values);
-                // this.props.onOk(values);
-                // this.refs.EquipmentFormRef.resetFields();
+                // console.log('OK：', values);
+                this.props.onOk(values);
+                this.refs.EquipmentFormRef.resetFields();
             }
         })
     }

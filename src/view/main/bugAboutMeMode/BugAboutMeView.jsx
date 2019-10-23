@@ -362,8 +362,11 @@ export default class BugAboutMeView extends Component {
                         <span>运行人员选择:</span>
                     </Col>
                     <Col span={18}>
-                        <Select value={this.state.runner_select_id} defaultValue={null} style={{ width: '100%' }}
+                        <Select showSearch={true} value={this.state.runner_select_id} defaultValue={null} style={{ width: '100%' }}
                             onChange={(v) => { this.setState({ runner_select_id: v }) }}
+                            filterOption={(input, option) =>
+                                option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                            }
                         >{runner_Options}</Select>
                     </Col>
                 </Row>
