@@ -38,7 +38,7 @@ export function transfromDataTo3level(area123result) {
                     title: item.area2_name,
                     value: item.area1_id + '-' + item.area2_id,
                     key: item.area1_id + '-' + item.area2_id,
-                    selectable: false,
+                    // selectable: false,
                     children: [{ value: item.area1_id + '-' + item.area2_id + '-' + item.area3_id, title: item.area3_name, key: item.area1_id + '-' + item.area2_id + '-' + item.area3_id }]
                 }
             }
@@ -47,7 +47,7 @@ export function transfromDataTo3level(area123result) {
                     title: item.area2_name,
                     value: item.area1_id + '-' + item.area2_id,
                     key: item.area1_id + '-' + item.area2_id,
-                    selectable: false,
+                    // selectable: false,
                     children: []
                 };
             }
@@ -64,7 +64,7 @@ export function transfromDataTo3level(area123result) {
             title: item.area1_name,
             value: item.area1_id + '',
             key: item.area1_id + '',
-            selectable: false,
+            // selectable: false,
             children: []
         }
     })

@@ -26,6 +26,34 @@ var area123_List = [];///三级区域选项 (树形结构 利用TreeSelect组件
 var storage = window.localStorage;
 var localUserInfo = '';
 
+const valueMap = {};
+
+function loops(list, parent) {
+    return (list || []).map(({ children, value, title }) => {
+        const node = (valueMap[value] = {
+            parent,
+            value,
+            title
+        });
+        node.children = loops(children, node);
+        return node;
+    });
+}
+
+function getPathAndTitle(value) {
+    const pathAndTitle = [];
+    let current = valueMap[value];
+    while (current) {
+        pathAndTitle.unshift({
+            value: current.value,
+            name: current.title
+        });
+        current = current.parent;
+    }
+    return pathAndTitle;
+}
+
+
 export default class BugView extends Component {
     constructor(props) {
         super(props);
@@ -56,9 +84,10 @@ export default class BugView extends Component {
             ////添加bug
             bug_level_select_id: null,
             major_select_id: null,
-            area_remark: null,
+            area_remark: null, /// ///选择器上显示的 多级区域文字值
             bug_text: null,
             area_id: null,/// 独立的缺陷 也要添加上 area_id
+            // areaTitle: "",///选择器上显示的 多级区域文字值
 
             userLevels: [],
             ///导出Excel部分
@@ -125,7 +154,7 @@ export default class BugView extends Component {
 
         let result = await HttpApi.getArea123Info();
         area123_List = transfromDataTo3level(result);/// 获取三级区域数据后，给添加的区域的对话框中，选择区域的树形组件添加数据源
-
+        loops(area123_List);
         // userOptions = userData.map(user => <Select.Option value={user.id} key={user.id}>{user.name}</Select.Option>)
         this.setState({
             data: finallyData,
@@ -225,13 +254,26 @@ export default class BugView extends Component {
     }
     getBugsInfo = (sql = null) => {
         if (!sql) {
-            sql = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,area_3.name as area_name from bugs
-        left join (select * from devices where effective = 1) des on bugs.device_id = des.id
-        left join (select * from users where effective = 1) urs on bugs.user_id = urs.id
-        left join (select * from majors where effective = 1) mjs on bugs.major_id = mjs.id
-        left join (select * from area_3 where effective = 1) area_3 on des.area_id = area_3.id
-        where bugs.status != 4 and bugs.effective = 1
-        `;
+            //     sql = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,area_3.name as area_name from bugs
+            // left join (select * from devices where effective = 1) des on bugs.device_id = des.id
+            // left join (select * from users where effective = 1) urs on bugs.user_id = urs.id
+            // left join (select * from majors where effective = 1) mjs on bugs.major_id = mjs.id
+            // left join (select * from area_3 where effective = 1) area_3 on des.area_id = area_3.id
+            // where bugs.status != 4 and bugs.effective = 1
+            // `;
+            sql = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,
+            area_1.name as area1_name,area_1.id as area1_id,
+            area_2.name as area2_name,area_2.id as area3_id,
+            area_3.name as area3_name,area_3.id as area3_id,
+            concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name
+            from bugs
+            left join (select * from devices where effective = 1) des on bugs.device_id = des.id
+            left join (select * from users where effective = 1) urs on bugs.user_id = urs.id
+            left join (select * from majors where effective = 1) mjs on bugs.major_id = mjs.id
+            left join (select * from area_3 where effective = 1) area_3 on des.area_id = area_3.id
+            left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
+            left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
+            where bugs.status != 4 and bugs.effective = 1`
         }
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
@@ -302,11 +344,22 @@ export default class BugView extends Component {
                         dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
                         treeData={area123_List}
                         placeholder="请选择在范围"
+                        value={this.state.area_remark}
                         onChange={(v, e) => {
-                            this.setState({
-                                area_remark: e[0],
-                                area_id: v.split('-')[2]
+                            // console.log('v,e::::', v, e);
+                            let pathAndTitle = getPathAndTitle(v);
+                            let titleArr = pathAndTitle.map((item) => {
+                                return item.name
                             })
+                            let titleStr = titleArr.join('/');
+                            // console.log(titleStr);
+                            this.setState({
+                                area_remark: titleStr
+                            })
+                            // this.setState({
+                            //     area_remark: e[0],
+                            //     area_id: v.split('-')[2]
+                            // })
                         }}
                     />
                 </Col>
@@ -339,7 +392,7 @@ export default class BugView extends Component {
                             valueObj.content = JSON.stringify({ select: '', text: this.state.bug_text, imgs: [] });
                             valueObj.buglevel = this.state.bug_level_select_id;
                             valueObj.area_remark = this.state.area_remark;
-                            valueObj.area_id = this.state.area_id;
+                            // valueObj.area_id = this.state.area_id;
                             valueObj.status = 0;
                             HttpApi.addBugInfo(valueObj, (res) => {
                                 if (res.data.code === 0) { message.success('上传成功'); this.init(); this.setState({ showModal7: false }) }
@@ -886,9 +939,13 @@ export default class BugView extends Component {
         let sql3 = '';///条件语句3
         sql3 = `and createdAt > '${tsl[0]}' and createdAt < '${tsl[1]}'`
         let sqlText = `select * from bugs where effective = 1 ${sql3} ${sql1} ${sql2}`
-        let finallySql = `select t1.*,des.name device_name,area_3.name area_name,majors.name major_name,users.name user_name from (${sqlText}) t1
+        let finallySql = `select t1.*,des.name device_name,
+        concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
+        majors.name major_name,users.name user_name from (${sqlText}) t1
         left join (select * from devices where effective = 1) des on des.id = t1.device_id
         left join (select * from area_3 where effective = 1) area_3 on area_3.id = des.area_id
+        left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
+        left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
         left join (select * from majors where effective = 1) majors on majors.id = t1.major_id
         left join users on users.id = t1.user_id
         order by major_id
