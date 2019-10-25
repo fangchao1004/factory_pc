@@ -1,58 +1,26 @@
 import React, { Component, Fragment } from 'react';
 import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Spin, Drawer, TreeSelect, Popconfirm, Divider, DatePicker, Checkbox } from 'antd'
-import ExportJsonExcel from 'js-export-excel'
 import HttpApi, { Testuri } from '../../util/HttpApi'
 import moment from 'moment'
 import Store from '../../../redux/store/Store';
 import { showBugNum } from '../../../redux/actions/BugAction';
-import { transfromDataTo3level } from '../../util/Tool'
+import AddBugView from './AddBugView';
+import ExportBugView from './ExportBugView';
 
 const CheckboxGroup = Checkbox.Group;
 const majorPlainOptions = [];
 const completeStatusPlainOptions = [{ label: '已完成', value: 4 }, { label: '未完成', value: 0 }];
 const { RangePicker } = DatePicker;
 const { Step } = Steps;
-const { TextArea } = Input;
 var major_filter = [];///用于筛选任务专业的数据 选项
 const status_filter = [{ text: '待分配', value: 0 }, { text: '维修中', value: 1 },
 { text: '专工验收中', value: 2 }, { text: '运行验收中', value: 3 }];///用于筛选状态的数据
 const bug_level_filters = [{ text: '一级', value: '1' }, { text: '二级', value: '2' }, { text: '三级', value: '3' }, { text: '/', value: 'null' }]
-const bug_level_Options = [{ id: 1, name: '一级' }, { id: 2, name: '二级' }, { id: 3, name: '三级' }].map(bug_level => <Select.Option value={bug_level.id} key={bug_level.id}>{bug_level.name}</Select.Option>)
 var uploader_filter = [];///用于筛选上传者的数据 选项
-var major_Options = [];///专业选项
 var runner_Options = [];///运行选项
-var area123_List = [];///三级区域选项 (树形结构 利用TreeSelect组件 直接提供对应的json数据结构)
 
 var storage = window.localStorage;
 var localUserInfo = '';
-
-const valueMap = {};
-
-function loops(list, parent) {
-    return (list || []).map(({ children, value, title }) => {
-        const node = (valueMap[value] = {
-            parent,
-            value,
-            title
-        });
-        node.children = loops(children, node);
-        return node;
-    });
-}
-
-function getPathAndTitle(value) {
-    const pathAndTitle = [];
-    let current = valueMap[value];
-    while (current) {
-        pathAndTitle.unshift({
-            value: current.value,
-            name: current.title
-        });
-        current = current.parent;
-    }
-    return pathAndTitle;
-}
-
 
 export default class BugView extends Component {
     constructor(props) {
@@ -81,36 +49,13 @@ export default class BugView extends Component {
             step_2_remark: '',///专工验收界面的备注
             step_3_remark: '',///运行验收界面的备注
 
-            ////添加bug
-            bug_level_select_id: null,
-            major_select_id: null,
-            area_remark: null, /// ///选择器上显示的 多级区域文字值
-            bug_text: null,
-            area_id: null,/// 独立的缺陷 也要添加上 area_id
-            // areaTitle: "",///选择器上显示的 多级区域文字值
-
             userLevels: [],
-            ///导出Excel部分
-            completeStatusCheckList: [],/// 完成状态 [0,4]
-            timeStampCheckList: [moment().startOf('day').format('YYYY-MM-DD HH:ss:mm'), moment().endOf('day').format('YYYY-MM-DD HH:ss:mm')],/// 时间段区间默认是今日 ['2019-01-01 00:00:00','2019-01-01 23:59:59']
-            majorCheckList: [],///['A','B',...] 专业A,B,...
-            // majorIndeterminate: false,
-            majorCheckAll: false,
-            completeStatusCheckAll: false,
-            exporting: false,
         }
     }
     componentDidMount() {
         this.init();
         localUserInfo = storage.getItem('userinfo');
     }
-
-    // socketTest() {
-    //     let message = messageFormat('我在bugView');
-    //     // console.log('BugView中向服务器发送的socket信息', message);
-    //     sendMessageToS('to_server', message);
-    //     getMessageFromS(`to_${JSON.parse(localUserInfo).username}`, (data) => { console.log('BugView中收到 来自服务器的socket信息:', data); });
-    // }
 
     init = async () => {
         major_filter.length = 0;
@@ -123,20 +68,12 @@ export default class BugView extends Component {
         })
         let uploaderData = await this.getUploaderInfo();
         uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
-
-        // console.log('marjorData:', marjorData);
-        major_Options = marjorData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
-
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
         finallyData.forEach((item) => { item.key = item.id + '' })
-        // console.log('bug数据：', finallyData);
         let userData = await this.getUsersInfo();
         let userLevels = await this.getUsersLevels();
         let runnerData = await this.getRunnerInfo();///获取有运行权限的人员
-        // console.log('runnerData:', runnerData);
         runner_Options = runnerData.map(userInfo => <Select.Option value={userInfo.id} key={userInfo.id}>{userInfo.name}</Select.Option>)
-        // console.log('userLevels:',userLevels);
-        // console.log('userData:', userData);
         userLevels.forEach((oneLevel) => {
             // console.log(oneLevel);
             let tempArr = [];
@@ -150,12 +87,6 @@ export default class BugView extends Component {
             oneLevel.children = tempArr
             oneLevel.selectable = false
         })
-        // console.log(userLevels);
-
-        let result = await HttpApi.getArea123Info();
-        area123_List = transfromDataTo3level(result);/// 获取三级区域数据后，给添加的区域的对话框中，选择区域的树形组件添加数据源
-        loops(area123_List);
-        // userOptions = userData.map(user => <Select.Option value={user.id} key={user.id}>{user.name}</Select.Option>)
         this.setState({
             data: finallyData,
             userData,
@@ -164,7 +95,6 @@ export default class BugView extends Component {
     }
     getUsersLevels = () => {
         return new Promise((resolve, reject) => {
-            // let sqlText = 'select * from users order by convert(name using gbk) ASC'
             let sqlText = `select distinct users.level_id, users.level_id as 'value',levels.name as title from users
             left join (select * from levels where effective = 1)levels
             on levels.id = users.level_id
@@ -181,7 +111,6 @@ export default class BugView extends Component {
     }
     getRunnerInfo = () => {
         return new Promise((resolve, reject) => {
-            // let sqlText = 'select * from users order by convert(name using gbk) ASC'
             let sqlText = `select * from users where permission like '%1%' and effective = 1`
             HttpApi.obs({ sql: sqlText }, (res) => {
                 let result = [];
@@ -194,7 +123,6 @@ export default class BugView extends Component {
     }
     getUsersInfo = () => {
         return new Promise((resolve, reject) => {
-            // let sqlText = 'select * from users order by convert(name using gbk) ASC'
             let sqlText = `select users.*,users.name as title,levels.name level_name,  CONCAT(users.level_id,'-',users.id) 'key',CONCAT(users.level_id,'-',users.id) 'value' from users
             left join (select * from levels where effective = 1)levels
             on users.level_id = levels.id
@@ -254,13 +182,6 @@ export default class BugView extends Component {
     }
     getBugsInfo = (sql = null) => {
         if (!sql) {
-            //     sql = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,area_3.name as area_name from bugs
-            // left join (select * from devices where effective = 1) des on bugs.device_id = des.id
-            // left join (select * from users where effective = 1) urs on bugs.user_id = urs.id
-            // left join (select * from majors where effective = 1) mjs on bugs.major_id = mjs.id
-            // left join (select * from area_3 where effective = 1) area_3 on des.area_id = area_3.id
-            // where bugs.status != 4 and bugs.effective = 1
-            // `;
             sql = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,
             area_1.name as area1_name,area_1.id as area1_id,
             area_2.name as area2_name,area_2.id as area3_id,
@@ -309,100 +230,6 @@ export default class BugView extends Component {
         if (this.state.userData && this.state.userData.length > 0) { this.state.userData.forEach((item) => { if (item.id === userId) { name = item.name } }) }
         return name;
     }
-    ///添加缺陷
-    renderAddBugModal = () => {
-        return (<div>
-            <Row gutter={16}>
-                <Col span={4}>
-                    <span>紧急类型:</span>
-                </Col>
-                <Col span={18}>
-                    <Select value={this.state.bug_level_select_id} defaultValue={null} style={{ width: '100%' }}
-                        onChange={(v) => { this.setState({ bug_level_select_id: v }) }}
-                    >{bug_level_Options}</Select>
-                </Col>
-            </Row>
-            <Row gutter={16} style={{ marginTop: 20 }}>
-                <Col span={4}>
-                    <span>缺陷专业:</span>
-                </Col>
-                <Col span={18}>
-                    <Select value={this.state.major_select_id} defaultValue={null} style={{ width: '100%' }}
-                        onChange={(v) => { this.setState({ major_select_id: v }) }}
-                    >{major_Options}</Select>
-                </Col>
-            </Row>
-            <Row gutter={16} style={{ marginTop: 20 }}>
-                <Col span={4}>
-                    <span>所在范围:</span>
-                </Col>
-                <Col span={18}>
-                    <TreeSelect
-                        style={{ width: '100%' }}
-                        treeNodeFilterProp="title"
-                        showSearch
-                        dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-                        treeData={area123_List}
-                        placeholder="请选择在范围"
-                        value={this.state.area_remark}
-                        onChange={(v, e) => {
-                            // console.log('v,e::::', v, e);
-                            let pathAndTitle = getPathAndTitle(v);
-                            let titleArr = pathAndTitle.map((item) => {
-                                return item.name
-                            })
-                            let titleStr = titleArr.join('/');
-                            // console.log(titleStr);
-                            this.setState({
-                                area_remark: titleStr
-                            })
-                            // this.setState({
-                            //     area_remark: e[0],
-                            //     area_id: v.split('-')[2]
-                            // })
-                        }}
-                    />
-                </Col>
-            </Row>
-            <Row gutter={16} style={{ marginTop: 20 }}>
-                <Col span={4}>
-                    <span>问题描述:</span>
-                </Col>
-                <Col span={18}>
-                    <TextArea value={this.state.bug_text} style={{ width: '100%' }} placeholder='请填写缺陷信息' onChange={(e) => { this.setState({ bug_text: e.target.value }) }}></TextArea>
-                </Col>
-            </Row>
-            <Row gutter={16} style={{ marginTop: 20 }}>
-                <Col span={4}>
-                </Col>
-                <Col span={18} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Button type={'ghost'} onClick={() => {
-                        this.setState({
-                            bug_level_select_id: null,
-                            major_select_id: null,
-                            area_remark: null,
-                            bug_text: null,
-                        })
-                    }}>重置</Button>
-                    <Button type={'primary'} onClick={() => {
-                        if (this.state.bug_level_select_id && this.state.major_select_id && this.state.area_remark && this.state.bug_text) {
-                            let valueObj = {};
-                            valueObj.user_id = JSON.parse(localUserInfo).id;
-                            valueObj.major_id = this.state.major_select_id;
-                            valueObj.content = JSON.stringify({ select: '', text: this.state.bug_text, imgs: [] });
-                            valueObj.buglevel = this.state.bug_level_select_id;
-                            valueObj.area_remark = this.state.area_remark;
-                            // valueObj.area_id = this.state.area_id;
-                            valueObj.status = 0;
-                            HttpApi.addBugInfo(valueObj, (res) => {
-                                if (res.data.code === 0) { message.success('上传成功'); this.init(); this.setState({ showModal7: false }) }
-                            })
-                        } else { message.error('请完善相关信息') }
-                    }}>确定</Button>
-                </Col>
-            </Row>
-        </div>)
-    }
     /// 导出Excel界面
     renderExportExcelView = () => {
         return <div>
@@ -441,18 +268,15 @@ export default class BugView extends Component {
                         onChange={(majorCheckList) => {
                             this.setState({
                                 majorCheckList,
-                                // majorIndeterminate: !!majorCheckList.length && majorCheckList.length < majorPlainOptions.length,
                                 majorCheckAll: majorCheckList.length === majorPlainOptions.length,
                             });
                         }}
                     />
                     <Checkbox
-                        // indeterminate={this.state.majorIndeterminate}
                         checked={this.state.majorCheckAll}
                         onChange={(e) => {
                             this.setState({
                                 majorCheckList: e.target.checked ? majorPlainOptions.map((item) => (item.value)) : [],
-                                // majorIndeterminate: false,
                                 majorCheckAll: e.target.checked,
                             });
                         }}
@@ -921,89 +745,6 @@ export default class BugView extends Component {
         ///每次删除
         Store.dispatch(showBugNum(null)) ///随便派发一个值，目的是让 mainView处监听到 执行init();
     }
-    exportHandler = async () => {
-        let mjl = this.state.majorCheckList;
-        let csl = this.state.completeStatusCheckList;
-        let tsl = this.state.timeStampCheckList;
-        let mca = this.state.majorCheckAll;
-        if (mjl.length === 0 || csl.length === 0) { message.error('请完善选项'); return }
-        ///开始整合生成sql语句
-        let sql1 = '';///条件语句1
-        if (csl.length === 1) {
-            if (csl[0] === 4) {
-                sql1 = `and status = 4`
-            } else { sql1 = `and status != 4` }
-        }
-        let sql2 = '';///条件语句2
-        if (!mca) { sql2 = 'and (' + (mjl.map((item) => { item = 'major_id = ' + item; return item })).join(' or ') + ')'; }
-        let sql3 = '';///条件语句3
-        sql3 = `and createdAt > '${tsl[0]}' and createdAt < '${tsl[1]}'`
-        let sqlText = `select * from bugs where effective = 1 ${sql3} ${sql1} ${sql2}`
-        let finallySql = `select t1.*,des.name device_name,
-        concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
-        majors.name major_name,users.name user_name from (${sqlText}) t1
-        left join (select * from devices where effective = 1) des on des.id = t1.device_id
-        left join (select * from area_3 where effective = 1) area_3 on area_3.id = des.area_id
-        left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
-        left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
-        left join (select * from majors where effective = 1) majors on majors.id = t1.major_id
-        left join users on users.id = t1.user_id
-        order by major_id
-        `;
-        let result = await this.getBugsInfo(finallySql);///获取符合条件的缺陷数据
-        if (result.length === 0) { message.warn('没有查询到符合条件的缺陷数据-请修改查询条件'); return }
-        this.setState({ exporting: true })
-        let data = this.transConstract(result);///数据结构进行转换
-        let option = {};
-        option.fileName = moment().format('YYYY-MM-DD-HH-mm-ss') + '-缺陷统计列表'
-        option.datas = data;
-        let toExcel = new ExportJsonExcel(option);
-        toExcel.saveExcel();
-        this.setState({ exporting: false, showModal8: false })
-        message.info('正在导出Excel文件，请从浏览器下载文件夹中查看');
-    }
-    transConstract = (result) => {
-        let tempList = {};
-        result.forEach(item => {
-            let tempObj = {};
-            tempObj.id = item.id + '';
-            tempObj.time = moment(item.createdAt).format('YYYY-MM-DD HH:mm:ss');
-            tempObj.device = item.device_name ? item.device_name : '/';
-            tempObj.uploadman = item.user_name;
-            tempObj.area = item.area_name ? item.area_name : (item.area_remark ? item.area_remark : '/')
-            tempObj.level = item.buglevel ? (item.buglevel === 1 ? '一级' : (item.buglevel === 2 ? '二级' : '三级')) : '/';
-            tempObj.content = item.title_name ? item.title_name + ' ' + JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text : JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text;
-            tempObj.major = item.major_name;
-            tempObj.status = item.status === 0 ? '待分配' : (item.status === 1 ? '维修中' : (item.status === 2 ? '专工验收中' : (item.status === 3 ? '运行验收中' : '处理完毕')));
-            tempObj.nowdoman = item.status === 4 || item.status === 0 ? '/' : (item.status === 2 ? '专工' : this.getusernameById(JSON.parse(item.remark)[item.status === 1 ? 0 : 2][JSON.parse(item.remark)[item.status === 1 ? 0 : 2].length - 1].to));
-            if (tempList[item.major_name]) { tempList[item.major_name].push(tempObj) }
-            else { tempList[item.major_name] = [tempObj] }
-        });
-        // console.log(tempList);
-        let excelOptionList = [];
-        for (const key in tempList) {
-            // console.log(key);
-            // console.log(tempList[key]);
-            excelOptionList.push({
-                sheetData: tempList[key],
-                sheetName: key,
-                sheetFilter: ['id', 'time', 'device', 'uploadman', 'area', 'level', 'content', 'major', 'status', 'nowdoman'],
-                sheetHeader: ['编号', '上报时间', '巡检点名称', '上报人', '区域', '等级', '内容', '专业', '当前状态', '当前处理人'],
-                columnWidths: ['3', '8', '10', '5', '5', '5', '15', '5', '5', '5'], // 列宽
-            })
-        }
-        // console.log('excelOptionList:', excelOptionList);
-        return excelOptionList;
-    }
-    getusernameById = (id) => {
-        let result = '/'
-        this.state.userData.forEach((item) => {
-            if (item.id === id) {
-                result = item.name
-            }
-        })
-        return result
-    }
     render() {
         const columns = [
             {
@@ -1186,32 +927,8 @@ export default class BugView extends Component {
                     dataSource={this.state.data}
                     columns={columns}
                 />
-                <Modal
-                    title="添加缺陷"
-                    visible={this.state.showModal7}
-                    onCancel={() => { this.setState({ showModal7: false }) }}
-                    footer={null}
-                    width={520}
-                >
-                    {this.renderAddBugModal()}
-                </Modal>
-                <Modal
-                    title="导出Excel选项"
-                    visible={this.state.showModal8}
-                    onCancel={() => { this.setState({ showModal8: false }) }}
-                    // footer={null}
-                    footer={[
-                        <Button key='cancel' onClick={() => { this.setState({ showModal8: false }) }}>
-                            取消
-                        </Button>,
-                        <Button key='ok' type="primary" loading={this.state.exporting} onClick={this.exportHandler}>
-                            确定导出
-                        </Button>,
-                    ]}
-                    width={520}
-                >
-                    {this.renderExportExcelView()}
-                </Modal>
+                <AddBugView showModal={this.state.showModal7} ok={() => { this.init(); this.setState({ showModal7: false }) }} cancel={() => { this.setState({ showModal7: false }) }} />
+                <ExportBugView showModal={this.state.showModal8} cancel={() => { this.setState({ showModal8: false }) }} />
                 {/* 进度界面 */}
                 < Modal
                     mask={false}
