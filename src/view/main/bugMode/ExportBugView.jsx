@@ -279,24 +279,22 @@ class ExportBugView extends Component {
     }
     render() {
         return (
-            <div>
-                <Modal
-                    title="导出Excel选项"
-                    visible={this.state.showModal}
-                    onCancel={() => { this.props.cancel() }} /// this.setState({ showModal: false })
-                    footer={[
-                        <Button key='cancel' onClick={() => { this.props.cancel() }}>
-                            取消
+            <Modal
+                title="导出Excel选项"
+                visible={this.state.showModal}
+                onCancel={() => { this.props.cancel() }} /// this.setState({ showModal: false })
+                footer={[
+                    <Button key='cancel' onClick={() => { this.props.cancel() }}>
+                        取消
                         </Button>,
-                        <Button key='ok' type="primary" loading={this.state.exporting} onClick={this.exportHandler}>
-                            确定导出
+                    <Button key='ok' type="primary" loading={this.state.exporting} onClick={this.exportHandler}>
+                        确定导出
                         </Button>,
-                    ]}
-                    width={520}
-                >
-                    {this.renderExportExcelView()}
-                </Modal>
-            </div>
+                ]}
+                width={520}
+            >
+                {this.renderExportExcelView()}
+            </Modal>
         );
     }
 }

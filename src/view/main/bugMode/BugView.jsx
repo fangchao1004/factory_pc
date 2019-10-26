@@ -1,16 +1,14 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Spin, Drawer, TreeSelect, Popconfirm, Divider, DatePicker, Checkbox } from 'antd'
-import HttpApi, { Testuri } from '../../util/HttpApi'
+import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Drawer, TreeSelect, Popconfirm, Divider } from 'antd'
+import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 import Store from '../../../redux/store/Store';
 import { showBugNum } from '../../../redux/actions/BugAction';
 import AddBugView from './AddBugView';
 import ExportBugView from './ExportBugView';
+import ShowImgView from './ShowImgView';
 
-const CheckboxGroup = Checkbox.Group;
 const majorPlainOptions = [];
-const completeStatusPlainOptions = [{ label: '已完成', value: 4 }, { label: '未完成', value: 0 }];
-const { RangePicker } = DatePicker;
 const { Step } = Steps;
 var major_filter = [];///用于筛选任务专业的数据 选项
 const status_filter = [{ text: '待分配', value: 0 }, { text: '维修中', value: 1 },
@@ -229,91 +227,6 @@ export default class BugView extends Component {
         let name = '';
         if (this.state.userData && this.state.userData.length > 0) { this.state.userData.forEach((item) => { if (item.id === userId) { name = item.name } }) }
         return name;
-    }
-    /// 导出Excel界面
-    renderExportExcelView = () => {
-        return <div>
-            <Row gutter={16}>
-                <Col span={5}>
-                    <span>时间段选择:</span>
-                </Col>
-                <Col span={19}>
-                    <RangePicker
-                        ranges={{
-                            '今日': [moment(), moment()],
-                            '本月': [moment().startOf('month'), moment().endOf('month')],
-                            '上月': [moment().add(-1, 'month').startOf('month'), moment().add(-1, 'month').endOf('month')],
-                        }}
-                        defaultValue={[moment().startOf('day'), moment().endOf('day')]}
-                        onChange={(momentArr) => {
-                            if (momentArr.length === 2) {
-                                let timeStampCheckList = [momentArr[0].startOf('day').format('YYYY-MM-DD HH:ss:mm'),
-                                momentArr[1].endOf('day').format('YYYY-MM-DD HH:ss:mm')]
-                                // console.log('timeStampCheckList:', timeStampCheckList);
-                                // console.log('this.state.timeStampCheckList1:', this.state.timeStampCheckList);
-                                this.setState({ timeStampCheckList })
-                            }
-                        }}
-                    />
-                </Col>
-            </Row>
-            <Row gutter={16} style={{ marginTop: 20 }}>
-                <Col span={5}>
-                    <span>专业选择:</span>
-                </Col>
-                <Col span={19}>
-                    <CheckboxGroup
-                        options={majorPlainOptions}
-                        value={this.state.majorCheckList}
-                        onChange={(majorCheckList) => {
-                            this.setState({
-                                majorCheckList,
-                                majorCheckAll: majorCheckList.length === majorPlainOptions.length,
-                            });
-                        }}
-                    />
-                    <Checkbox
-                        checked={this.state.majorCheckAll}
-                        onChange={(e) => {
-                            this.setState({
-                                majorCheckList: e.target.checked ? majorPlainOptions.map((item) => (item.value)) : [],
-                                majorCheckAll: e.target.checked,
-                            });
-                        }}
-                    >
-                        全选
-                    </Checkbox>
-                </Col>
-            </Row>
-            <Row gutter={16} style={{ marginTop: 20 }}>
-                <Col span={5}>
-                    <span>状态选择:</span>
-                </Col>
-                <Col span={19}>
-                    <CheckboxGroup
-                        options={completeStatusPlainOptions}
-                        value={this.state.completeStatusCheckList}
-                        onChange={(completeStatusCheckList) => {
-                            this.setState({
-                                completeStatusCheckList,
-                                completeStatusCheckAll: completeStatusCheckList.length === completeStatusPlainOptions.length,
-                            });
-                        }}
-                    />
-                    <Checkbox
-                        checked={this.state.completeStatusCheckAll}
-                        onChange={(e) => {
-                            this.setState({
-                                completeStatusCheckList: e.target.checked ? completeStatusPlainOptions.map((item) => (item.value)) : [],
-                                completeStatusCheckAll: e.target.checked,
-                            });
-                        }}
-                    >
-                        全选
-                    </Checkbox>
-                </Col>
-            </Row>
-        </div>
     }
     ////缺陷分配界面
     renderSelectWorkerModal = () => {
@@ -920,15 +833,22 @@ export default class BugView extends Component {
             <Fragment>
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
                     <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
-                    {localUserInfo && JSON.parse(localUserInfo).isadmin === 1 ? <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal8: true }) }}>导出缺陷</Button> : null}
+                    {localUserInfo && JSON.parse(localUserInfo).isadmin === 1 ?
+                        <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal8: true }) }}>导出缺陷</Button>
+                        : null}
                 </div>
                 <Table
                     bordered
                     dataSource={this.state.data}
                     columns={columns}
                 />
-                <AddBugView showModal={this.state.showModal7} ok={() => { this.init(); this.setState({ showModal7: false }) }} cancel={() => { this.setState({ showModal7: false }) }} />
-                <ExportBugView showModal={this.state.showModal8} cancel={() => { this.setState({ showModal8: false }) }} />
+                <AddBugView
+                    showModal={this.state.showModal7}
+                    ok={() => { this.init(); this.setState({ showModal7: false }) }}
+                    cancel={() => { this.setState({ showModal7: false }) }} />
+                <ExportBugView
+                    showModal={this.state.showModal8}
+                    cancel={() => { this.setState({ showModal8: false }) }} />
                 {/* 进度界面 */}
                 < Modal
                     mask={false}
@@ -1002,17 +922,7 @@ export default class BugView extends Component {
                 >
                     {this.renderRunerModal()}
                 </Drawer >
-                <Drawer
-                    title="查看图片"
-                    placement="left"
-                    visible={this.state.showModal1}
-                    onClose={() => { this.setState({ showModal1: false }); }}
-                    width={450}
-                    bodyStyle={{ padding: 10 }}
-                >
-                    <div style={{ textAlign: 'center', display: this.state.showLoading ? 'block' : 'none' }}><Spin tip='努力加载中。。。' /></div>
-                    <img alt='' src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} style={{ width: 430, height: 430 / 3 * 4, display: this.state.showLoading ? 'none' : 'block' }} onLoad={() => { console.log('图片加载完成'); this.setState({ showLoading: false }) }} />
-                </Drawer>
+                <ShowImgView showModal={this.state.showModal1} cancel={() => { this.setState({ showModal1: false }) }} showLoading={this.state.showLoading} imguuid={this.state.imguuid} />
             </Fragment >
         );
     }
