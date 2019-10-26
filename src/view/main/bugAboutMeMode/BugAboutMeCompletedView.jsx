@@ -593,20 +593,20 @@ export default class BugAboutMeCompletedView extends Component {
     render() {
         const columns = [
             {
-                key:'id',
-                dataIndex:'id',
-                title:'编号',
-                render:(text,record)=>{
+                key: 'id',
+                dataIndex: 'id',
+                title: '编号',
+                render: (text, record) => {
                     return <div>{text}</div>
                 }
             },
             {
-                key: 'createdAt', dataIndex: 'createdAt', title: '时间',
+                key: 'checkedAt', dataIndex: 'checkedAt', title: '时间',
                 sorter: (a, b) => {
-                    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+                    return new Date(a.checkedAt).getTime() - new Date(b.checkedAt).getTime()
                 },
-                defaultSortOrder: 'descend',
-                render: (text, record) => { return <div>{moment(text).format('YYYY-MM-DD HH:mm:ss')}</div> }
+                // defaultSortOrder: 'descend',
+                render: (text, record) => { return <div>{text || '/'}</div> }
             },
             {
                 key: 'device_name', dataIndex: 'device_name', title: '设备',
@@ -669,7 +669,7 @@ export default class BugAboutMeCompletedView extends Component {
                     })
                     let comArr = [];
                     result_arr.forEach((item, index) => {
-                        comArr.push(<span key={item.uuid} style={{ color: '#438ef7',fontWeight: 500, marginRight: 10, cursor: "pointer" }}
+                        comArr.push(<span key={item.uuid} style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
                             onClick={e => {
                                 if (this.state.preImguuid !== item.uuid) {
                                     this.setState({

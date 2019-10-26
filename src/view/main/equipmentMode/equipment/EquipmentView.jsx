@@ -428,9 +428,9 @@ class EquipmentView extends Component {
         const columns = [
             {
                 title: '时间',
-                dataIndex: 'createdAt',
+                dataIndex: 'checkedAt',
                 render: (text, record) => (
-                    <div>{moment(text).format('YYYY-MM-DD HH:mm:ss')}</div>
+                    <div>{text || '/'}</div>
                 )
             },
             {

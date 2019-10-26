@@ -709,12 +709,12 @@ export default class BugAboutMeView extends Component {
                 }
             },
             {
-                key: 'createdAt', dataIndex: 'createdAt', title: '时间',
+                key: 'checkedAt', dataIndex: 'checkedAt', title: '时间',
                 sorter: (a, b) => {
-                    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+                    return new Date(a.checkedAt).getTime() - new Date(b.checkedAt).getTime()
                 },
-                defaultSortOrder: 'descend',
-                render: (text, record) => { return <div>{moment(text).format('YYYY-MM-DD HH:mm:ss')}</div> }
+                // defaultSortOrder: 'descend',
+                render: (text, record) => { return <div>{text || '/'}</div> }
             },
             {
                 key: 'device_name', dataIndex: 'device_name', title: '设备',

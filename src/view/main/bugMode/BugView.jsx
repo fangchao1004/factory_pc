@@ -67,6 +67,7 @@ export default class BugView extends Component {
         let uploaderData = await this.getUploaderInfo();
         uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
+        // console.log('finallyData:', finallyData);
         finallyData.forEach((item) => { item.key = item.id + '' })
         let userData = await this.getUsersInfo();
         let userLevels = await this.getUsersLevels();
@@ -192,7 +193,7 @@ export default class BugView extends Component {
             left join (select * from area_3 where effective = 1) area_3 on des.area_id = area_3.id
             left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
             left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
-            where bugs.status != 4 and bugs.effective = 1`
+            where bugs.status != 4 and bugs.effective = 1 order by bugs.id desc`
         }
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
@@ -669,12 +670,12 @@ export default class BugView extends Component {
                 }
             },
             {
-                key: 'createdAt', dataIndex: 'createdAt', title: '时间',
+                key: 'checkedAt', dataIndex: 'checkedAt', title: '时间',
                 sorter: (a, b) => {
-                    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+                    return new Date(a.checkedAt).getTime() - new Date(b.checkedAt).getTime()
                 },
-                defaultSortOrder: 'descend',
-                render: (text, record) => { return <div>{moment(text).format('YYYY-MM-DD HH:mm:ss')}</div> }
+                // defaultSortOrder: 'descend',
+                render: (text, record) => { return <div>{text || '/'}</div> }
             },
             {
                 key: 'device_name', dataIndex: 'device_name', title: '设备',

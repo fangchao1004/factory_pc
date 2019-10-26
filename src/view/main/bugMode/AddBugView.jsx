@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Row, Col, Select, TreeSelect, Input, Button, message, Modal } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import { transfromDataTo3level } from '../../util/Tool'
+import moment from 'moment'
 
 const { TextArea } = Input;
 var storage = window.localStorage;
@@ -168,6 +169,7 @@ class AddBugView extends Component {
                                 valueObj.buglevel = this.state.bug_level_select_id;
                                 valueObj.area_remark = this.state.area_remark;
                                 valueObj.status = 0;
+                                valueObj.checkedAt = moment().format('YYYY-MM-DD HH:mm:ss');
                                 HttpApi.addBugInfo(valueObj, (res) => {
                                     if (res.data.code === 0) {
                                         message.success('上传成功');
