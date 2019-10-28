@@ -6,6 +6,9 @@ var storage = window.localStorage;
 var userinfo = null;
 const { TextArea } = Input;
 
+/**
+ * 右上角 退出登录等功能的菜单
+ */
 export default class UserMenuView extends Component {
     constructor(props) {
         super(props);
@@ -58,7 +61,7 @@ export default class UserMenuView extends Component {
         return (
             <div>
                 {this.state.isadmin ? <Button type='primary' style={{ width: "100%", marginBottom: 10 }} onClick={() => { this.setState({ showModal1: true }) }}>发布通知</Button> : null}
-                <Button type='primary' style={{ width: "100%" }}
+                <Button type='danger' style={{ width: "100%" }}
                     onClick={() => {
                         storage.removeItem('userinfo');
                         window.location.href = "/";

@@ -7,7 +7,6 @@ import moment from 'moment'
  */
 function AddTaskForm(props) {
     const { getFieldDecorator } = props.form
-    // console.log('props.form:',props.form);
     const [isMessage, setIsMessage] = React.useState(false)
     return <Form>
         <Form.Item label="执行人" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
@@ -34,7 +33,7 @@ function AddTaskForm(props) {
             {getFieldDecorator('isMessage', {
                 initialValue: isMessage,
                 rules: [{ required: false, message: '请选择是否短信通知' }]
-            })(<Switch checkedChildren="开" unCheckedChildren="关" defaultChecked={isMessage} onChange={(v)=>{setIsMessage(v)}} />)}
+            })(<Switch checkedChildren="开" unCheckedChildren="关" defaultChecked={isMessage} onChange={(v) => { setIsMessage(v) }} />)}
         </Form.Item>
     </Form >
 }
@@ -108,7 +107,7 @@ export default function AddTaskView(props) {
 
 async function getLevelData() {
     return new Promise((resolve, reject) => {
-        HttpApi.getUserLevel(null, data => {
+        HttpApi.getUserLevel({ effective: 1 }, data => {
             if (data.data.code === 0) {
                 resolve(data.data.data)
             }
@@ -117,7 +116,7 @@ async function getLevelData() {
 }
 async function getUserData() {
     return new Promise((resolve, reject) => {
-        HttpApi.getUserInfo(null, data => {
+        HttpApi.getUserInfo({ effective: 1 }, data => {
             if (data.data.code === 0) {
                 resolve(data.data.data)
             }

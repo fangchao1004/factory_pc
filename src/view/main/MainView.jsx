@@ -11,11 +11,11 @@ import TableModeRoot from './tableMode/TableModeRoot';
 import TaskModeRoot from './taskMode/TaskModeRoot'
 import BugModeRoot from './bugMode/BugModeRoot';
 import BugAboutMeModeRoot from './bugAboutMeMode/BugAboutMeModeRoot';
-import SettingViewRoot from './setting/SettingViewRoot';
+import SettingViewRoot from './settingMode/SettingViewRoot';
 import TransactionModeRoot from './transactionMode/TransactionModeRoot';
 import CarModeRoot from './carMode/CarModeRoot'
 import AttendanceModeRoot from './attendanceMode/AttendanceModeRoot'
-import ScheduleRoot from './schedule/ScheduleRoot'
+import ScheduleRoot from './scheduleMode/ScheduleRoot'
 import TansactionApplyModeRoot from './tansactionApplyMode/TansactionApplyModeRoot'
 import UserMenuView from './userMenu/UserMenuView'
 import HttpApi from '../util/HttpApi';
@@ -34,7 +34,6 @@ export default class MainView extends Component {
         super(props)
         localUserInfo = storage.getItem('userinfo')
         noticeinfo = storage.getItem('noticeinfo')
-        // console.log('noticeinfo', noticeinfo);
         this.state = {
             collapsed: false,
             isAdmin: localUserInfo && JSON.parse(localUserInfo).isadmin === 1,
@@ -42,8 +41,6 @@ export default class MainView extends Component {
             aboutMeTaskNum: 0,
         }
         tempNoticeStr = noticeinfo ? noticeinfo : ''///获取曾提醒过的最新内容。作为临时数据。
-        // console.log('tempNoticeStr:', tempNoticeStr);
-        // console.log(this.state.isAdmin)
     }
     componentDidMount() {
         localUserInfo = storage.getItem('userinfo');
@@ -54,9 +51,6 @@ export default class MainView extends Component {
             this.init();
         });
         this.openPolling();///开启轮询---定时去获取缺陷了任务数据
-
-        // toExcel.saveExcel();
-        // console.log('toExcel.saveExcel();');
     }
     init = async () => {
         let bugResult = await this.getBugsInfo();

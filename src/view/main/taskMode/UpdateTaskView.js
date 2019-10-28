@@ -75,7 +75,7 @@ export default function UpdateTaskView(props) {
     const [users, setUsers] = React.useState(null)
     const [remarkText, setRemarkText] = React.useState(null);///备注文本的值
     React.useEffect(() => {
-        HttpApi.getUserInfo({}, data => {
+        HttpApi.getUserInfo({ effective: 1 }, data => {
             if (data.data.code === 0) {
                 setUsers(data.data.data)
             }
