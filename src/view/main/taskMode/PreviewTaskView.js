@@ -97,7 +97,7 @@ export default function PreviewTaskView(props) {
     const [isStaffEditable, setStaffIsEditeable] = React.useState(false);///人员是否可编辑
     const [remarkText, setRemarkText] = React.useState(null);///备注文本的值
     React.useEffect(() => {
-        HttpApi.getUserInfo({}, data => {
+        HttpApi.getUserInfo({ effective: 1 }, data => {
             if (data.data.code === 0) {
                 setUsers(data.data.data)
             }
