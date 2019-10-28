@@ -72,6 +72,10 @@ class ScheduleView extends Component {
                     bordered
                     dataSource={this.state.schedulesData}
                     columns={columns}
+                    pagination={{
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                    }}
                 />
             </div>
         );

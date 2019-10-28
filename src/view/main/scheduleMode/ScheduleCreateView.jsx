@@ -348,6 +348,10 @@ class ScheduleCreateView extends Component {
                     bordered
                     dataSource={this.state.listOfyear}
                     columns={columns}
+                    pagination={{
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                    }}
                 />
             </div>
         );

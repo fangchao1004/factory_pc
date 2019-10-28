@@ -4,8 +4,6 @@ import moment from 'moment';
 import HttpApi from '../../util/HttpApi';
 import RecordDetailByTime from './RecordDetailByTime';
 
-const storage = window.localStorage;
-const localUserInfo = storage.getItem('userinfo')
 const today = moment().format('YYYY-MM-DD ');
 const tomorrow = moment().add(1, 'day').format('YYYY-MM-DD ');
 /**
@@ -15,10 +13,10 @@ class TimeView extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            isAdmin: localUserInfo && JSON.parse(localUserInfo).isadmin === 1,
             dataSource: [],
             showDrawer: false,
-            oneRecord: {}
+            oneRecord: {},
+            isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin,
         }
         this.columns = [
             {
@@ -29,9 +27,9 @@ class TimeView extends Component {
                 }
             },
             {
-                title: '今日应检测设备数量',
+                title: `今日应检测设备数量${this.state.isAdmin === 1 ? '(可编辑)' : ''}`,
                 dataIndex: 'should',
-                editable: true,
+                editable: this.state.isAdmin === 1,
                 render: (text, record) => {
                     return <div>{text !== null ? text : '/'}</div>
                 }
@@ -117,7 +115,7 @@ class TimeView extends Component {
      * 保存到数据库
      */
     handleSave = async (data) => {
-        console.log('data:', data);
+        // console.log('data:', data);
         let result = await this.changeShouldNum(data);
         if (result) { message.success('设置成功'); this.init() }
         else { message.error('设置失败') }

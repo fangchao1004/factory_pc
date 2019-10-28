@@ -10,7 +10,6 @@ import LineViewOfCollection from './LineViewOfCollection';
 
 var device_status_filter = [{ text: '正常', value: 1 }, { text: '故障', value: 2 }, { text: '待检', value: 3 }];///用于筛选设备状态的数据 选项
 var device_type_data_filter = []; ///用于筛选巡检点类型的数据 选项
-// var area_data_filter = []; ///用于筛选区域的数据 选项
 
 class EquipmentView extends Component {
     constructor(props) {
