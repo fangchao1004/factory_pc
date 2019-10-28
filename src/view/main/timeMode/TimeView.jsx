@@ -1,56 +1,13 @@
 import React, { Component } from 'react';
-import { Table, Button } from 'antd';
+import { Table, Button, Form, message, InputNumber } from 'antd';
 import moment from 'moment';
 import HttpApi from '../../util/HttpApi';
 import RecordDetailByTime from './RecordDetailByTime';
 
+const storage = window.localStorage;
+const localUserInfo = storage.getItem('userinfo')
 const today = moment().format('YYYY-MM-DD ');
 const tomorrow = moment().add(1, 'day').format('YYYY-MM-DD ');
-var list = [
-    {
-        time: ['01:10', '4:30'], /// 开始时间，结束时间
-        isCross: false, ///是否跨天
-        should: '/', /// 应该检设备数量
-        actually: '/',/// 实际检查设备数量
-        name: '夜班'
-    }, {
-        time: ['05:00', '7:30'],
-        isCross: false,
-        should: '/',
-        actually: '/',
-        name: '夜班'
-    }, {
-        time: ['08:10', '11:30'],
-        isCross: false,
-        should: '/',
-        actually: '/',
-        name: '白班'
-    }, {
-        time: ['13:10', '15:30'],
-        isCross: false,
-        should: '/',
-        actually: '/',
-        name: '白班'
-    }, {
-        time: ['16:10', '19:20'],
-        isCross: false,
-        should: '/',
-        actually: '/',
-        name: '中班'
-    }, {
-        time: ['19:30', '22:00'],
-        isCross: false,
-        should: '/',
-        actually: '/',
-        name: '中班'
-    }, {
-        time: ['22:10', '00:30'],
-        isCross: true,
-        should: '/',
-        actually: '/',
-        name: '中班'
-    }
-]
 /**
  * 时间区间 模块界面
  */
@@ -58,63 +15,26 @@ class TimeView extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            list: [],
+            isAdmin: localUserInfo && JSON.parse(localUserInfo).isadmin === 1,
+            dataSource: [],
             showDrawer: false,
             oneRecord: {}
         }
-    }
-    componentDidMount() {
-        this.getInfoAndChangeData();
-    }
-    closeHandler = () => {
-        this.setState({
-            showDrawer: false
-        })
-    }
-    getInfoAndChangeData = async () => {
-        for (let index = 0; index < list.length; index++) {
-            const element = list[index];
-            let beginTime = today + element.time[0] + ':00'
-            let endTime = element.isCross ? tomorrow + element.time[1] + ':00' : today + element.time[1] + ':00'
-            element.bt = beginTime;
-            element.et = endTime;
-            let result = await this.getCountInfoFromDB(element);
-            element.actually = result[0].count;
-        }
-        this.setState({
-            list
-        })
-    }
-
-    /**
-     * 从数据库查询统计数据
-     */
-    getCountInfoFromDB = (element) => {
-        let sql = `select count(distinct(device_id)) as count from records
-        where checkedAt>'${element.bt}' and checkedAt<'${element.et}'`;
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
-
-    render() {
-        const columns = [
+        this.columns = [
             {
                 title: '今日时间段划分',
-                dataIndex: 'time',
+                dataIndex: '/',
                 render: (text, record) => {
-                    return <div>{record.time[0]} ~ {record.time[1]} （{record.name}）</div>
+                    return <div>{record.begin} ~ {record.end} （{record.name}）</div>
                 }
             },
             {
                 title: '今日应检测设备数量',
                 dataIndex: 'should',
+                editable: true,
+                render: (text, record) => {
+                    return <div>{text !== null ? text : '/'}</div>
+                }
             },
             {
                 title: '今日实际检测设备数量',
@@ -135,12 +55,119 @@ class TimeView extends Component {
                 )
             }
         ]
+    }
+    componentDidMount() {
+        this.init();
+    }
+    closeHandler = () => {
+        this.setState({
+            showDrawer: false
+        })
+    }
+    init = async () => {
+        let result = await this.getAllowTimeInfo();
+        // console.log('result:', result);
+        this.getInfoAndChangeData(result);
+    }
+    getAllowTimeInfo = () => {
+        return new Promise((resolve, reject) => {
+            let sql = `select * from allow_time`;
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
+    getInfoAndChangeData = async (resultList) => {
+        for (let index = 0; index < resultList.length; index++) {
+            const element = resultList[index];
+            let beginTime = today + element.begin
+            let endTime = element.isCross === 1 ? tomorrow + element.end : today + element.end
+            element.bt = beginTime;
+            element.et = endTime;
+            let result = await this.getCountInfoFromDB(element);
+            element.actually = result[0].count;
+        }
+        this.setState({
+            dataSource: resultList.map((item, index) => { item.key = index + ''; return item })
+        })
+    }
+
+    /**
+     * 从数据库查询统计数据
+     */
+    getCountInfoFromDB = (element) => {
+        let sql = `select count(distinct(device_id)) as count from records
+        where checkedAt>'${element.bt}' and checkedAt<'${element.et}'`;
+        return new Promise((resolve, reject) => {
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
+
+    /**
+     * 保存到数据库
+     */
+    handleSave = async (data) => {
+        console.log('data:', data);
+        let result = await this.changeShouldNum(data);
+        if (result) { message.success('设置成功'); this.init() }
+        else { message.error('设置失败') }
+    }
+
+    changeShouldNum = (data) => {
+        return new Promise((resolve, reject) => {
+            let sql = `UPDATE allow_time SET should=${parseInt(data.should)} where id = ${data.id}`
+            let result = false;
+            HttpApi.obs({ sql }, data => {
+                if (data.data.code === 0) {
+                    result = true
+                }
+                resolve(result);
+            })
+        })
+    }
+
+
+    render() {
+        const { dataSource } = this.state;
+        const components = {
+            body: {
+                row: EditableFormRow,
+                cell: EditableCell,
+            },
+        };
+        const columns = this.columns.map(col => {
+            if (!col.editable) {
+                return col;
+            }
+            return {
+                ...col,
+                onCell: record => ({
+                    record,
+                    editable: col.editable,
+                    dataIndex: col.dataIndex,
+                    title: col.title,
+                    handleSave: this.handleSave,
+                }),
+            };
+        });
         return (
             <div>
                 <Table
+                    components={components}
+                    rowClassName={() => 'editable-row'}
                     bordered
                     columns={columns}
-                    dataSource={list.map((item, index) => { item.key = index + ''; return item })}
+                    dataSource={dataSource}
                 />
                 <RecordDetailByTime visible={this.state.showDrawer} record={this.state.oneRecord} close={this.closeHandler} />
             </div>
@@ -149,3 +176,88 @@ class TimeView extends Component {
 }
 
 export default TimeView;
+
+const EditableContext = React.createContext();
+
+const EditableRow = ({ form, index, ...props }) => (
+    <EditableContext.Provider value={form}>
+        <tr {...props} />
+    </EditableContext.Provider>
+);
+
+const EditableFormRow = Form.create()(EditableRow);
+
+class EditableCell extends React.Component {
+    state = {
+        editing: false,
+    };
+
+    toggleEdit = () => {
+        const editing = !this.state.editing;
+        this.setState({ editing }, () => {
+            if (editing) {
+                this.input.focus();
+            }
+        });
+    };
+
+    save = e => {
+        const { record, handleSave } = this.props;
+        this.form.validateFields((error, values) => {
+            if (error && error[e.currentTarget.id]) {
+                return;
+            }
+            this.toggleEdit();
+            handleSave({ ...record, ...values });
+        });
+    };
+
+    renderCell = form => {
+        this.form = form;
+        const { children, dataIndex, record, title } = this.props;
+        const { editing } = this.state;
+        return editing ? (
+            <Form.Item style={{ margin: 0 }}>
+                {form.getFieldDecorator(dataIndex, {
+                    rules: [
+                        {
+                            required: true,
+                            message: `${title} 不可为空！`,
+                        },
+                    ],
+                    initialValue: record[dataIndex],
+                })(<InputNumber style={{ width: '100%' }} ref={node => (this.input = node)} onPressEnter={this.save} onBlur={this.save} />)}
+            </Form.Item>
+        ) : (
+                <div
+                    className="editable-cell-value-wrap"
+                    style={{ paddingRight: 24 }}
+                    onClick={this.toggleEdit}
+                >
+                    {children}
+                </div>
+            );
+    };
+
+    render() {
+        const {
+            editable,
+            dataIndex,
+            title,
+            record,
+            index,
+            handleSave,
+            children,
+            ...restProps
+        } = this.props;
+        return (
+            <td {...restProps}>
+                {editable ? (
+                    <EditableContext.Consumer>{this.renderCell}</EditableContext.Consumer>
+                ) : (
+                        children
+                    )}
+            </td>
+        );
+    }
+}
