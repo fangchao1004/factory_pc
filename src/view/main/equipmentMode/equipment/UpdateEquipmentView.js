@@ -19,13 +19,13 @@ function UpdateEquipmentForm(props) {
         <Form.Item label="区域" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             {getFieldDecorator('area_id', {
                 initialValue: props.device.area_id,
-                rules: [{ required: true, message: '请选择巡检点区域' }]
+                rules: [{ required: true, message: '请选择巡检点区域(精确到第三级)' }]
             })(<TreeSelect
                 treeNodeFilterProp="title"
                 showSearch
                 dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
                 treeData={props.areas}
-                placeholder="请选择所属具体设备范围"
+                placeholder="请选择巡检点区域(精确到第三级)"
             />)}
         </Form.Item>
         <Form.Item label="巡检点类型" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>

@@ -73,20 +73,20 @@ function updateArea3From(props) {
         <Form.Item label="所属上级位置:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('area12_id', {
                 initialValue: props.area.area1_id + '-' + props.area.area2_id,
-                rules: [{ required: true, message: '请选择所属的上级(精确到二级)' }]
+                rules: [{ required: true, message: '请选择所属的上级(精确到第二级)' }]
             })(<TreeSelect
                 treeNodeFilterProp="title"
                 showSearch
                 dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
                 treeData={treeData}
-                placeholder="请选择所属的上级(精确到二级)"
+                placeholder="请选择所属的上级(精确到第二级)"
             />)}
         </Form.Item>
-        <Form.Item label="三级设备范围:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
+        <Form.Item label="第三级设备范围:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('area3_name', {
                 initialValue: props.area.area3_name,
-                rules: [{ required: true, message: '请输入三级设备范围名称' }]
-            })(<Input placeholder='请输入三级设备范围名称'></Input>)}
+                rules: [{ required: true, message: '请输入第三级设备范围名称' }]
+            })(<Input placeholder='请输入第三级设备范围名称'></Input>)}
         </Form.Item>
     </Form>
 }
