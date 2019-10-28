@@ -1,6 +1,8 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Spin, Drawer, Popconfirm, Divider } from 'antd'
-import HttpApi, { Testuri } from '../../util/HttpApi'
+import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Drawer, Popconfirm, Divider } from 'antd'
+import HttpApi from '../../util/HttpApi'
+import ShowImgView from './ShowImgView';
+
 import moment from 'moment'
 const { Step } = Steps;
 const { TextArea } = Input;
@@ -853,17 +855,7 @@ export default class BugCompletedView extends Component {
                 >
                     {this.renderRunerModal()}
                 </Drawer>
-                <Drawer
-                    title="查看图片"
-                    placement="left"
-                    visible={this.state.showModal1}
-                    onClose={() => { this.setState({ showModal1: false }); }}
-                    width={450}
-                    bodyStyle={{ padding: 10 }}
-                >
-                    <div style={{ textAlign: 'center', display: this.state.showLoading ? 'block' : 'none' }}><Spin tip='努力加载中。。。' /></div>
-                    <img alt='' src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} style={{ width: 430, height: 430 / 3 * 4, display: this.state.showLoading ? 'none' : 'block' }} onLoad={() => { console.log('图片加载完成'); this.setState({ showLoading: false }) }} />
-                </Drawer>
+                <ShowImgView showModal={this.state.showModal1} cancel={() => { this.setState({ showModal1: false }) }} showLoading={this.state.showLoading} imguuid={this.state.imguuid} />
             </div>
         );
     }
