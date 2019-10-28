@@ -34,7 +34,7 @@ function AddTaskForm(props) {
             {getFieldDecorator('isMessage', {
                 initialValue: isMessage,
                 rules: [{ required: false, message: '请选择是否短信通知' }]
-            })(<Switch checkedChildren="开" unCheckedChildren="关" defaultChecked={isMessage} onChange={(v)=>{setIsMessage(v)}} />)}
+            })(<Switch disabled checkedChildren="开" unCheckedChildren="关" defaultChecked={isMessage} onChange={(v)=>{setIsMessage(v)}} />)}
         </Form.Item>
     </Form >
 }

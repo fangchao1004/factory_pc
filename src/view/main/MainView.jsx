@@ -233,12 +233,12 @@ export default class MainView extends Component {
                             <Menu.Item key="消费记录">
                                 <Icon type="ordered-list" />
                                 <span>消费记录</span>
-                                <Link to={`${this.props.match.url}/transaction`} />
+                                <Link to={`${this.props.match.url}/transaction222`} />
                             </Menu.Item>
                             <Menu.Item key="消费申请">
                                 <Icon type="form" />
                                 <span>消费申请</span>
-                                <Link to={`${this.props.match.url}/applytrans`} />
+                                <Link to={`${this.props.match.url}/applytrans222`} />
                             </Menu.Item>
                         </SubMenu>
                         <SubMenu key="考勤" title={
@@ -250,12 +250,12 @@ export default class MainView extends Component {
                             <Menu.Item key="考勤信息">
                                 <Icon type="contacts" />
                                 <span>考勤信息</span>
-                                <Link to={`${this.props.match.url}/attendance`} />
+                                <Link to={`${this.props.match.url}/attendance222`} />
                             </Menu.Item>
                             <Menu.Item key="工作排班">
                                 <Icon type="schedule" />
                                 <span>工作排班</span>
-                                <Link to={`${this.props.match.url}/schedule`} />
+                                <Link to={`${this.props.match.url}/schedule222`} />
                             </Menu.Item>
                         </SubMenu>
                         {/* <Menu.Item key="车辆">
