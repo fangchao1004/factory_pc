@@ -1,11 +1,12 @@
 import React, { Component, Fragment } from 'react';
-import { Checkbox, Input, Divider, Row, Col } from 'antd';
+import { Checkbox, Input, Divider, Row, Col, Empty } from 'antd';
 import { Testuri } from '../../../util/HttpApi';
 
 const { TextArea } = Input;
 /**
  * 一次record记录中所包含的bugs的详情
  * 位于抽屉界面显示
+ * 很重要！！！
  * 
  * bugs数据+采集数据改造
  */
@@ -28,30 +29,32 @@ class OneRecordDetialView extends Component {
     renderView = () => {
         if (!this.state.renderData) { return }
         let titleComponent = this.renderTitleView();
-        let bugContentComponent = this.renderBugView();
-        let collectContentComponent = this.renderCollectView();
+        let bugContentComponent = this.state.renderData.content.length > 0 ? this.renderBugView() : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />;
+        let collectContentComponent = this.state.renderData.collect.length > 0 ? this.renderCollectView() : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />;
         return (<Fragment>
             {titleComponent}
-            {this.state.renderData.content.length > 0 ?
-                <Divider orientation="left">缺陷展示:</Divider> : null}
+            <Divider orientation="left">缺陷展示:</Divider>
             {bugContentComponent}
-            {this.state.renderData.collect.length > 0 ?
-                <Divider orientation="left">采集数据:</Divider> : null}
+            <Divider orientation="left">采集数据:</Divider>
             {collectContentComponent}
         </Fragment>)
     }
     ///渲染标题
     renderTitleView = () => {
         return (<div style={{ width: '100%', display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-            <div style={{ fontWeight: 600, fontSize: 24, color: '#40A9FF' }}>{this.state.renderData.table_name}</div>
+            <div style={{ fontWeight: 600, fontSize: 24, color: '#40A9FF' }}>{this.state.renderData.table_name || '/'}</div>
             <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: 16, marginTop: 10, marginBottom: 20 }}>
-                <span>设备名: {this.state.renderData.device_name}</span>
-                <span>上传者: {this.state.renderData.user_name}</span>
+                <span>设备名: {this.state.renderData.device_name || '/'}</span>
+                <span>上传者: {this.state.renderData.user_name || '/'}</span>
             </div>
         </div >)
     }
     ///渲染bug界面
     renderBugView = () => {
+        if (!this.state.renderData) {
+            console.log('this.state.renderData is null return');
+            return;
+        }
         console.log('渲染bug界面', this.state.renderData.content);
 
         ///将content中，bug_id 值不为null都的提取处理

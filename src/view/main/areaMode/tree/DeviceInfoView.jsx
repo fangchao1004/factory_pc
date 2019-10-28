@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Table, Button, Drawer, message } from 'antd';
 import OneRecordDetialView from '../../equipmentMode/equipment/OneRecordDetialView';
 import HttpApi from '../../../util/HttpApi';
-import moment from 'moment';
 
 /**
  * 设备巡检记录表
@@ -66,7 +65,8 @@ class DeviceInfoView extends Component {
             user_name: record.user_name,
             content: bugs_info_arr,///bugs数据
             collect: collectAndInputDataList,///采集的数据
-            updatedAt: record.updatedAt
+            updatedAt: record.updatedAt,
+            checkedAt: record.checkedAt
         }
         this.setState({ oneRecordData, drawerVisible2: true })
     }
@@ -90,9 +90,9 @@ class DeviceInfoView extends Component {
             children: [
                 {
                     title: '时间',
-                    dataIndex: 'createdAt',
+                    dataIndex: 'checkedAt',
                     render: (text, record) => (
-                        <div>{moment(text).format('YYYY-MM-DD HH:mm:ss')}</div>
+                        <div>{text || '/'}</div >
                     )
                 },
                 {
@@ -140,7 +140,7 @@ class DeviceInfoView extends Component {
                         <Drawer
                             title={<div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', }}>
                                 <span>当次记录</span>
-                                <span>{moment(this.state.oneRecordData.updatedAt).format('YYYY-MM-DD HH:mm:ss')}</span>
+                                <span>{this.state.oneRecordData.checkedAt}</span>
                             </div>}
                             placement="left"
                             width={500}

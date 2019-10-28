@@ -289,7 +289,7 @@ class EquipmentView extends Component {
                     <Drawer
                         title={<div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', }}>
                             <span>当次记录</span>
-                            <span>{moment(this.state.oneRecordData.updatedAt).format('YYYY-MM-DD HH:mm:ss')}</span>
+                            <span>{this.state.oneRecordData.checkedAt}</span>
                         </div>}
                         placement="left"
                         width={500}
@@ -303,7 +303,7 @@ class EquipmentView extends Component {
                 <Drawer
                     title={<div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', }}>
                         <span>最新记录</span>
-                        <span>{moment(this.state.oneRecordData.updatedAt).format('YYYY-MM-DD HH:mm:ss')}</span>
+                        <span>{this.state.oneRecordData.checkedAt}</span>
                     </div>}
                     placement="right"
                     width={500}
@@ -417,7 +417,8 @@ class EquipmentView extends Component {
             user_name: record.user_name,
             content: bugs_info_arr,///bugs数据
             collect: collectAndInputDataList,///采集的数据
-            updatedAt: record.updatedAt
+            updatedAt: record.updatedAt,
+            checkedAt: record.checkedAt
         }
         if (v === 2) {
             this.setState({
