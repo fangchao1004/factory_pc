@@ -250,6 +250,10 @@ class StaffView extends Component {
                     bordered
                     dataSource={this.state.users}
                     columns={columns}
+                    pagination={{
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                    }}
                 />
                 <AddStaffView onOk={this.addStaffOnOk} onCancel={this.addStaffOnCancel} visible={this.state.addStaffVisible} />
                 <UpdateStaffView staff={this.state.updateStaffData} onOk={this.updateStaffOnOk}

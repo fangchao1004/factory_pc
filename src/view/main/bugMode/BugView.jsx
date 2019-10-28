@@ -842,6 +842,10 @@ export default class BugView extends Component {
                     bordered
                     dataSource={this.state.data}
                     columns={columns}
+                    pagination={{
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                    }}
                 />
                 <AddBugView
                     showModal={this.state.showModal7}

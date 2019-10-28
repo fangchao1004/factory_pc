@@ -266,7 +266,9 @@ class TaskFromMeView extends Component {
             {
                 title: '任务主题',
                 dataIndex: 'title',
-                // width: '15%'
+                render: (text, record) => {
+                    return <div>{text || '/'}</div>
+                }
             },
             {
                 title: '执行人',
@@ -358,6 +360,10 @@ class TaskFromMeView extends Component {
                     bordered
                     dataSource={this.state.tasks}
                     columns={columns}
+                    pagination={{
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                    }}
                 />
                 <AddTaskView onOk={this.addTaskOnOk} onCancel={this.addTaskOnCancel} visible={this.state.addTaskVisible} />
                 <PreviewTaskView task={this.state.updateTaskData} onOk={this.updateTaskOnOk}

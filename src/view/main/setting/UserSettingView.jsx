@@ -20,7 +20,7 @@ export default function UserSettingView(props) {
             // { title: '更新', description: '1.1.3 增加巡检点处-区域和巡检点类型筛选' }
             // { title: '更新', description: '1.1.4 多级区域' }
             // { title: '更新', description: '1.1.5 多级区域-自由选择' }
-            { title: '更新', description: '1.1.6 打点时间修改' }
+            { title: '更新', description: '1.1.6 打点时间修改-添加巡检时间段模块' }
 
         ]
         setData(listData)

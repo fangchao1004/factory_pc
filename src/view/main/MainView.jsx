@@ -8,7 +8,7 @@ import AreaModeRoot from './areaMode/AreaModeRoot'
 import TimeModeRoot from './timeMode/TimeModeRoot'
 import StaffModeRoot from './staffMode/StaffModeRoot'
 import TableModeRoot from './tableMode/TableModeRoot';
-import UserModeRoot from './usercenter/UserModeRoot'
+import TaskModeRoot from './taskMode/TaskModeRoot'
 import BugModeRoot from './bugMode/BugModeRoot';
 import BugAboutMeModeRoot from './bugAboutMeMode/BugAboutMeModeRoot';
 import SettingViewRoot from './setting/SettingViewRoot';
@@ -222,7 +222,7 @@ export default class MainView extends Component {
                             <span>任务</span>
                             <Badge count={this.state.aboutMeTaskNum} overflowCount={99} style={{ marginLeft: 30 }}>
                             </Badge>
-                            <Link to={`${this.props.match.url}/user`} />
+                            <Link to={`${this.props.match.url}/task`} />
                         </Menu.Item>
                         <SubMenu key="消费" title={
                             <span>
@@ -346,8 +346,8 @@ class ContentView extends Component {
                 />
                 <Route
                     exact
-                    path={`${this.props.match.path}/user`}
-                    component={() => (storage.getItem('userinfo') ? <UserModeRoot /> : <Redirect to='/' />)}
+                    path={`${this.props.match.path}/task`}
+                    component={() => (storage.getItem('userinfo') ? <TaskModeRoot /> : <Redirect to='/' />)}
                 />
                 <Route
                     exact

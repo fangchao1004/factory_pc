@@ -166,12 +166,13 @@ class TaskToMeView extends Component {
             {
                 title: '任务主题',
                 dataIndex: 'title',
-                // width: '20%',
+                render: (text, record) => {
+                    return <div>{text || '/'}</div>
+                }
             },
             {
                 title: '分配人',
                 dataIndex: 'from',
-                // width: '15%',
                 render: (text, record) => {
                     var u
                     this.state.users.some(user => {
@@ -255,6 +256,10 @@ class TaskToMeView extends Component {
                     bordered
                     dataSource={this.state.tasks}
                     columns={columns}
+                    pagination={{
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                    }}
                 />
                 <UpdateTaskView task={this.state.updateTaskData} onOk={this.updateTaskOnOk}
                     onCancel={this.updateTaskOnCancel} visible={this.state.updateTaskVisible} />

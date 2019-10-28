@@ -17,7 +17,7 @@ const contentListNoTitle = {
     TaskToMeView: <TaskToMeView />
 };
 
-class UserModeRoot extends Component {
+class TaskModeRoot extends Component {
     state = {
         key: 'TaskToMeView',
         noTitleKey: 'TaskToMeView',
@@ -42,4 +42,4 @@ class UserModeRoot extends Component {
     }
 }
 
-export default UserModeRoot;
+export default TaskModeRoot;
