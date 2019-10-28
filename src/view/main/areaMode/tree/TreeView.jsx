@@ -6,6 +6,10 @@ import "./treeView.css"
 import DeviceInfoView from './DeviceInfoView';
 
 var treeNodeList = null;
+/**
+ * 巡检区域
+ * 分级展示界面
+ */
 export default class TreeView extends Component {
     constructor(props) {
         super(props);

@@ -79,13 +79,13 @@ function AddArea3From(props) {
     return <Form>
         <Form.Item label="所属上级位置:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('area12_id', {
-                rules: [{ required: true, message: '请选择所属的上级区域位置' }]
+                rules: [{ required: true, message: '请选择所属的上级(精确到二级)' }]
             })(<TreeSelect
                 treeNodeFilterProp="title"
                 showSearch
                 dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
                 treeData={treeData}
-                placeholder="请选择所属的上级区域位置"
+                placeholder="请选择所属的上级(精确到二级)"
             />)}
         </Form.Item>
         <Form.Item label="三级设备范围:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>

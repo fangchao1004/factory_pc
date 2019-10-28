@@ -17,13 +17,13 @@ function AddEquipmentForm(props) {
     return <Form>
         <Form.Item label="区域" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             {getFieldDecorator('area_id', {
-                rules: [{ required: true, message: '请选择巡检点区域' }]
+                rules: [{ required: true, message: '请选择巡检点区域(精确到三级)' }]
             })(<TreeSelect
                 treeNodeFilterProp="title"
                 showSearch
                 dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
                 treeData={props.areas}
-                placeholder="请选择所属具体设备范围"
+                placeholder="请选择巡检点区域(精确到三级)"
             />)}
         </Form.Item>
         <Form.Item label="巡检点类型" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
@@ -41,11 +41,6 @@ function AddEquipmentForm(props) {
                 rules: [{ required: true, message: '请输入巡检点名称' }]
             })(<Input></Input>)}
         </Form.Item>
-        {/* <Form.Item label="备注" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('remark', {
-                rules: [{ required: false, message: '请输入设备备注' }]
-            })(<Input></Input>)}
-        </Form.Item> */}
     </Form>
 }
 
@@ -80,7 +75,7 @@ export default class AddEquipmentView extends Component {
         let typeResult = await this.getTypeInfo();
         let nfcResult = await this.getNfcInfo();
         let result = await HttpApi.getArea123Info();
-        let resultList = transfromDataTo3level(result);
+        let resultList = transfromDataTo3level(result, false);
         // console.log('resultList', resultList);
         this.setState({ areas: resultList, types: typeResult, nfcs: nfcResult })
     }

@@ -25,8 +25,12 @@ function omitTextLength(text, targetlength) {
  * 将数据库查询的 数据进行 三层结构转换
  * 
  * 123级
+ * 
+ * 三级的节点都可以被选择 (默认三级都可选)
+ * 只有在添加 设备时 只能选择第三级
+ * 在添加缺陷时，三级区域范围都可以被选择
  */
-export function transfromDataTo3level(area123result) {
+export function transfromDataTo3level(area123result, all3 = true) {
     let tempObj = {};
     area123result.forEach((item) => {
         if (tempObj[item.area2_id]) { /// 如果它已经有了某个二级属性
@@ -38,7 +42,7 @@ export function transfromDataTo3level(area123result) {
                     title: item.area2_name,
                     value: item.area1_id + '-' + item.area2_id,
                     key: item.area1_id + '-' + item.area2_id,
-                    // selectable: false,
+                    selectable: all3,
                     children: [{ value: item.area1_id + '-' + item.area2_id + '-' + item.area3_id, title: item.area3_name, key: item.area1_id + '-' + item.area2_id + '-' + item.area3_id }]
                 }
             }
@@ -47,7 +51,7 @@ export function transfromDataTo3level(area123result) {
                     title: item.area2_name,
                     value: item.area1_id + '-' + item.area2_id,
                     key: item.area1_id + '-' + item.area2_id,
-                    // selectable: false,
+                    selectable: all3,
                     children: []
                 };
             }
@@ -64,7 +68,7 @@ export function transfromDataTo3level(area123result) {
             title: item.area1_name,
             value: item.area1_id + '',
             key: item.area1_id + '',
-            // selectable: false,
+            selectable: all3,
             children: []
         }
     })
