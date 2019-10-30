@@ -139,7 +139,7 @@ class DeviceInfoView extends Component {
                         />
                         <Drawer
                             title={<div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', }}>
-                                <span>当次记录</span>
+                                <span>当次巡检记录</span>
                                 <span>{this.state.oneRecordData.checkedAt}</span>
                             </div>}
                             placement="left"

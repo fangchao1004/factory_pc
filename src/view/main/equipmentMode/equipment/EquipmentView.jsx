@@ -291,7 +291,7 @@ class EquipmentView extends Component {
                     {this.renderCollectionLineView()}
                     <Drawer
                         title={<div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', }}>
-                            <span>当次记录</span>
+                            <span>当次巡检记录</span>
                             <span>{this.state.oneRecordData.checkedAt}</span>
                         </div>}
                         placement="left"
@@ -438,7 +438,7 @@ class EquipmentView extends Component {
     renderDeviceRecordsView = () => {
         const columns = [
             {
-                title: '时间',
+                title: '巡检时间',
                 dataIndex: 'checkedAt',
                 render: (text, record) => (
                     <div>{text || '/'}</div>

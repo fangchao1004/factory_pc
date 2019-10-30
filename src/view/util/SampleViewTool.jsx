@@ -5,7 +5,7 @@ const RadioItem = Radio.RadioItem;
 const CheckboxItem = Checkbox.CheckboxItem;
 
 // const optionsData = [{ "value": "1", "text": "文本输入框" }, { "value": "2", "text": "数字输入框" }, { "value": "3", "text": "单选" },
-// { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" },{ "value": "10", "text": "测温组件" }, { "value": "11", "text": "测震组件" }];
+// { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" },{ "value": "10", "text": "测温组件" }, { "value": "11", "text": "测振组件" }];
 
 /**
  * 模板表渲染器
@@ -116,9 +116,18 @@ export default class SampleViewTool {
                 <List>
                     {element.title_name}
                     <div style={{ display: 'flex', flexDirection: 'row' }}>
-                        <Input style={{ width: '40%', marginLeft: 80 }} disabled placeholder={'所测震动数据'}></Input>
+                        <Input style={{ width: '40%', marginLeft: 80 }} disabled placeholder={'所测振动数据'}></Input>
                         <Button style={{ width: 100, marginLeft: 50, height: 30, }} >开始测量</Button>
                     </div>
+                </List>
+            </div>
+        }
+
+        let renderCommon = (element) => {
+            return <div key={element.key} >
+                <List style={{ height: 40 }}>
+                    <span>{element.title_name}</span>
+                    <span style={{ color: 'blue' }}>{element.title_remark}</span>
                 </List>
             </div>
         }
@@ -140,11 +149,13 @@ export default class SampleViewTool {
                 } else if (element.type_id === "6") {
                     viewArr.push(renderImagePicker(element))
                 } else if (element.type_id === "7") {
-                    viewArr.push(renderTitle(element))
-                } else if (element.type_id === "10") {
+                    viewArr.push(renderTitle(element))///标题
+                } else if (element.type_id === "10") {///测温
                     viewArr.push(renderCollectTem(element))
-                } else if (element.type_id === "11") {
+                } else if (element.type_id === "11") {///测振
                     viewArr.push(renderCollectShake(element))
+                } else if (element.type_id === "12") { ///默认通用-最新要求 类似于多选，但是不需要选项
+                    viewArr.push(renderCommon(element))
                 }
             });
         }

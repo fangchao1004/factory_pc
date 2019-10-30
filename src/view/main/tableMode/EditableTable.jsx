@@ -6,9 +6,9 @@ import HttpApi from '../../util/HttpApi'
 const Option = Select.Option;
 
 // const optionsData = [{ "value": "1", "text": "文本输入框" }, { "value": "2", "text": "数字输入框" }, { "value": "3", "text": "单选" },
-// { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" }, { "value": "7", "text": "表单类型",{ "value": "10", "text": "测温组件" }, { "value": "11", "text": "测震组件" } }];
+// { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" }, { "value": "7", "text": "表单类型",{ "value": "10", "text": "测温组件" }, { "value": "11", "text": "测振组件" },{ "value": "12", "text": "默认" }];
 
-const optionsData = [{ "value": "2", "text": "数字输入框" }, { "value": "4", "text": "多选" }, { "value": "7", "text": "表单类型" }, { "value": "10", "text": "测温组件" }, { "value": "11", "text": "测震组件" }];
+const optionsData = [{ "value": "7", "text": "表单类型" }, { "value": "12", "text": "通用" }, { "value": "10", "text": "测温组件" }, { "value": "11", "text": "测振组件" }];
 ////测试数据， 实际数据要从巡检点类型表device_type表中获取
 // var titleData = [{ "value": "1", "text": "水表报告单" }, { "value": "2", "text": "电表报告单" }, { "value": "3", "text": "锅炉报告单" }]
 // var titleData = [];
@@ -28,6 +28,7 @@ export default class EditableTable extends Component {
         title_name: '表头',
         type_id: '7',
         default_values: '',
+        title_remark: ''
       }],
       count: "1",
       modalvisible: false,
@@ -75,31 +76,30 @@ export default class EditableTable extends Component {
 
   render() {
     const { dataSource } = this.state;
-    // console.log('dataSource:', dataSource);
     const columns = [
-      // {
-      //   title: '编号',
-      //   dataIndex: 'key',
-      //   // width: '8%',
-      //   render: (text, record) => (
-      //     // <Input value={text} />
-      //     <div>{text}</div>
-      //   )
-      // },
       {
         title: '标签',
         dataIndex: 'title_name',
         // width: '15%',
         render: (text, record) => {
           return (
-            <Input disabled={(record.type_id === '7' && record.key === '0') || (record.type_id === '3' && record.key === '1')}
+            <Input disabled={record.type_id === '7' && record.key === '0'}
               value={text} onChange={(e) => this.onChangeHandler(record, e.target.value, "title_name")}></Input>
+          )
+        }
+      }, {
+        title: '标题备注',
+        dataIndex: 'title_remark',
+        render: (text, record) => {
+          return (
+            <Input disabled={record.type_id !== '12'}
+              placeholder={record.type_id === '12' ? '可以输入标题备注' : '/'}
+              value={text} onChange={(e) => this.onChangeHandler(record, e.target.value, "title_remark")}></Input>
           )
         }
       }, {
         title: '元素类型',
         dataIndex: 'type_id',
-        // width: '15%',
         render: (text, record) => {
           // console.log(record);
           let Options = [];
@@ -120,26 +120,25 @@ export default class EditableTable extends Component {
           )
         }
       }, {
-        title: '默认值 /或/ 选择器的选项',
+        title: '选择器的选项',
         dataIndex: 'default_values',
         render: (text, record) => {
           let Options = [];
           this.state.titleData.forEach((item) => {
-            // console.log(item);
             Options.push(<Option key={item.value} disabled={this.state.haveExistSampleIDs.indexOf(item.value) !== -1} value={item.value}>{item.text}</Option>)
           })
           return (
             record.type_id === '7' ? ///标题--不可修改---是个选项
-              <Select value={text} style={{ width: "100%" }}
+              <Select style={{ width: "100%" }}
+                placeholder='请选择表单类型'
                 onChange={(value, option) => this.onChangeHandler(record, value, "default_values", option.props.children)}
               >
                 {Options}
               </Select> :
               <Input
-                disabled={record.type_id === '6' || (record.type_id === '3' && record.key === '1')}
-                type={record.type_id === '2' ? 'number' : 'text'}
-                placeholder={"设置默认值或默认选项-选项之间请用/隔开"}
                 value={text}
+                disabled={record.type_id !== '4'}
+                placeholder={record.type_id !== '4' ? "/" : "请设置选项-选项之间请用/隔开"}
                 onChange={(e) => this.onChangeHandler(record, e.target.value, "default_values")}></Input>
           )
         }
@@ -218,8 +217,9 @@ export default class EditableTable extends Component {
     const newData = {
       key: count,
       title_name: `标题${parseInt(count)}`,
-      type_id: "4",
+      type_id: "12", ///默认添加的是 id=12 的 通用组件（无需默认值）
       default_values: '',
+      title_remark: '',///标题备注
     };
     this.setState({
       dataSource: [...dataSource, newData],
@@ -234,11 +234,12 @@ export default class EditableTable extends Component {
     copyData.forEach(element => {
       if (element.key === record.key) {
         element[targetField] = val
-        if (targetField === 'type_id' && val === '6') {
-          element['default_values'] = []
+        if (targetField === 'type_id' && val === '12') {
+          element['default_values'] = ''
+        } else if (targetField === 'type_id' && val !== '12') {
+          element['title_remark'] = ''
         }
         if (record.key === '0') {
-          // console.log(extraData);
           element.extra_value = extraData
         }
       }
@@ -273,7 +274,7 @@ export default class EditableTable extends Component {
         isCompleteFlag = false
         return
       }
-      else if ((element.type_id === '3' && !element.default_values) || (element.type_id === '4' && !element.default_values)) {
+      else if (element.type_id === '4' && !element.default_values) {
         // console.error('缺少选项');
         isCompleteFlag = false
         return
@@ -316,7 +317,7 @@ export default class EditableTable extends Component {
     sample_data.table_name = table_name;
     sample_data.content = JSON.stringify(contentArr);
 
-    // console.log("模版数据L：", sample_data);
+    console.log("模版数据L：", sample_data);
     // return;
     HttpApi.uploadSample(sample_data, (res) => {
       // console.log(res);

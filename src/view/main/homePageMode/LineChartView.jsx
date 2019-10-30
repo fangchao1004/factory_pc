@@ -51,9 +51,10 @@ class LineChartView extends Component {
             allcountForToday += item.status_count
         })
         let todayObj = {}
-        todayObj.总共 = allcountForToday;
-        todayObj.故障 = currentDeviceStatusData[1].status_count;
-        todayObj.巡检 = todayHasDetectCount.todayDetectCount;
+        // console.log(' currentDeviceStatusData:', currentDeviceStatusData);
+        todayObj.总共 = allcountForToday || 0;
+        todayObj.故障 = currentDeviceStatusData[1] && currentDeviceStatusData[1].status_count ? currentDeviceStatusData[1].status_count : 0;
+        todayObj.巡检 = todayHasDetectCount.todayDetectCount || 0;
         todayObj.date = moment().format('DD');
         dataArr.push(todayObj);
         this.setState({

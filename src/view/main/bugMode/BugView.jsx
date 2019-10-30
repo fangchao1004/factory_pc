@@ -720,7 +720,12 @@ export default class BugView extends Component {
             {
                 key: 'content', dataIndex: 'content', title: '内容', render: (text, record) => {
                     let obj = JSON.parse(text);
-                    return <div><div style={{ color: '#000', fontWeight: 900 }}>{record.title_name}</div><div>{obj.select}</div><div>{obj.text}</div></div>
+                    return <div>
+                        <div style={{ color: '#000', fontWeight: 900 }}>{record.title_name}<span style={{ color: '#41A8FF' }}>{record.title_remark}</span></div>
+                        <div>{obj.select}</div>
+                        {record.title_name ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
+                        <div>{obj.text}</div>
+                    </div>
                 }
             },
             {
@@ -799,7 +804,10 @@ export default class BugView extends Component {
                         str = '专工'
                     } else if (currentStatus === 3) {
                         // str = '运行人员'
-                        let currentUserID = remarkObj['2'][remarkObj['2'].length - 1].to;
+                        let currentUserID;
+                        if (remarkObj['2'] && remarkObj['2'].length > 0) {
+                            currentUserID = remarkObj['2'][remarkObj['2'].length - 1].to;
+                        }
                         this.state.userData.forEach((item) => {
                             if (item.id === currentUserID) {
                                 str = item.name

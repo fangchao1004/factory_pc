@@ -170,6 +170,7 @@ class AddBugView extends Component {
                                 valueObj.area_remark = this.state.area_remark;
                                 valueObj.status = 0;
                                 valueObj.checkedAt = moment().format('YYYY-MM-DD HH:mm:ss');
+                                valueObj.remark = JSON.stringify({ '0': [], '1': [], '2': [], '3': [] });
                                 HttpApi.addBugInfo(valueObj, (res) => {
                                     if (res.data.code === 0) {
                                         message.success('上传成功');

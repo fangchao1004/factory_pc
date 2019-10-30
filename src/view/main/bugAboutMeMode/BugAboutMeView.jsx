@@ -837,7 +837,10 @@ export default class BugAboutMeView extends Component {
                         str = '专工'
                     } else if (currentStatus === 3) {
                         // str = '运行人员'
-                        let currentUserID = remarkObj['2'][remarkObj['2'].length - 1].to;
+                        let currentUserID;
+                        if (remarkObj['2'] && remarkObj['2'].length > 0) {
+                            currentUserID = remarkObj['2'][remarkObj['2'].length - 1].to;
+                        }
                         this.state.userData.forEach((item) => {
                             if (item.id === currentUserID) {
                                 str = item.name

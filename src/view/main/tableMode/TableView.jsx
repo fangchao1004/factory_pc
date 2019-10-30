@@ -7,7 +7,7 @@ var TagColor = ['magenta', 'orange', 'green', 'blue', 'purple', 'geekblue', 'cya
 var sample_data = [];
 var device_type_data = [];
 /**
- * 表单模版展示(卡片)界面--（支持修改和删除）
+ * 表单模版展示(卡片)界面--（仅支持删除）
  */
 class TableView extends Component {
     constructor(props) {
@@ -42,7 +42,7 @@ class TableView extends Component {
     }
     getDeviceTypeData = () => {
         let p = new Promise((resolve, reject) => {
-            HttpApi.getDeviceTypeInfo({}, (res) => {
+            HttpApi.getDeviceTypeInfo({ effective: 1 }, (res) => {
                 if (res.data.code === 0) {
                     resolve(res.data.data)
                 }
@@ -100,6 +100,7 @@ class TableView extends Component {
         return cellsArr
     }
     onConfirmDeleteHandler = (element) => {
+        ///这里不光要删除 sample,还要把 用该sample的所有某类设备的 record 全部删除！！！！
         HttpApi.obs({ sql: `update samples set effective = 0 where id = ${element.id} ` }, (res) => {
             // HttpApi.removeSampleInfo({ id: element.id }, (res) => {
             if (res.data.code === 0) {

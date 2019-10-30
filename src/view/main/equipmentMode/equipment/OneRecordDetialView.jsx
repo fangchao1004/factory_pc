@@ -65,7 +65,7 @@ class OneRecordDetialView extends Component {
         // console.log('state.renderData.content:',this.state.renderData);
         for (const oneBug of this.state.renderData.content) {
             let oneBugContent = [];
-            oneBugContent.push(<div key={0} style={{ color: '#40A9FF' }}>{oneBug.key + '. ' + oneBug.title_name}</div>)
+            oneBugContent.push(<div key={0} >{oneBug.key + '. ' + oneBug.title_name}<span style={{ color: '#40A9FF' }}>{oneBug.title_remark}</span></div>)
             oneBugContent.push(<div key={1} style={{ marginBottom: 20 }}>{this.renderOneSelectOption(JSON.parse(oneBug.content))}</div>);
             oneBugContent.push(<div key={2} style={{ marginBottom: 20 }}>{oneBug.major_name ? '缺陷专业 ' + oneBug.major_name : null}</div>);
             oneBugContent.push(<div key={3} style={{ marginBottom: 20 }}>{this.renderOneTextArea(JSON.parse(oneBug.content))}</div>);
