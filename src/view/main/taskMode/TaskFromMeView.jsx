@@ -110,10 +110,10 @@ class TaskFromMeView extends Component {
                 toIds.push(items[1])
             }
         })
-        let stepRemark = {};
-        stepRemark['0'] = [{ from: userinfo.id + '', to: toIds.join(','), remark: null, time: moment().format('YYYY-MM-DD HH:mm:ss') }]
-        stepRemark['1'] = [];
-
+        let stepRemark = {
+            '0': [{ from: userinfo.id + '', to: toIds.join(','), remark: null, time: moment().format('YYYY-MM-DD HH:mm:ss') }],
+            '1': []
+        }
         newValues.status = 0;
         newValues.from = userinfo.id
         newValues.to = "," + toIds.join(',') + ","
