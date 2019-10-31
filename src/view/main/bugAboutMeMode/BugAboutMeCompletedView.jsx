@@ -69,8 +69,8 @@ export default class BugAboutMeCompletedView extends Component {
     }
     getUsersInfo = () => {
         return new Promise((resolve, reject) => {
-            let sqlText = 'select * from users order by convert(name using gbk) ASC'
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            let sql = 'select * from users where effective = 1 order by convert(name using gbk) ASC'
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -80,9 +80,9 @@ export default class BugAboutMeCompletedView extends Component {
         })
     }
     getMajorInfo = () => {
-        let sqlText = 'select m.id,m.name from majors m'
+        let sql = 'select m.id,m.name from majors m where effective = 1'
         return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -92,10 +92,9 @@ export default class BugAboutMeCompletedView extends Component {
         })
     }
     getOneBugInfo = (bug_id) => {
-        let sql1 = ' select bugs.* from bugs where id = ' + bug_id;
-        let sqlText = sql1;
+        let sql = ` select bugs.* from bugs where id = ${bug_id} and effective = 1`
         return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
                 let result = null;
                 if (res.data.code === 0) {
                     result = res.data.data[0]
@@ -116,10 +115,9 @@ export default class BugAboutMeCompletedView extends Component {
         })
     }
     getOneRecordInfo = (device_id) => {
-        let sql1 = ' select * from records rds where device_id = ' + device_id + ' order by rds.id desc limit 1';
-        let sqlText = sql1;
+        let sql = ` select * from records rds where device_id = ${device_id} and effective = 1 order by rds.id desc limit 1`;
         return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
                 let result = null;
                 if (res.data.code === 0) {
                     result = res.data.data[0]

@@ -98,7 +98,7 @@ export default function AddStaffView(props) {
     const [levels, setLevels] = React.useState(null)
     const [nfcs, setNfcs] = React.useState(null)
     React.useEffect(() => {
-        HttpApi.getUserLevel({}, data => {
+        HttpApi.getUserLevel({ effective: 1 }, data => {
             if (data.data.code === 0) {
                 setLevels(data.data.data)
             }

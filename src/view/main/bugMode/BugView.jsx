@@ -94,12 +94,9 @@ export default class BugView extends Component {
     }
     getUsersLevels = () => {
         return new Promise((resolve, reject) => {
-            let sqlText = `select distinct users.level_id, users.level_id as 'value',levels.name as title from users
-            left join (select * from levels where effective = 1)levels
-            on levels.id = users.level_id
-            where users.effective = 1
-            order by level_id`
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            let sql = `select levels.id as level_id, levels.id as 'value', levels.name as title from levels
+            where effective = 1`
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data

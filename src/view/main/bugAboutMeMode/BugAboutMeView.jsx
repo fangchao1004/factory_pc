@@ -99,10 +99,8 @@ export default class BugAboutMeView extends Component {
     }
     getUsersLevels = () => {
         return new Promise((resolve, reject) => {
-            // let sql = 'select * from users order by convert(name using gbk) ASC'
-            let sql = `select distinct users.level_id, users.level_id as 'value',levels.name as title from users
-            left join (select * from levels where effective = 1)levels on levels.id = users.level_id
-            order by level_id`
+            let sql = `select levels.id as level_id, levels.id as 'value', levels.name as title from levels
+            where effective = 1`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -115,8 +113,8 @@ export default class BugAboutMeView extends Component {
     getRunnerInfo = () => {
         return new Promise((resolve, reject) => {
             // let sqlText = 'select * from users order by convert(name using gbk) ASC'
-            let sqlText = `select * from users where permission like '%1%' and effective = 1`
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            let sql = `select * from users where permission like '%1%' and effective = 1`
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -127,10 +125,10 @@ export default class BugAboutMeView extends Component {
     }
     getUsersInfo = () => {
         return new Promise((resolve, reject) => {
-            // let sql = 'select * from users order by convert(name using gbk) ASC'
             let sql = `select users.*,users.name as title,levels.name level_name,  CONCAT(users.level_id,'-',users.id) 'key',CONCAT(users.level_id,'-',users.id) 'value' from users
             left join (select * from levels where effective = 1) levels
             on users.level_id = levels.id
+            where users.effective = 1
             order by users.level_id`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -177,7 +175,7 @@ export default class BugAboutMeView extends Component {
         })
     }
     getOneRecordInfo = (device_id) => {
-        let sql = ' select * from records rds where device_id = ' + device_id + ' order by rds.id desc limit 1';
+        let sql = `select * from records rds where device_id = ${device_id} and effective order by rds.id desc limit 1`;
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = null;
