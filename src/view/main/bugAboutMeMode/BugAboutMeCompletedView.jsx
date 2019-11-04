@@ -7,6 +7,7 @@ import moment from 'moment'
 const { Step } = Steps;
 const { TextArea } = Input;
 var major_filter = [];///用于筛选任务专业的数据 选项
+var bug_type_filter = [];///用于筛选类别的数据 选项
 var storage = window.localStorage;
 var localUserInfo = '';
 var userOptions = [];///人员选项
@@ -51,6 +52,11 @@ export default class BugAboutMeCompletedView extends Component {
     }
     init = async () => {
         major_filter.length = 0;
+        bug_type_filter.length = 0;
+        let bugTypeData = await this.getBugTypeInfo();
+        bugTypeData.forEach((item) => {
+            bug_type_filter.push({ text: item.name, value: item.id });
+        })
         let marjorData = await this.getMajorInfo();
         marjorData.forEach((item) => { major_filter.push({ text: item.name, value: item.id }) })
         // console.log('marjorData:', marjorData);
@@ -81,6 +87,18 @@ export default class BugAboutMeCompletedView extends Component {
     }
     getMajorInfo = () => {
         let sql = 'select m.id,m.name from majors m where effective = 1'
+        return new Promise((resolve, reject) => {
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
+    getBugTypeInfo = () => {
+        let sql = `select * from bug_types  where effective = 1`
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -662,6 +680,14 @@ export default class BugAboutMeCompletedView extends Component {
                 onFilter: (value, record) => record.major_id === value,
                 render: (text, record) => {
                     return <div>{text}</div>
+                }
+            },
+            {
+                key: 'bug_type_name', dataIndex: 'bug_type_name', title: '类别',
+                filters: bug_type_filter,
+                onFilter: (value, record) => record.bug_type_id === value,
+                render: (text, record) => {
+                    return <div>{text || '/'}</div>
                 }
             },
             {
