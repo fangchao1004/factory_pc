@@ -136,7 +136,8 @@ export default class BugCompletedView extends Component {
             area_1.name as area1_name,area_1.id as area1_id,
             area_2.name as area2_name,area_2.id as area3_id,
             area_3.name as area3_name,area_3.id as area3_id,
-            concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name
+            concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
+            bug_types.name as bug_type_name
             from bugs
             left join (select * from devices where effective = 1) des on bugs.device_id = des.id
             left join (select * from users where effective = 1) urs on bugs.user_id = urs.id
@@ -144,6 +145,7 @@ export default class BugCompletedView extends Component {
             left join (select * from area_3 where effective = 1) area_3 on des.area_id = area_3.id
             left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
             left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
+            left join (select * from bug_types where effective = 1) bug_types on bug_types.id = bugs.bug_type_id
             where bugs.status = 4 and bugs.effective = 1 order by bugs.id desc`
         }
         return new Promise((resolve, reject) => {

@@ -63,7 +63,6 @@ export default class BugView extends Component {
         let uploaderData = await this.getUploaderInfo();
         uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
-        // console.log('finallyData:', finallyData);
         finallyData.forEach((item) => { item.key = item.id + '' })
         let userData = await this.getUsersInfo();
         this.setState({
