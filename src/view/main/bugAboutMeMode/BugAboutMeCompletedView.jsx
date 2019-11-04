@@ -1,21 +1,26 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Modal, Button, Steps, Select, message, Input, Row, Col, Drawer, Popconfirm, Divider } from 'antd'
+import { Table, Tag, Button, message, Popconfirm, Divider } from 'antd'
 import HttpApi from '../../util/HttpApi'
-import ShowImgView from '../bugMode/ShowImgView';
-
 import moment from 'moment'
-const { Step } = Steps;
-const { TextArea } = Input;
+import Store from '../../../redux/store/Store';
+import { showBugNum } from '../../../redux/actions/BugAction';
+import ShowImgView from '../bugMode/ShowImgView';
+import DistributionView from '../bugMode/actions/DistributionView';
+import RepairView from '../bugMode/actions/RepairView';
+import ManagerView from '../bugMode/actions/ManagerView';
+import RunnerView from '../bugMode/actions/RunnerView';
+import BaseModal from '../bugMode/actions/BaseModal';
+
 var major_filter = [];///用于筛选任务专业的数据 选项
 var bug_type_filter = [];///用于筛选类别的数据 选项
+const status_filter = [{ text: '待分配', value: 0 }, { text: '维修中', value: 1 },
+{ text: '专工验收中', value: 2 }, { text: '运行验收中', value: 3 }];///用于筛选状态的数据
+const bug_level_filters = [{ text: '一级', value: '1' }, { text: '二级', value: '2' }, { text: '三级', value: '3' }, { text: '/', value: 'null' }]
+
 var storage = window.localStorage;
 var localUserInfo = '';
-var userOptions = [];///人员选项
-const bug_level_filters = [{ text: '一级', value: '1' }, { text: '二级', value: '2' }, { text: '三级', value: '3' }, { text: '/', value: 'null' }]
-const bug_level_Options = [{ id: 1, name: '一级' }, { id: 2, name: '二级' }, { id: 3, name: '三级' }].map(bug_level => <Select.Option value={bug_level.id} key={bug_level.id}>{bug_level.name}</Select.Option>)
-var major_Options = [];///专业选项
 
-export default class BugAboutMeCompletedView extends Component {
+export default class BugView extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -28,28 +33,16 @@ export default class BugAboutMeCompletedView extends Component {
             showModal4: false,
             showModal5: false,
             showModal6: false,
-            showModal7: false,///添加缺陷显示框
             imguuid: null,
             userData: [],
             currentRecord: {},///当前选择的某一行。某一个缺陷对象
-
-            user_select_id: null, ///分配的维修人员的id
-            step_0_remark: '',///分配时的备注
-            step_1_remark: '',///维修界面的备注
-            step_2_remark: '',///专工验收界面的备注
-            step_3_remark: '',///运行验收界面的备注
-
-            ////添加bug
-            bug_level_select_id: null,
-            major_select_id: null,
-            area_remark: null,
-            bug_text: null,
         }
     }
     componentDidMount() {
-        localUserInfo = storage.getItem('userinfo');
         this.init();
+        localUserInfo = storage.getItem('userinfo');
     }
+
     init = async () => {
         major_filter.length = 0;
         bug_type_filter.length = 0;
@@ -58,37 +51,26 @@ export default class BugAboutMeCompletedView extends Component {
             bug_type_filter.push({ text: item.name, value: item.id });
         })
         let marjorData = await this.getMajorInfo();
-        marjorData.forEach((item) => { major_filter.push({ text: item.name, value: item.id }) })
-        // console.log('marjorData:', marjorData);
-        major_Options = marjorData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
-
+        marjorData.forEach((item) => {
+            major_filter.push({ text: item.name, value: item.id });
+        })
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
+        // console.log('finallyData:', finallyData);
         finallyData.forEach((item) => { item.key = item.id + '' })
-        // console.log('bug数据：', finallyData);
         let userData = await this.getUsersInfo();
-        // console.log('userData:', userData);
-        userOptions = userData.map(user => <Select.Option value={user.id} key={user.id}>{user.name}</Select.Option>)
         this.setState({
             data: finallyData,
-            userData
+            userData,
         })
     }
     getUsersInfo = () => {
         return new Promise((resolve, reject) => {
-            let sql = 'select * from users where effective = 1 order by convert(name using gbk) ASC'
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
-    getMajorInfo = () => {
-        let sql = 'select m.id,m.name from majors m where effective = 1'
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
+            let sqlText = `select users.*,users.name as title,levels.name level_name,  CONCAT(users.level_id,'-',users.id) 'key',CONCAT(users.level_id,'-',users.id) 'value' from users
+            left join (select * from levels where effective = 1)levels
+            on users.level_id = levels.id
+            where users.effective = 1
+            order by users.level_id`
+            HttpApi.obs({ sql: sqlText }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -109,8 +91,20 @@ export default class BugAboutMeCompletedView extends Component {
             })
         })
     }
+    getMajorInfo = () => {
+        let sql = `select m.id,m.name from majors m where effective = 1`
+        return new Promise((resolve, reject) => {
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
     getOneBugInfo = (bug_id) => {
-        let sql = ` select bugs.* from bugs where id = ${bug_id} and effective = 1`
+        let sql = `select bugs.* from bugs where id = ${bug_id} and effective = 1`;
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = null;
@@ -133,9 +127,10 @@ export default class BugAboutMeCompletedView extends Component {
         })
     }
     getOneRecordInfo = (device_id) => {
-        let sql = ` select * from records rds where device_id = ${device_id} and effective = 1 order by rds.id desc limit 1`;
+        let sql1 = ' select * from records rds where device_id = ' + device_id + ' order by rds.id desc limit 1';
+        let sqlText = sql1;
         return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
+            HttpApi.obs({ sql: sqlText }, (res) => {
                 let result = null;
                 if (res.data.code === 0) {
                     result = res.data.data[0]
@@ -154,234 +149,6 @@ export default class BugAboutMeCompletedView extends Component {
         let name = '';
         if (this.state.userData && this.state.userData.length > 0) { this.state.userData.forEach((item) => { if (item.id === userId) { name = item.name } }) }
         return name;
-    }
-    ///添加缺陷
-    renderAddBugModal = () => {
-        return (<div>
-            <Row gutter={16}>
-                <Col span={4}>
-                    <span>紧急类型:</span>
-                </Col>
-                <Col span={18}>
-                    <Select value={this.state.bug_level_select_id} defaultValue={null} style={{ width: '100%' }}
-                        onChange={(v) => { this.setState({ bug_level_select_id: v }) }}
-                    >{bug_level_Options}</Select>
-                </Col>
-            </Row>
-            <Row gutter={16} style={{ marginTop: 20 }}>
-                <Col span={4}>
-                    <span>缺陷专业:</span>
-                </Col>
-                <Col span={18}>
-                    <Select value={this.state.major_select_id} defaultValue={null} style={{ width: '100%' }}
-                        onChange={(v) => { this.setState({ major_select_id: v }) }}
-                    >{major_Options}</Select>
-                </Col>
-            </Row>
-            <Row gutter={16} style={{ marginTop: 20 }}>
-                <Col span={4}>
-                    <span>所在区域:</span>
-                </Col>
-                <Col span={18}>
-                    <Input value={this.state.area_remark} style={{ width: '100%' }} placeholder='请填写位置信息' onChange={(e) => { this.setState({ area_remark: e.target.value }) }} allowClear></Input>
-                </Col>
-            </Row>
-            <Row gutter={16} style={{ marginTop: 20 }}>
-                <Col span={4}>
-                    <span>问题描述:</span>
-                </Col>
-                <Col span={18}>
-                    <TextArea value={this.state.bug_text} style={{ width: '100%' }} placeholder='请填写缺陷信息' onChange={(e) => { this.setState({ bug_text: e.target.value }) }}></TextArea>
-                </Col>
-            </Row>
-            <Row gutter={16} style={{ marginTop: 20 }}>
-                <Col span={4}>
-                </Col>
-                <Col span={18} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Button type={'ghost'} onClick={() => {
-                        this.setState({
-                            bug_level_select_id: null,
-                            major_select_id: null,
-                            area_remark: null,
-                            bug_text: null,
-                        })
-                    }}>重置</Button>
-                    <Button type={'primary'} onClick={() => {
-                        if (this.state.bug_level_select_id && this.state.major_select_id && this.state.area_remark && this.state.bug_text) {
-                            let valueObj = {};
-                            valueObj.user_id = JSON.parse(localUserInfo).id;
-                            valueObj.major_id = this.state.major_select_id;
-                            valueObj.content = JSON.stringify({ select: '', text: this.state.bug_text, imgs: [] });
-                            valueObj.buglevel = this.state.bug_level_select_id;
-                            valueObj.area_remark = this.state.area_remark;
-                            valueObj.status = 0;
-                            HttpApi.addBugInfo(valueObj, (res) => {
-                                if (res.data.code === 0) { message.success('上传成功'); this.init(); this.setState({ showModal7: false }) }
-                            })
-                        } else { message.error('请完善相关信息') }
-                    }}>确定</Button>
-                </Col>
-            </Row>
-        </div>)
-    }
-    ////缺陷分配界面
-    renderSelectWorkerModal = () => {
-        return (<div>
-            <Row gutter={16}>
-                <Col span={5}>
-                    <span>人员选择:</span>
-                </Col>
-                <Col span={18}>
-                    <Select
-                        showSearch
-                        optionFilterProp="children"
-                        filterOption={(input, option) =>
-                            option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                        }
-                        value={this.state.user_select_id} defaultValue={null} style={{ width: '100%' }}
-                        onChange={(v) => { this.setState({ user_select_id: v }) }}
-                    >{userOptions}</Select>
-                </Col>
-            </Row>
-            <Row gutter={16} style={{ marginTop: 20 }}>
-                <Col span={5}>
-                    <span>备注:</span>
-                </Col>
-                <Col span={18}>
-                    <Input value={this.state.step_0_remark} style={{ width: '100%' }} placeholder='可用来说明相关情况' onChange={(e) => { this.setState({ step_0_remark: e.target.value }) }} allowClear></Input>
-                </Col>
-            </Row>
-            <div style={{ marginTop: 20 }}>
-                <Button type={'primary'}
-                    onClick={() => {
-                        if (this.state.user_select_id !== null) {
-                            //// 人员选择完毕。改变bug中的数据。status 和 remark
-                            this.changeBugStatus(1, 0, this.state.step_0_remark, JSON.parse(localUserInfo).id, this.state.user_select_id);
-                            this.setState({ user_select_id: null, step_0_remark: '', showModal3: false })
-                        } else { message.error('请分配人员'); }
-                    }}>确定人员</Button>
-            </div>
-        </div >)
-    }
-    ////维修工的界面
-    renderWorkerModal = () => {
-        return (
-            <div>
-                <Row gutter={16}>
-                    <Col span={5}>
-                        <span>备注:</span>
-                    </Col>
-                    <Col span={18}>
-                        <Input value={this.state.step_1_remark} style={{ width: '100%' }} placeholder='可用来说明相关情况' onChange={(e) => { this.setState({ step_1_remark: e.target.value }) }} allowClear></Input>
-                    </Col>
-                </Row>
-                <div style={{ marginTop: 20 }}>
-                    <Button type={'ghost'}
-                        onClick={() => {
-                            //// 人员选择完毕。改变bug中的数据。status 和 remark
-                            let remarkText = this.state.step_1_remark ? this.state.step_1_remark : '暂缓维修工作';
-                            this.changeBugStatus(1, 1, remarkText, JSON.parse(localUserInfo).id);
-                            this.setState({ step_1_remark: '', showModal4: false })
-                        }}>暂缓工作</Button>
-                    <Button type={'danger'}
-                        style={{ marginLeft: 20 }}
-                        onClick={() => {
-                            //// 人员选择完毕。改变bug中的数据。status 和 remark
-                            let remarkText = this.state.step_1_remark ? this.state.step_1_remark : '回退工作,重新分配';
-                            this.changeBugStatus(0, 1, remarkText, JSON.parse(localUserInfo).id);
-                            this.setState({ step_1_remark: '', showModal4: false })
-                        }}>回退工作</Button>
-                    <Button type={'primary'}
-                        style={{ marginLeft: 20 }}
-                        onClick={() => {
-                            //// 人员选择完毕。改变bug中的数据。status 和 remark
-                            let remarkText = this.state.step_1_remark ? this.state.step_1_remark : '完成维修工作,等待专工验收';
-                            this.changeBugStatus(2, 1, remarkText, JSON.parse(localUserInfo).id);
-                            this.setState({ step_1_remark: '', showModal4: false })
-                        }}>完成工作</Button>
-                </div>
-            </div>
-        )
-    }
-    /////专工界面
-    renderManagerModal = () => {
-        return (
-            <div>
-                <Row gutter={16}>
-                    <Col span={5}>
-                        <span>备注:</span>
-                    </Col>
-                    <Col span={18}>
-                        <Input value={this.state.step_2_remark} style={{ width: '100%' }} placeholder='可用来说明相关情况' onChange={(e) => { this.setState({ step_2_remark: e.target.value }) }} allowClear></Input>
-                    </Col>
-                </Row>
-                <div style={{ marginTop: 20 }}>
-                    <Button type={'ghost'}
-                        onClick={() => {
-                            //// 人员选择完毕。改变bug中的数据。status 和 remark
-                            let remarkText = this.state.step_2_remark ? this.state.step_2_remark : '暂缓验收工作';
-                            this.changeBugStatus(2, 2, remarkText, JSON.parse(localUserInfo).id);
-                            this.setState({ step_2_remark: '', showModal5: false })
-                        }}>暂缓工作</Button>
-                    <Button type={'danger'}
-                        style={{ marginLeft: 20 }}
-                        onClick={() => {
-                            //// 人员选择完毕。改变bug中的数据。status 和 remark
-                            let remarkText = this.state.step_2_remark ? this.state.step_2_remark : '验收不通过，重新维修';
-                            this.changeBugStatus(1, 2, remarkText, JSON.parse(localUserInfo).id);
-                            this.setState({ step_2_remark: '', showModal5: false })
-                        }}>重新维修</Button>
-                    <Button type={'primary'}
-                        style={{ marginLeft: 20 }}
-                        onClick={() => {
-                            //// 人员选择完毕。改变bug中的数据。status 和 remark
-                            let remarkText = this.state.step_2_remark ? this.state.step_2_remark : '完成验收,等待运行验收';
-                            this.changeBugStatus(3, 2, remarkText, JSON.parse(localUserInfo).id);
-                            this.setState({ step_2_remark: '', showModal5: false })
-                        }}>完成验收</Button>
-                </div>
-            </div>
-        )
-    }
-    ////运行验收界面
-    renderRunerModal = () => {
-        return (
-            <div>
-                <Row gutter={16}>
-                    <Col span={5}>
-                        <span>备注:</span>
-                    </Col>
-                    <Col span={18}>
-                        <Input value={this.state.step_3_remark} style={{ width: '100%' }} placeholder='可用来说明相关情况' onChange={(e) => { this.setState({ step_3_remark: e.target.value }) }} allowClear></Input>
-                    </Col>
-                </Row>
-                <div style={{ marginTop: 20 }}>
-                    <Button type={'ghost'}
-                        onClick={() => {
-                            //// 人员选择完毕。改变bug中的数据。status 和 remark
-                            let remarkText = this.state.step_3_remark ? this.state.step_3_remark : '暂缓验收工作';
-                            this.changeBugStatus(3, 3, remarkText, JSON.parse(localUserInfo).id);
-                            this.setState({ step_3_remark: '', showModal6: false })
-                        }}>暂缓工作</Button>
-                    <Button type={'danger'}
-                        style={{ marginLeft: 20 }}
-                        onClick={() => {
-                            //// 人员选择完毕。改变bug中的数据。status 和 remark
-                            let remarkText = this.state.step_3_remark ? this.state.step_3_remark : '验收不通过，发回专工处理';
-                            this.changeBugStatus(2, 3, remarkText, JSON.parse(localUserInfo).id);
-                            this.setState({ step_3_remark: '', showModal6: false })
-                        }}>验收失败</Button>
-                    <Button type={'primary'}
-                        style={{ marginLeft: 20 }}
-                        onClick={() => {
-                            //// 人员选择完毕。改变bug中的数据。status 和 remark
-                            let remarkText = this.state.step_3_remark ? this.state.step_3_remark : '完成验收';
-                            this.changeBugStatus(4, 3, remarkText, JSON.parse(localUserInfo).id);
-                            this.setState({ step_3_remark: '', showModal6: false })
-                        }}>完成验收</Button>
-                </div>
-            </div>
-        )
     }
     /**
      * statusValue  当前bug的状态status字段。（0，1，2，3，4)
@@ -418,24 +185,33 @@ export default class BugAboutMeCompletedView extends Component {
         }
         ///将最新的 remark 数据 更新到 bugs 表中。并且判断要把 status 改到哪一步
         let newValue = { status: targetStatus, remark: JSON.stringify(remarkCopy) }
+        if (targetStatus === 4) { ///当 运行验收后， 状态为 4 此时还要记录一下缺陷的解决时间，为什么不用 updatedAt 来判断？ 因为怕 混乱 
+            newValue = { status: targetStatus, remark: JSON.stringify(remarkCopy), closedAt: moment().format('YYYY-MM-DD HH:mm:ss') }
+        }
         if (toId !== null) {
             newValue.fix_id = toId;
         }
         HttpApi.updateBugInfo({ query: { id: this.state.currentRecord.id }, update: newValue }, (res) => {
             if (res.data.code === 0) {
+                this.init();
+                if (targetStatus === 1 || targetStatus === 4) {
+                    this.updateDataByRedux();
+                }
                 ///成功以后要立即刷新当前的bug数据。
                 HttpApi.getBugInfo({ id: this.state.currentRecord.id }, (res) => {
                     if (res.data.code === 0) {
                         message.success('发布成功');
                         this.setState({ currentRecord: res.data.data[0] })
                         ////如果是状态4 则说明这个bug已经解决了。要把这个bug对应的record给更新（复制原有数据，本地修改，再作为新数据插入数据库record表）
-                        if (targetStatus === 4) { this.changeRecordData(); }
+                        if (targetStatus === 4) {
+                            this.changeRecordData(); setTimeout(() => {
+                                this.setState({ showModal2: false })
+                            }, 1000);
+                        }
                     }
                 })
             }
         })
-        ////同时要刷新整个表中的数据
-        this.init();
     }
 
     ////改变包含了这个bug_id 的record 再数据库中的值。
@@ -444,6 +220,7 @@ export default class BugAboutMeCompletedView extends Component {
         ///1，要根据bug_id 去bugs表中去查询该条数据，获取其中的 device_id 字段信息
         let oneBugInfo = await this.getOneBugInfo(bugId);
         let device_id = oneBugInfo.device_id;
+        if (!device_id) { return }
         ///2，根据 device_id 去record 表中 找到 这个设备最新的一次record。 获取到后，在本地修改。再最为一条新数据插入到records表中
         let oneRecordInfo = await this.getOneRecordInfo(device_id);
         let bug_content = JSON.parse(oneRecordInfo.content);
@@ -589,10 +366,19 @@ export default class BugAboutMeCompletedView extends Component {
                 }
             }
         } else if (btnV === 3) {
-            ///有运行权限，且 status = 3 时 可用。disableFlag = false;
-            if (localUserInfo && JSON.parse(localUserInfo).permission && this.state.currentRecord.remark) {
-                if (JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('1') !== -1 && this.state.currentRecord.status === 3) {
-                    disabledFlag = false;
+            // ///有运行权限，且 status = 3 时 可用。disableFlag = false;
+            // if (localUserInfo && JSON.parse(localUserInfo).permission && this.state.currentRecord.remark) {
+            //     if (JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('1') !== -1 && this.state.currentRecord.status === 3) {
+            //         disabledFlag = false;
+            //     }
+            // }
+            ////当前用户是不是 2 数组中最后一位的 to  且 当前status 的值 =3
+            if (localUserInfo && this.state.currentRecord.remark && this.state.currentRecord.status === 3) {
+                let stepData_2_arr = JSON.parse(this.state.currentRecord.remark)['2'];
+                if (stepData_2_arr) {
+                    let to_id = stepData_2_arr[stepData_2_arr.length - 1].to; ////最新一次任务分配给了谁。
+                    disabledFlag = to_id !== JSON.parse(localUserInfo).id;/// 如果不等于 则禁用
+                    // console.log('运行_to_id:',to_id);
                 }
             }
         }
@@ -600,14 +386,22 @@ export default class BugAboutMeCompletedView extends Component {
     }
 
     deleteBugsHandler = (record) => {
-        HttpApi.obs({ sql: `update bugs set effective= 0 where id = ${record.id} ` }, (res) => {
+        HttpApi.obs({ sql: `update bugs set effective = 0 where id = ${record.id} ` }, (res) => {
             if (res.data.code === 0) {
                 message.success('移除缺陷成功');
                 this.init();
+                ///要利用redux刷新 mainView处的徽标数
+                this.updateDataByRedux();
             }
         })
     }
-
+    updateDataByRedux = () => {
+        ///每次删除
+        Store.dispatch(showBugNum(null)) ///随便派发一个值，目的是让 mainView处监听到 执行init();
+    }
+    openDrawerHandler = (dataObj) => {
+        this.setState({ ...dataObj })
+    }
     render() {
         const columns = [
             {
@@ -651,6 +445,7 @@ export default class BugAboutMeCompletedView extends Component {
                 filters: bug_level_filters,
                 onFilter: (value, record) => record.buglevel + '' === value,
                 render: (text) => {
+                    // console.log(text);
                     let result = null;
                     let resultCom = '/'
                     let color = '#505659';
@@ -660,7 +455,7 @@ export default class BugAboutMeCompletedView extends Component {
                         else if (text === 3) { result = '三级'; color = '#87d068' }
                         resultCom = <Tag color={color}>{result}</Tag>
                     }
-                    return <div>{resultCom}</div>
+                    return resultCom
                 }
             },
             {
@@ -716,7 +511,6 @@ export default class BugAboutMeCompletedView extends Component {
                                     showModal1: true,
                                     preImguuid: item.uuid,
                                 })
-
                             }}>{item.name}</span>)
                     });
                     let result = '/'
@@ -727,7 +521,9 @@ export default class BugAboutMeCompletedView extends Component {
             {
                 title: '缺陷状态',
                 dataIndex: 'status',
+                filters: status_filter,
                 align: 'center',
+                onFilter: (value, record) => record.status === value,
                 render: (text, record) => {
                     let str = '';
                     let color = '#888888'
@@ -737,16 +533,52 @@ export default class BugAboutMeCompletedView extends Component {
                 }
             },
             {
+                title: '当前处理人员',
+                dataIndex: 'a',
+                render: (text, record) => {
+                    let remarkObj = JSON.parse(record.remark);
+                    let currentStatus = record.status;
+                    let str = '/';
+                    if (currentStatus === 1 && remarkObj) {
+                        // console.log('id:', record.id,'数组长度:',remarkObj['0'].length,'最新:',remarkObj['0'][remarkObj['0'].length-1]);
+                        // console.log('最新的维修人员id:',remarkObj['0'][remarkObj['0'].length-1].to);
+                        let currentUserID = remarkObj['0'][remarkObj['0'].length - 1].to;
+                        this.state.userData.forEach((item) => {
+                            if (item.id === currentUserID) {
+                                str = item.name
+                            }
+                        })
+                    }
+                    if (currentStatus === 2) {
+                        str = '专工'
+                    } else if (currentStatus === 3) {
+                        // str = '运行人员'
+                        let currentUserID;
+                        if (remarkObj['2'] && remarkObj['2'].length > 0) {
+                            currentUserID = remarkObj['2'][remarkObj['2'].length - 1].to;
+                        }
+                        this.state.userData.forEach((item) => {
+                            if (item.id === currentUserID) {
+                                str = item.name
+                            }
+                        })
+                    } else if (currentStatus === 4) {
+                        str = '/'
+                    }
+                    return <div>{str}</div>;
+                }
+            },
+            {
                 title: '操作',
                 dataIndex: 'actions',
                 width: 150,
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
-                        <Button size="small" type="primary" onClick={() => { this.actionsHandler(record) }}>查看</Button>
+                        <Button size="small" type="primary" onClick={() => { this.actionsHandler(record) }}>处理</Button>
                         {JSON.parse(localUserInfo).isadmin === 1 ?
                             <Fragment>
                                 <Divider type="vertical" />
-                                <Popconfirm title="确定要删除该专业吗?" onConfirm={() => { this.deleteBugsHandler(record); }}>
+                                <Popconfirm title="确定要删除该缺陷吗?" onConfirm={() => { this.deleteBugsHandler(record); }}>
                                     <Button size="small" type="danger">删除</Button>
                                 </Popconfirm>
                             </Fragment> : null
@@ -756,8 +588,7 @@ export default class BugAboutMeCompletedView extends Component {
             }
         ]
         return (
-            <div>
-                {/* <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button> */}
+            <Fragment>
                 <Table
                     bordered
                     dataSource={this.state.data}
@@ -767,90 +598,19 @@ export default class BugAboutMeCompletedView extends Component {
                         pageSizeOptions: ['10', '20', '50', '80', '100'],
                     }}
                 />
-                <Modal
-                    title="添加缺陷"
-                    visible={this.state.showModal7}
-                    onCancel={() => { this.setState({ showModal7: false }) }}
-                    footer={null}
-                    width={500}
-                >
-                    {this.renderAddBugModal()}
-                </Modal>
                 {/* 进度界面 */}
-                <Modal
-                    mask={false}
-                    title="当前进度"
-                    visible={this.state.showModal2}
-                    onCancel={() => { this.setState({ showModal2: false }) }}
-                    footer={null}
-                    width={520}
-                >
-                    <Steps direction="vertical" size="small" current={this.state.currentRecord.status}>
-                        <Step title='工作分配' description={this.renderStatusX(0)} />
-                        <Step title='开始维修' description={this.renderStatusX(1)} />
-                        <Step title='专工验收' description={this.renderStatusX(2)} />
-                        <Step title='运行验收' description={this.renderStatusX(3)} />
-                        <Step title='已完成' description={this.renderStatusX(4)} />
-                    </Steps>
-                    <Button type={'primary'}
-                        disabled={this.checkDisable(0)}
-                        onClick={() => { this.setState({ showModal3: true }) }}
-                    >分配维修人员</Button>
-                    <Button style={{ marginLeft: 20 }} type={'primary'}
-                        disabled={this.checkDisable(1)}
-                        onClick={() => { this.setState({ showModal4: true }) }}
-                    >维修处理</Button>
-                    <Button style={{ marginLeft: 20 }} type={'primary'}
-                        disabled={this.checkDisable(2)}
-                        onClick={() => { this.setState({ showModal5: true }) }}
-                    >专工验收</Button>
-                    <Button style={{ marginLeft: 20 }} type={'primary'}
-                        disabled={this.checkDisable(3)}
-                        onClick={() => { this.setState({ showModal6: true }) }}
-                    >运行人员验收</Button>
-                </Modal>
+                <BaseModal showModal={this.state.showModal2} onClose={() => { this.setState({ showModal2: false }) }} renderStatusX={this.renderStatusX} currentStatus={this.state.currentRecord.status} openDrawer={this.openDrawerHandler} checkDisable={this.checkDisable} />
                 {/* 分配人员操作界面 */}
-                <Drawer
-                    title="分配维修人员"
-                    placement='right'
-                    visible={this.state.showModal3}
-                    onClose={() => { this.setState({ user_select_id: null, step_0_remark: '', showModal3: false }) }}
-                    width={450}
-                >
-                    {this.renderSelectWorkerModal()}
-                </Drawer>
+                <DistributionView showModal={this.state.showModal3} onClose={() => { this.setState({ showModal3: false }) }} changeBugStatus={this.changeBugStatus} />
                 {/* 维修人员操作界面 */}
-                <Drawer
-                    title="维修处理"
-                    placement='right'
-                    visible={this.state.showModal4}
-                    onClose={() => { this.setState({ step_1_remark: '', showModal4: false }) }}
-                    width={450}
-                >
-                    {this.renderWorkerModal()}
-                </Drawer>
+                <RepairView showModal={this.state.showModal4} onClose={() => { this.setState({ showModal4: false }) }} changeBugStatus={this.changeBugStatus} />
                 {/* 专工验收操作界面 */}
-                <Drawer
-                    title="专工验收处理"
-                    placement='right'
-                    visible={this.state.showModal5}
-                    onClose={() => { this.setState({ step_2_remark: '', showModal5: false }) }}
-                    width={450}
-                >
-                    {this.renderManagerModal()}
-                </Drawer>
+                <ManagerView showModal={this.state.showModal5} onClose={() => { this.setState({ showModal5: false }) }} changeBugStatus={this.changeBugStatus} />
                 {/* 运行验收操作界面 */}
-                <Drawer
-                    title="运行验收处理"
-                    placement='right'
-                    visible={this.state.showModal6}
-                    onClose={() => { this.setState({ step_3_remark: '', showModal6: false }) }}
-                    width={450}
-                >
-                    {this.renderRunerModal()}
-                </Drawer>
+                <RunnerView showModal={this.state.showModal6} onClose={() => { this.setState({ showModal6: false }) }} changeBugStatus={this.changeBugStatus} />
+                {/* 图片显示界面 */}
                 <ShowImgView showModal={this.state.showModal1} cancel={() => { this.setState({ showModal1: false }) }} showLoading={this.state.showLoading} imguuid={this.state.imguuid} />
-            </div>
+            </Fragment >
         );
     }
 }
