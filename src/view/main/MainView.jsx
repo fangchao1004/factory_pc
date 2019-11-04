@@ -152,7 +152,7 @@ export default class MainView extends Component {
                     <div style={{ height: 64, background: 'rgba(8,32,61,1)', padding: '16 24', position: 'relative' }}>
                         <img src={logopng} alt="" width="32" height="32" style={{ position: 'absolute', left: 24, top: 16 }} />
                         {this.state.collapsed ? null :
-                            <span style={{ position: 'absolute', top: 18, left: 60, width: 180, color: '#fff', fontSize: 20 }}>信息综合管理平台</span>
+                            <span style={{ position: 'absolute', top: 18, left: 60, width: 180, color: '#fff', fontSize: 17, marginLeft: 20 }}>信息综合管理平台</span>
                         }
                     </div>
                     <Menu theme="dark" mode="inline" onClick={this.onMeunClick}>

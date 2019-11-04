@@ -357,6 +357,8 @@ export default class BugView extends Component {
                     let to_id = stepData_0_arr[stepData_0_arr.length - 1].to; ////最新一次任务分配给了谁。
                     disabledFlag = to_id !== JSON.parse(localUserInfo).id;/// 如果不等于 则禁用
                 }
+            } else if (localUserInfo && JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('3') !== -1 && this.state.currentRecord.status === 0) { ///如果当前bug的状态还是0 未分配 但是你有维修专工权限，则维修按钮可用
+                disabledFlag = false;
             }
         } else if (btnV === 2) {
             ///有专工权限，且 status = 2 时 可用。disableFlag = false;
