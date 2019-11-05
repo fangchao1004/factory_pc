@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import { Table, Button, Form, message, InputNumber } from 'antd';
+import { Table, Button, TreeSelect, message } from 'antd';
 import moment from 'moment';
 import HttpApi from '../../util/HttpApi';
 import RecordDetailByTime from './RecordDetailByTime';
+import { transfromDataTo3level, combinAreaAndDevice, renderTreeNodeListByData } from '../../util/Tool'
+const { TreeNode } = TreeSelect;
 
 const today = moment().format('YYYY-MM-DD ');
 const tomorrow = moment().add(1, 'day').format('YYYY-MM-DD ');
@@ -17,42 +19,9 @@ class TimeView extends Component {
             showDrawer: false,
             oneRecord: {},
             isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin,
+            treeNodeList: [],
         }
-        this.columns = [
-            {
-                title: '今日时间段划分',
-                dataIndex: '/',
-                render: (text, record) => {
-                    return <div>{record.begin} ~ {record.end} （{record.name}）</div>
-                }
-            },
-            {
-                title: `今日应检测设备数量${this.state.isAdmin === 1 ? '(可编辑)' : ''}`,
-                dataIndex: 'should',
-                editable: this.state.isAdmin === 1,
-                render: (text, record) => {
-                    return <div>{text !== null ? text : '/'}</div>
-                }
-            },
-            {
-                title: '今日实际检测设备数量',
-                dataIndex: 'actually',
-            }, {
-                title: '操作',
-                dataIndex: 'actions',
-                width: 150,
-                render: (text, record) => (
-                    <div style={{ textAlign: 'center' }}>
-                        <Button size="small" type="primary" onClick={() => {
-                            this.setState({
-                                oneRecord: record,
-                                showDrawer: true
-                            })
-                        }}>详情</Button>
-                    </div>
-                )
-            }
-        ]
+
     }
     componentDidMount() {
         this.init();
@@ -64,8 +33,42 @@ class TimeView extends Component {
     }
     init = async () => {
         let result = await this.getAllowTimeInfo();
-        // console.log('result:', result);
         this.getInfoAndChangeData(result);
+        let resultArea123 = await this.getArea123Info();
+        let deviceInfo = await this.getDeviceInfo();
+        let tempData = transfromDataTo3level(resultArea123);
+        let tempData2 = combinAreaAndDevice(tempData, deviceInfo);
+        let treeNodeList = renderTreeNodeListByData(tempData2, TreeNode);
+        this.setState({
+            treeNodeList
+        })
+    }
+    getDeviceInfo = () => {
+        return new Promise((resolve, reject) => {
+            HttpApi.getDeviceInfo({ effective: 1 }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result)
+            })
+        })
+    }
+    getArea123Info = () => {
+        return new Promise((resolve, reject) => {
+            let sql = `select area_1.id as area1_id , area_1.name as area1_name, area_2.id as area2_id ,area_2.name as area2_name,area_3.id as area3_id,area_3.name as area3_name from area_1
+            left join (select * from area_2 where effective = 1)area_2 on area_1.id = area_2.area1_id
+            left join (select * from area_3 where effective = 1)area_3 on area_2.id = area_3.area2_id
+            where area_1.effective = 1
+            order by area_1.id`;
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result)
+            })
+        })
     }
     getAllowTimeInfo = () => {
         return new Promise((resolve, reject) => {
@@ -111,58 +114,74 @@ class TimeView extends Component {
         })
     }
 
-    /**
-     * 保存到数据库
-     */
-    handleSave = async (data) => {
-        // console.log('data:', data);
-        let result = await this.changeShouldNum(data);
-        if (result) { message.success('设置成功'); this.init() }
-        else { message.error('设置失败') }
-    }
-
-    changeShouldNum = (data) => {
-        return new Promise((resolve, reject) => {
-            let sql = `UPDATE allow_time SET should=${parseInt(data.should)} where id = ${data.id}`
-            let result = false;
-            HttpApi.obs({ sql }, data => {
-                if (data.data.code === 0) {
-                    result = true
-                }
-                resolve(result);
-            })
+    onChange = (value, record) => {
+        // console.log('onChange ', value, 'record:', record);
+        let sql = `UPDATE allow_time SET selected_devices = '${JSON.stringify(value)}' where id = ${record.id}`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                message.success('修改成功');
+                this.init();
+            } else {
+                message.error('修改失败');
+            }
         })
-    }
-
+    };
 
     render() {
         const { dataSource } = this.state;
-        const components = {
-            body: {
-                row: EditableFormRow,
-                cell: EditableCell,
+        const columns = [
+            {
+                title: '今日时间段划分',
+                dataIndex: '/',
+                render: (text, record) => {
+                    return <div>{record.begin} ~ {record.end} （{record.name}）</div>
+                }
             },
-        };
-        const columns = this.columns.map(col => {
-            if (!col.editable) {
-                return col;
+            {
+                title: `今日应检测设备数量${this.state.isAdmin === 1 ? '(可编辑)' : ''}`,
+                dataIndex: 'selected_devices',
+                render: (text, record) => {
+                    return <div style={{ display: 'flex', flexDirction: 'row' }}>
+                        <TreeSelect
+                            disabled={this.state.isAdmin !== 1}
+                            showSearch
+                            treeNodeFilterProp="title"
+                            style={{ width: '85%' }}
+                            value={text ? JSON.parse(text) : []}
+                            dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                            placeholder="请选择需要查看的巡检点"
+                            allowClear
+                            multiple
+                            onChange={(v) => { this.onChange(v, record) }}
+                        >
+                            {this.state.treeNodeList}
+                        </TreeSelect>
+                        <div style={{ width: '15%', textAlign: "center", paddingTop: 5 }}>{JSON.parse(text) && JSON.parse(text).length > 0 ? JSON.parse(text).length : ''}</div>
+                    </div>;
+                }
+            },
+            {
+                title: '今日实际检测设备数量',
+                dataIndex: 'actually',
+            }, {
+                title: '操作',
+                dataIndex: 'actions',
+                width: 150,
+                render: (text, record) => (
+                    <div style={{ textAlign: 'center' }}>
+                        <Button size="small" type="primary" onClick={() => {
+                            this.setState({
+                                oneRecord: record,
+                                showDrawer: true
+                            })
+                        }}>详情</Button>
+                    </div>
+                )
             }
-            return {
-                ...col,
-                onCell: record => ({
-                    record,
-                    editable: col.editable,
-                    dataIndex: col.dataIndex,
-                    title: col.title,
-                    handleSave: this.handleSave,
-                }),
-            };
-        });
+        ]
         return (
             <div>
                 <Table
-                    components={components}
-                    rowClassName={() => 'editable-row'}
                     bordered
                     columns={columns}
                     dataSource={dataSource}
@@ -174,88 +193,3 @@ class TimeView extends Component {
 }
 
 export default TimeView;
-
-const EditableContext = React.createContext();
-
-const EditableRow = ({ form, index, ...props }) => (
-    <EditableContext.Provider value={form}>
-        <tr {...props} />
-    </EditableContext.Provider>
-);
-
-const EditableFormRow = Form.create()(EditableRow);
-
-class EditableCell extends React.Component {
-    state = {
-        editing: false,
-    };
-
-    toggleEdit = () => {
-        const editing = !this.state.editing;
-        this.setState({ editing }, () => {
-            if (editing) {
-                this.input.focus();
-            }
-        });
-    };
-
-    save = e => {
-        const { record, handleSave } = this.props;
-        this.form.validateFields((error, values) => {
-            if (error && error[e.currentTarget.id]) {
-                return;
-            }
-            this.toggleEdit();
-            handleSave({ ...record, ...values });
-        });
-    };
-
-    renderCell = form => {
-        this.form = form;
-        const { children, dataIndex, record, title } = this.props;
-        const { editing } = this.state;
-        return editing ? (
-            <Form.Item style={{ margin: 0 }}>
-                {form.getFieldDecorator(dataIndex, {
-                    rules: [
-                        {
-                            required: true,
-                            message: `${title} 不可为空！`,
-                        },
-                    ],
-                    initialValue: record[dataIndex],
-                })(<InputNumber style={{ width: '100%' }} ref={node => (this.input = node)} onPressEnter={this.save} onBlur={this.save} />)}
-            </Form.Item>
-        ) : (
-                <div
-                    className="editable-cell-value-wrap"
-                    style={{ paddingRight: 24 }}
-                    onClick={this.toggleEdit}
-                >
-                    {children}
-                </div>
-            );
-    };
-
-    render() {
-        const {
-            editable,
-            dataIndex,
-            title,
-            record,
-            index,
-            handleSave,
-            children,
-            ...restProps
-        } = this.props;
-        return (
-            <td {...restProps}>
-                {editable ? (
-                    <EditableContext.Consumer>{this.renderCell}</EditableContext.Consumer>
-                ) : (
-                        children
-                    )}
-            </td>
-        );
-    }
-}

@@ -1,10 +1,24 @@
 import React, { Component } from 'react';
-import { Button, Modal, Row, Col, Input, message } from 'antd';
+import { Button, Modal, Row, Col, Input, message, Card, Tooltip } from 'antd';
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
+import { permisstionWithDes } from '../../util/Tool'
+
 var storage = window.localStorage;
 var userinfo = null;
 const { TextArea } = Input;
+
+function changeIdListToNameListForPer(idList) {
+    let nameList = [];
+    permisstionWithDes.forEach((item) => {
+        idList.forEach((idStr) => {
+            if (idStr + '' === item.value + '') {
+                nameList.push({ name: item.name, des: item.des });
+            }
+        })
+    })
+    return nameList
+}
 
 /**
  * 右上角 退出登录等功能的菜单
@@ -18,10 +32,13 @@ export default class UserMenuView extends Component {
             isadmin: JSON.parse(userinfo).isadmin === 1,
             showModal1: false,
             notiveTxt: '',
+            permissionList: []
         }
     }
     componentDidMount() {
-        // console.log('userinfo:', userinfo);
+        this.setState({
+            permissionList: JSON.parse(userinfo).permission ? changeIdListToNameListForPer(JSON.parse(userinfo).permission.split(',')) : []
+        })
     }
     noticeRender = () => {
         return <div>
@@ -60,19 +77,27 @@ export default class UserMenuView extends Component {
     render() {
         return (
             <div>
-                {this.state.isadmin ? <Button type='primary' style={{ width: "100%", marginBottom: 10 }} onClick={() => { this.setState({ showModal1: true }) }}>发布通知</Button> : null}
-                <Button type='danger' style={{ width: "100%" }}
+                {this.state.permissionList.length > 0 ?
+                    <Card size="small" title="所有权限">
+                        {this.state.permissionList.map((item, index) => {
+                            return (
+                                <Tooltip key={index} placement="leftBottom" title={item.des}>
+                                    <div style={{ color: '#46a1ff' }}>{item.name}</div>
+                                </Tooltip>
+                            )
+                        })}
+                    </Card> : null}
+                {this.state.isadmin ? <Button type='primary' style={{ width: "100%", marginTop: 10 }} onClick={() => { this.setState({ showModal1: true }) }}>发布通知</Button> : null}
+                <Button type='danger' style={{ width: "100%", marginTop: 10 }}
                     onClick={() => {
                         storage.removeItem('userinfo');
                         window.location.href = "/";
                     }}>退出登录</Button>
                 <Modal
-                    // mask={false}
                     title="发布通知"
                     visible={this.state.showModal1}
                     onOk={this.onOk}
                     onCancel={() => { this.setState({ showModal1: false }) }}
-                    // footer={null}
                     width={520}
                 >
                     {this.noticeRender()}

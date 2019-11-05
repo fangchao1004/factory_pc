@@ -388,20 +388,22 @@ export default class BugView extends Component {
         if (btnV === 0) {
             ///有专工权限，且 status <= 1 时 可用。disableFlag = false;
             if (localUserInfo && JSON.parse(localUserInfo).permission) {
-                if (JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('0') !== -1 && this.state.currentRecord.status <= 1) {
+                if (JSON.parse(localUserInfo).permission.indexOf('0') !== -1 && this.state.currentRecord.status <= 1) {
                     disabledFlag = false;
                 }
             }
         } else if (btnV === 1) {
-            ////当前用户是不是 0 数组中最后一位的 to  且 当前status 的值 =1
-            if (localUserInfo && this.state.currentRecord.remark && this.state.currentRecord.status === 1) {///如果当前bug的状态是1 已经分配
+            // //当前用户是不是 0 数组中最后一位的 to  且 当前status 的值 =1
+            if (this.state.currentRecord.status === 0) {
+                if (localUserInfo && JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('3') !== -1) {
+                    disabledFlag = false;
+                }
+            } else if (this.state.currentRecord.status === 1) {
                 let stepData_0_arr = JSON.parse(this.state.currentRecord.remark)['0'];
-                if (stepData_0_arr) {
+                if (stepData_0_arr && stepData_0_arr.length > 0) {
                     let to_id = stepData_0_arr[stepData_0_arr.length - 1].to; ////最新一次任务分配给了谁。
                     disabledFlag = to_id !== JSON.parse(localUserInfo).id;/// 如果不等于 则禁用
                 }
-            } else if (localUserInfo && JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('3') !== -1 && this.state.currentRecord.status === 0) { ///如果当前bug的状态还是0 未分配 但是你有维修专工权限，则维修按钮可用
-                disabledFlag = false;
             }
         } else if (btnV === 2) {
             ///有专工权限，且 status = 2 时 可用。disableFlag = false;
@@ -589,12 +591,14 @@ export default class BugView extends Component {
                     if (currentStatus === 1 && remarkObj) {
                         // console.log('id:', record.id,'数组长度:',remarkObj['0'].length,'最新:',remarkObj['0'][remarkObj['0'].length-1]);
                         // console.log('最新的维修人员id:',remarkObj['0'][remarkObj['0'].length-1].to);
-                        let currentUserID = remarkObj['0'][remarkObj['0'].length - 1].to;
-                        this.state.userData.forEach((item) => {
-                            if (item.id === currentUserID) {
-                                str = item.name
-                            }
-                        })
+                        if (remarkObj['0'] && remarkObj['0'].length > 0) {
+                            let currentUserID = remarkObj['0'][remarkObj['0'].length - 1].to;
+                            this.state.userData.forEach((item) => {
+                                if (item.id === currentUserID) {
+                                    str = item.name
+                                }
+                            })
+                        }
                     }
                     if (currentStatus === 2) {
                         str = '专工'
@@ -663,7 +667,7 @@ export default class BugView extends Component {
                 {/* 分配人员操作界面 */}
                 <DistributionView showModal={this.state.showModal3} onClose={() => { this.setState({ showModal3: false }) }} changeBugStatus={this.changeBugStatus} />
                 {/* 维修人员操作界面 */}
-                <RepairView showModal={this.state.showModal4} onClose={() => { this.setState({ showModal4: false }) }} changeBugStatus={this.changeBugStatus} />
+                <RepairView showModal={this.state.showModal4} onClose={() => { this.setState({ showModal4: false }) }} changeBugStatus={this.changeBugStatus} status={this.state.currentRecord.status} />
                 {/* 专工验收操作界面 */}
                 <ManagerView showModal={this.state.showModal5} onClose={() => { this.setState({ showModal5: false }) }} changeBugStatus={this.changeBugStatus} />
                 {/* 运行验收操作界面 */}

@@ -6,6 +6,9 @@ var localUserInfo = '';
 
 /**
  * 维修界面
+ * 
+ * 以及维修专工
+ * 如果当前缺陷状态为0，且自己有维修专工权限。则回退按钮禁用，去完成按钮点后，会在0字段处自动添加 领取缺陷的记录
  */
 class RepairView extends Component {
     constructor(props) {
@@ -13,15 +16,21 @@ class RepairView extends Component {
         this.state = {
             showModal: false,
             step_1_remark: '',///维修界面的备注
+            bug_status: 0,///当前缺陷的状态
+            isRepairManager: false,///是否有维修专工权限
         }
     }
     componentDidMount() {
         this.init();
         localUserInfo = storage.getItem('userinfo');
+        this.setState({
+            isRepairManager: JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('3') !== -1
+        })
     }
     componentWillReceiveProps(nextProps) {
         this.setState({
-            showModal: nextProps.showModal
+            showModal: nextProps.showModal,
+            bug_status: nextProps.status
         })
     }
     init = () => {
@@ -40,15 +49,16 @@ class RepairView extends Component {
                     </Col>
                 </Row>
                 <div style={{ marginTop: 20 }}>
-                    <Button type={'ghost'}
+                    {/* <Button type={'ghost'}
                         onClick={() => {
                             //// 人员选择完毕。改变bug中的数据。status 和 remark
                             let remarkText = this.state.step_1_remark ? this.state.step_1_remark : '暂缓维修工作';
                             this.props.changeBugStatus(1, 1, remarkText, JSON.parse(localUserInfo).id);
                             this.setState({ step_1_remark: '' })
                             this.props.onClose();
-                        }}>暂缓工作</Button>
+                        }}>暂缓工作</Button> */}
                     <Button type={'danger'}
+                        disabled={this.state.isRepairManager && this.state.bug_status === 0}
                         style={{ marginLeft: 20 }}
                         onClick={() => {
                             //// 人员选择完毕。改变bug中的数据。status 和 remark
@@ -62,7 +72,12 @@ class RepairView extends Component {
                         onClick={() => {
                             //// 人员选择完毕。改变bug中的数据。status 和 remark
                             let remarkText = this.state.step_1_remark ? this.state.step_1_remark : '完成维修工作,等待专工验收';
-                            this.props.changeBugStatus(2, 1, remarkText, JSON.parse(localUserInfo).id);
+                            if (this.state.isRepairManager && this.state.bug_status === 0) {
+                                this.props.changeBugStatus(1, 0, '维修专工自行处理', JSON.parse(localUserInfo).id, JSON.parse(localUserInfo).id);
+                            }
+                            setTimeout(() => {
+                                this.props.changeBugStatus(2, 1, remarkText, JSON.parse(localUserInfo).id);
+                            }, 500);
                             this.setState({ step_1_remark: '' })
                             this.props.onClose();
                         }}>完成工作</Button>

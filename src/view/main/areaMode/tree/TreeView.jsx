@@ -4,6 +4,8 @@ import HttpApi from '../../../util/HttpApi';
 import { transfromDataTo3level, combinAreaAndDevice, renderTreeNodeListByData } from '../../../util/Tool'
 import "./treeView.css"
 import DeviceInfoView from './DeviceInfoView';
+const { TreeNode } = Tree;
+
 
 var treeNodeList = null;
 /**
@@ -26,7 +28,7 @@ export default class TreeView extends Component {
         let deviceInfo = await this.getDeviceInfo();
         let tempData = transfromDataTo3level(resultArea123);
         let tempData2 = combinAreaAndDevice(tempData, deviceInfo);
-        treeNodeList = renderTreeNodeListByData(tempData2);
+        treeNodeList = renderTreeNodeListByData(tempData2, TreeNode);
         this.forceUpdate();
     }
 

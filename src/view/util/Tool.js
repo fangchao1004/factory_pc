@@ -1,6 +1,15 @@
 import React from "react";
-import { Tree, Icon } from 'antd'
-const { TreeNode } = Tree;
+import { Icon } from 'antd'
+
+/**
+ * 权限数据
+ */
+export const permisstion = [{ name: '专工权限', value: 0 }, { name: '运行权限', value: 1 }, { name: '消费审批权限', value: 2 }, { name: '维修专工权限', value: 3 }]
+export const permisstionWithDes = [
+    { name: '专工权限', value: 0, des: '可以在缺陷处理过程中，进行缺陷的分配和验收工作' },
+    { name: '运行权限', value: 1, des: '可以在缺陷处理过程中，进行最后的运行验收工作' },
+    { name: '消费审批权限', value: 2, des: '可以处理消费申请，进行审批操作' },
+    { name: '维修专工权限', value: 3, des: '可以自行处理未分配的权限，无需专工分配' }]
 
 /**
  * Tool 工具类 
@@ -160,16 +169,18 @@ export function combinAreaAndDevice(level3List, devicesList) {
 /**
  * 将多级数据+设备信息 形成的新的4级结构数据
  * 渲染成对应的 4级树节点
+ * @param {*} dataList  数据源
+ * @param {*} renderNode 目标节点
  */
-export function renderTreeNodeListByData(dataList) {
+export function renderTreeNodeListByData(dataList, TargetNode) {
     let nodeList = dataList.map((area1Item) => {
-        return <TreeNode title={omitTextLength(area1Item.title, 25)} key={area1Item.key} selectable={false} icon={<Icon type="environment" />}>
+        return <TargetNode title={omitTextLength(area1Item.title, 25)} key={area1Item.key} value={area1Item.value} selectable={false} icon={<Icon type="environment" />}>
             {area1Item.children.length > 0 ?
                 area1Item.children.map(area2Item => {
-                    return <TreeNode title={omitTextLength(area2Item.title, 25)} key={area2Item.key} selectable={false} icon={<Icon type="environment" />}>
+                    return <TargetNode title={omitTextLength(area2Item.title, 25)} key={area2Item.key} value={area2Item.value} selectable={false} icon={<Icon type="environment" />}>
                         {area2Item.children.length > 0 ?
                             area2Item.children.map(area3Item => {
-                                return <TreeNode title={omitTextLength(area3Item.title, 25)} key={area3Item.key} selectable={false} icon={<Icon type="environment" />}>
+                                return <TargetNode title={omitTextLength(area3Item.title, 25)} key={area3Item.key} value={area3Item.value} selectable={false} icon={<Icon type="environment" />}>
                                     {area3Item.children.length > 0 ?
                                         area3Item.children.map(deviceItem => {
                                             let color = '#33CC66' /// 绿色 正常
@@ -178,16 +189,16 @@ export function renderTreeNodeListByData(dataList) {
                                             } else if (deviceItem.status === 3) {
                                                 color = '#AAAAAA' /// 灰色 待检
                                             }
-                                            return <TreeNode {...deviceItem} icon={<Icon type="laptop" style={{ color }} />} ></TreeNode>
+                                            return <TargetNode {...deviceItem} icon={<Icon type="laptop" style={{ color }} />} ></TargetNode>
                                         })
                                         : null}
-                                </TreeNode>
+                                </TargetNode>
                             })
                             : null}
-                    </TreeNode>
+                    </TargetNode>
                 })
                 : null}
-        </TreeNode>
+        </TargetNode>
     })
     return nodeList
 }

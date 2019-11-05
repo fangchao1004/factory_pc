@@ -10,7 +10,7 @@ class BaseModal extends Component {
         super(props);
         this.state = {
             showModal: false,
-            currentStatus: 0
+            currentStatus: 0,
         }
     }
     componentWillReceiveProps(nextProps) {

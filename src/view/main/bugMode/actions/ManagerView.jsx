@@ -16,6 +16,7 @@ class ManagerView extends Component {
         this.state = {
             showModal: false,
             step_2_remark: '',///专工验收界面的备注
+            runner_select_id: null,///选择的运行人员id
         }
     }
     componentDidMount() {
@@ -69,14 +70,14 @@ class ManagerView extends Component {
                     </Col>
                 </Row>
                 <div style={{ marginTop: 20 }}>
-                    <Button type={'ghost'}
+                    {/* <Button type={'ghost'}
                         onClick={() => {
                             //// 人员选择完毕。改变bug中的数据。status 和 remark
                             let remarkText = this.state.step_2_remark ? this.state.step_2_remark : '暂缓验收工作';
                             this.props.changeBugStatus(2, 2, remarkText, JSON.parse(localUserInfo).id);
                             this.setState({ step_2_remark: '' })
                             this.props.onClose();
-                        }}>暂缓工作</Button>
+                        }}>暂缓工作</Button> */}
                     <Button type={'danger'}
                         style={{ marginLeft: 20 }}
                         onClick={() => {

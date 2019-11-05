@@ -36,14 +36,14 @@ class RunnerView extends Component {
                     </Col>
                 </Row>
                 <div style={{ marginTop: 20 }}>
-                    <Button type={'ghost'}
+                    {/* <Button type={'ghost'}
                         onClick={() => {
                             //// 人员选择完毕。改变bug中的数据。status 和 remark
                             let remarkText = this.state.step_3_remark ? this.state.step_3_remark : '暂缓验收工作';
                             this.props.changeBugStatus(3, 3, remarkText, JSON.parse(localUserInfo).id);
                             this.setState({ step_3_remark: '' })
                             this.props.onClose();
-                        }}>暂缓工作</Button>
+                        }}>暂缓工作</Button> */}
                     <Button type={'danger'}
                         style={{ marginLeft: 20 }}
                         onClick={() => {
