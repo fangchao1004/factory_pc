@@ -18,7 +18,10 @@ export const permisstionWithDes = [
  */
 
 /**
- * 省略文本长度
+ *省略文本长度
+ * @param {*} text
+ * @param {*} targetlength
+ * @returns
  */
 function omitTextLength(text, targetlength) {
     let result = ''
@@ -31,13 +34,15 @@ function omitTextLength(text, targetlength) {
 }
 
 /**
- * 将数据库查询的 数据进行 三层结构转换
- * 
- * 123级
- * 
+ *将数据库查询的 数据进行 三层结构转换
+ *123级
  * 三级的节点都可以被选择 (默认三级都可选)
  * 只有在添加 设备时 只能选择第三级
  * 在添加缺陷时，三级区域范围都可以被选择
+ * @export
+ * @param {*} area123result
+ * @param {boolean} [all3=true]
+ * @returns
  */
 export function transfromDataTo3level(area123result, all3 = true) {
     let tempObj = {};
@@ -96,9 +101,11 @@ export function transfromDataTo3level(area123result, all3 = true) {
 }
 
 /**
- * 将数据库查询的 数据进行 二层结构转换
- * 
- * 12级
+ *将数据库查询的 数据进行 二层结构转换
+ *12级
+ * @export
+ * @param {*} area12result
+ * @returns
  */
 export function transfromDataTo2level(area12result) {
     let tempObj = {};
@@ -136,6 +143,10 @@ export function transfromDataTo2level(area12result) {
 /**
  * 将三级区间结构数+设备信息之间进行绑定
  * 形成了4级结构
+ * @export
+ * @param {*} level3List
+ * @param {*} devicesList
+ * @returns
  */
 export function combinAreaAndDevice(level3List, devicesList) {
     level3List.forEach((area1Item) => {
@@ -204,7 +215,11 @@ export function renderTreeNodeListByData(dataList, TargetNode) {
 }
 
 /**
- * 将recordlist的数据结构--转换成-采集数据的数组
+ *将recordlist的数据结构--转换成-采集数据的数组
+ *
+ * @export
+ * @param {*} recordList
+ * @returns
  */
 export function transfromDataToCollectionList(recordList) {
     let tempObj = {};

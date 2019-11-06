@@ -26,7 +26,7 @@ class StaffView extends Component {
         })
     }
     getLevelInfo = () => {
-        let sqlText = 'select m.id,m.name from levels m where effective = 1'
+        let sqlText = 'select levels.id,levels.name from levels where effective = 1'
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql: sqlText }, (res) => {
                 let result = [];
@@ -37,10 +37,10 @@ class StaffView extends Component {
             })
         })
     }
-    getUserList() {
+    getUserList = () => {
         return new Promise((resolve, reject) => {
             let sql = `select users.*,levels.name as level_name from users 
-            left join levels on levels.id = users.level_id
+            left join (select * from levels where effective = 1)levels on levels.id = users.level_id
             where users.effective = 1
             order by level_id`;
             let result = [];
