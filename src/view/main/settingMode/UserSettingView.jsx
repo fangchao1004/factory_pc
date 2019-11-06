@@ -23,7 +23,7 @@ export default function UserSettingView(props) {
             // { title: '更新', description: '1.1.6 打点时间修改-添加巡检时间段模块' }
             // { title: '更新', description: '1.1.7 编辑表单模块增设通用组件' }
             // { title: '更新', description: '1.1.8' }
-            // { title: '更新', description: '1.2.0' }
+            { title: '更新', description: '哈哈哈哈' }
         ]
         setData(listData)
     }, [])
