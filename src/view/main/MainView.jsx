@@ -20,6 +20,7 @@ import TansactionApplyModeRoot from './tansactionApplyMode/TansactionApplyModeRo
 import UserMenuView from './userMenu/UserMenuView'
 import HttpApi from '../util/HttpApi';
 import Store from '../../redux/store/Store';
+import StaffListRoot from './staffListTest/StaffListRoot'
 
 var storage = window.localStorage;
 const { Header, Content, Sider } = Layout;
@@ -145,7 +146,7 @@ export default class MainView extends Component {
         });
     };
 
-    render() {
+  render() {
         return (
             <Layout style={{ minHeight: '100vh' }}>
                 <Sider collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse} trigger={null} width={255}>
@@ -259,8 +260,14 @@ export default class MainView extends Component {
                         </Menu.Item> */}
                         <SubMenu key="设置" title={<span><Icon type="setting" /><span>设置</span></span>}>
                             <Menu.Item key="个人设置"><Icon type="switcher" /><span>个人设置</span><Link to={`${this.props.match.url}/usersetting`} /></Menu.Item>
-                        </SubMenu>
-                    </Menu>
+                </SubMenu>
+                <Menu.Item key="员工列表">
+                  <Icon type="user" />
+                  <span>员工列表</span>
+                  <Link to={`${this.props.match.url}/StaffListRoot`}></Link>
+                </Menu.Item>
+                
+              </Menu>
                 </Sider>
                 <Layout>
                     <Header style={{ background: '#fff', padding: 0 }}>
@@ -280,8 +287,8 @@ export default class MainView extends Component {
                             </Col>
                         </Row>
                     </Header>
-                    <ContentView {...this.props} />
-                </Layout>
+              <ContentView {...this.props} />
+              </Layout>
             </Layout >
         );
     }
@@ -367,7 +374,12 @@ class ContentView extends Component {
                     exact
                     path={`${this.props.match.path}/schedule`}
                     component={() => (storage.getItem('userinfo') ? <ScheduleRoot /> : <Redirect to='/' />)}
-                />
+            />
+            <Route
+              exact
+              path={`${this.props.match.path}/StaffListRoot`}
+              component={() => (storage.getItem('userinfo') ? <StaffListRoot /> : <Redirect to='/' />)}
+            />
             </section>
         </Content>
     }

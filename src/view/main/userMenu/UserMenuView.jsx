@@ -21,7 +21,7 @@ function changeIdListToNameListForPer(idList) {
 }
 
 /**
- * 右上角 退出登录等功能的菜单
+ * 右上角 退出登录等功能的菜单！！！
  */
 export default class UserMenuView extends Component {
     constructor(props) {

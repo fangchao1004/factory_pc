@@ -16,7 +16,11 @@ class StaffView extends Component {
     async getUsersData() {
         level_filter.length = 0;
         let levelData = await this.getLevelInfo();
-        levelData.forEach((item) => { level_filter.push({ text: item.name, value: item.id }) })
+      levelData.forEach((item) => {
+        level_filter.push({
+          text: item.name, value: item.id
+        })
+      })
         var usersData = await this.getUserList()
         this.setState({
             users: usersData.map(user => {
