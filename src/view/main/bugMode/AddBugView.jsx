@@ -9,7 +9,7 @@ var storage = window.localStorage;
 var localUserInfo = '';
 const bug_level_Options = [{ id: 1, name: '一级' }, { id: 2, name: '二级' }, { id: 3, name: '三级' }].map(bug_level => <Select.Option value={bug_level.id} key={bug_level.id}>{bug_level.name}</Select.Option>)
 var major_Options = [];///专业选项
-var bugType_Options = [];///缺陷类型
+// var bugType_Options = [];///缺陷类型
 var area123_List = [];///三级区域选项 (树形结构 利用TreeSelect组件 直接提供对应的json数据结构)
 
 const valueMap = {};
@@ -69,8 +69,8 @@ class AddBugView extends Component {
         loops(area123_List);
         let marjorData = await this.getMajorInfo();
         major_Options = marjorData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
-        let bugTypeData = await this.getBugTypeInfo();
-        bugType_Options = bugTypeData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
+        // let bugTypeData = await this.getBugTypeInfo();
+        // bugType_Options = bugTypeData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
         this.forceUpdate();
     }
     reset = () => {
@@ -93,18 +93,18 @@ class AddBugView extends Component {
             })
         })
     }
-    getBugTypeInfo = () => {
-        let sql = `select bt.id,bt.name from bug_types bt where effective = 1`
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
+    // getBugTypeInfo = () => {
+    //     let sql = `select bt.id,bt.name from bug_types bt where effective = 1`
+    //     return new Promise((resolve, reject) => {
+    //         HttpApi.obs({ sql }, (res) => {
+    //             let result = [];
+    //             if (res.data.code === 0) {
+    //                 result = res.data.data
+    //             }
+    //             resolve(result);
+    //         })
+    //     })
+    // }
     onCancelHandler = () => {
         this.props.cancel()
         this.refs.bugFormRef.resetFields();
@@ -122,7 +122,7 @@ class AddBugView extends Component {
                     status: 0,
                     checkedAt: moment().format('YYYY-MM-DD HH:mm:ss'),
                     remark: JSON.stringify({ '0': [], '1': [], '2': [], '3': [] }),
-                    bug_type_id: values.bug_type_id,
+                    // bug_type_id: values.bug_type_id,
                 }
                 HttpApi.addBugInfo(valueObj, (res) => {
                     if (res.data.code === 0) {
@@ -172,11 +172,11 @@ function AddBugFrom(props) {
                 <TreeSelect style={{ width: '100%' }} treeNodeFilterProp="title" showSearch dropdownStyle={{ maxHeight: 400, overflow: 'auto' }} treeData={area123_List} placeholder="请选择在范围" />
             )}
         </Form.Item>
-        <Form.Item label="描述类别:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
+        {/* <Form.Item label="描述类别:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('bug_type_id', {
                 rules: [{ required: true, message: '请选择类别' }]
             })(<Select style={{ width: '100%' }} placeholder="请选择类别">{bugType_Options}</Select>)}
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item label="问题描述:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('bug_text', {
                 rules: [{ required: true, message: '请输入问题描述' }]

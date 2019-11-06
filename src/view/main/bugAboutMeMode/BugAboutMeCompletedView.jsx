@@ -486,6 +486,12 @@ export default class BugView extends Component {
                 }
             },
             {
+                key: 'last_remark', dataIndex: 'last_remark', title: '最新备注',
+                render: (text, record) => {
+                    return <div>{text || '/'}</div>
+                }
+            },
+            {
                 key: 'img', dataIndex: 'content', title: '图片', render: (text) => {
                     let obj = JSON.parse(text);
                     let imgs_arr = JSON.parse(JSON.stringify(obj.imgs));

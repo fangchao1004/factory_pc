@@ -158,7 +158,22 @@ export default class BugView extends Component {
      * 3 -- 专工验收完成，等待运行验收
      * 4 -- 运行验收完成，流程结束
      */
-    changeBugStatus = (targetStatus, currentStep, remarkText, fromId, toId = null) => {
+
+    /**
+    * statusValue  当前bug的状态status字段。（0，1，2，3，4)
+    * 0 -- 等待分配
+    * 1 -- 分配完成，等待维修
+    * 2 -- 维修完成，等待专工验收
+    * 3 -- 专工验收完成，等待运行验收
+    * 4 -- 运行验收完成，流程结束
+    * @param {*} targetStatus 目标状态 目的是将bug 的status 置成什么值
+    * @param {*} currentStep 当前步骤值
+    * @param {*} remarkText 每一步的备注
+    * @param {*} bugTypeId 备注的类别id
+    * @param {*} fromId 来自人 id
+    * @param {*} toId  目标人 id
+    */
+    changeBugStatus = (targetStatus, currentStep, remarkText, bugTypeId, fromId, toId = null) => {
         // console.log('要将bug的status置成：', targetStatus, '当前流程在哪一步：', currentStep, '备注的文本：', remarkText, '操作人：', fromId, '目标对象：', toId);
         // return;
         ////首先要先把当前的bug的remak信息全copy一份。
@@ -184,9 +199,12 @@ export default class BugView extends Component {
             }
         }
         ///将最新的 remark 数据 更新到 bugs 表中。并且判断要把 status 改到哪一步
-        let newValue = { status: targetStatus, remark: JSON.stringify(remarkCopy) }
+        let newValue = { status: targetStatus, remark: JSON.stringify(remarkCopy), last_remark: remarkText }
         if (targetStatus === 4) { ///当 运行验收后， 状态为 4 此时还要记录一下缺陷的解决时间，为什么不用 updatedAt 来判断？ 因为怕 混乱 
-            newValue = { status: targetStatus, remark: JSON.stringify(remarkCopy), closedAt: moment().format('YYYY-MM-DD HH:mm:ss') }
+            newValue = { ...newValue, closedAt: moment().format('YYYY-MM-DD HH:mm:ss') }
+        }
+        if (bugTypeId) {
+            newValue = { ...newValue, bug_type_id: bugTypeId }
         }
         if (toId !== null) {
             newValue.fix_id = toId;
@@ -483,6 +501,12 @@ export default class BugView extends Component {
                 key: 'bug_type_name', dataIndex: 'bug_type_name', title: '类别',
                 filters: bug_type_filter,
                 onFilter: (value, record) => record.bug_type_id === value,
+                render: (text, record) => {
+                    return <div>{text || '/'}</div>
+                }
+            },
+            {
+                key: 'last_remark', dataIndex: 'last_remark', title: '最新备注',
                 render: (text, record) => {
                     return <div>{text || '/'}</div>
                 }
