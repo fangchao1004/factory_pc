@@ -15,15 +15,17 @@ export default class SampleViewTool {
     static renderTable(dataSource) {
         let renderInputText = (element) => {
             return <div key={element.key}>
+                <span>{element.title_name}</span>
                 <List>
-                    <InputItem labelNumber={6} style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title_name}</InputItem>
+                    <InputItem labelNumber={6} style={{ width: 200 }} key={element.key} placeholder='必填'></InputItem>
                 </List>
             </div>
         }
         let renderInputNumber = (element) => {
             return <div key={element.key}>
+                <span>{element.title_name}</span>
                 <List>
-                    <InputItem labelNumber={6} style={{ width: 200 }} key={element.key} value={element.default_values} >{element.title_name}</InputItem>
+                    <InputItem labelNumber={6} key={element.key} placeholder='这是数字输入框'></InputItem>
                 </List>
             </div>
         }

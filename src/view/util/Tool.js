@@ -178,10 +178,12 @@ export function combinAreaAndDevice(level3List, devicesList) {
 }
 
 /**
- * 将多级数据+设备信息 形成的新的4级结构数据
- * 渲染成对应的 4级树节点
- * @param {*} dataList  数据源
- * @param {*} renderNode 目标节点
+ *将多级数据+设备信息 形成的新的4级结构数据
+ *渲染成对应的 4级树节点
+ * @export
+ * @param {*} dataList
+ * @param {*} TargetNode
+ * @returns
  */
 export function renderTreeNodeListByData(dataList, TargetNode) {
     let nodeList = dataList.map((area1Item) => {

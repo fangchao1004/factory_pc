@@ -8,7 +8,7 @@ const Option = Select.Option;
 // const optionsData = [{ "value": "1", "text": "文本输入框" }, { "value": "2", "text": "数字输入框" }, { "value": "3", "text": "单选" },
 // { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" }, { "value": "7", "text": "表单类型",{ "value": "10", "text": "测温组件" }, { "value": "11", "text": "测振组件" },{ "value": "12", "text": "默认" }];
 
-const optionsData = [{ "value": "7", "text": "表单类型" }, { "value": "12", "text": "通用" }, { "value": "10", "text": "测温组件" }, { "value": "11", "text": "测振组件" }];
+const optionsData = [{ "value": "7", "text": "表单类型" }, { "value": "12", "text": "通用" }, { "value": "10", "text": "测温组件" }, { "value": "11", "text": "测振组件" }, { "value": "6", "text": "图片选择器" }, { "value": "2", "text": "数字输入框" }];
 ////测试数据， 实际数据要从巡检点类型表device_type表中获取
 // var titleData = [{ "value": "1", "text": "水表报告单" }, { "value": "2", "text": "电表报告单" }, { "value": "3", "text": "锅炉报告单" }]
 // var titleData = [];
