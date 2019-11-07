@@ -398,7 +398,7 @@ class EquipmentView extends Component {
                 bug_id_arr.push(item.bug_id);
                 bug_key_id_arr.push({ key: item.key, bug_id: item.bug_id });
             }
-            if (item.type_id === '2' || item.type_id === '10' || item.type_id === '11') {
+            if (item.type_id === '2' || item.type_id === '6' || item.type_id === '10' || item.type_id === '11') { /// 2 数字输入框 6 图片选择器 10 测温 11 测振
                 collectAndInputDataList.push(item);
             }
         })

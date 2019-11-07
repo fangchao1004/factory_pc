@@ -228,7 +228,7 @@ export function transfromDataToCollectionList(recordList) {
     recordList.forEach((recordItem) => {
         let oneRecordContentJson = JSON.parse(recordItem.content);
         oneRecordContentJson.forEach((item) => { /// item 每一项 每一题
-            if (item.type_id === '10' || item.type_id === '11') {
+            if (item.type_id === '10' || item.type_id === '11' || item.type_id === '2') {
                 // console.log('tempObj[item.key]:', tempObj[item.key]);
                 let value = item.type_id === '11' ? (item.value / 1000) + '' : item.value
                 if (tempObj[item.key]) {

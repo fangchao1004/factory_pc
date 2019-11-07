@@ -56,7 +56,6 @@ class OneRecordDetialView extends Component {
             return;
         }
         console.log('渲染bug界面', this.state.renderData.content);
-
         ///将content中，bug_id 值不为null都的提取处理
         this.state.renderData.content.sort((a, b) => {
             return parseInt(a.key) - parseInt(b.key)
@@ -78,17 +77,31 @@ class OneRecordDetialView extends Component {
     renderCollectView = () => {
         console.log('渲染采集界面', this.state.renderData.collect);
         let oneBugContent = [];
+        let cell = null;
         this.state.renderData.collect.forEach(element => {
+            if (element.type_id === '11') {
+                cell = parseFloat(element.value / 1000).toFixed(3);
+            } else if (element.type_id === '10' || element.type_id === '2') {
+                cell = element.value
+            } else if (element.type_id === '6') {
+                cell = element.value.map((oneImgUUID) => { return <img key={oneImgUUID} alt='' src={Testuri + 'get_jpg?uuid=' + oneImgUUID} style={{ width: 450, height: 600, marginTop: 15 }} /> })
+            }
+
             oneBugContent.push(<div key={element.key} style={{ borderBottomStyle: 'solid', borderBottomColor: '#d0d0d0', borderBottomWidth: 1, marginBottom: 20 }} >
-                <Row>
-                    <Col span={12} style={{ color: '#40A9FF' }}>
-                        {element.key + '. ' + element.title_name}
-                    </Col>
-                    <Col span={12} >
-                        {element.type_id === '11' ? parseFloat(element.value / 1000).toFixed(3)
-                            : element.value}
-                    </Col>
-                </Row>
+                {element.type_id === '6' ?
+                    <div>
+                        <div style={{ color: '#40A9FF' }}>{element.key + '. ' + element.title_name}</div>
+                        {cell}
+                    </div>
+                    :
+                    <Row>
+                        <Col span={12} style={{ color: '#40A9FF' }}>
+                            {element.key + '. ' + element.title_name}
+                        </Col>
+                        <Col span={12} >
+                            {cell}
+                        </Col>
+                    </Row>}
             </div>)
         });
         return oneBugContent
