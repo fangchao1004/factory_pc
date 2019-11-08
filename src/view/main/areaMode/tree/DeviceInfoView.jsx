@@ -44,7 +44,7 @@ class DeviceInfoView extends Component {
                 bug_id_arr.push(item.bug_id);
                 bug_key_id_arr.push({ key: item.key, bug_id: item.bug_id });
             }
-            if (item.type_id === '2' || item.type_id === '6' || item.type_id === '10' || item.type_id === '11') {
+            if (item.type_id === '2' || item.type_id === '6' || item.type_id === '10' || item.type_id === '11'|| item.type_id === '13') {
                 collectAndInputDataList.push(item);
             }
         })

@@ -64,7 +64,7 @@ class OneRecordDetialView extends Component {
         // console.log('state.renderData.content:',this.state.renderData);
         for (const oneBug of this.state.renderData.content) {
             let oneBugContent = [];
-            oneBugContent.push(<div key={0} >{oneBug.key + '. ' + oneBug.title_name}<span style={{ color: '#40A9FF' }}>{oneBug.title_remark}</span></div>)
+            oneBugContent.push(<div key={0} >{oneBug.title_name}<span style={{ color: '#40A9FF' }}>{oneBug.title_remark}</span></div>)
             oneBugContent.push(<div key={1} style={{ marginBottom: 20 }}>{this.renderOneSelectOption(JSON.parse(oneBug.content))}</div>);
             oneBugContent.push(<div key={2} style={{ marginBottom: 20 }}>{oneBug.major_name ? '缺陷专业 ' + oneBug.major_name : null}</div>);
             oneBugContent.push(<div key={3} style={{ marginBottom: 20 }}>{this.renderOneTextArea(JSON.parse(oneBug.content))}</div>);
@@ -85,23 +85,31 @@ class OneRecordDetialView extends Component {
                 cell = element.value
             } else if (element.type_id === '6') {
                 cell = element.value.map((oneImgUUID) => { return <img key={oneImgUUID} alt='' src={Testuri + 'get_jpg?uuid=' + oneImgUUID} style={{ width: 450, height: 600, marginTop: 15 }} /> })
+            } else if (element.type_id === '13') {
+                cell = element.title_name
             }
 
-            oneBugContent.push(<div key={element.key} style={{ borderBottomStyle: 'solid', borderBottomColor: '#d0d0d0', borderBottomWidth: 1, marginBottom: 20 }} >
+            oneBugContent.push(<div key={element.key} style={{ borderBottomStyle: 'solid', borderBottomColor: '#d0d0d0', borderBottomWidth: element.type_id === '13'? 0:1, marginBottom: 20 }} >
                 {element.type_id === '6' ?
                     <div>
-                        <div style={{ color: '#40A9FF' }}>{element.key + '. ' + element.title_name}</div>
+                        <div style={{ color: '#40A9FF' }}>{element.title_name}</div>
                         {cell}
                     </div>
                     :
-                    <Row>
-                        <Col span={12} style={{ color: '#40A9FF' }}>
-                            {element.key + '. ' + element.title_name}
-                        </Col>
-                        <Col span={12} >
-                            {cell}
-                        </Col>
-                    </Row>}
+                    (
+                        element.type_id === '13' ?
+                            <div style={{ color: '#55555', fontSize: 16,fontWeight:500 }}>{cell}</div>
+                            :
+                            <Row>
+                                <Col span={12} style={{ color: '#40A9FF' }}>
+                                    {element.title_name}
+                                </Col>
+                                <Col span={12} >
+                                    {cell}
+                                </Col>
+                            </Row>
+                    )
+                }
             </div>)
         });
         return oneBugContent

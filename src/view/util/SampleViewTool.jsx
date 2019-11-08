@@ -124,12 +124,18 @@ export default class SampleViewTool {
                 </List>
             </div>
         }
-
         let renderCommon = (element) => {
             return <div key={element.key} >
                 <List style={{ height: 40 }}>
                     <span>{element.title_name}</span>
                     <span style={{ color: 'blue' }}>{element.title_remark}</span>
+                </List>
+            </div>
+        }
+        let renderSubTitle = (element) => {
+            return <div key={element.key} >
+                <List style={{ height: 40, fontWeight: 800 }}>
+                    <span>{element.title_name}</span>
                 </List>
             </div>
         }
@@ -140,7 +146,7 @@ export default class SampleViewTool {
             dataSource.forEach(element => {
                 if (element.type_id === "1") {
                     viewArr.push(renderInputText(element))
-                } else if (element.type_id === "2") {
+                } else if (element.type_id === "2") {///数字输入框
                     viewArr.push(renderInputNumber(element))
                 } else if (element.type_id === "3") {
                     viewArr.push(renderRadio(element))
@@ -148,7 +154,7 @@ export default class SampleViewTool {
                     viewArr.push(renderCheckBox(element))
                 } else if (element.type_id === "5") {
                     viewArr.push(renderTextArea(element))
-                } else if (element.type_id === "6") {
+                } else if (element.type_id === "6") {///图片选择器
                     viewArr.push(renderImagePicker(element))
                 } else if (element.type_id === "7") {
                     viewArr.push(renderTitle(element))///标题
@@ -158,6 +164,8 @@ export default class SampleViewTool {
                     viewArr.push(renderCollectShake(element))
                 } else if (element.type_id === "12") { ///默认通用-最新要求 类似于多选，但是不需要选项
                     viewArr.push(renderCommon(element))
+                } else if (element.type_id === "13") { ///分区标题-只做渲染
+                    viewArr.push(renderSubTitle(element))
                 }
             });
         }
