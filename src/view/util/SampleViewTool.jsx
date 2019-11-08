@@ -134,8 +134,8 @@ export default class SampleViewTool {
         }
         let renderSubTitle = (element) => {
             return <div key={element.key} >
-                <List style={{ height: 40, fontWeight: 800 }}>
-                    <span>{element.title_name}</span>
+                <List style={{ height: 40 }}>
+                    <span style={{ fontWeight: 500, fontSize: 16 }}>{element.title_name}</span>
                 </List>
             </div>
         }
