@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import { Row, Col, Card, Button, Tag, Icon, Popconfirm, Empty, Modal } from 'antd'
+import { Row, Col, Card, Button, Tag, Icon, Popconfirm, Empty, Modal, message } from 'antd'
 import HttpApi from '../../util/HttpApi';
 import SampleViewTool from '../../util/SampleViewTool';
+import ChangeTableView from './ChangeTableView';
+import { omitTextLength } from '../../util/Tool'
 
 var TagColor = ['magenta', 'orange', 'green', 'blue', 'purple', 'geekblue', 'cyan'];
 var sample_data = [];
@@ -15,13 +17,15 @@ class TableView extends Component {
         this.state = {
             dataSource: [],
             modalvisible: false,
-            sampleView: null
+            sampleView: null,
+            drawerVisible: false,///修改表单界面是否显示
+            currentTable: null,///当前选中的table数据
         }
     }
     componentDidMount() {
-        this.initHandler();
+        this.init();
     }
-    initHandler = async () => {
+    init = async () => {
         sample_data.length = device_type_data.length = 0;
         sample_data = await this.getSampleData();
         device_type_data = await this.getDeviceTypeData();
@@ -75,24 +79,26 @@ class TableView extends Component {
         this.state.dataSource.forEach((element, index) => {
             cellsArr.push(
                 <Col span={8} key={element.key}>
-                    <Card title={(<div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <span>{element.table_name}</span>
-                        <Popconfirm title="确定删除吗?" onConfirm={() => this.onConfirmDeleteHandler(element)}>
-                            {/* <Button type='primary' loading={this.state.uploadLoading}>确定保存</Button> */}
-                            <Icon type="delete" theme="twoTone" style={{ fontSize: 20 }} />
-                        </Popconfirm>
-
-                    </div>)}
-                        bordered={true} style={{ marginTop: 16, height: 125, borderRadius: 5 }}>
-                        <div style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'space-between', width: '102%' }}>
-                            <div>
-                                {/* <Button type='primary' onClick={() => { console.log(element); }}>修改</Button> */}
-                                <Button style={{ marginLeft: 20 }} type='primary' onClick={() => { this.openModalHandler(element) }}>详情</Button>
-                            </div>
-                            <Tag color={TagColor[index]} style={{ height: 25 }}>
-                                <span style={{ fontSize: 15 }}>{element.device_type_name}</span>
+                    <Card
+                        title={(<div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <div style={{ width: '70%' }}>{omitTextLength(element.table_name, 15)}</div>
+                            <Popconfirm title="确定删除吗?" onConfirm={() => this.onConfirmDeleteHandler(element)}>
+                                <div><Icon type="delete" theme="twoTone" style={{ fontSize: 20 }} /></div>
+                            </Popconfirm></div>)}
+                        bordered={true}
+                        style={{ marginTop: 16, height: 170, borderRadius: 5 }}>
+                        <div>
+                            <Tag color={TagColor[index % TagColor.length]} style={{ height: 25 }}>
+                                <span style={{ fontSize: 15 }}>{omitTextLength(element.device_type_name, 18)}</span>
                             </Tag>
                         </div>
+                        <div style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'space-between', width: '102%', marginTop: 20 }}>
+                            <div>
+                                <Button type='ghost' onClick={() => { this.setState({ drawerVisible: true, currentTable: element }) }}>修改</Button>
+                                <Button style={{ marginLeft: 20 }} type='primary' onClick={() => { this.openModalHandler(element) }}>详情</Button>
+                            </div>
+                        </div>
+
                     </Card>
                 </Col>
             )
@@ -104,7 +110,7 @@ class TableView extends Component {
         HttpApi.obs({ sql: `update samples set effective = 0 where id = ${element.id} ` }, (res) => {
             // HttpApi.removeSampleInfo({ id: element.id }, (res) => {
             if (res.data.code === 0) {
-                this.initHandler();
+                this.init();
             }
         })
     }
@@ -143,13 +149,11 @@ class TableView extends Component {
                         </Row>
                     </div>}
                 <Modal
-                    // confirmLoading={this.state.modalvisible}
                     centered
                     width={450}
                     hight={500}
                     title={<div><span>效果预览</span><span style={{ fontSize: 10, color: '#AAAAAA', marginLeft: 40 }}>实际效果以移动端显示为准</span></div>}
                     visible={this.state.modalvisible}
-                    // onOk={this.handleOk}
                     onCancel={this.handleCancel}
                     footer={
                         <div>
@@ -159,6 +163,7 @@ class TableView extends Component {
                 >
                     {this.state.sampleView}
                 </Modal>
+                <ChangeTableView data={this.state.currentTable} visible={this.state.drawerVisible} onClose={() => { this.setState({ drawerVisible: false }) }} onOk={() => { this.setState({ drawerVisible: false }); this.init(); message.success('刷新数据') }} />
             </div>
         );
     }

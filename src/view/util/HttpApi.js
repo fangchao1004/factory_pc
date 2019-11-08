@@ -125,6 +125,13 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
+    static updateSampleInfo(params, f1, f2) {
+        Axios.post(Testuri + 'update_sample', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
     static removeSampleInfo(params, f1, f2) {
         Axios.post(Testuri + 'remove_sample', params).then(res => {
             if (f1) { f1(res) }

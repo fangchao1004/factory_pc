@@ -17,13 +17,13 @@ export const tableCellOptionsData = [
     { "value": "13", "text": "副标题" }];
 
 export const VersionlistData = [
-    { title: '版本号', description: 'V 1.2.2 dev' },
+    { title: '版本号', description: 'V 1.2.3 dev' },
     // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
     // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
     // { title: '更新', description: '1.0.9 添加设备信息修改功能' }
     // { title: '更新', description: '1.1.0 消费审批' }
     // { title: '更新', description: '1.1.1 任务进程添加' }
-    //  { title: '更新', description: '1.1.2 点检record-改造+巡检记录展示改造' }
+    // { title: '更新', description: '1.1.2 点检record-改造+巡检记录展示改造' }
     // { title: '更新', description: '1.1.3 增加巡检点处-区域和巡检点类型筛选' }
     // { title: '更新', description: '1.1.4 多级区域' }
     // { title: '更新', description: '1.1.5 多级区域-自由选择' }
@@ -32,5 +32,6 @@ export const VersionlistData = [
     // { title: '更新', description: '1.1.8' }
     // { title: '更新', description: '1.2.0' }
     // { title: '更新', description: '1.2.1 dev 创建表单时-支持图片选择器组件和数字输入框组件' }
-    { title: '更新', description: '1.2.2 dev 支持副标题-专工和运行专工可以添加缺陷的备注' }
+    // { title: '更新', description: '1.2.2 dev 支持副标题-专工和运行专工可以添加缺陷的备注' }
+    { title: '更新', description: '1.2.3 dev 支持表单修改' }
 ]

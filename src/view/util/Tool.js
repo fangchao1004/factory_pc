@@ -12,7 +12,7 @@ import { Icon } from 'antd'
  * @param {*} targetlength
  * @returns
  */
-function omitTextLength(text, targetlength) {
+export function omitTextLength(text, targetlength) {
     let result = ''
     if (text.length > targetlength) {
         result = text.substring(0, targetlength) + '...'
