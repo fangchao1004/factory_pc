@@ -21,6 +21,7 @@ import UserMenuView from './userMenu/UserMenuView'
 import HttpApi from '../util/HttpApi';
 import Store from '../../redux/store/Store';
 import StaffListRoot from './staffListTest/StaffListRoot'
+import TestRoot from './test/TestRoot'
 
 var storage = window.localStorage;
 const { Header, Content, Sider } = Layout;
@@ -266,7 +267,11 @@ export default class MainView extends Component {
                   <span>员工列表</span>
                   <Link to={`${this.props.match.url}/StaffListRoot`}></Link>
                 </Menu.Item>
-                
+                <Menu.Item key="测试">
+                    <Icon type="disconnect"/>
+                    <span>测试</span>
+                    <Link to={`${this.props.match.url}/test`}></Link>
+                </Menu.Item>
               </Menu>
                 </Sider>
                 <Layout>
@@ -380,6 +385,11 @@ class ContentView extends Component {
               path={`${this.props.match.path}/StaffListRoot`}
               component={() => (storage.getItem('userinfo') ? <StaffListRoot /> : <Redirect to='/' />)}
             />
+            <Route
+              exact
+              path={`${this.props.match.path}/test`}
+              component={() => (storage.getItem('userinfo') ? <TestRoot /> : <Redirect to='/' />)}
+              />
             </section>
         </Content>
     }
