@@ -1,16 +1,5 @@
 import React from "react";
 import { Icon } from 'antd'
-
-/**
- * 权限数据
- */
-export const permisstion = [{ name: '专工权限', value: 0 }, { name: '运行权限', value: 1 }, { name: '消费审批权限', value: 2 }, { name: '维修专工权限', value: 3 }]
-export const permisstionWithDes = [
-    { name: '专工权限', value: 0, des: '可以在缺陷处理过程中，进行缺陷的分配和验收工作，添加缺陷备注' },
-    { name: '运行权限', value: 1, des: '可以在缺陷处理过程中，进行最后的运行验收工作' },
-    { name: '消费审批权限', value: 2, des: '可以处理消费申请，进行审批操作' },
-    { name: '维修专工权限', value: 3, des: '可以自行处理未分配的权限，无需专工分配，添加缺陷备注' }]
-
 /**
  * Tool 工具类 
  * 将可以重复利用的函数，或是代码量很大的函数进行封装

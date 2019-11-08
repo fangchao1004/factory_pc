@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Button, Modal, Row, Col, Input, message, Card, Tooltip } from 'antd';
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
-import { permisstionWithDes } from '../../util/Tool'
+import { permisstionWithDes } from '../../util/AppData'
 
 var storage = window.localStorage;
 var userinfo = null;

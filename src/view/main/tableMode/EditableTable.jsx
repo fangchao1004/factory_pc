@@ -1,17 +1,9 @@
 import React, { Component } from 'react';
 import { Table, Input, Button, Popconfirm, Select, Modal, message, Row, Col } from 'antd';
 import SampleViewTool from '../../util/SampleViewTool';
-// import { View } from 'antd-mobile';
 import HttpApi from '../../util/HttpApi'
+import { tableCellOptionsData } from '../../util/AppData'
 const Option = Select.Option;
-
-// const optionsData = [{ "value": "1", "text": "文本输入框" }, { "value": "2", "text": "数字输入框" }, { "value": "3", "text": "单选" },
-// { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" }, { "value": "7", "text": "表单类型",{ "value": "10", "text": "测温组件" }, { "value": "11", "text": "测振组件" },{ "value": "12", "text": "默认" }];
-
-const optionsData = [{ "value": "7", "text": "表单类型" }, { "value": "12", "text": "通用" }, { "value": "10", "text": "测温组件" }, { "value": "11", "text": "测振组件" }, { "value": "6", "text": "图片选择器" }, { "value": "2", "text": "数字输入框" }, { "value": "13", "text": "分区标题" }];
-////测试数据， 实际数据要从巡检点类型表device_type表中获取
-// var titleData = [{ "value": "1", "text": "水表报告单" }, { "value": "2", "text": "电表报告单" }, { "value": "3", "text": "锅炉报告单" }]
-// var titleData = [];
 
 /**
  * 表格创建区---只用于创建模版
@@ -22,7 +14,6 @@ export default class EditableTable extends Component {
     this.state = {
       titleData: [],
       uploadLoading: false,
-      // sample_type_title:'1',////模板所对应的巡检点类型
       dataSource: [{
         key: '0',
         title_name: '表头',
@@ -103,7 +94,7 @@ export default class EditableTable extends Component {
         render: (text, record) => {
           // console.log(record);
           let Options = [];
-          optionsData.forEach((item) => {
+          tableCellOptionsData.forEach((item) => {
             if (record.key === '0') {
               Options.push(<Option key={item.value} value={item.value}>{item.text}</Option>)
             } else {

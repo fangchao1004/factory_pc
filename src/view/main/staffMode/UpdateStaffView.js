@@ -1,7 +1,7 @@
 import React from 'react'
 import { Modal, Form, Input, Select, Switch, TreeSelect } from 'antd'
 import HttpApi from '../../util/HttpApi'
-import { permisstion } from '../../util/Tool'
+import { permisstion } from '../../util/AppData'
 
 const permissionOptions = permisstion.map(
     permission => <Select.Option value={permission.value} key={permission.value}>{permission.name}</Select.Option>
