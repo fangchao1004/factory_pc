@@ -12,6 +12,7 @@ import RepairView from './actions/RepairView';
 import ManagerView from './actions/ManagerView';
 import RunnerView from './actions/RunnerView';
 import BaseModal from './actions/BaseModal';
+import ChangeRemarkView from './ChangeRemarkView';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
 var bug_type_filter = [];///用于筛选类别的数据 选项
@@ -38,6 +39,7 @@ export default class BugView extends Component {
             showModal6: false,
             showModal7: false,///添加缺陷显示框
             showModal8: false,///导出缺陷显示框
+            showModal9: false,///修改最新的备注
             imguuid: null,
             userData: [],
             currentRecord: {},///当前选择的某一行。某一个缺陷对象
@@ -637,10 +639,16 @@ export default class BugView extends Component {
             {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 150,
+                width: 220,
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
                         <Button size="small" type="primary" onClick={() => { this.actionsHandler(record) }}>处理</Button>
+                        {JSON.parse(localUserInfo).permission.indexOf('0') !== -1 || JSON.parse(localUserInfo).permission.indexOf('3') !== -1 ?
+                            <Fragment>
+                                <Divider type="vertical" />
+                                <Button size="small" type="ghost" onClick={() => { this.setState({ showModal9: true, currentRecord: record }) }}>备注</Button>
+                            </Fragment>
+                            : null}
                         {JSON.parse(localUserInfo).isadmin === 1 ?
                             <Fragment>
                                 <Divider type="vertical" />
@@ -670,6 +678,10 @@ export default class BugView extends Component {
                         pageSizeOptions: ['10', '20', '50', '80', '100'],
                     }}
                 />
+                <ChangeRemarkView showModal={this.state.showModal9}
+                    oneBug={this.state.currentRecord}
+                    ok={() => { this.init(); this.setState({ showModal9: false }) }}
+                    cancel={() => { this.setState({ showModal9: false }) }} />
                 <AddBugView
                     showModal={this.state.showModal7}
                     ok={() => { this.init(); this.setState({ showModal7: false }) }}
