@@ -88,7 +88,8 @@ class ExportBugView extends Component {
             area_1.name as area1_name,area_1.id as area1_id,
             area_2.name as area2_name,area_2.id as area3_id,
             area_3.name as area3_name,area_3.id as area3_id,
-            concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name
+            concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
+            bug_types.name as bug_type_name
             from bugs
             left join (select * from devices where effective = 1) des on bugs.device_id = des.id
             left join (select * from users where effective = 1) urs on bugs.user_id = urs.id
@@ -96,6 +97,7 @@ class ExportBugView extends Component {
             left join (select * from area_3 where effective = 1) area_3 on des.area_id = area_3.id
             left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
             left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
+            left join (select * from bug_types where effective = 1) bug_types on bug_types.id = bugs.bug_type_id
             where bugs.status != 4 and bugs.effective = 1`
         }
         return new Promise((resolve, reject) => {
@@ -120,6 +122,8 @@ class ExportBugView extends Component {
             tempObj.level = item.buglevel ? (item.buglevel === 1 ? '一级' : (item.buglevel === 2 ? '二级' : '三级')) : '/';
             tempObj.content = item.title_name ? item.title_name + ' ' + JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text : JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text;
             tempObj.major = item.major_name;
+            tempObj.type_name = item.bug_type_name;
+            tempObj.last_remark = item.last_remark;
             tempObj.status = item.status === 0 ? '待分配' : (item.status === 1 ? '维修中' : (item.status === 2 ? '专工验收中' : (item.status === 3 ? '运行验收中' : '处理完毕')));
             tempObj.nowdoman = item.status === 4 || item.status === 0 ? '/' : (item.status === 2 ? '专工' : this.getusernameById(JSON.parse(item.remark)[item.status === 1 ? 0 : 2][JSON.parse(item.remark)[item.status === 1 ? 0 : 2].length - 1].to));
             if (tempList[item.major_name]) { tempList[item.major_name].push(tempObj) }
@@ -133,9 +137,9 @@ class ExportBugView extends Component {
             excelOptionList.push({
                 sheetData: tempList[key],
                 sheetName: key,
-                sheetFilter: ['id', 'time', 'device', 'uploadman', 'area', 'level', 'content', 'major', 'status', 'nowdoman'],
-                sheetHeader: ['编号', '上报时间', '巡检点名称', '上报人', '区域', '等级', '内容', '专业', '当前状态', '当前处理人'],
-                columnWidths: ['3', '8', '10', '5', '5', '5', '15', '5', '5', '5'], // 列宽
+                sheetFilter: ['id', 'time', 'device', 'uploadman', 'area', 'level', 'content', 'major', 'type_name', 'last_remark', 'status', 'nowdoman'],
+                sheetHeader: ['编号', '上报时间', '巡检点名称', '上报人', '区域', '等级', '内容', '专业', '类型', '最新备注', '当前状态', '当前处理人'],
+                columnWidths: ['3', '8', '10', '5', '5', '5', '15', '5', '5', '5', '5', '5'], // 列宽
             })
         }
         // console.log('excelOptionList:', excelOptionList);
@@ -170,13 +174,16 @@ class ExportBugView extends Component {
         let sqlText = `select * from bugs where effective = 1 ${sql3} ${sql1} ${sql2}`
         let finallySql = `select t1.*,des.name device_name,
         concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
-        majors.name major_name,users.name user_name from (${sqlText}) t1
+        majors.name major_name,users.name user_name,
+        bug_types.name as bug_type_name
+        from (${sqlText}) t1
         left join (select * from devices where effective = 1) des on des.id = t1.device_id
         left join (select * from area_3 where effective = 1) area_3 on area_3.id = des.area_id
         left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
         left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
         left join (select * from majors where effective = 1) majors on majors.id = t1.major_id
-        left join users on users.id = t1.user_id
+        left join (select * from users where effective = 1) users on users.id = t1.user_id
+        left join (select * from bug_types where effective = 1) bug_types on bug_types.id = t1.bug_type_id
         order by major_id
         `;
         let result = await this.getBugsInfo(finallySql);///获取符合条件的缺陷数据
