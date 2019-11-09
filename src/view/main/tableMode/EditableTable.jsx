@@ -173,6 +173,9 @@ export default class EditableTable extends Component {
           bordered
           dataSource={dataSource}
           columns={columns}
+          pagination={{
+            pageSize: 100
+          }}
         />
         <Modal
           // confirmLoading={this.state.modalvisible}
