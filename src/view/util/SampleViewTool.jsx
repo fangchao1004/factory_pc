@@ -126,7 +126,7 @@ export default class SampleViewTool {
         }
         let renderCommon = (element) => {
             return <div key={element.key} >
-                <List style={{ height: 40 }}>
+                <List>
                     <span>{element.title_name}</span>
                     <span style={{ color: 'blue' }}>{element.title_remark}</span>
                 </List>
@@ -134,7 +134,7 @@ export default class SampleViewTool {
         }
         let renderSubTitle = (element) => {
             return <div key={element.key} >
-                <List style={{ height: 40 }}>
+                <List>
                     <span style={{ fontWeight: 500, fontSize: 16 }}>{element.title_name}</span>
                 </List>
             </div>
