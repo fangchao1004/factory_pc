@@ -124,7 +124,7 @@ class DistributionView extends Component {
                     ></TreeSelect>
                 </Col>
             </Row>
-            <Row gutter={16} style={{ marginTop: 20 }}>
+            {/* <Row gutter={16} style={{ marginTop: 20 }}>
                 <Col span={5}>
                     <span>备注类别(非必选):</span>
                 </Col>
@@ -133,7 +133,7 @@ class DistributionView extends Component {
                         this.setState({ bug_type_id: v })
                     }}>{bugType_Options}</Select>
                 </Col>
-            </Row>
+            </Row> */}
             <Row gutter={16} style={{ marginTop: 20 }}>
                 <Col span={5}>
                     <span>备注:</span>

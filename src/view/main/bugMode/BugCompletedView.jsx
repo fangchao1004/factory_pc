@@ -465,15 +465,15 @@ export default class BugCompletedView extends Component {
                 filters: uploader_filter,
                 onFilter: (value, record) => record.user_id === value,
             },
-            {
-                key: 'area_remark', dataIndex: 'area_remark', title: '具体设备范围',
-                render: (text, record) => {
-                    let result = '/'
-                    if (text) { result = text }
-                    else { result = record.area_name }
-                    return <div>{result}</div>
-                }
-            },
+            // {
+            //     key: 'area_remark', dataIndex: 'area_remark', title: '具体设备范围',
+            //     render: (text, record) => {
+            //         let result = '/'
+            //         if (text) { result = text }
+            //         else { result = record.area_name }
+            //         return <div>{result}</div>
+            //     }
+            // },
             {
                 key: 'buglevel', dataIndex: 'buglevel', title: '等级',
                 filters: bug_level_filters,
@@ -525,39 +525,39 @@ export default class BugCompletedView extends Component {
                     return <div>{text || '/'}</div>
                 }
             },
-            {
-                key: 'img', dataIndex: 'content', title: '图片', render: (text) => {
-                    let obj = JSON.parse(text);
-                    let imgs_arr = JSON.parse(JSON.stringify(obj.imgs));
-                    let result_arr = [];
-                    imgs_arr.forEach((item, index) => {
-                        result_arr.push({ key: index + item, name: ('图片' + (index + 1)), uuid: item });
-                    })
-                    let comArr = [];
-                    result_arr.forEach((item, index) => {
-                        comArr.push(<span key={item.uuid} style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
-                            onClick={e => {
-                                if (this.state.preImguuid !== item.uuid) {
-                                    this.setState({
-                                        showLoading: true,
-                                    })
-                                } else {
-                                    this.setState({
-                                        showLoading: false,
-                                    })
-                                }
-                                this.setState({
-                                    imguuid: item.uuid,
-                                    showModal1: true,
-                                    preImguuid: item.uuid,
-                                })
-                            }}>{item.name}</span>)
-                    });
-                    let result = '/'
-                    if (comArr.length > 0) { result = comArr }
-                    return <div>{result}</div>
-                }
-            },
+            // {
+            //     key: 'img', dataIndex: 'content', title: '图片', render: (text) => {
+            //         let obj = JSON.parse(text);
+            //         let imgs_arr = JSON.parse(JSON.stringify(obj.imgs));
+            //         let result_arr = [];
+            //         imgs_arr.forEach((item, index) => {
+            //             result_arr.push({ key: index + item, name: ('图片' + (index + 1)), uuid: item });
+            //         })
+            //         let comArr = [];
+            //         result_arr.forEach((item, index) => {
+            //             comArr.push(<span key={item.uuid} style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
+            //                 onClick={e => {
+            //                     if (this.state.preImguuid !== item.uuid) {
+            //                         this.setState({
+            //                             showLoading: true,
+            //                         })
+            //                     } else {
+            //                         this.setState({
+            //                             showLoading: false,
+            //                         })
+            //                     }
+            //                     this.setState({
+            //                         imguuid: item.uuid,
+            //                         showModal1: true,
+            //                         preImguuid: item.uuid,
+            //                     })
+            //                 }}>{item.name}</span>)
+            //         });
+            //         let result = '/'
+            //         if (comArr.length > 0) { result = comArr }
+            //         return <div>{result}</div>
+            //     }
+            // },
             {
                 title: '缺陷状态',
                 dataIndex: 'status',
