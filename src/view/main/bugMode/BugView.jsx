@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm, Divider } from 'antd'
+import { Table, Tag, Button, message, Popconfirm } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 import Store from '../../../redux/store/Store';
@@ -472,6 +472,7 @@ export default class BugView extends Component {
             },
             {
                 key: 'checkedAt', dataIndex: 'checkedAt', title: '时间',
+                width: 120,
                 sorter: (a, b) => {
                     return new Date(a.checkedAt).getTime() - new Date(b.checkedAt).getTime()
                 },
@@ -488,16 +489,31 @@ export default class BugView extends Component {
             },
             {
                 key: 'user_name', dataIndex: 'user_name', title: '上报人',
+                width: 100,
                 filters: uploader_filter,
                 onFilter: (value, record) => record.user_id === value,
             },
+            // {
+            //     key: 'area_remark', dataIndex: 'area_remark', title: '具体设备范围',
+            //     render: (text, record) => {
+            //         let result = '/'
+            //         if (text) { result = text }
+            //         else { result = record.area_name }
+            //         return <div>{result}</div>
+            //     }
+            // },
             {
-                key: 'area_remark', dataIndex: 'area_remark', title: '具体设备范围',
+                key: 'content',
+                dataIndex: 'content',
+                title: '内容',
                 render: (text, record) => {
-                    let result = '/'
-                    if (text) { result = text }
-                    else { result = record.area_name }
-                    return <div>{result}</div>
+                    let obj = JSON.parse(text);
+                    return <div>
+                        <div style={{ color: '#000', fontWeight: 900 }}>{record.title_name}<span style={{ color: '#41A8FF' }}>{record.title_remark}</span></div>
+                        <div>{obj.select}</div>
+                        {record.title_name ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
+                        <div>{obj.text}</div>
+                    </div>
                 }
             },
             {
@@ -519,18 +535,8 @@ export default class BugView extends Component {
                 }
             },
             {
-                key: 'content', dataIndex: 'content', title: '内容', render: (text, record) => {
-                    let obj = JSON.parse(text);
-                    return <div>
-                        <div style={{ color: '#000', fontWeight: 900 }}>{record.title_name}<span style={{ color: '#41A8FF' }}>{record.title_remark}</span></div>
-                        <div>{obj.select}</div>
-                        {record.title_name ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
-                        <div>{obj.text}</div>
-                    </div>
-                }
-            },
-            {
                 key: 'major_name', dataIndex: 'major_name', title: '专业',
+                width: 80,
                 filters: major_filter,
                 onFilter: (value, record) => record.major_id === value,
                 render: (text, record) => {
@@ -539,6 +545,7 @@ export default class BugView extends Component {
             },
             {
                 key: 'bug_type_name', dataIndex: 'bug_type_name', title: '类别',
+                width: 80,
                 filters: bug_type_filter,
                 onFilter: (value, record) => record.bug_type_id === value,
                 render: (text, record) => {
@@ -551,39 +558,39 @@ export default class BugView extends Component {
                     return <div>{text || '/'}</div>
                 }
             },
-            {
-                key: 'img', dataIndex: 'content', title: '图片', render: (text) => {
-                    let obj = JSON.parse(text);
-                    let imgs_arr = JSON.parse(JSON.stringify(obj.imgs));
-                    let result_arr = [];
-                    imgs_arr.forEach((item, index) => {
-                        result_arr.push({ key: index + item, name: ('图片' + (index + 1)), uuid: item });
-                    })
-                    let comArr = [];
-                    result_arr.forEach((item, index) => {
-                        comArr.push(<span key={item.uuid} style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
-                            onClick={e => {
-                                if (this.state.preImguuid !== item.uuid) {
-                                    this.setState({
-                                        showLoading: true,
-                                    })
-                                } else {
-                                    this.setState({
-                                        showLoading: false,
-                                    })
-                                }
-                                this.setState({
-                                    imguuid: item.uuid,
-                                    showModal1: true,
-                                    preImguuid: item.uuid,
-                                })
-                            }}>{item.name}</span>)
-                    });
-                    let result = '/'
-                    if (comArr.length > 0) { result = comArr }
-                    return <div>{result}</div>
-                }
-            },
+            // {
+            //     key: 'img', dataIndex: 'content', title: '图片', render: (text) => {
+            //         let obj = JSON.parse(text);
+            //         let imgs_arr = JSON.parse(JSON.stringify(obj.imgs));
+            //         let result_arr = [];
+            //         imgs_arr.forEach((item, index) => {
+            //             result_arr.push({ key: index + item, name: ('图片' + (index + 1)), uuid: item });
+            //         })
+            //         let comArr = [];
+            //         result_arr.forEach((item, index) => {
+            //             comArr.push(<span key={item.uuid} style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
+            //                 onClick={e => {
+            //                     if (this.state.preImguuid !== item.uuid) {
+            //                         this.setState({
+            //                             showLoading: true,
+            //                         })
+            //                     } else {
+            //                         this.setState({
+            //                             showLoading: false,
+            //                         })
+            //                     }
+            //                     this.setState({
+            //                         imguuid: item.uuid,
+            //                         showModal1: true,
+            //                         preImguuid: item.uuid,
+            //                     })
+            //                 }}>{item.name}</span>)
+            //         });
+            //         let result = '/'
+            //         if (comArr.length > 0) { result = comArr }
+            //         return <div>{result}</div>
+            //     }
+            // },
             {
                 title: '缺陷状态',
                 dataIndex: 'status',
@@ -599,8 +606,9 @@ export default class BugView extends Component {
                 }
             },
             {
-                title: '当前处理人员',
+                title: '当前处理人',
                 dataIndex: 'a',
+                width: 100,
                 render: (text, record) => {
                     let remarkObj = JSON.parse(record.remark);
                     let currentStatus = record.status;
@@ -639,19 +647,18 @@ export default class BugView extends Component {
             {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 220,
                 render: (text, record) => (
-                    <div style={{ textAlign: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <Button size="small" type="primary" onClick={() => { this.actionsHandler(record) }}>处理</Button>
                         {JSON.parse(localUserInfo).permission.indexOf('0') !== -1 || JSON.parse(localUserInfo).permission.indexOf('3') !== -1 ?
                             <Fragment>
-                                <Divider type="vertical" />
+                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                 <Button size="small" type="ghost" onClick={() => { this.setState({ showModal9: true, currentRecord: record }) }}>备注</Button>
                             </Fragment>
                             : null}
                         {JSON.parse(localUserInfo).isadmin === 1 ?
                             <Fragment>
-                                <Divider type="vertical" />
+                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                 <Popconfirm title="确定要删除该缺陷吗?" onConfirm={() => { this.deleteBugsHandler(record); }}>
                                     <Button size="small" type="danger">删除</Button>
                                 </Popconfirm>

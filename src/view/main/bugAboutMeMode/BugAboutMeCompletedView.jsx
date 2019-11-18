@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm, Divider } from 'antd'
+import { Table, Tag, Button, message, Popconfirm } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 import Store from '../../../redux/store/Store';
@@ -577,13 +577,12 @@ export default class BugView extends Component {
             {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 150,
                 render: (text, record) => (
-                    <div style={{ textAlign: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <Button size="small" type="primary" onClick={() => { this.actionsHandler(record) }}>处理</Button>
                         {JSON.parse(localUserInfo).isadmin === 1 ?
                             <Fragment>
-                                <Divider type="vertical" />
+                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                 <Popconfirm title="确定要删除该缺陷吗?" onConfirm={() => { this.deleteBugsHandler(record); }}>
                                     <Button size="small" type="danger">删除</Button>
                                 </Popconfirm>

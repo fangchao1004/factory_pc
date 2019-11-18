@@ -133,6 +133,7 @@ class TimeView extends Component {
             {
                 title: '今日时间段划分',
                 dataIndex: '/',
+                width: 240,
                 render: (text, record) => {
                     return <div>{record.begin} ~ {record.end} （{record.name}）</div>
                 }
