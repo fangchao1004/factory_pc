@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm } from 'antd'
+import { Table, Tag, Button, message, Popconfirm,Tooltip } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 import Store from '../../../redux/store/Store';
@@ -13,6 +13,7 @@ import ManagerView from './actions/ManagerView';
 import RunnerView from './actions/RunnerView';
 import BaseModal from './actions/BaseModal';
 import ChangeRemarkView from './ChangeRemarkView';
+import { omitTextLength } from '../../util/Tool'
 
 var major_filter = [];///用于筛选任务专业的数据 选项
 var bug_type_filter = [];///用于筛选类别的数据 选项
@@ -484,7 +485,12 @@ export default class BugView extends Component {
                 render: (text) => {
                     let result = '/'
                     if (text && text !== '') { result = text }
-                    return <div>{result}</div>
+                  return <div>
+                    <Tooltip title={result}>
+                      <span>{omitTextLength(result,8)}</span>
+                    </Tooltip>
+                    {/* {result} */}
+                  </div>
                 }
             },
             {
@@ -509,10 +515,27 @@ export default class BugView extends Component {
                 render: (text, record) => {
                     let obj = JSON.parse(text);
                     return <div>
-                        <div style={{ color: '#000', fontWeight: 900 }}>{record.title_name}<span style={{ color: '#41A8FF' }}>{record.title_remark}</span></div>
+                      <div style={{ color: '#000', fontWeight: 900 }}>
+                        <Tooltip title={record.title_name}>
+                          <span>{record.title_name ? omitTextLength(record.title_name, 5) : null}</span>
+                        </Tooltip>
+                        {/* {record.title_name} */}
+                        <span style={{ color: '#41A8FF' }}>
+                          <Tooltip title={record.title_remark}>
+                            <span>
+                              {record.title_remark ? omitTextLength(record.title_remark, 4) : null}
+                            </span>
+                          </Tooltip>
+                          {/* {record.title_remark} */}
+                        </span></div>
                         <div>{obj.select}</div>
                         {record.title_name ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
-                        <div>{obj.text}</div>
+                      <div>
+                        <Tooltip title={obj.text}>
+                          <span>{omitTextLength(obj.text, 9)}</span>
+                        </Tooltip>
+                        {/* {obj.text} */}
+                      </div>
                     </div>
                 }
             },
