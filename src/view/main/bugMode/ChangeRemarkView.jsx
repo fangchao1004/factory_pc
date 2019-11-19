@@ -68,7 +68,7 @@ export default function ChangeRemarkView(props) {
         visible={props.showModal}
         onCancel={cancelHandler}
         footer={<div style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
-            {localUserInfo && JSON.parse(localUserInfo).permission.indexOf('0') !== -1 ? <Button type='primary' onClick={props.openRunerView}>直接消缺</Button> : null}
+            {localUserInfo && JSON.parse(localUserInfo).permission.indexOf('0') !== -1 ? <Button type='primary' onClick={props.openRunerView}>直接消缺</Button> : <div></div>}
             <span><Button onClick={cancelHandler}>取消</Button><Button type='primary' onClick={okHandler}>确定</Button></span>
         </div>}
     >
