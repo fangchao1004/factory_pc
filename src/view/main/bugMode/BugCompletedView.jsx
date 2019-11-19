@@ -1,27 +1,24 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm, Tooltip  } from 'antd'
+import { Table, Tag, Button, message, Popconfirm, Tooltip } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 import Store from '../../../redux/store/Store';
 import { showBugNum } from '../../../redux/actions/BugAction';
-import ShowImgView from '../bugMode/ShowImgView';
-import DistributionView from '../bugMode/actions/DistributionView';
-import RepairView from '../bugMode/actions/RepairView';
-import ManagerView from '../bugMode/actions/ManagerView';
-import RunnerView from '../bugMode/actions/RunnerView';
-import BaseModal from '../bugMode/actions/BaseModal';
-import { omitTextLength } from '../../util/Tool';
+import ShowImgView from './ShowImgView';
+import BaseModal from './actions/BaseModal';
+import { omitTextLength } from '../../util/Tool'
 
 var major_filter = [];///用于筛选任务专业的数据 选项
 var bug_type_filter = [];///用于筛选类别的数据 选项
 const status_filter = [{ text: '待分配', value: 0 }, { text: '维修中', value: 1 },
 { text: '专工验收中', value: 2 }, { text: '运行验收中', value: 3 }];///用于筛选状态的数据
 const bug_level_filters = [{ text: '一级', value: '1' }, { text: '二级', value: '2' }, { text: '三级', value: '3' }, { text: '/', value: 'null' }]
+var uploader_filter = [];///用于筛选上传者的数据 选项
 
 var storage = window.localStorage;
 var localUserInfo = '';
 
-export default class BugView extends Component {
+export default class BugCompletedView extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -30,10 +27,6 @@ export default class BugView extends Component {
             showLoading: true,///现实loading图片
             preImguuid: null,///上一次加载的图片的uuid
             showModal2: false,
-            showModal3: false,
-            showModal4: false,
-            showModal5: false,
-            showModal6: false,
             imguuid: null,
             userData: [],
             currentRecord: {},///当前选择的某一行。某一个缺陷对象
@@ -46,6 +39,7 @@ export default class BugView extends Component {
 
     init = async () => {
         major_filter.length = 0;
+        uploader_filter.length = 0;
         bug_type_filter.length = 0;
         let bugTypeData = await this.getBugTypeInfo();
         bugTypeData.forEach((item) => {
@@ -55,9 +49,11 @@ export default class BugView extends Component {
         marjorData.forEach((item) => {
             major_filter.push({ text: item.name, value: item.id });
         })
+        let uploaderData = await this.getUploaderInfo();
+        uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
         // console.log('finallyData:', finallyData);
-        finallyData.forEach((item) => { item.key = item.id + '' ;})
+        finallyData.forEach((item) => { item.key = item.id + '' })
         let userData = await this.getUsersInfo();
         this.setState({
             data: finallyData,
@@ -80,8 +76,15 @@ export default class BugView extends Component {
             })
         })
     }
-    getBugTypeInfo = () => {
-        let sql = `select * from bug_types  where effective = 1`
+    /**
+     * 查询上传者 去重
+     * 未完成的缺陷
+     */
+    getUploaderInfo = () => {
+        let sql = `select distinct(users.name) as user_name,bugs.user_id from bugs
+        left join (select * from users where effective = 1) users
+        on users.id = bugs.user_id
+        where bugs.effective = 1 and bugs.status !=4`
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -104,6 +107,18 @@ export default class BugView extends Component {
             })
         })
     }
+    getBugTypeInfo = () => {
+        let sql = `select * from bug_types  where effective = 1`
+        return new Promise((resolve, reject) => {
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
     getOneBugInfo = (bug_id) => {
         let sql = `select bugs.* from bugs where id = ${bug_id} and effective = 1`;
         return new Promise((resolve, reject) => {
@@ -116,9 +131,26 @@ export default class BugView extends Component {
             })
         })
     }
-    getBugsInfo = () => {
+    getBugsInfo = (sql = null) => {
+        if (!sql) {
+            sql = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,
+            area_1.name as area1_name,area_1.id as area1_id,
+            area_2.name as area2_name,area_2.id as area3_id,
+            area_3.name as area3_name,area_3.id as area3_id,
+            concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
+            bug_types.name as bug_type_name
+            from bugs
+            left join (select * from devices where effective = 1) des on bugs.device_id = des.id
+            left join (select * from users where effective = 1) urs on bugs.user_id = urs.id
+            left join (select * from majors where effective = 1) mjs on bugs.major_id = mjs.id
+            left join (select * from area_3 where effective = 1) area_3 on des.area_id = area_3.id
+            left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
+            left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
+            left join (select * from bug_types where effective = 1) bug_types on bug_types.id = bugs.bug_type_id
+            where bugs.status = 4 and bugs.effective = 1 order by bugs.id desc`
+        }
         return new Promise((resolve, reject) => {
-            HttpApi.findBugsAboutMe({ userId: JSON.parse(localUserInfo).id, isCompleted: 1 }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -427,22 +459,24 @@ export default class BugView extends Component {
                     let result = '/'
                     if (text && text !== '') { result = text }
                     return <div>
-                        <Tooltip title={result}>
-                            <span>{omitTextLength(result, 5)}</span>
-                        </Tooltip>,
+                    <Tooltip title={result}>
+                      <span>{omitTextLength(result,8)}</span>
+                    </Tooltip>
                     </div>
                 }
             },
             {
                 key: 'user_name', dataIndex: 'user_name', title: '上报人',
+                filters: uploader_filter,
+                onFilter: (value, record) => record.user_id === value,
             },
-            /// {
-            ///     key: 'area_remark', dataIndex: 'area_remark', title: '具体设备范围',
-            ///     render: (text, record) => {
-            ///         let result = '/'
-            ///         if (text) { result = text }
-            //       else { result = record.area_name }
-            ///         return <div>{result}</div>
+            // {
+            //     key: 'area_remark', dataIndex: 'area_remark', title: '具体设备范围',
+            //     render: (text, record) => {
+            //         let result = '/'
+            //         if (text) { result = text }
+            //         else { result = record.area_name }
+            //         return <div>{result}</div>
             //     }
             // },
             {
@@ -464,29 +498,33 @@ export default class BugView extends Component {
                 }
             },
             {
-                key: 'content', dataIndex: 'content', title: '内容', render: (text, record) => {
+                key: 'content',
+                dataIndex: 'content',
+                title: '内容',
+                render: (text, record) => {
                     let obj = JSON.parse(text);
                     return <div>
-                        <div style={{ color: '#000', fontWeight: 900 }}>
-                            <Tooltip title={record.title_name}>
-                               <span>{record.title_name ? omitTextLength(record.title_name, 5) : null}</span>
-                            </Tooltip>
-                            <span style={{ color: '#41A8FF' }}>
-                                <Tooltip title={record.title_remark}>
-                                    <span>
-                                        {record.title_remark ? omitTextLength(record.title_remark, 4) : null}
-                                    </span>
-                                 </Tooltip>
-                           </span>
-                        </div>
+                      <div style={{ color: '#000', fontWeight: 900 }}>
+                        <Tooltip title={record.title_name}>
+                          <span>{record.title_name ? omitTextLength(record.title_name, 5) : null}</span>
+                        </Tooltip>
+                        {/* {record.title_name} */}
+                        <span style={{ color: '#41A8FF' }}>
+                          <Tooltip title={record.title_remark}>
+                            <span>
+                              {record.title_remark ? omitTextLength(record.title_remark, 4) : null}
+                            </span>
+                          </Tooltip>
+                          {/* {record.title_remark} */}
+                        </span></div>
                         <div>{obj.select}</div>
                         {record.title_name ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
-                        <div>{obj.text}</div>
-                        <div>
-                            <Tooltip title={obj.text}>
-                              <span>{omitTextLength(obj.text, 6)}</span>
-                            </Tooltip>
-                        </div>
+                      <div>
+                        <Tooltip title={obj.text}>
+                          <span>{omitTextLength(obj.text, 9)}</span>
+                        </Tooltip>
+                        {/* {obj.text} */}
+                      </div>
                     </div>
                 }
             },
@@ -626,14 +664,6 @@ export default class BugView extends Component {
                 />
                 {/* 进度界面 */}
                 <BaseModal showModal={this.state.showModal2} onClose={() => { this.setState({ showModal2: false }) }} renderStatusX={this.renderStatusX} currentStatus={this.state.currentRecord.status} openDrawer={this.openDrawerHandler} checkDisable={this.checkDisable} />
-                {/* 分配人员操作界面 */}
-                <DistributionView showModal={this.state.showModal3} onClose={() => { this.setState({ showModal3: false }) }} changeBugStatus={this.changeBugStatus} />
-                {/* 维修人员操作界面 */}
-                <RepairView showModal={this.state.showModal4} onClose={() => { this.setState({ showModal4: false }) }} changeBugStatus={this.changeBugStatus} />
-                {/* 专工验收操作界面 */}
-                <ManagerView showModal={this.state.showModal5} onClose={() => { this.setState({ showModal5: false }) }} changeBugStatus={this.changeBugStatus} />
-                {/* 运行验收操作界面 */}
-                <RunnerView showModal={this.state.showModal6} onClose={() => { this.setState({ showModal6: false }) }} changeBugStatus={this.changeBugStatus} />
                 {/* 图片显示界面 */}
                 <ShowImgView showModal={this.state.showModal1} cancel={() => { this.setState({ showModal1: false }) }} showLoading={this.state.showLoading} imguuid={this.state.imguuid} />
             </Fragment >

@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm } from 'antd'
+import { Table, Tag, Button, message, Popconfirm, Tooltip } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 import Store from '../../../redux/store/Store';
@@ -11,6 +11,7 @@ import ManagerView from '../bugMode/actions/ManagerView';
 import RunnerView from '../bugMode/actions/RunnerView';
 import BaseModal from '../bugMode/actions/BaseModal';
 import ChangeRemarkView from '../bugMode/ChangeRemarkView';
+import { omitTextLength } from '../../util/Tool';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
 var bug_type_filter = [];///用于筛选类别的数据 选项
@@ -447,21 +448,25 @@ export default class BugView extends Component {
                 render: (text) => {
                     let result = '/'
                     if (text && text !== '') { result = text }
-                    return <div>{result}</div>
+                    return <div>
+                        <Tooltip title={result}>
+                            <span>{omitTextLength(result, 5)}</span>
+                        </Tooltip>,
+                    </div>
                 }
             },
             {
                 key: 'user_name', dataIndex: 'user_name', title: '上报人',
             },
-            {
-                key: 'area_remark', dataIndex: 'area_remark', title: '具体设备范围',
-                render: (text, record) => {
-                    let result = '/'
-                    if (text) { result = text }
-                    else { result = record.area_name }
-                    return <div>{result}</div>
-                }
-            },
+            // {
+            //     key: 'area_remark', dataIndex: 'area_remark', title: '具体设备范围',
+            //     render: (text, record) => {
+            //         let result = '/'
+            //         if (text) { result = text }
+            //         else { result = record.area_name }
+            //         return <div>{result}</div>
+            //     }
+            // },
             {
                 key: 'buglevel', dataIndex: 'buglevel', title: '等级',
                 filters: bug_level_filters,
@@ -484,10 +489,26 @@ export default class BugView extends Component {
                 key: 'content', dataIndex: 'content', title: '内容', render: (text, record) => {
                     let obj = JSON.parse(text);
                     return <div>
-                        <div style={{ color: '#000', fontWeight: 900 }}>{record.title_name}<span style={{ color: '#41A8FF' }}>{record.title_remark}</span></div>
+                        <div style={{ color: '#000', fontWeight: 900 }}>
+                            <Tooltip title={record.title_name}>
+                               <span>{record.title_name ? omitTextLength(record.title_name, 5) : null}</span>
+                            </Tooltip>
+                            <span style={{ color: '#41A8FF' }}>
+                                <Tooltip title={record.title_remark}>
+                                    <span>
+                                        {record.title_remark ? omitTextLength(record.title_remark, 4) : null}
+                                    </span>
+                                 </Tooltip>
+                           </span>
+                        </div>
                         <div>{obj.select}</div>
                         {record.title_name ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
                         <div>{obj.text}</div>
+                        <div>
+                            <Tooltip title={obj.text}>
+                              <span>{omitTextLength(obj.text, 6)}</span>
+                            </Tooltip>
+                        </div>
                     </div>
                 }
             },
@@ -513,39 +534,39 @@ export default class BugView extends Component {
                     return <div>{text || '/'}</div>
                 }
             },
-            {
-                key: 'img', dataIndex: 'content', title: '图片', render: (text) => {
-                    let obj = JSON.parse(text);
-                    let imgs_arr = JSON.parse(JSON.stringify(obj.imgs));
-                    let result_arr = [];
-                    imgs_arr.forEach((item, index) => {
-                        result_arr.push({ key: index + item, name: ('图片' + (index + 1)), uuid: item });
-                    })
-                    let comArr = [];
-                    result_arr.forEach((item, index) => {
-                        comArr.push(<span key={item.uuid} style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
-                            onClick={e => {
-                                if (this.state.preImguuid !== item.uuid) {
-                                    this.setState({
-                                        showLoading: true,
-                                    })
-                                } else {
-                                    this.setState({
-                                        showLoading: false,
-                                    })
-                                }
-                                this.setState({
-                                    imguuid: item.uuid,
-                                    showModal1: true,
-                                    preImguuid: item.uuid,
-                                })
-                            }}>{item.name}</span>)
-                    });
-                    let result = '/'
-                    if (comArr.length > 0) { result = comArr }
-                    return <div>{result}</div>
-                }
-            },
+            /// {
+            ///     key: 'img', dataIndex: 'content', title: '图片', render: (text) => {
+            ///         let obj = JSON.parse(text);
+            ///        let imgs_arr = JSON.parse(JSON.stringify(obj.imgs));
+            ///       let result_arr = [];
+            ///       imgs_arr.forEach((item, index) => {
+            ///            result_arr.push({ key: index + item, name: ('图片' + (index + 1)), uuid: item });
+            ///         })
+            ///         let comArr = [];
+            ///         result_arr.forEach((item, index) => {
+            ///             comArr.push(<span key={item.uuid} style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
+            ///                 onClick={e => {
+            ///                     if (this.state.preImguuid !== item.uuid) {
+            ///                         this.setState({
+            ///                             showLoading: true,
+            ///                         })
+            ///                     } else {
+            ///                         this.setState({
+            ///                             showLoading: false,
+            ///                         })
+            ///                     }
+            ///                     this.setState({
+            ///                         imguuid: item.uuid,
+            ///                         showModal1: true,
+            ///                         preImguuid: item.uuid,
+            ///                     })
+            ///                 }}>{item.name}</span>)
+            ///         });
+            ///         let result = '/'
+            ///         if (comArr.length > 0) { result = comArr }
+            ///         return <div>{result}</div>
+            ///     }
+            /// },
             {
                 title: '缺陷状态',
                 dataIndex: 'status',
