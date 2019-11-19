@@ -4,7 +4,7 @@ import HttpApi from '../../../util/HttpApi';
 
 var runner_Options = [];///运行选项
 
-var bugType_Options = [];///缺陷类型
+// var bugType_Options = [];///缺陷类型
 var storage = window.localStorage;
 var localUserInfo = '';
 /**
@@ -32,8 +32,8 @@ class ManagerView extends Component {
     init = async () => {
         let runnerData = await this.getRunnerInfo();///获取有运行权限的人员
         runner_Options = runnerData.map(userInfo => <Select.Option value={userInfo.id} key={userInfo.id}>{userInfo.name}</Select.Option>)
-        let bugTypeData = await this.getBugTypeInfo();
-        bugType_Options = bugTypeData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
+        // let bugTypeData = await this.getBugTypeInfo();
+        // bugType_Options = bugTypeData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
     }
     getRunnerInfo = () => {
         return new Promise((resolve, reject) => {
@@ -47,18 +47,18 @@ class ManagerView extends Component {
             })
         })
     }
-    getBugTypeInfo = () => {
-        let sql = `select bt.id,bt.name from bug_types bt where effective = 1`
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
+    // getBugTypeInfo = () => {
+    //     let sql = `select bt.id,bt.name from bug_types bt where effective = 1`
+    //     return new Promise((resolve, reject) => {
+    //         HttpApi.obs({ sql }, (res) => {
+    //             let result = [];
+    //             if (res.data.code === 0) {
+    //                 result = res.data.data
+    //             }
+    //             resolve(result);
+    //         })
+    //     })
+    // }
     /////专工界面
     renderManagerModal = () => {
         return (

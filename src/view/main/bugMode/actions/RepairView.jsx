@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import { Drawer, Button, Row, Col, Input, Select } from 'antd';
-import HttpApi from '../../../util/HttpApi';
+import { Drawer, Button, Row, Col, Input } from 'antd';
 
 var storage = window.localStorage;
 var localUserInfo = '';
-var bugType_Options = [];///缺陷类型
+// var bugType_Options = [];///缺陷类型
 
 /**
  * 维修界面
@@ -24,7 +23,6 @@ class RepairView extends Component {
         }
     }
     componentDidMount() {
-        this.init();
         localUserInfo = storage.getItem('userinfo');
         this.setState({
             isRepairManager: JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('3') !== -1
@@ -34,22 +32,6 @@ class RepairView extends Component {
         this.setState({
             showModal: nextProps.showModal,
             bug_status: nextProps.status
-        })
-    }
-    init = async () => {
-        let bugTypeData = await this.getBugTypeInfo();
-        bugType_Options = bugTypeData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
-    }
-    getBugTypeInfo = () => {
-        let sql = `select bt.id,bt.name from bug_types bt where effective = 1`
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
         })
     }
     ////维修工的界面

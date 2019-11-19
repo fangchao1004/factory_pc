@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import { Drawer, Button, Row, Col, Input, Select } from 'antd';
-import HttpApi from '../../../util/HttpApi';
+import { Drawer, Button, Row, Col, Input } from 'antd';
 
 var storage = window.localStorage;
 var localUserInfo = '';
-var bugType_Options = [];///缺陷类型
+// var bugType_Options = [];///缺陷类型
 
 /**
  * 运行人员界面
@@ -20,43 +19,16 @@ class RunnerView extends Component {
     }
     componentDidMount() {
         localUserInfo = storage.getItem('userinfo');
-        this.init();
     }
     componentWillReceiveProps(nextProps) {
         this.setState({
             showModal: nextProps.showModal
         })
     }
-    init = async () => {
-        let bugTypeData = await this.getBugTypeInfo();
-        bugType_Options = bugTypeData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
-    }
-    getBugTypeInfo = () => {
-        let sql = `select bt.id,bt.name from bug_types bt where effective = 1`
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
     ////运行验收界面
     renderRunerModal = () => {
         return (
             <div>
-                {/* <Row gutter={16} style={{ marginTop: 20 }}>
-                    <Col span={5}>
-                        <span>备注类别(非必选):</span>
-                    </Col>
-                    <Col span={18}>
-                        <Select style={{ width: '100%' }} value={this.state.bug_type_id} onChange={(v) => {
-                            this.setState({ bug_type_id: v })
-                        }}>{bugType_Options}</Select>
-                    </Col>
-                </Row> */}
                 <Row gutter={16}>
                     <Col span={5}>
                         <span>备注:</span>

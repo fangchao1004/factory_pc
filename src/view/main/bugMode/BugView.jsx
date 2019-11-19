@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm,Tooltip } from 'antd'
+import { Table, Tag, Button, message, Popconfirm, Tooltip } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 import Store from '../../../redux/store/Store';
@@ -44,6 +44,7 @@ export default class BugView extends Component {
             imguuid: null,
             userData: [],
             currentRecord: {},///当前选择的某一行。某一个缺陷对象
+            bugTypes: [],///所有缺陷备注类型
         }
     }
     componentDidMount() {
@@ -68,6 +69,7 @@ export default class BugView extends Component {
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
         finallyData.forEach((item) => { item.key = item.id + '' })
         let userData = await this.getUsersInfo();
+        // console.log('finallyData:', finallyData);
         this.setState({
             data: finallyData,
             userData,
@@ -75,12 +77,12 @@ export default class BugView extends Component {
     }
     getUsersInfo = () => {
         return new Promise((resolve, reject) => {
-            let sqlText = `select users.*,users.name as title,levels.name level_name,  CONCAT(users.level_id,'-',users.id) 'key',CONCAT(users.level_id,'-',users.id) 'value' from users
+            let sql = `select users.*,users.name as title,levels.name level_name,  CONCAT(users.level_id,'-',users.id) 'key',CONCAT(users.level_id,'-',users.id) 'value' from users
             left join (select * from levels where effective = 1)levels
             on users.level_id = levels.id
             where users.effective = 1
             order by users.level_id`
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -485,12 +487,12 @@ export default class BugView extends Component {
                 render: (text) => {
                     let result = '/'
                     if (text && text !== '') { result = text }
-                  return <div>
-                    <Tooltip title={result}>
-                      <span>{omitTextLength(result,8)}</span>
-                    </Tooltip>
-                    {/* {result} */}
-                  </div>
+                    return <div>
+                        <Tooltip title={result}>
+                            <span>{omitTextLength(result, 8)}</span>
+                        </Tooltip>
+                        {/* {result} */}
+                    </div>
                 }
             },
             {
@@ -515,27 +517,27 @@ export default class BugView extends Component {
                 render: (text, record) => {
                     let obj = JSON.parse(text);
                     return <div>
-                      <div style={{ color: '#000', fontWeight: 900 }}>
-                        <Tooltip title={record.title_name}>
-                          <span>{record.title_name ? omitTextLength(record.title_name, 5) : null}</span>
-                        </Tooltip>
-                        {/* {record.title_name} */}
-                        <span style={{ color: '#41A8FF' }}>
-                          <Tooltip title={record.title_remark}>
-                            <span>
-                              {record.title_remark ? omitTextLength(record.title_remark, 4) : null}
-                            </span>
-                          </Tooltip>
-                          {/* {record.title_remark} */}
-                        </span></div>
+                        <div style={{ color: '#000', fontWeight: 900 }}>
+                            <Tooltip title={record.title_name}>
+                                <span>{record.title_name ? omitTextLength(record.title_name, 5) : null}</span>
+                            </Tooltip>
+                            {/* {record.title_name} */}
+                            <span style={{ color: '#41A8FF' }}>
+                                <Tooltip title={record.title_remark}>
+                                    <span>
+                                        {record.title_remark ? omitTextLength(record.title_remark, 4) : null}
+                                    </span>
+                                </Tooltip>
+                                {/* {record.title_remark} */}
+                            </span></div>
                         <div>{obj.select}</div>
                         {record.title_name ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
-                      <div>
-                        <Tooltip title={obj.text}>
-                          <span>{omitTextLength(obj.text, 9)}</span>
-                        </Tooltip>
-                        {/* {obj.text} */}
-                      </div>
+                        <div>
+                            <Tooltip title={obj.text}>
+                                <span>{omitTextLength(obj.text, 9)}</span>
+                            </Tooltip>
+                            {/* {obj.text} */}
+                        </div>
                     </div>
                 }
             },
@@ -708,8 +710,12 @@ export default class BugView extends Component {
                         pageSizeOptions: ['10', '20', '50', '80', '100'],
                     }}
                 />
-                <ChangeRemarkView showModal={this.state.showModal9}
+                <ChangeRemarkView
+                    currentRecord={this.state.currentRecord}
+                    getLocalUserName={this.getLocalUserName}
+                    showModal={this.state.showModal9}
                     oneBug={this.state.currentRecord}
+                    openRunerView={() => { this.setState({ showModal5: true }) }}
                     ok={() => { this.init(); this.setState({ showModal9: false }) }}
                     cancel={() => { this.setState({ showModal9: false }) }} />
                 <AddBugView

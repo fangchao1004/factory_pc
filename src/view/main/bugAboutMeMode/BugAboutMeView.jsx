@@ -451,7 +451,7 @@ export default class BugView extends Component {
                     return <div>
                         <Tooltip title={result}>
                             <span>{omitTextLength(result, 5)}</span>
-                        </Tooltip>,
+                        </Tooltip>
                     </div>
                 }
             },
@@ -491,22 +491,21 @@ export default class BugView extends Component {
                     return <div>
                         <div style={{ color: '#000', fontWeight: 900 }}>
                             <Tooltip title={record.title_name}>
-                               <span>{record.title_name ? omitTextLength(record.title_name, 5) : null}</span>
+                                <span>{record.title_name ? omitTextLength(record.title_name, 5) : null}</span>
                             </Tooltip>
                             <span style={{ color: '#41A8FF' }}>
                                 <Tooltip title={record.title_remark}>
                                     <span>
                                         {record.title_remark ? omitTextLength(record.title_remark, 4) : null}
                                     </span>
-                                 </Tooltip>
-                           </span>
+                                </Tooltip>
+                            </span>
                         </div>
                         <div>{obj.select}</div>
                         {record.title_name ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
-                        <div>{obj.text}</div>
                         <div>
                             <Tooltip title={obj.text}>
-                              <span>{omitTextLength(obj.text, 6)}</span>
+                                <span>{omitTextLength(obj.text, 6)}</span>
                             </Tooltip>
                         </div>
                     </div>
@@ -652,8 +651,12 @@ export default class BugView extends Component {
                         pageSizeOptions: ['10', '20', '50', '80', '100'],
                     }}
                 />
-                <ChangeRemarkView showModal={this.state.showModal9}
+                <ChangeRemarkView
+                    currentRecord={this.state.currentRecord}
+                    getLocalUserName={this.getLocalUserName}
+                    showModal={this.state.showModal9}
                     oneBug={this.state.currentRecord}
+                    openRunerView={() => { this.setState({ showModal5: true }) }}
                     ok={() => { this.init(); this.setState({ showModal9: false }) }}
                     cancel={() => { this.setState({ showModal9: false }) }} />
                 {/* 进度界面 */}

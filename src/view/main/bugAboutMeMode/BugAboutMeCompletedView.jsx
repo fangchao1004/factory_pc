@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm, Tooltip  } from 'antd'
+import { Table, Tag, Button, message, Popconfirm, Tooltip } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 import Store from '../../../redux/store/Store';
@@ -57,7 +57,7 @@ export default class BugView extends Component {
         })
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
         // console.log('finallyData:', finallyData);
-        finallyData.forEach((item) => { item.key = item.id + '' ;})
+        finallyData.forEach((item) => { item.key = item.id + ''; })
         let userData = await this.getUsersInfo();
         this.setState({
             data: finallyData,
@@ -429,7 +429,7 @@ export default class BugView extends Component {
                     return <div>
                         <Tooltip title={result}>
                             <span>{omitTextLength(result, 5)}</span>
-                        </Tooltip>,
+                        </Tooltip>
                     </div>
                 }
             },
@@ -469,22 +469,21 @@ export default class BugView extends Component {
                     return <div>
                         <div style={{ color: '#000', fontWeight: 900 }}>
                             <Tooltip title={record.title_name}>
-                               <span>{record.title_name ? omitTextLength(record.title_name, 5) : null}</span>
+                                <span>{record.title_name ? omitTextLength(record.title_name, 5) : null}</span>
                             </Tooltip>
                             <span style={{ color: '#41A8FF' }}>
                                 <Tooltip title={record.title_remark}>
                                     <span>
                                         {record.title_remark ? omitTextLength(record.title_remark, 4) : null}
                                     </span>
-                                 </Tooltip>
-                           </span>
+                                </Tooltip>
+                            </span>
                         </div>
                         <div>{obj.select}</div>
                         {record.title_name ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
-                        <div>{obj.text}</div>
                         <div>
                             <Tooltip title={obj.text}>
-                              <span>{omitTextLength(obj.text, 6)}</span>
+                                <span>{omitTextLength(obj.text, 6)}</span>
                             </Tooltip>
                         </div>
                     </div>

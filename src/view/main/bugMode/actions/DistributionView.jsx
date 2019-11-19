@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import { Row, Col, Input, Button, message, TreeSelect, Drawer, Select } from 'antd';
+import { Row, Col, Input, Button, message, TreeSelect, Drawer } from 'antd';
 import HttpApi from '../../../util/HttpApi';
 
 var storage = window.localStorage;
 var localUserInfo = '';
-var bugType_Options = [];///缺陷类型
 
 /**
  * 分配界面-抽屉
@@ -45,8 +44,8 @@ class DistributionView extends Component {
             oneLevel.selectable = false
         })
 
-        let bugTypeData = await this.getBugTypeInfo();
-        bugType_Options = bugTypeData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
+        // let bugTypeData = await this.getBugTypeInfo();
+        // bugType_Options = bugTypeData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
 
         this.setState({ userLevels })
     }
@@ -79,18 +78,18 @@ class DistributionView extends Component {
             })
         })
     }
-    getBugTypeInfo = () => {
-        let sql = `select bt.id,bt.name from bug_types bt where effective = 1`
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
+    // getBugTypeInfo = () => {
+    //     let sql = `select bt.id,bt.name from bug_types bt where effective = 1`
+    //     return new Promise((resolve, reject) => {
+    //         HttpApi.obs({ sql }, (res) => {
+    //             let result = [];
+    //             if (res.data.code === 0) {
+    //                 result = res.data.data
+    //             }
+    //             resolve(result);
+    //         })
+    //     })
+    // }
     componentWillReceiveProps(nextProps) {
         this.setState({
             showModal: nextProps.showModal
