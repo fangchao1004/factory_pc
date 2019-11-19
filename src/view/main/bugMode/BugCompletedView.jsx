@@ -454,19 +454,19 @@ export default class BugCompletedView extends Component {
                 render: (text, record) => { return <div>{text || '/'}</div> }
             },
             {
-                key: 'device_name', dataIndex: 'device_name', title: '设备',
+                key: 'device_name', dataIndex: 'device_name', title: '巡检点',
                 render: (text) => {
                     let result = '/'
                     if (text && text !== '') { result = text }
                     return <div>
-                    <Tooltip title={result}>
-                      <span>{omitTextLength(result,8)}</span>
-                    </Tooltip>
+                        <Tooltip title={result}>
+                            <span>{omitTextLength(result, 10)}</span>
+                        </Tooltip>
                     </div>
                 }
             },
             {
-                key: 'user_name', dataIndex: 'user_name', title: '上报人',
+                key: 'user_name', dataIndex: 'user_name', title: '发现人',
                 filters: uploader_filter,
                 onFilter: (value, record) => record.user_id === value,
             },
@@ -480,7 +480,7 @@ export default class BugCompletedView extends Component {
             //     }
             // },
             {
-                key: 'buglevel', dataIndex: 'buglevel', title: '等级',
+                key: 'buglevel', dataIndex: 'buglevel', title: '缺陷类型',
                 filters: bug_level_filters,
                 onFilter: (value, record) => record.buglevel + '' === value,
                 render: (text) => {
@@ -504,27 +504,27 @@ export default class BugCompletedView extends Component {
                 render: (text, record) => {
                     let obj = JSON.parse(text);
                     return <div>
-                      <div style={{ color: '#000', fontWeight: 900 }}>
-                        <Tooltip title={record.title_name}>
-                          <span>{record.title_name ? omitTextLength(record.title_name, 5) : null}</span>
-                        </Tooltip>
-                        {/* {record.title_name} */}
-                        <span style={{ color: '#41A8FF' }}>
-                          <Tooltip title={record.title_remark}>
-                            <span>
-                              {record.title_remark ? omitTextLength(record.title_remark, 4) : null}
-                            </span>
-                          </Tooltip>
-                          {/* {record.title_remark} */}
-                        </span></div>
+                        <div style={{ color: '#000', fontWeight: 900 }}>
+                            <Tooltip title={record.title_name}>
+                                <span>{record.title_name ? omitTextLength(record.title_name, 10) : null}</span>
+                            </Tooltip>
+                            {/* {record.title_name} */}
+                            <span style={{ color: '#41A8FF' }}>
+                                <Tooltip title={record.title_remark}>
+                                    <span>
+                                        {record.title_remark ? omitTextLength(record.title_remark, 10) : null}
+                                    </span>
+                                </Tooltip>
+                                {/* {record.title_remark} */}
+                            </span></div>
                         <div>{obj.select}</div>
                         {record.title_name ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
-                      <div>
-                        <Tooltip title={obj.text}>
-                          <span>{omitTextLength(obj.text, 9)}</span>
-                        </Tooltip>
-                        {/* {obj.text} */}
-                      </div>
+                        <div>
+                            <Tooltip title={obj.text}>
+                                <span>{omitTextLength(obj.text, 10)}</span>
+                            </Tooltip>
+                            {/* {obj.text} */}
+                        </div>
                     </div>
                 }
             },
@@ -537,7 +537,7 @@ export default class BugCompletedView extends Component {
                 }
             },
             {
-                key: 'bug_type_name', dataIndex: 'bug_type_name', title: '类别',
+                key: 'bug_type_name', dataIndex: 'bug_type_name', title: '备注类别',
                 filters: bug_type_filter,
                 onFilter: (value, record) => record.bug_type_id === value,
                 render: (text, record) => {
@@ -545,9 +545,13 @@ export default class BugCompletedView extends Component {
                 }
             },
             {
-                key: 'last_remark', dataIndex: 'last_remark', title: '最新备注',
+                key: 'last_remark', dataIndex: 'last_remark', title: '备注内容',
                 render: (text, record) => {
-                    return <div>{text || '/'}</div>
+                    return <div>{text ?
+                        < Tooltip title={text}>
+                            <span>{omitTextLength(text, 15)}</span>
+                        </Tooltip> : '/'
+                    }</div>
                 }
             },
             // {
