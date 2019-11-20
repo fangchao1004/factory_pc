@@ -71,21 +71,20 @@ class RepairView extends Component {
                         onClick={() => {
                             //// 人员选择完毕。改变bug中的数据。status 和 remark
                             let remarkText = this.state.step_1_remark ? this.state.step_1_remark : '回退工作,重新分配';
-                            this.props.changeBugStatus(0, 1, remarkText, this.state.bug_type_id, JSON.parse(localUserInfo).id);
+                            this.props.changeBugStatus(0, 1, remarkText, JSON.parse(localUserInfo).id);
                             this.reset();
                             this.props.onClose();
                         }}>回退工作</Button>
                     <Button type={'primary'}
                         style={{ marginLeft: 20 }}
                         onClick={() => {
-                            const bug_type_id = this.state.bug_type_id;
                             //// 人员选择完毕。改变bug中的数据。status 和 remark
                             let remarkText = this.state.step_1_remark ? this.state.step_1_remark : '完成维修工作,等待专工验收';
                             if (this.state.isRepairManager && this.state.bug_status === 0) {
-                                this.props.changeBugStatus(1, 0, '维修专工自行处理', this.state.bug_type_id, JSON.parse(localUserInfo).id, JSON.parse(localUserInfo).id);
+                                this.props.changeBugStatus(1, 0, '维修专工自行处理', JSON.parse(localUserInfo).id, JSON.parse(localUserInfo).id);
                             }
                             setTimeout(() => {
-                                this.props.changeBugStatus(2, 1, remarkText, bug_type_id, JSON.parse(localUserInfo).id);
+                                this.props.changeBugStatus(2, 1, remarkText, JSON.parse(localUserInfo).id);
                             }, 500);
                             this.reset();
                             this.props.onClose();

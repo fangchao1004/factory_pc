@@ -108,7 +108,7 @@ class ManagerView extends Component {
                         onClick={() => {
                             //// 人员选择完毕。改变bug中的数据。status 和 remark
                             let remarkText = this.state.step_2_remark ? this.state.step_2_remark : '验收不通过，重新维修';
-                            this.props.changeBugStatus(1, 2, remarkText, this.state.bug_type_id, JSON.parse(localUserInfo).id);
+                            this.props.changeBugStatus(1, 2, remarkText, JSON.parse(localUserInfo).id);
                             this.reset();
                             this.props.onClose();
                         }}>重新维修</Button>
@@ -118,7 +118,7 @@ class ManagerView extends Component {
                             if (this.state.runner_select_id === null) { message.error('请选择运行人员进行下一步验收工作'); return }
                             /// 人员选择完毕。改变bug中的数据。status 和 remark
                             let remarkText = this.state.step_2_remark ? this.state.step_2_remark : '完成验收,等待运行验收';
-                            this.props.changeBugStatus(3, 2, remarkText, this.state.bug_type_id, JSON.parse(localUserInfo).id, this.state.runner_select_id);
+                            this.props.changeBugStatus(3, 2, remarkText, JSON.parse(localUserInfo).id, this.state.runner_select_id);
                             this.reset();
                             this.props.onClose();
                         }}>完成验收</Button>

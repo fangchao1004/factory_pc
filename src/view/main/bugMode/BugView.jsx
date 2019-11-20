@@ -208,11 +208,10 @@ export default class BugView extends Component {
      * @param {*} targetStatus 目标状态 目的是将bug 的status 置成什么值
      * @param {*} currentStep 当前步骤值
      * @param {*} remarkText 每一步的备注
-     * @param {*} bugTypeId 备注的类别id
      * @param {*} fromId 来自人 id
      * @param {*} toId  目标人 id
      */
-    changeBugStatus = (targetStatus, currentStep, remarkText, bugTypeId, fromId, toId = null) => {
+    changeBugStatus = (targetStatus, currentStep, remarkText, fromId, toId = null) => {
         // console.log('要将bug的status置成：', targetStatus, '当前流程在哪一步：', currentStep, '备注的文本：', remarkText, '操作人：', fromId, '目标对象：', toId);
         // return;
         ////首先要先把当前的bug的remak信息全copy一份。
@@ -238,12 +237,9 @@ export default class BugView extends Component {
             }
         }
         ///将最新的 remark 数据 更新到 bugs 表中。并且判断要把 status 改到哪一步
-        let newValue = { status: targetStatus, remark: JSON.stringify(remarkCopy), last_remark: remarkText }
+        let newValue = { status: targetStatus, remark: JSON.stringify(remarkCopy) }
         if (targetStatus === 4) { ///当 运行验收后， 状态为 4 此时还要记录一下缺陷的解决时间，为什么不用 updatedAt 来判断？ 因为怕 混乱 
             newValue = { ...newValue, closedAt: moment().format('YYYY-MM-DD HH:mm:ss') }
-        }
-        if (bugTypeId) {
-            newValue = { ...newValue, bug_type_id: bugTypeId }
         }
         if (toId !== null) {
             newValue.fix_id = toId;
@@ -729,7 +725,7 @@ export default class BugView extends Component {
                 {/* 维修人员操作界面 */}
                 <RepairView showModal={this.state.showModal4} onClose={() => { this.setState({ showModal4: false }) }} changeBugStatus={this.changeBugStatus} status={this.state.currentRecord.status} />
                 {/* 专工验收操作界面 */}
-                <ManagerView showModal={this.state.showModal5} onClose={() => { this.setState({ showModal5: false }) }} changeBugStatus={this.changeBugStatus} />
+                <ManagerView showModal={this.state.showModal5} onClose={() => { this.setState({ showModal5: false, showModal9: false }) }} changeBugStatus={this.changeBugStatus} />
                 {/* 运行验收操作界面 */}
                 <RunnerView showModal={this.state.showModal6} onClose={() => { this.setState({ showModal6: false }) }} changeBugStatus={this.changeBugStatus} />
                 {/* 图片显示界面 */}

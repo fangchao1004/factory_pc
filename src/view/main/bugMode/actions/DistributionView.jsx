@@ -146,7 +146,7 @@ class DistributionView extends Component {
                     onClick={() => {
                         if (this.state.user_select_id !== null) {
                             //// 人员选择完毕。改变bug中的数据。status 和 remark
-                            this.props.changeBugStatus(1, 0, this.state.step_0_remark, this.state.bug_type_id, JSON.parse(localUserInfo).id, this.state.user_select_id);
+                            this.props.changeBugStatus(1, 0, this.state.step_0_remark, JSON.parse(localUserInfo).id, this.state.user_select_id);
                             this.reset();
                             this.props.onClose();
                         } else { message.error('请分配人员'); }

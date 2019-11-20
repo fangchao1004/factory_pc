@@ -51,7 +51,7 @@ class RunnerView extends Component {
                         onClick={() => {
                             //// 人员选择完毕。改变bug中的数据。status 和 remark
                             let remarkText = this.state.step_3_remark ? this.state.step_3_remark : '验收不通过，发回专工处理';
-                            this.props.changeBugStatus(2, 3, remarkText, this.state.bug_type_id, JSON.parse(localUserInfo).id);
+                            this.props.changeBugStatus(2, 3, remarkText, JSON.parse(localUserInfo).id);
                             this.reset();
                             this.props.onClose();
                         }}>验收失败</Button>
@@ -60,7 +60,7 @@ class RunnerView extends Component {
                         onClick={() => {
                             //// 人员选择完毕。改变bug中的数据。status 和 remark
                             let remarkText = this.state.step_3_remark ? this.state.step_3_remark : '完成验收';
-                            this.props.changeBugStatus(4, 3, remarkText, this.state.bug_type_id, JSON.parse(localUserInfo).id);
+                            this.props.changeBugStatus(4, 3, remarkText, JSON.parse(localUserInfo).id);
                             this.reset();
                             this.props.onClose();
                         }}>完成验收</Button>
