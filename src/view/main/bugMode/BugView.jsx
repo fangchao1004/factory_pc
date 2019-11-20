@@ -134,8 +134,8 @@ export default class BugView extends Component {
             })
         })
     }
-    getOneBugInfo = (bug_id) => {
-        let sql = `select bugs.* from bugs where id = ${bug_id} and effective = 1`;
+    getOneBugInfo = (bug_id, isDelete) => {
+        let sql = `select bugs.* from bugs where id = ${bug_id} and effective = ${isDelete ? 0 : 1}`;
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = null;
@@ -247,7 +247,7 @@ export default class BugView extends Component {
         HttpApi.updateBugInfo({ query: { id: this.state.currentRecord.id }, update: newValue }, (res) => {
             if (res.data.code === 0) {
                 this.init();
-                if (targetStatus === 1 || targetStatus === 4) {
+                if (targetStatus === 1 || targetStatus === 4) { /// 1是分配  4是处理完毕缺陷消除  这个时候 显示缺陷的计数都要更新
                     this.updateDataByRedux();
                 }
                 ///成功以后要立即刷新当前的bug数据。
@@ -257,7 +257,7 @@ export default class BugView extends Component {
                         this.setState({ currentRecord: res.data.data[0] })
                         ////如果是状态4 则说明这个bug已经解决了。要把这个bug对应的record给更新（复制原有数据，本地修改，再作为新数据插入数据库record表）
                         if (targetStatus === 4) {
-                            this.changeRecordData(); setTimeout(() => {
+                            this.changeRecordData(this.state.currentRecord.id); setTimeout(() => {
                                 this.setState({ showModal2: false })
                             }, 1000);
                         }
@@ -267,12 +267,13 @@ export default class BugView extends Component {
         })
     }
 
-    ////改变包含了这个bug_id 的record 再数据库中的值。
-    changeRecordData = async () => {
-        let bugId = this.state.currentRecord.id;
+    ////改变包含了这个bug_id 的record 再数据库中的值。 isDelete 是否为 删除缺陷的操作
+    changeRecordData = async (bugId, isDelete = false) => {
+        // let bugId = this.state.currentRecord.id;
         ///1，要根据bug_id 去bugs表中去查询该条数据，获取其中的 device_id 字段信息
-        let oneBugInfo = await this.getOneBugInfo(bugId);
+        let oneBugInfo = await this.getOneBugInfo(bugId, isDelete);
         let device_id = oneBugInfo.device_id;
+        // return;
         if (!device_id) { return }
         ///2，根据 device_id 去record 表中 找到 这个设备最新的一次record。 获取到后，在本地修改。再最为一条新数据插入到records表中
         let oneRecordInfo = await this.getOneRecordInfo(device_id);
@@ -449,6 +450,8 @@ export default class BugView extends Component {
                 this.init();
                 ///要利用redux刷新 mainView处的徽标数
                 this.updateDataByRedux();
+                ///再创建一个新的record记录插入records表
+                this.changeRecordData(record.id, true);
             }
         })
     }
