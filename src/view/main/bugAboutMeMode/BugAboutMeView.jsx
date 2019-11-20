@@ -11,7 +11,7 @@ import ManagerView from '../bugMode/actions/ManagerView';
 import RunnerView from '../bugMode/actions/RunnerView';
 import BaseModal from '../bugMode/actions/BaseModal';
 import ChangeRemarkView from '../bugMode/ChangeRemarkView';
-import { omitTextLength } from '../../util/Tool';
+import '../bugMode/BugViewCss.css'
 
 var major_filter = [];///用于筛选任务专业的数据 选项
 var bug_type_filter = [];///用于筛选类别的数据 选项
@@ -437,6 +437,7 @@ export default class BugView extends Component {
             },
             {
                 key: 'checkedAt', dataIndex: 'checkedAt', title: '时间',
+                width: 120,
                 sorter: (a, b) => {
                     return new Date(a.checkedAt).getTime() - new Date(b.checkedAt).getTime()
                 },
@@ -448,9 +449,9 @@ export default class BugView extends Component {
                 render: (text) => {
                     let result = '/'
                     if (text && text !== '') { result = text }
-                    return <div>
+                    return <div className='hideText lineClamp5'>
                         <Tooltip title={result}>
-                            <span>{omitTextLength(result, 10)}</span>
+                            <span>{result}</span>
                         </Tooltip>
                     </div>
                 }
@@ -489,23 +490,18 @@ export default class BugView extends Component {
                 key: 'content', dataIndex: 'content', title: '内容', render: (text, record) => {
                     let obj = JSON.parse(text);
                     return <div>
-                        <div style={{ color: '#000', fontWeight: 900 }}>
-                            <Tooltip title={record.title_name}>
-                                <span>{record.title_name ? omitTextLength(record.title_name, 10) : null}</span>
+                        <div className='hideText lineClamp3' style={{ fontWeight: 900, minWidth: 120 }}>
+                            <Tooltip title={<span>{record.title_name}{record.title_remark}</span>} placement='topLeft'>
+                                <span>{record.title_name}</span>
+                                <span style={{ color: '#41A8FF' }}>
+                                    {record.title_remark}
+                                </span>
                             </Tooltip>
-                            <span style={{ color: '#41A8FF' }}>
-                                <Tooltip title={record.title_remark}>
-                                    <span>
-                                        {record.title_remark ? omitTextLength(record.title_remark, 10) : null}
-                                    </span>
-                                </Tooltip>
-                            </span>
                         </div>
-                        <div>{obj.select}</div>
                         {record.title_name ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
-                        <div>
+                        <div className='hideText lineClamp2'>
                             <Tooltip title={obj.text}>
-                                <span>{omitTextLength(obj.text, 10)}</span>
+                                <span>{obj.text}</span>
                             </Tooltip>
                         </div>
                     </div>
@@ -530,9 +526,9 @@ export default class BugView extends Component {
             {
                 key: 'last_remark', dataIndex: 'last_remark', title: '备注内容',
                 render: (text, record) => {
-                    return <div>{text ?
+                    return <div className='hideText lineClamp5' style={{ minWidth: 80 }}>{text ?
                         < Tooltip title={text}>
-                            <span>{omitTextLength(text, 15)}</span>
+                            <span>{text}</span>
                         </Tooltip> : '/'
                     }</div>
                 }
@@ -587,6 +583,7 @@ export default class BugView extends Component {
             {
                 title: '当前处理人员',
                 dataIndex: 'a',
+                width: 80,
                 render: (text, record) => {
                     let remarkObj = JSON.parse(record.remark);
                     let currentStatus = record.status;
