@@ -412,7 +412,7 @@ export default class BugView extends Component {
                 ///要利用redux刷新 mainView处的徽标数
                 this.updateDataByRedux();
                 ///再创建一个新的record记录插入records表
-                this.changeRecordData(record.id);
+                this.changeRecordData(record.id, true);
             }
         })
     }
