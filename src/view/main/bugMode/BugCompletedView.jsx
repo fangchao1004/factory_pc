@@ -468,6 +468,7 @@ export default class BugCompletedView extends Component {
             },
             {
                 key: 'user_name', dataIndex: 'user_name', title: '发现人',
+                width: 80,
                 filters: uploader_filter,
                 onFilter: (value, record) => record.user_id === value,
             },
@@ -480,24 +481,6 @@ export default class BugCompletedView extends Component {
             //         return <div>{result}</div>
             //     }
             // },
-            {
-                key: 'buglevel', dataIndex: 'buglevel', title: '缺陷类型',
-                filters: bug_level_filters,
-                onFilter: (value, record) => record.buglevel + '' === value,
-                render: (text) => {
-                    // console.log(text);
-                    let result = null;
-                    let resultCom = '/'
-                    let color = '#505659';
-                    if (text) {
-                        if (text === 1) { result = '一级'; color = '#f50' }
-                        else if (text === 2) { result = '二级'; color = '#FF9900' }
-                        else if (text === 3) { result = '三级'; color = '#87d068' }
-                        resultCom = <Tag color={color}>{result}</Tag>
-                    }
-                    return resultCom
-                }
-            },
             {
                 key: 'content',
                 dataIndex: 'content',
@@ -520,6 +503,25 @@ export default class BugCompletedView extends Component {
                             </Tooltip>
                         </div>
                     </div>
+                }
+            },
+            {
+                key: 'buglevel', dataIndex: 'buglevel', title: '缺陷类型',
+                width: 80,
+                filters: bug_level_filters,
+                onFilter: (value, record) => record.buglevel + '' === value,
+                render: (text) => {
+                    // console.log(text);
+                    let result = null;
+                    let resultCom = '/'
+                    let color = '#505659';
+                    if (text) {
+                        if (text === 1) { result = '一级'; color = '#f50' }
+                        else if (text === 2) { result = '二级'; color = '#FF9900' }
+                        else if (text === 3) { result = '三级'; color = '#87d068' }
+                        resultCom = <Tag color={color}>{result}</Tag>
+                    }
+                    return resultCom
                 }
             },
             {

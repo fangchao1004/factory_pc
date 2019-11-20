@@ -496,7 +496,7 @@ export default class BugView extends Component {
             },
             {
                 key: 'user_name', dataIndex: 'user_name', title: '发现人',
-                width: 100,
+                width: 80,
                 filters: uploader_filter,
                 onFilter: (value, record) => record.user_id === value,
             },
@@ -535,6 +535,7 @@ export default class BugView extends Component {
             },
             {
                 key: 'buglevel', dataIndex: 'buglevel', title: '缺陷类型',
+                width: 80,
                 filters: bug_level_filters,
                 onFilter: (value, record) => record.buglevel + '' === value,
                 render: (text) => {
