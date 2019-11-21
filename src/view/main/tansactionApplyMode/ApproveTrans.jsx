@@ -95,7 +95,6 @@ class ApproveTrans extends Component {
                     let result = await this.insertTranDetail(data);///插入 消费详情表
                     if (result === 0) {
                         message.success('餐卡补贴已经发放成功!');
-                        this.updateHandler(1, record.id);
                         let result = await this.updateHandler(1, record.id);
                         if (result === 0) { this.init(); } else { message.error('申请记录状态操作失败') }
                     } else {
