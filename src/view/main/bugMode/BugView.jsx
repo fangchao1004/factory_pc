@@ -483,9 +483,10 @@ export default class BugView extends Component {
             },
             {
                 key: 'device_name', dataIndex: 'device_name', title: '巡检点',
-                render: (text) => {
+                render: (text, record) => {
                     let result = '/'
                     if (text && text !== '') { result = text }
+                    else { result = record.area_remark }
                     return <div className='hideText lineClamp5'>
                         <Tooltip title={result}>
                             <span>{result}</span>

@@ -144,6 +144,8 @@ class TimeView extends Component {
                 render: (text, record) => {
                     return <div style={{ display: 'flex', flexDirction: 'row' }}>
                         <TreeSelect
+                            maxTagCount={5}
+                            maxTagTextLength={8}
                             disabled={this.state.isAdmin !== 1}
                             showSearch
                             treeNodeFilterProp="title"

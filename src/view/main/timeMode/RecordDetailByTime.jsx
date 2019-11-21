@@ -154,6 +154,10 @@ class RecordDetailByTime extends Component {
                     bordered
                     dataSource={this.state.devicesList}
                     columns={columns}
+                    pagination={{
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                    }}
                 />
                 <OneDeviceRecordListView
                     onClose={() => { this.setState({ showRecordListDrawer: false }) }}
