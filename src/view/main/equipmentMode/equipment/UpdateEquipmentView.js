@@ -11,10 +11,12 @@ import { transfromDataTo3level } from '../../../util/Tool'
  * @returns
  */
 function UpdateEquipmentForm(props) {
+    // console.log('props.device:', props.device);
     const { getFieldDecorator } = props.form
     const typeOptions = props.types.map(type => <Select.Option value={type.id} key={type.id}>{type.name}</Select.Option>)
     const nfcOptions = props.nfcs.map(nfc => <Select.Option value={nfc.id} key={nfc.id}>{nfc.name}</Select.Option>)
     const statusOptions = [{ id: 1, lab: '正常' }, { id: 2, lab: '异常' }, { id: 3, lab: '待检' }].map(item => <Select.Option value={item.id} key={item.id}>{item.lab}</Select.Option>)
+    const switchOptions = [{ value: 1, lab: '停机' }, { value: 0, lab: '开机' }].map(item => <Select.Option value={item.value} key={item.value}>{item.lab}</Select.Option>)
     return <Form>
         <Form.Item label="区域" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             {getFieldDecorator('area_id', {
@@ -49,8 +51,14 @@ function UpdateEquipmentForm(props) {
         <Form.Item label="设备状态" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             {getFieldDecorator('status', {
                 initialValue: props.device.status,
-                rules: [{ required: true, message: '请输入设备备注' }]
+                rules: [{ required: true, message: '请选择设备状态' }]
             })(<Select>{statusOptions}</Select>)}
+        </Form.Item>
+        <Form.Item label="开停机切换" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+            {getFieldDecorator('switch', {
+                initialValue: props.device.switch,
+                rules: [{ required: true, message: '请选择功能切换' }]
+            })(<Select>{switchOptions}</Select>)}
         </Form.Item>
     </Form>
 }
@@ -58,7 +66,7 @@ function UpdateEquipmentForm(props) {
 const EquipmentForm = Form.create({ name: 'EquipmentForm' })(UpdateEquipmentForm)
 
 /**
- * 更新员工界面
+ * 更新设备界面
  *
  * @export
  * @param {*} props

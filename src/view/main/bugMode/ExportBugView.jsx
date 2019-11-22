@@ -116,11 +116,11 @@ class ExportBugView extends Component {
             let tempObj = {};
             tempObj.id = item.id + '';
             tempObj.time = moment(item.createdAt).format('YYYY-MM-DD HH:mm:ss');
-            tempObj.device = item.device_name ? item.device_name : '/';
+            tempObj.device = item.device_name ? item.device_name : item.area_remark;
             tempObj.uploadman = item.user_name;
             tempObj.area = item.area_name ? item.area_name : (item.area_remark ? item.area_remark : '/')
             tempObj.level = item.buglevel ? (item.buglevel === 1 ? '一级' : (item.buglevel === 2 ? '二级' : '三级')) : '/';
-            tempObj.content = item.title_name ? item.title_name + ' ' + JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text : JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text;
+            tempObj.content = item.title_name ? item.title_name + item.title_remark + ' ' + JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text : JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text;
             tempObj.major = item.major_name;
             tempObj.type_name = item.bug_type_name;
             tempObj.last_remark = item.last_remark;
@@ -137,9 +137,9 @@ class ExportBugView extends Component {
             excelOptionList.push({
                 sheetData: tempList[key],
                 sheetName: key,
-                sheetFilter: ['id', 'time', 'device', 'uploadman', 'area', 'level', 'content', 'major', 'type_name', 'last_remark', 'status', 'nowdoman'],
-                sheetHeader: ['编号', '上报时间', '巡检点名称', '上报人', '区域', '等级', '内容', '专业', '类型', '最新备注', '当前状态', '当前处理人'],
-                columnWidths: ['3', '8', '10', '5', '5', '5', '15', '5', '5', '5', '5', '5'], // 列宽
+                sheetFilter: ['id', 'time', 'device', 'uploadman', 'content', 'level', 'major', 'type_name', 'last_remark', 'status', 'nowdoman'],
+                sheetHeader: ['编号', '上报时间', '巡检点', '发现人', '内容', '缺陷专业', '专业', '备注类型', '备注内容', '当前状态', '当前处理人'],
+                columnWidths: ['3', '8', '30', '5', '20', '5', '5', '5', '20', '5', '5'], // 列宽
             })
         }
         // console.log('excelOptionList:', excelOptionList);

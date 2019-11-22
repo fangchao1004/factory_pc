@@ -694,9 +694,7 @@ export default class BugView extends Component {
             <Fragment>
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
                     <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
-                    {localUserInfo && JSON.parse(localUserInfo).isadmin === 1 ?
-                        <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal8: true }) }}>导出缺陷</Button>
-                        : null}
+                    <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showModal8: true }) }}>导出缺陷</Button>
                 </div>
                 <Table
                     bordered
