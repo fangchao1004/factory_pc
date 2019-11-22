@@ -16,7 +16,7 @@ function UpdateEquipmentForm(props) {
     const typeOptions = props.types.map(type => <Select.Option value={type.id} key={type.id}>{type.name}</Select.Option>)
     const nfcOptions = props.nfcs.map(nfc => <Select.Option value={nfc.id} key={nfc.id}>{nfc.name}</Select.Option>)
     const statusOptions = [{ id: 1, lab: '正常' }, { id: 2, lab: '异常' }, { id: 3, lab: '待检' }].map(item => <Select.Option value={item.id} key={item.id}>{item.lab}</Select.Option>)
-    const switchOptions = [{ value: 1, lab: '停机' }, { value: 0, lab: '开机' }].map(item => <Select.Option value={item.value} key={item.value}>{item.lab}</Select.Option>)
+    // const switchOptions = [{ value: 0, lab: '停运' }, { value: 1, lab: '运行' }].map(item => <Select.Option value={item.value} key={item.value}>{item.lab}</Select.Option>)
     return <Form>
         <Form.Item label="区域" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             {getFieldDecorator('area_id', {
@@ -54,12 +54,12 @@ function UpdateEquipmentForm(props) {
                 rules: [{ required: true, message: '请选择设备状态' }]
             })(<Select>{statusOptions}</Select>)}
         </Form.Item>
-        <Form.Item label="开停机切换" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+        {/* <Form.Item label="运/停切换" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             {getFieldDecorator('switch', {
                 initialValue: props.device.switch,
                 rules: [{ required: true, message: '请选择功能切换' }]
             })(<Select>{switchOptions}</Select>)}
-        </Form.Item>
+        </Form.Item> */}
     </Form>
 }
 

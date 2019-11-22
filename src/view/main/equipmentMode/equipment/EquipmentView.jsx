@@ -10,7 +10,7 @@ import LineViewOfCollection from './LineViewOfCollection';
 
 var device_status_filter = [{ text: '正常', value: 1 }, { text: '故障', value: 2 }, { text: '待检', value: 3 }];///用于筛选设备状态的数据 选项
 var device_type_data_filter = []; ///用于筛选巡检点类型的数据 选项
-var device_switch_filter = [{ text: '开机', value: 0 }, { text: '停机', value: 1 }];///用于筛选设备开停机状态的数据 选项
+var device_switch_filter = [{ text: '运行', value: 1 }, { text: '停运', value: 0 }];///用于筛选设备开停运状态的数据 选项
 
 class EquipmentView extends Component {
     constructor(props) {
@@ -212,14 +212,14 @@ class EquipmentView extends Component {
                 }
             },
             {
-                title: '开/停',
+                title: '运/停',
                 dataIndex: 'switch',
                 width: 80,
                 filters: device_switch_filter,
                 align: 'center',
                 onFilter: (value, record) => record.switch === value,
                 render: (text, record) => {
-                    return <div>{text === 1 ? '停机' : '开机'}</div>
+                    return <div>{text === 0 ? '停运' : '运行'}</div>
                 }
             },
             {
@@ -469,6 +469,17 @@ class EquipmentView extends Component {
                 }
             },
             {
+                title: '运/停',
+                dataIndex: 'switch',
+                width: 80,
+                filters: device_switch_filter,
+                align: 'center',
+                onFilter: (value, record) => record.switch === value,
+                render: (text, record) => {
+                    return <div>{text === 0 ? '停运' : '运行'}</div>
+                }
+            },
+            {
                 title: '报告人',
                 dataIndex: 'user_name',
                 render: (text, record) => {
@@ -490,7 +501,10 @@ class EquipmentView extends Component {
             bordered
             dataSource={this.state.deviceRecords}
             columns={columns}
-            pagination={{ pageSize: 5 }}
+            pagination={{
+                showSizeChanger: true,
+                pageSizeOptions: ['10', '20', '50', '80', '100'],
+            }}
         />
     }
 

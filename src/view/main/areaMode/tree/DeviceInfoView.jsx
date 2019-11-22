@@ -44,7 +44,7 @@ class DeviceInfoView extends Component {
                 bug_id_arr.push(item.bug_id);
                 bug_key_id_arr.push({ key: item.key, bug_id: item.bug_id });
             }
-            if (item.type_id === '2' || item.type_id === '6' || item.type_id === '10' || item.type_id === '11'|| item.type_id === '13') {
+            if (item.type_id === '2' || item.type_id === '6' || item.type_id === '10' || item.type_id === '11' || item.type_id === '13') {
                 collectAndInputDataList.push(item);
             }
         })
@@ -108,6 +108,15 @@ class DeviceInfoView extends Component {
                     }
                 },
                 {
+                    title: '运/停',
+                    dataIndex: 'switch',
+                    width: 80,
+                    align: 'center',
+                    render: (text, record) => {
+                        return <div>{text === 0 ? '停运' : '运行'}</div>
+                    }
+                },
+                {
                     title: '报告人',
                     dataIndex: 'user_name',
                     render: (text, record) => {
@@ -135,7 +144,10 @@ class DeviceInfoView extends Component {
                             bordered
                             dataSource={this.state.deviceRecords}
                             columns={columns}
-                            pagination={{ pageSize: 5 }}
+                            pagination={{
+                                showSizeChanger: true,
+                                pageSizeOptions: ['10', '20', '50', '80', '100'],
+                            }}
                         />
                         <Drawer
                             title={<div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', }}>

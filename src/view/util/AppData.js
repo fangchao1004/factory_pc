@@ -37,6 +37,6 @@ export const VersionlistData = [
     // { title: '更新', description: '1.2.4 dev 支持表单拖拽修改' }
     // { title: '更新', description: '1.2.5 缺陷备注添加日志记录功能' }
     // { title: '更新', description: '1.2.5 dev 删除缺陷，更新record' }
-    { title: '更新', description: '1.2.6 添加开停机功能-所有人可以导出缺陷excel' }
+    { title: '更新', description: '1.2.6 添加开停运功能-所有人可以导出缺陷excel' }
 
 ]
