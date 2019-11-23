@@ -62,7 +62,7 @@ export default props => {
         }
     ]
     return <div>
-        <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { setTitle('添加缺陷类型'); setAddModalVisible(true) }}>添加缺陷类型</Button>
+        <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { setTitle('添加备注类型'); setAddModalVisible(true) }}>添加备注类型</Button>
         <Table
             bordered
             columns={columns}
