@@ -148,6 +148,10 @@ class EquipmentArea3View extends Component {
                         bordered
                         dataSource={this.state.dataSource}
                         columns={columns}
+                        pagination={{
+                            showSizeChanger: true,
+                            pageSizeOptions: ['10', '20', '50', '80', '100'],
+                        }}
                     />
                     <AddArea3View visible={this.state.addVisible} onOk={this.addArea3ok} onCancel={this.addArea3cancel} />
                     <UpdateArea3View visible={this.state.updateVisible} onOk={this.updateArea3ok} onCancel={this.updateArea3cancel} area={this.state.areaRecord} />

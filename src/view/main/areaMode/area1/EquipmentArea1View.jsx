@@ -166,6 +166,10 @@ class EquipmentArea1View extends Component {
                     bordered
                     dataSource={this.state.dataSource}
                     columns={columns}
+                    pagination={{
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                    }}
                 />
                 <AddArea1View visible={this.state.addVisible} onOk={this.addArea1ok} onCancel={this.addArea1cancel} />
                 <UpdateArea1View visible={this.state.updateVisible} onOk={this.updateArea1ok} onCancel={this.updateArea1cancel} area={this.state.areaRecord} />
