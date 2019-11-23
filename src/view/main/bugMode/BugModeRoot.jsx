@@ -12,7 +12,9 @@ const tabListNoTitle = [{
 }, {
     key: 'BugCompletedView',
     tab: '所有已完成',
-}, {
+}];
+
+const tabListNoTitle2 = [{
     key: 'BugLevelView',
     tab: '缺陷类型管理',
 }, {
@@ -35,6 +37,7 @@ class BugModeRoot extends Component {
     state = {
         key: 'BugView',
         noTitleKey: 'BugView',
+        isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin,
     }
 
     onTabChange = (key) => {
@@ -42,11 +45,17 @@ class BugModeRoot extends Component {
     }
 
     render() {
+        var tabs
+        if (this.state.isAdmin) {
+            tabs = tabListNoTitle.concat(tabListNoTitle2)
+        } else {
+            tabs = tabListNoTitle
+        }
         return (
             <Card
                 bordered={false}
                 style={{ width: '100%' }}
-                tabList={tabListNoTitle}
+                tabList={tabs}
                 activeTabKey={this.state.noTitleKey}
                 onTabChange={(key) => { this.onTabChange(key); }}
             >
