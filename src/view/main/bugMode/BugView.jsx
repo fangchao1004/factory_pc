@@ -19,7 +19,7 @@ var major_filter = [];///用于筛选任务专业的数据 选项
 var bug_type_filter = [];///用于筛选类别的数据 选项
 const status_filter = [{ text: '待分配', value: 0 }, { text: '维修中', value: 1 },
 { text: '专工验收中', value: 2 }, { text: '运行验收中', value: 3 }];///用于筛选状态的数据
-const bug_level_filters = [{ text: '一级', value: '1' }, { text: '二级', value: '2' }, { text: '三级', value: '3' }, { text: '/', value: 'null' }]
+const bug_level_filter = [];
 var uploader_filter = [];///用于筛选上传者的数据 选项
 
 var storage = window.localStorage;
@@ -56,9 +56,14 @@ export default class BugView extends Component {
         major_filter.length = 0;
         uploader_filter.length = 0;
         bug_type_filter.length = 0;
+        bug_level_filter.length = 0;
         let bugTypeData = await this.getBugTypeInfo();
         bugTypeData.forEach((item) => {
             bug_type_filter.push({ text: item.name, value: item.id });
+        })
+        let bugLevelData = await this.getBugLevelInfo();
+        bugLevelData.forEach((item) => {
+            bug_level_filter.push({ text: item.name, value: item.id });
         })
         let marjorData = await this.getMajorInfo();
         marjorData.forEach((item) => {
@@ -115,6 +120,17 @@ export default class BugView extends Component {
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
+    getBugLevelInfo = () => {
+        return new Promise((resolve, reject) => {
+            let result = [];
+            HttpApi.getBugLevel({ effective: 1 }, (res) => {
                 if (res.data.code === 0) {
                     result = res.data.data
                 }
@@ -536,7 +552,7 @@ export default class BugView extends Component {
             {
                 key: 'buglevel', dataIndex: 'buglevel', title: '缺陷类型',
                 width: 80,
-                filters: bug_level_filters,
+                filters: bug_level_filter,
                 onFilter: (value, record) => record.buglevel + '' === value,
                 render: (text) => {
                     // console.log(text);

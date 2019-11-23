@@ -1,7 +1,7 @@
 import Axios from 'axios';
 
 export const Testuri = 'http://ixiaomu.cn:3008/'///小木服务器数据库
-// export const Testuri = 'http://localhost:3009/'///本地服务器测试用
+// export const Testuri = 'http://localhost:3008/'///本地服务器测试用
 // export const Testuri = 'http://localhost:2019/'///本地服务器测试用 socket.io 服务测试
 
 export const TesturiForss = 'http://ixiaomu.cn:3007/'///小木服务器数据库 sql server 服务独立地址 消费机
@@ -393,6 +393,62 @@ class HttpApi {
     }
     static addBugInfo(params, f1, f2) {
         Axios.post(Testuri + 'insert_bug', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static addBugLevel(params, f1, f2) {
+        Axios.post(Testuri + 'insert_bug_level', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static getBugLevel(params, f1, f2) {
+        Axios.post(Testuri + 'find_bug_level', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static removeBugLevel(params, f1, f2) {
+        Axios.post(Testuri + 'remove_bug_level', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static updateBugLevel(params, f1, f2) {
+        Axios.post(Testuri + 'update_bug_level', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static addBugType(params, f1, f2) {
+        Axios.post(Testuri + 'insert_bug_type', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static getBugType(params, f1, f2) {
+        Axios.post(Testuri + 'find_bug_type', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static removeBugType(params, f1, f2) {
+        Axios.post(Testuri + 'remove_bug_type', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
+    static updateBugType(params, f1, f2) {
+        Axios.post(Testuri + 'update_bug_type', params).then(res => {
             if (f1) { f1(res) }
         }).catch(res => {
             if (f2) { f2(res) }
