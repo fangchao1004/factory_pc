@@ -74,25 +74,34 @@ export default class UserMenuView extends Component {
             })
         })
     }
+    renderHandler = () => {
+        let tempList = JSON.parse(JSON.stringify(this.state.permissionList));
+        if (this.state.isadmin) {
+            tempList.unshift({ des: '管理员权限，可以增减修改各个选项', name: '管理员权限' })
+        }
+        return tempList.map((item, index) => {
+            return (
+                <Tooltip key={index} placement="leftBottom" title={item.des}>
+                    <div style={{ color: '#46a1ff' }}>{item.name}</div>
+                </Tooltip>
+            )
+        })
+    }
     render() {
         return (
             <div>
-                {this.state.permissionList.length > 0 ?
-                    <Card size="small" title="所有权限">
-                        {this.state.permissionList.map((item, index) => {
-                            return (
-                                <Tooltip key={index} placement="leftBottom" title={item.des}>
-                                    <div style={{ color: '#46a1ff' }}>{item.name}</div>
-                                </Tooltip>
-                            )
-                        })}
-                    </Card> : null}
+                {
+                    this.state.permissionList.length > 0 || this.state.isadmin ?
+                        <Card size="small" title="所有权限">
+                            {this.renderHandler()}
+                        </Card> : null
+                }
                 {this.state.isadmin ? <Button type='primary' style={{ width: "100%", marginTop: 10 }} onClick={() => { this.setState({ showModal1: true }) }}>发布通知</Button> : null}
-                <Button type='danger' style={{ width: "100%", marginTop: 10 }}
+                < Button type='danger' style={{ width: "100%", marginTop: 10 }}
                     onClick={() => {
                         storage.removeItem('userinfo');
                         window.location.href = "/";
-                    }}>退出登录</Button>
+                    }}> 退出登录</Button >
                 <Modal
                     title="发布通知"
                     visible={this.state.showModal1}
@@ -102,7 +111,7 @@ export default class UserMenuView extends Component {
                 >
                     {this.noticeRender()}
                 </Modal>
-            </div>
+            </div >
         );
     }
 }

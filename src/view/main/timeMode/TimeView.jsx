@@ -5,6 +5,7 @@ import HttpApi from '../../util/HttpApi';
 import RecordDetailByTime from './RecordDetailByTime';
 import { transfromDataTo3level, combinAreaAndDevice, renderTreeNodeListByData } from '../../util/Tool'
 import UpdateTimeView from './UpdateTimeView';
+import AddTimeView from './AddTimeView';
 const { TreeNode } = TreeSelect;
 
 /**
@@ -17,6 +18,7 @@ class TimeView extends Component {
             dataSource: [],
             showDrawer: false,
             showUpdateModal: false,
+            showAddModal: false,
             oneRecord: {},
             isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin,
             treeNodeList: [],
@@ -132,9 +134,21 @@ class TimeView extends Component {
     disabledDate = (current) => {
         return current > moment().endOf('day');
     }
+    AddTimeOk = (data) => {
+        let sql = `INSERT INTO allow_time SET begin='${data.begin.format('HH:mm:ss')}', end='${data.end.format('HH:mm:ss')}', isCross=${data.isCross ? 1 : 0}, name='${data.name}'`
+        HttpApi.obs({ sql }, (res) => {
+            console.log('res.data:', res.data);
+            if (res.data.code === 0) {
+                message.success('添加成功');
+                this.init();
+            }
+        })
+        this.setState({
+            showAddModal: false
+        })
+    }
     UpdateTimeOk = (data) => {
-        // console.log('UpdateTimeOk:', data.begin.format('HH:mm:ss'), data.end.format('HH:mm:ss'), data.isCross);
-        let sql = `UPDATE allow_time SET begin='${data.begin.format('HH:mm:ss')}', end='${data.end.format('HH:mm:ss')}', isCross=${data.isCross ? 1 : 0}
+        let sql = `UPDATE allow_time SET begin='${data.begin.format('HH:mm:ss')}', end='${data.end.format('HH:mm:ss')}', isCross=${data.isCross ? 1 : 0}, name='${data.name}'
         where id = ${this.state.oneRecord.id}`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
@@ -161,7 +175,7 @@ class TimeView extends Component {
         const { dataSource } = this.state;
         const columns = [
             {
-                title: <div><DatePicker disabledDate={this.disabledDate} value={this.state.selectTime} onChange={(v) => {
+                title: <div><span style={{ marginRight: 10 }}>日期选择</span> <DatePicker disabledDate={this.disabledDate} value={this.state.selectTime} onChange={(v) => {
                     if (v) { this.setState({ selectTime: v }, () => { this.init() }) } else { message.warn('请选则日期'); }
                 }} /></div>,
                 dataIndex: '/',
@@ -227,6 +241,8 @@ class TimeView extends Component {
         ]
         return (
             <div>
+                {this.state.isAdmin ?
+                    <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showAddModal: true }) }}>添加时间段</Button> : null}
                 <Table
                     bordered
                     columns={columns}
@@ -238,6 +254,7 @@ class TimeView extends Component {
                 />
                 <RecordDetailByTime visible={this.state.showDrawer} record={this.state.oneRecord} close={this.closeHandler} />
                 <UpdateTimeView visible={this.state.showUpdateModal} record={this.state.oneRecord} onOk={this.UpdateTimeOk} onCancel={() => { this.setState({ showUpdateModal: false }) }} />
+                <AddTimeView visible={this.state.showAddModal} onOk={this.AddTimeOk} onCancel={() => { this.setState({ showAddModal: false }) }} />
             </div>
         );
     }

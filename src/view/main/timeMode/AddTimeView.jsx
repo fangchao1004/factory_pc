@@ -1,6 +1,5 @@
 import React from 'react'
 import { TimePicker, Modal, Form, Switch, message, Input } from 'antd';
-import moment from 'moment'
 
 export default props => {
     const SelectTimeRef = React.useRef(null);
@@ -18,7 +17,7 @@ export default props => {
         })
     }
     return <Modal
-        title={'时间段修改'}
+        title={'时间段添加'}
         visible={props.visible}
         onCancel={onCancel}
         onOk={onOk}
@@ -32,25 +31,22 @@ function TimeFrom(props) {
     return <Form>
         <Form.Item label="开始时间" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('begin', {
-                initialValue: moment(props.record.begin, 'HH:mm:ss'),
                 rules: [{ required: true, message: '请选择开始时间' }]
             })(<TimePicker style={{ width: '100%' }} />)}
         </Form.Item>
         <Form.Item label="结束时间" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('end', {
-                initialValue: moment(props.record.end, 'HH:mm:ss'),
                 rules: [{ required: true, message: '请选择结束时间' }]
             })(<TimePicker style={{ width: '100%' }} />)}
         </Form.Item>
         <Form.Item label="班次名称" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('name', {
-                initialValue: props.record.name,
                 rules: [{ required: true, message: '请输入班次名称' }]
             })(<Input style={{ width: '100%' }} />)}
         </Form.Item>
         <Form.Item label="是否跨天" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('isCross', {
-                initialValue: props.record.isCross === 1,
+                initialValue: false,
                 valuePropName: 'checked'
             })(<Switch checkedChildren="是" unCheckedChildren="否" onChange={() => { message.warning('注意！请自行确保当前选择符合逻辑常识，否则可能会出现某些意想不到的问题'); }} />)}
         </Form.Item>
