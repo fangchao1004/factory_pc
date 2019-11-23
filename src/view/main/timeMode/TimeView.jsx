@@ -1,9 +1,10 @@
-import React, { Component } from 'react';
-import { Table, Button, TreeSelect, message, DatePicker } from 'antd';
+import React, { Component, Fragment } from 'react';
+import { Table, Button, TreeSelect, message, DatePicker, Popconfirm } from 'antd';
 import moment from 'moment';
 import HttpApi from '../../util/HttpApi';
 import RecordDetailByTime from './RecordDetailByTime';
 import { transfromDataTo3level, combinAreaAndDevice, renderTreeNodeListByData } from '../../util/Tool'
+import UpdateTimeView from './UpdateTimeView';
 const { TreeNode } = TreeSelect;
 
 /**
@@ -15,6 +16,7 @@ class TimeView extends Component {
         this.state = {
             dataSource: [],
             showDrawer: false,
+            showUpdateModal: false,
             oneRecord: {},
             isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin,
             treeNodeList: [],
@@ -70,7 +72,7 @@ class TimeView extends Component {
     }
     getAllowTimeInfo = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select * from allow_time`;
+            let sql = `select * from allow_time where effective = 1`;
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -130,6 +132,30 @@ class TimeView extends Component {
     disabledDate = (current) => {
         return current > moment().endOf('day');
     }
+    UpdateTimeOk = (data) => {
+        // console.log('UpdateTimeOk:', data.begin.format('HH:mm:ss'), data.end.format('HH:mm:ss'), data.isCross);
+        let sql = `UPDATE allow_time SET begin='${data.begin.format('HH:mm:ss')}', end='${data.end.format('HH:mm:ss')}', isCross=${data.isCross ? 1 : 0}
+        where id = ${this.state.oneRecord.id}`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                message.success('更新成功');
+                this.init();
+            }
+        })
+        this.setState({
+            showUpdateModal: false
+        })
+    }
+    deleteTimeHandler = (recordValue) => {
+        let sql = `UPDATE allow_time SET effective = 0
+        where id = ${recordValue.id}`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                message.success('删除成功');
+                this.init();
+            }
+        })
+    }
 
     render() {
         const { dataSource } = this.state;
@@ -139,10 +165,10 @@ class TimeView extends Component {
                     if (v) { this.setState({ selectTime: v }, () => { this.init() }) } else { message.warn('请选则日期'); }
                 }} /></div>,
                 dataIndex: '/',
-                width: 240,
+                width: 280,
                 align: 'center',
                 render: (text, record) => {
-                    return <div>{record.begin} ~ {record.end} （{record.name}）</div>
+                    return <div>{record.begin} ~ {record.end} （{record.name}）{record.isCross ? '跨天' : ''}</div>
                 }
             },
             {
@@ -176,15 +202,25 @@ class TimeView extends Component {
             }, {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 150,
                 render: (text, record) => (
-                    <div style={{ textAlign: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <Button size="small" type="primary" onClick={() => {
                             this.setState({
                                 oneRecord: record,
                                 showDrawer: true
                             })
                         }}>详情</Button>
+                        {this.state.isAdmin ?
+                            <Fragment>
+                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                                <Button size="small" type='ghost' onClick={() => { this.setState({ oneRecord: record, showUpdateModal: true }) }}>修改</Button>
+                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                                <Popconfirm title="确定要删除该时间端吗?" onConfirm={() => { this.deleteTimeHandler(record); }}>
+                                    <Button size="small" type="danger">删除</Button>
+                                </Popconfirm>
+                            </Fragment>
+                            : null}
+
                     </div>
                 )
             }
@@ -195,8 +231,13 @@ class TimeView extends Component {
                     bordered
                     columns={columns}
                     dataSource={dataSource}
+                    pagination={{
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                    }}
                 />
                 <RecordDetailByTime visible={this.state.showDrawer} record={this.state.oneRecord} close={this.closeHandler} />
+                <UpdateTimeView visible={this.state.showUpdateModal} record={this.state.oneRecord} onOk={this.UpdateTimeOk} onCancel={() => { this.setState({ showUpdateModal: false }) }} />
             </div>
         );
     }

@@ -17,7 +17,7 @@ export const tableCellOptionsData = [
     { "value": "13", "text": "副标题" }];
 
 export const VersionlistData = [
-    { title: '版本号', description: 'V 1.2.6' },
+    { title: '版本号', description: 'V 1.2.6 dev' },
     // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
     // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
     // { title: '更新', description: '1.0.9 添加设备信息修改功能' }
@@ -37,6 +37,6 @@ export const VersionlistData = [
     // { title: '更新', description: '1.2.4 dev 支持表单拖拽修改' }
     // { title: '更新', description: '1.2.5 缺陷备注添加日志记录功能' }
     // { title: '更新', description: '1.2.5 dev 删除缺陷，更新record' }
-    { title: '更新', description: '1.2.6 添加开停运功能-所有人可以导出缺陷excel' }
-
+    // { title: '更新', description: '1.2.6 添加开停运功能-所有人可以导出缺陷excel' }
+    { title: '更新', description: '1.2.6 dev 支持时间端选择和修改' }
 ]
