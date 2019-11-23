@@ -1,13 +1,11 @@
 import React, { Component } from 'react';
-import { Table, Button, TreeSelect, message } from 'antd';
+import { Table, Button, TreeSelect, message, DatePicker } from 'antd';
 import moment from 'moment';
 import HttpApi from '../../util/HttpApi';
 import RecordDetailByTime from './RecordDetailByTime';
 import { transfromDataTo3level, combinAreaAndDevice, renderTreeNodeListByData } from '../../util/Tool'
 const { TreeNode } = TreeSelect;
 
-const today = moment().format('YYYY-MM-DD ');
-const tomorrow = moment().add(1, 'day').format('YYYY-MM-DD ');
 /**
  * 时间区间 模块界面
  */
@@ -20,8 +18,8 @@ class TimeView extends Component {
             oneRecord: {},
             isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin,
             treeNodeList: [],
+            selectTime: moment(),
         }
-
     }
     componentDidMount() {
         this.init();
@@ -83,10 +81,11 @@ class TimeView extends Component {
         })
     }
     getInfoAndChangeData = async (resultList) => {
+        let copyTime = moment(this.state.selectTime.format('YYYY-MM-DD'));
         for (let index = 0; index < resultList.length; index++) {
             const element = resultList[index];
-            let beginTime = today + element.begin
-            let endTime = element.isCross === 1 ? tomorrow + element.end : today + element.end
+            let beginTime = copyTime.format('YYYY-MM-DD ') + element.begin
+            let endTime = element.isCross === 1 ? copyTime.add(1, 'day').format('YYYY-MM-DD ') + element.end : copyTime.format('YYYY-MM-DD ') + element.end
             element.bt = beginTime;
             element.et = endTime;
             let result = await this.getCountInfoFromDB(element);
@@ -101,6 +100,7 @@ class TimeView extends Component {
      * 从数据库查询统计数据
      */
     getCountInfoFromDB = (element) => {
+        // console.log('element:', element);
         let sql = `select count(distinct(device_id)) as count from records
         where checkedAt>'${element.bt}' and checkedAt<'${element.et}'`;
         return new Promise((resolve, reject) => {
@@ -127,19 +127,26 @@ class TimeView extends Component {
         })
     };
 
+    disabledDate = (current) => {
+        return current > moment().endOf('day');
+    }
+
     render() {
         const { dataSource } = this.state;
         const columns = [
             {
-                title: '今日时间段划分',
+                title: <div><DatePicker disabledDate={this.disabledDate} value={this.state.selectTime} onChange={(v) => {
+                    if (v) { this.setState({ selectTime: v }, () => { this.init() }) } else { message.warn('请选则日期'); }
+                }} /></div>,
                 dataIndex: '/',
                 width: 240,
+                align: 'center',
                 render: (text, record) => {
                     return <div>{record.begin} ~ {record.end} （{record.name}）</div>
                 }
             },
             {
-                title: `今日应检测设备数量${this.state.isAdmin === 1 ? '(可编辑)' : ''}`,
+                title: `应检测设备数量${this.state.isAdmin === 1 ? '(可编辑)' : ''}`,
                 dataIndex: 'selected_devices',
                 render: (text, record) => {
                     return <div style={{ display: 'flex', flexDirction: 'row' }}>
@@ -164,7 +171,7 @@ class TimeView extends Component {
                 }
             },
             {
-                title: '今日实际检测设备数量',
+                title: '实际检测设备数量',
                 dataIndex: 'actually',
             }, {
                 title: '操作',
