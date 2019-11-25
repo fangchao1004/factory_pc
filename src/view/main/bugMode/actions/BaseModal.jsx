@@ -47,7 +47,7 @@ class BaseModal extends Component {
                 >维修处理</Button>
                 <Button style={{ marginLeft: 20 }} type={'primary'}
                     disabled={this.props.checkDisable(2)}
-                    onClick={() => { this.props.openDrawer({ showModal5: true }) }}
+                    onClick={() => { this.props.openDrawer({ showModal5: true, ableGoBackRepair: true }) }}
                 >专工验收</Button>
                 <Button style={{ marginLeft: 20 }} type={'primary'}
                     disabled={this.props.checkDisable(3)}

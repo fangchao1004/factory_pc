@@ -45,6 +45,7 @@ export default class BugView extends Component {
             userData: [],
             currentRecord: {},///当前选择的某一行。某一个缺陷对象
             bugTypes: [],///所有缺陷备注类型
+            ableGoBackRepair: true,///专工操作界面中的返回维修按钮是否可用 (默认是可以返回的，只有在直接消缺时，不可点击返回维修按钮)
         }
     }
     componentDidMount() {
@@ -449,7 +450,7 @@ export default class BugView extends Component {
             ////当前用户是不是 2 数组中最后一位的 to  且 当前status 的值 =3
             if (localUserInfo && this.state.currentRecord.remark && this.state.currentRecord.status === 3) {
                 let stepData_2_arr = JSON.parse(this.state.currentRecord.remark)['2'];
-                if (stepData_2_arr) {
+                if (stepData_2_arr && stepData_2_arr.length > 0) {
                     let to_id = stepData_2_arr[stepData_2_arr.length - 1].to; ////最新一次任务分配给了谁。
                     disabledFlag = to_id !== JSON.parse(localUserInfo).id;/// 如果不等于 则禁用
                     // console.log('运行_to_id:',to_id);
@@ -726,7 +727,7 @@ export default class BugView extends Component {
                     getLocalUserName={this.getLocalUserName}
                     showModal={this.state.showModal9}
                     oneBug={this.state.currentRecord}
-                    openRunerView={() => { this.setState({ showModal5: true }) }}
+                    openManagerView={() => { this.setState({ showModal5: true, ableGoBackRepair: false }) }}
                     ok={() => { this.init(); this.setState({ showModal9: false }) }}
                     cancel={() => { this.setState({ showModal9: false }) }} />
                 <AddBugView
@@ -743,7 +744,7 @@ export default class BugView extends Component {
                 {/* 维修人员操作界面 */}
                 <RepairView showModal={this.state.showModal4} onClose={() => { this.setState({ showModal4: false }) }} changeBugStatus={this.changeBugStatus} status={this.state.currentRecord.status} />
                 {/* 专工验收操作界面 */}
-                <ManagerView showModal={this.state.showModal5} onClose={() => { this.setState({ showModal5: false, showModal9: false }) }} changeBugStatus={this.changeBugStatus} />
+                <ManagerView showModal={this.state.showModal5} onClose={() => { this.setState({ showModal5: false, showModal9: false }) }} changeBugStatus={this.changeBugStatus} ableGoBackRepair={this.state.ableGoBackRepair} />
                 {/* 运行验收操作界面 */}
                 <RunnerView showModal={this.state.showModal6} onClose={() => { this.setState({ showModal6: false }) }} changeBugStatus={this.changeBugStatus} />
                 {/* 图片显示界面 */}

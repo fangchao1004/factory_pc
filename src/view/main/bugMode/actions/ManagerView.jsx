@@ -18,6 +18,7 @@ class ManagerView extends Component {
             step_2_remark: '',///专工验收界面的备注
             runner_select_id: null,///选择的运行人员id
             bug_type_id: null,///缺陷类型id
+            ableGoBackRepair: true,
         }
     }
     componentDidMount() {
@@ -26,7 +27,8 @@ class ManagerView extends Component {
     }
     componentWillReceiveProps(nextProps) {
         this.setState({
-            showModal: nextProps.showModal
+            showModal: nextProps.showModal,
+            ableGoBackRepair: nextProps.ableGoBackRepair
         })
     }
     init = async () => {
@@ -105,6 +107,7 @@ class ManagerView extends Component {
                         }}>暂缓工作</Button> */}
                     <Button type={'danger'}
                         style={{ marginLeft: 20 }}
+                        disabled={!this.state.ableGoBackRepair}
                         onClick={() => {
                             //// 人员选择完毕。改变bug中的数据。status 和 remark
                             let remarkText = this.state.step_2_remark ? this.state.step_2_remark : '验收不通过，重新维修';

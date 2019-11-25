@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { Button, Modal, Row, Col, Input, message, Card, Tooltip } from 'antd';
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
-import { permisstionWithDes } from '../../util/AppData'
+import { permisstionWithDes, adminPermission } from '../../util/AppData'
+
 
 var storage = window.localStorage;
 var userinfo = null;
@@ -77,7 +78,7 @@ export default class UserMenuView extends Component {
     renderHandler = () => {
         let tempList = JSON.parse(JSON.stringify(this.state.permissionList));
         if (this.state.isadmin) {
-            tempList.unshift({ des: '管理员权限，可以增减修改各个选项', name: '管理员权限' })
+            tempList.unshift(adminPermission)
         }
         return tempList.map((item, index) => {
             return (

@@ -1,13 +1,13 @@
 /**
  * 固定数据统一存放类
  */
-export const permisstion = [{ name: '专工权限', value: 0 }, { name: '运行权限', value: 1 }, { name: '消费审批权限', value: 2 }, { name: '维修专工权限', value: 3 }]
+export const permisstion = [{ name: '专工权限', value: 0 }, { name: '运行权限', value: 1 }, { name: '消费审批权限', value: 2 }, { name: '维修权限', value: 3 }]
 export const permisstionWithDes = [
-    { name: '专工权限', value: 0, des: '可以在缺陷处理过程中，进行缺陷的分配和验收工作，添加缺陷备注' },
+    { name: '专工权限', value: 0, des: '可以在缺陷处理过程中，进行缺陷的分配和验收工作，可以直接消除缺陷，同时可以添加缺陷备注' },
     { name: '运行权限', value: 1, des: '可以在缺陷处理过程中，进行最后的运行验收工作' },
-    { name: '消费审批权限', value: 2, des: '可以处理消费申请，进行审批操作' },
-    { name: '维修专工权限', value: 3, des: '可以自行处理未分配的权限，无需专工分配，添加缺陷备注' }]
-
+    { name: '维修权限', value: 3, des: '可以自行维修处理未分配过的缺陷，无需专工分配，同时可以添加缺陷备注' },
+    { name: '消费审批权限', value: 2, des: '可以处理消费申请，进行审批操作' }]
+export const adminPermission = { name: '管理员权限', des: '管理员权限，可以增减修改各个选项，查看所有信息' }
 // const optionsDataOld = [{ "value": "1", "text": "文本输入框" }, { "value": "2", "text": "数字输入框" }, { "value": "3", "text": "单选" },
 // { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" }, { "value": "7", "text": "表单类型",{ "value": "10", "text": "测温组件" }, { "value": "11", "text": "测振组件" },{ "value": "12", "text": "默认" }];
 export const tableCellOptionsData = [
@@ -17,7 +17,7 @@ export const tableCellOptionsData = [
     { "value": "13", "text": "副标题" }];
 
 export const VersionlistData = [
-    { title: '版本号', description: 'V 1.2.6 dev' },
+    { title: '版本号', description: 'V 1.2.7' },
     // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
     // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
     // { title: '更新', description: '1.0.9 添加设备信息修改功能' }
@@ -38,5 +38,6 @@ export const VersionlistData = [
     // { title: '更新', description: '1.2.5 缺陷备注添加日志记录功能' }
     // { title: '更新', description: '1.2.5 dev 删除缺陷，更新record' }
     // { title: '更新', description: '1.2.6 添加开停运功能-所有人可以导出缺陷excel' }
-    { title: '更新', description: '1.2.6 dev 支持时间端选择和修改' }
+    // { title: '更新', description: '1.2.6 dev 支持时间端选择和修改' }
+    { title: '更新', description: '1.2.7 解决部分Bug' }
 ]
