@@ -223,7 +223,7 @@ export default class BugView extends Component {
             newValue = { ...newValue, closedAt: moment().format('YYYY-MM-DD HH:mm:ss') }
         }
         if (toId !== null) {
-            newValue.fix_id = toId[0];
+            newValue.fix_id = toId[1];
         }
         HttpApi.updateBugInfo({ query: { id: this.state.currentRecord.id }, update: newValue }, (res) => {
             if (res.data.code === 0) {
