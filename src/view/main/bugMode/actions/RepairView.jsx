@@ -81,7 +81,7 @@ class RepairView extends Component {
                             //// 人员选择完毕。改变bug中的数据。status 和 remark
                             let remarkText = this.state.step_1_remark ? this.state.step_1_remark : '完成维修工作,等待专工验收';
                             if (this.state.isRepairManager && this.state.bug_status === 0) {
-                                this.props.changeBugStatus(1, 0, '维修专工自行处理', JSON.parse(localUserInfo).id, JSON.parse(localUserInfo).id);
+                                this.props.changeBugStatus(1, 0, '维修专工自行处理', JSON.parse(localUserInfo).id, [null, JSON.parse(localUserInfo).id, null]);
                             }
                             setTimeout(() => {
                                 this.props.changeBugStatus(2, 1, remarkText, JSON.parse(localUserInfo).id);

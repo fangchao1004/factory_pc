@@ -246,3 +246,40 @@ export function transfromDataToCollectionList(recordList) {
     return tempList;
 }
 
+
+export function transfromDataToRunerAndGroupLeader(runnerList) {
+    // console.log('runnerList:', runnerList);
+    let groupLeaderList = [];///队长组
+    let normalList = [];///普通运行人员组
+    runnerList.forEach((item) => {
+        if (item.isGroupLeader === 1) groupLeaderList.push(item);
+        else normalList.push(item);
+    })
+    // console.log('groupLeaderList:', groupLeaderList);
+    // console.log('normalList:', normalList);
+    let treeData = [];
+    treeData = [{
+        title: '值长',
+        value: '1',
+        key: '1',
+        children: groupLeaderList.map((item, key) => {
+            return {
+                title: item.name,
+                value: item.id,
+                key: '1-' + key,
+            }
+        })
+    }, {
+        title: '运行人员',
+        value: '2',
+        key: '2',
+        children: normalList.map((item, key) => {
+            return {
+                title: item.name,
+                value: item.id,
+                key: '2-' + key,
+            }
+        })
+    }]
+    return treeData;
+} 

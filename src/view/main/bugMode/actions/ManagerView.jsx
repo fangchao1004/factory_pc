@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import { Drawer, Button, Row, Col, Input, Select, message } from 'antd';
+import { Drawer, Button, Row, Col, Input, message, TreeSelect } from 'antd';
 import HttpApi from '../../../util/HttpApi';
+import { transfromDataToRunerAndGroupLeader } from '../../../util/Tool'
+const { SHOW_CHILD } = TreeSelect;
 
-var runner_Options = [];///运行选项
+// var runner_Options = [];///运行选项
 
 // var bugType_Options = [];///缺陷类型
 var storage = window.localStorage;
@@ -19,6 +21,9 @@ class ManagerView extends Component {
             runner_select_id: null,///选择的运行人员id
             bug_type_id: null,///缺陷类型id
             ableGoBackRepair: true,
+            myTest: null,
+            treeData: [],
+            selectRunerList: [],
         }
     }
     componentDidMount() {
@@ -33,7 +38,10 @@ class ManagerView extends Component {
     }
     init = async () => {
         let runnerData = await this.getRunnerInfo();///获取有运行权限的人员
-        runner_Options = runnerData.map(userInfo => <Select.Option value={userInfo.id} key={userInfo.id}>{userInfo.name}</Select.Option>)
+        this.setState({
+            treeData: transfromDataToRunerAndGroupLeader(runnerData)
+        })
+        // runner_Options = runnerData.map(userInfo => <Select.Option value={userInfo.id} key={userInfo.id}>{userInfo.name}</Select.Option>)
         // let bugTypeData = await this.getBugTypeInfo();
         // bugType_Options = bugTypeData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
     }
@@ -70,12 +78,23 @@ class ManagerView extends Component {
                         <span>运行人员选择(必选):</span>
                     </Col>
                     <Col span={18}>
-                        <Select showSearch={true} value={this.state.runner_select_id} defaultValue={null} style={{ width: '100%' }}
+                        {/* <Select showSearch={true} value={this.state.runner_select_id} defaultValue={null} style={{ width: '100%' }}
                             onChange={(v) => { this.setState({ runner_select_id: v }) }}
                             filterOption={(input, option) =>
                                 option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
                             }
-                        >{runner_Options}</Select>
+                        >{runner_Options}</Select> */}
+                        <TreeSelect
+                            style={{ width: '100%' }}
+                            treeData={this.state.treeData}
+                            value={this.state.selectRunerList}
+                            onChange={(v) => { this.setState({ selectRunerList: v }) }}
+                            treeCheckable={true}
+                            allowClear={true}
+                            treeDefaultExpandedKeys={['1']}
+                            showCheckedStrategy={SHOW_CHILD}
+                            treeNodeFilterProp="title"
+                            searchPlaceholder='选择运行人员' />
                     </Col>
                 </Row>
                 {/* <Row gutter={16} style={{ marginTop: 20 }}>
@@ -118,10 +137,10 @@ class ManagerView extends Component {
                     <Button type={'primary'}
                         style={{ marginLeft: 20 }}
                         onClick={() => {
-                            if (this.state.runner_select_id === null) { message.error('请选择运行人员进行下一步验收工作'); return }
+                            if (this.state.selectRunerList.length === 0) { message.error('请选择运行人员进行下一步验收工作'); return }
                             /// 人员选择完毕。改变bug中的数据。status 和 remark
                             let remarkText = this.state.step_2_remark ? this.state.step_2_remark : '完成验收,等待运行验收';
-                            this.props.changeBugStatus(3, 2, remarkText, JSON.parse(localUserInfo).id, this.state.runner_select_id);
+                            this.props.changeBugStatus(3, 2, remarkText, JSON.parse(localUserInfo).id, [null, ...this.state.selectRunerList, null]);
                             this.reset();
                             this.props.onClose();
                         }}>完成验收</Button>
@@ -131,7 +150,7 @@ class ManagerView extends Component {
     }
 
     reset = () => {
-        this.setState({ step_2_remark: '', runner_select_id: null, bug_type_id: null });
+        this.setState({ step_2_remark: '', runner_select_id: null, bug_type_id: null, selectRunerList: [] });
     }
 
     render() {

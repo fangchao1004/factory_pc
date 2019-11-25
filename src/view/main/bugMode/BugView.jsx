@@ -259,8 +259,10 @@ export default class BugView extends Component {
             newValue = { ...newValue, closedAt: moment().format('YYYY-MM-DD HH:mm:ss') }
         }
         if (toId !== null) {
-            newValue.fix_id = toId;
+            newValue.fix_id = toId[0];
         }
+        // console.log('newValue:', newValue);
+        // return;
         HttpApi.updateBugInfo({ query: { id: this.state.currentRecord.id }, update: newValue }, (res) => {
             if (res.data.code === 0) {
                 this.init();
@@ -388,7 +390,7 @@ export default class BugView extends Component {
                         text = <Fragment><span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{item.time}</span>
                             <span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{' ' + this.getLocalUserName(item.from)}</span>
                             <span> 分配给 </span>
-                            <span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{' ' + this.getLocalUserName(item.to)}</span>
+                            <span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{' ' + item.to.map((id) => { console.log('id:', id); return this.getLocalUserName(id) })}</span>
                             {remarkText ? <span style={{ color: '#888888' }}> 备注: </span> : null}
                             <span style={{ color: renderArr.length - 1 === index ? 'orange' : '#888888' }}>{remarkText}</span>
                         </Fragment>
@@ -429,8 +431,8 @@ export default class BugView extends Component {
             } else if (this.state.currentRecord.status === 1) {
                 let stepData_0_arr = JSON.parse(this.state.currentRecord.remark)['0'];
                 if (stepData_0_arr && stepData_0_arr.length > 0) {
-                    let to_id = stepData_0_arr[stepData_0_arr.length - 1].to; ////最新一次任务分配给了谁。
-                    disabledFlag = to_id !== JSON.parse(localUserInfo).id;/// 如果不等于 则禁用
+                    let to_id_arr = stepData_0_arr[stepData_0_arr.length - 1].to; ////最新一次任务分配给了谁。
+                    disabledFlag = to_id_arr.indexOf(JSON.parse(localUserInfo).id) === -1;/// 如果不等于 则禁用
                 }
             }
         } else if (btnV === 2) {
@@ -451,8 +453,8 @@ export default class BugView extends Component {
             if (localUserInfo && this.state.currentRecord.remark && this.state.currentRecord.status === 3) {
                 let stepData_2_arr = JSON.parse(this.state.currentRecord.remark)['2'];
                 if (stepData_2_arr && stepData_2_arr.length > 0) {
-                    let to_id = stepData_2_arr[stepData_2_arr.length - 1].to; ////最新一次任务分配给了谁。
-                    disabledFlag = to_id !== JSON.parse(localUserInfo).id;/// 如果不等于 则禁用
+                    let to_id_arr = stepData_2_arr[stepData_2_arr.length - 1].to; ////最新一次任务分配给了谁。
+                    disabledFlag = to_id_arr.indexOf(JSON.parse(localUserInfo).id) === -1;/// 如果不等于 则禁用
                     // console.log('运行_to_id:',to_id);
                 }
             }
@@ -656,31 +658,29 @@ export default class BugView extends Component {
                         // console.log('id:', record.id,'数组长度:',remarkObj['0'].length,'最新:',remarkObj['0'][remarkObj['0'].length-1]);
                         // console.log('最新的维修人员id:',remarkObj['0'][remarkObj['0'].length-1].to);
                         if (remarkObj['0'] && remarkObj['0'].length > 0) {
-                            let currentUserID = remarkObj['0'][remarkObj['0'].length - 1].to;
-                            this.state.userData.forEach((item) => {
-                                if (item.id === currentUserID) {
-                                    str = item.name
-                                }
-                            })
+                            let currentUserIDArr = remarkObj['0'][remarkObj['0'].length - 1].to;
+                            str = currentUserIDArr.splice(1, currentUserIDArr.length - 2).map((id) => {
+                                return this.getLocalUserName(id)
+                            }).join(',')
                         }
                     }
                     if (currentStatus === 2) {
                         str = '专工'
                     } else if (currentStatus === 3) {
                         // str = '运行人员'
-                        let currentUserID;
+                        let currentUserIDArr;
                         if (remarkObj['2'] && remarkObj['2'].length > 0) {
-                            currentUserID = remarkObj['2'][remarkObj['2'].length - 1].to;
+                            currentUserIDArr = remarkObj['2'][remarkObj['2'].length - 1].to;
                         }
-                        this.state.userData.forEach((item) => {
-                            if (item.id === currentUserID) {
-                                str = item.name
-                            }
-                        })
-                    } else if (currentStatus === 4) {
-                        str = '/'
+                        str = currentUserIDArr.splice(1, currentUserIDArr.length - 2).map((id) => {
+                            return this.getLocalUserName(id)
+                        }).join(',')
                     }
-                    return <div>{str}</div>;
+                    return <div className='hideText lineClamp5'>
+                        < Tooltip title={str}>
+                            <span>{str}</span>
+                        </Tooltip>
+                    </div>;
                 }
             },
             {

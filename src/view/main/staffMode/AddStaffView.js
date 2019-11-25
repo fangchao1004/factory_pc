@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Form, Input, Select, TreeSelect } from 'antd'
+import { Modal, Form, Input, Select, TreeSelect, Switch } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import { permisstion } from '../../util/AppData'
 
@@ -80,6 +80,12 @@ function AddStaffForm(props) {
             {getFieldDecorator('remark', {
                 rules: [{ required: false, message: '请输入员工备注' }]
             })(<Input></Input>)}
+        </Form.Item>
+        <Form.Item label="值长" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('isGroupLeader', {
+                initialValue: false,
+                valuePropName: 'checked'
+            })(<Switch checkedChildren="是" unCheckedChildren="否"></Switch>)}
         </Form.Item>
     </Form>
 }

@@ -94,6 +94,12 @@ function UpdateStaffForm(props) {
                 valuePropName: 'checked'
             })(<Switch checkedChildren="是" unCheckedChildren="否"></Switch>)}
         </Form.Item>
+        <Form.Item label="值长" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('isGroupLeader', {
+                initialValue: props.staff.isGroupLeader === 1,
+                valuePropName: 'checked'
+            })(<Switch checkedChildren="是" unCheckedChildren="否"></Switch>)}
+        </Form.Item>
     </Form>
 }
 
