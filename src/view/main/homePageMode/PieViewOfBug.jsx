@@ -79,7 +79,7 @@ export default class PieViewOfBug extends React.Component {
           <Geom
             type="intervalStack"
             position="percent"
-            color="item"
+            color='item'
             tooltip={[
               "item*percent",
               (item, percent) => {

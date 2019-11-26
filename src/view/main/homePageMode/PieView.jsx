@@ -22,17 +22,17 @@ export default class PieView extends React.Component {
     this.transConstruct(this.props.data);
   }
   transConstruct = (data) => {
-    // console.log('获取原始数据：',data.datasouce,'对应的标题：',data.title);
+    // console.log('获取原始数据：', data.datasouce, '对应的标题：', data.title);
     let newArr = [];
     let totalCount = 0;
     data.datasouce.forEach((ele) => {
-      if (ele.status_count > 0) {
+      // if (ele.status_count > 0) {
         totalCount += ele.status_count;
         let stautsTxt = '待检'
         if (ele.device_status === 1) { stautsTxt = '正常' }
         else if (ele.device_status === 2) { stautsTxt = '故障' }
         newArr.push({ item: stautsTxt, count: ele.status_count });
-      }
+      // }
     })
     // console.log('处理后的数据：', newArr);
     this.setState({ data: newArr, titleStr: data.title, allCount: totalCount })
@@ -80,9 +80,10 @@ export default class PieView extends React.Component {
             />
           </Guide>
           <Geom
+            color={['item', ['#4AC9CA', '#FF6633', '#63AEFD']]}
             type="intervalStack"
             position="percent"
-            color="item"
+            // color="item"
             tooltip={[
               "item*percent",
               (item, percent) => {

@@ -27,7 +27,7 @@ class HomePageView extends Component {
         }
         let result = this.changeDataConstruct(b);////进行数据结构的改变统计
         let linkAll = [{ user_name: '所有设备', count_data: allDeviceStatusCount }, ...result]
-        // console.log(linkAll);////如果后期看不懂，要看这里的数据结构
+        // console.log('linkAll:', linkAll);////如果后期看不懂，要看这里的数据结构
         this.setState({
             groupData: linkAll
         })
