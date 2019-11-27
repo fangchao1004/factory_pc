@@ -487,7 +487,7 @@ export default class BugView extends Component {
             {
                 key: 'buglevel', dataIndex: 'buglevel', title: '缺陷类型',
                 filters: bug_level_filter,
-                onFilter: (value, record) => record.buglevel + '' === value,
+                onFilter: (value, record) => record.buglevel === value,
                 render: (text) => {
                     // console.log(text);
                     let result = null;
