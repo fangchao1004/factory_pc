@@ -255,7 +255,7 @@ export default class BugView extends Component {
         let oneBugInfo = await this.getOneBugInfo(bugId, isDelete);
         let device_id = oneBugInfo.device_id;
         if (!device_id) { return }
-        ///2，根据 device_id 去record 表中 找到 这个设备最新的一次record。 获取到后，在本地修改。再最为一条新数据插入到records表中
+        ///2，根据 device_id 去record 表中 找到 这个巡检点最新的一次record。 获取到后，在本地修改。再最为一条新数据插入到records表中
         let oneRecordInfo = await this.getOneRecordInfo(device_id);
         let bug_content = JSON.parse(oneRecordInfo.content);
         ///content 数组。找到其中bug_id 不为null的。把bug_id 和 bugId 相同的给至null,再手动判断是不是bug_id字段都是null了。如果是device_status就要至1（正常）
@@ -266,7 +266,7 @@ export default class BugView extends Component {
                 bug_id_count++;
             }
         })
-        // console.log('这个设备还有几个bug:', bug_id_count);
+        // console.log('这个巡检点还有几个bug:', bug_id_count);
         if (bug_id_count > 0) {
             ///如果找到对应的bug_id。将它至null,说明这个缺陷已经解决了。就不要再出现在record中了。同时bug_id_count减1
             bug_content.forEach((oneSelect) => {
@@ -290,13 +290,13 @@ export default class BugView extends Component {
             if (res.data.code === 0) {
                 // console.log('入库成功。');
                 if (oneRecordInfo.device_status === 1) {
-                    ///手动更新数据库中，对应设备的状态
+                    ///手动更新数据库中，对应巡检点的状态
                     HttpApi.updateDeviceInfo({ query: { id: device_id }, update: { status: 1 } }, (res) => {
-                        if (res.data.code === 0) { message.success('对应设备最新巡检记录更新-设备状态恢复正常'); }
+                        if (res.data.code === 0) { message.success('对应巡检点最新巡检记录更新-巡检点状态恢复正常'); }
                     })
                 } else {
                     HttpApi.updateDeviceInfo({ query: { id: device_id }, update: { status: 2 } }, (res) => {
-                        if (res.data.code === 0) { message.info('对应设备最新巡检记录更新'); } ///这么做的目的是只要有record上传，就要更新对应设备的updateAt
+                        if (res.data.code === 0) { message.info('对应巡检点最新巡检记录更新'); } ///这么做的目的是只要有record上传，就要更新对应巡检点的updateAt
                     })
                 }
             }
@@ -476,7 +476,7 @@ export default class BugView extends Component {
                 key: 'user_name', dataIndex: 'user_name', title: '发现人',
             },
             // {
-            //     key: 'area_remark', dataIndex: 'area_remark', title: '具体设备范围',
+            //     key: 'area_remark', dataIndex: 'area_remark', title: '具体巡检点范围',
             //     render: (text, record) => {
             //         let result = '/'
             //         if (text) { result = text }

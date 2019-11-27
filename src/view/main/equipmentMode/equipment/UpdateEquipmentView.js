@@ -5,7 +5,7 @@ import { transfromDataTo3level } from '../../../util/Tool'
 
 
 /**
- * 更新设备的表单界面
+ * 更新巡检点的表单界面
  *
  * @param {*} props
  * @returns
@@ -39,7 +39,7 @@ function UpdateEquipmentForm(props) {
         <Form.Item label="NFC" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             {getFieldDecorator('nfc_id', {
                 initialValue: props.device.nfc_id,
-                rules: [{ required: true, message: '请选择设备NFC' }]
+                rules: [{ required: true, message: '请选择巡检点NFC' }]
             })(<Select>{nfcOptions}</Select>)}
         </Form.Item>
         <Form.Item label="巡检点名称" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
@@ -48,10 +48,10 @@ function UpdateEquipmentForm(props) {
                 rules: [{ required: true, message: '请输入巡检点名称' }]
             })(<Input></Input>)}
         </Form.Item>
-        <Form.Item label="设备状态" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+        <Form.Item label="巡检点状态" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             {getFieldDecorator('status', {
                 initialValue: props.device.status,
-                rules: [{ required: true, message: '请选择设备状态' }]
+                rules: [{ required: true, message: '请选择巡检点状态' }]
             })(<Select>{statusOptions}</Select>)}
         </Form.Item>
         {/* <Form.Item label="运/停切换" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
@@ -66,7 +66,7 @@ function UpdateEquipmentForm(props) {
 const EquipmentForm = Form.create({ name: 'EquipmentForm' })(UpdateEquipmentForm)
 
 /**
- * 更新设备界面
+ * 更新巡检点界面
  *
  * @export
  * @param {*} props
@@ -138,7 +138,7 @@ export default class UpdateEquipmentView extends Component {
     }
     render() {
         return (
-            <Modal centered title="修改设备"
+            <Modal centered title="修改巡检点"
                 onOk={this.onOkHandler}
                 onCancel={this.onCancelHandler}
                 visible={this.state.visible}

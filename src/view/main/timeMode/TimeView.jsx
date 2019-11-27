@@ -186,7 +186,7 @@ class TimeView extends Component {
                 }
             },
             {
-                title: `应检测设备数量${this.state.isAdmin === 1 ? '(可编辑)' : ''}`,
+                title: `应检测巡检点数量${this.state.isAdmin === 1 ? '(可编辑)' : ''}`,
                 dataIndex: 'selected_devices',
                 render: (text, record) => {
                     return <div style={{ display: 'flex', flexDirction: 'row' }}>
@@ -211,7 +211,7 @@ class TimeView extends Component {
                 }
             },
             {
-                title: '实际检测设备数量',
+                title: '实际检测巡检点数量',
                 dataIndex: 'actually',
             }, {
                 title: '操作',

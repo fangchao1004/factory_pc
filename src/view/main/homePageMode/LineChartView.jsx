@@ -29,12 +29,12 @@ class LineChartView extends Component {
     //     })
     // }
     getData = async () => {
-        let currentDeviceStatusData = await this.getDeviceStatusCount();////当前设备的状态。分布（正常多少）（故障多少）
-        // console.log('当前的设备状态：', currentDeviceStatusData);///今日记录
-        let historyOfDevicesStatusData = await this.getStatusCount();///近一个月的设备情况
-        // console.log('设备历史记录：', historyOfDevicesStatusData);
-        let todayHasDetectCount = await this.getTodayHasDetectCount();///今日检测了多少台设备
-        // console.log('今日检测了多少台设备:', todayHasDetectCount.todayDetectCount);
+        let currentDeviceStatusData = await this.getDeviceStatusCount();////当前巡检点的状态。分布（正常多少）（故障多少）
+        // console.log('当前的巡检点状态：', currentDeviceStatusData);///今日记录
+        let historyOfDevicesStatusData = await this.getStatusCount();///近一个月的巡检点情况
+        // console.log('巡检点历史记录：', historyOfDevicesStatusData);
+        let todayHasDetectCount = await this.getTodayHasDetectCount();///今日检测了多少台巡检点
+        // console.log('今日检测了多少台巡检点:', todayHasDetectCount.todayDetectCount);
 
         let dataArr = [];
         historyOfDevicesStatusData.forEach((item) => {

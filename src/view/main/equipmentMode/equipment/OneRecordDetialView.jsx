@@ -44,7 +44,7 @@ class OneRecordDetialView extends Component {
         return (<div style={{ width: '100%', display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
             <div style={{ fontWeight: 600, fontSize: 24, color: '#40A9FF' }}>{this.state.renderData.table_name || '/'}</div>
             <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: 16, marginTop: 10, marginBottom: 20 }}>
-                <span>设备名: {this.state.renderData.device_name || '/'}</span>
+                <span>巡检点名: {this.state.renderData.device_name || '/'}</span>
                 <span>上传者: {this.state.renderData.user_name || '/'}</span>
             </div>
         </div >)

@@ -78,7 +78,7 @@ class LineViewOfCollection extends Component {
     }
 
     getDataFromDB = async (count) => {
-        // console.log('设备id:', device_id, '此多少条上传的record数据:', count);
+        // console.log('巡检点id:', device_id, '此多少条上传的record数据:', count);
         let result = await this.getRecordInfo(count);///多条records
         let renderLineData = transfromDataToCollectionList(result);
         // console.log('renderLineData:', renderLineData);

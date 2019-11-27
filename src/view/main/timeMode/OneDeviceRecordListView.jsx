@@ -4,7 +4,7 @@ import HttpApi from '../../util/HttpApi';
 import OneRecordDetialView from '../equipmentMode/equipment/OneRecordDetialView';
 
 /**
- * 某个设备的所有records
+ * 某个巡检点的所有records
  */
 class OneDeviceRecordListView extends Component {
     constructor(props) {

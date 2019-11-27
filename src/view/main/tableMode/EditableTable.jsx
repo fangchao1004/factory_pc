@@ -286,7 +286,7 @@ export default class EditableTable extends Component {
   /*
   [
     {key: "0", title_name: "表头", type_id: "7", default_values: "2", extra_value: "电表报告单"},
-    {key: "1", title_name: "设备状态", type_id: "3", default_values: "正常/故障"},
+    {key: "1", title_name: "巡检点状态", type_id: "3", default_values: "正常/故障"},
     {key: "2", title_name: "标题3", type_id: "3", default_values: "a/v"},
   ]
   */

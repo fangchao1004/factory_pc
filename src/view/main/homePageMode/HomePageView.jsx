@@ -15,10 +15,10 @@ class HomePageView extends Component {
         this.init();
     }
     init = async () => {
-        ///获取所有设备的当前的状态统计信息。
-        let allDeviceStatusCount = await this.getAllDeviceStatusCount();///获取所有设备的 状态统计 信息
+        ///获取所有巡检点的当前的状态统计信息。
+        let allDeviceStatusCount = await this.getAllDeviceStatusCount();///获取所有巡检点的 状态统计 信息
         // console.log(allDeviceStatusCount);////[{device_status: 1, status_count: 3},{device_status: 2, status_count: 4}]
-        let allTodayRecordInfo = await this.getEveryUserRecordToday(); ///获取当日 所有设备的巡检情况（针对参加巡检的人员的分组）
+        let allTodayRecordInfo = await this.getEveryUserRecordToday(); ///获取当日 所有巡检点的巡检情况（针对参加巡检的人员的分组）
         // console.log('allTodayRecordInfo:', allTodayRecordInfo); ////这里的数据很有指导性---如果后期修改要看这个数据结构
         let b = {};
         for (let item of allTodayRecordInfo) {
@@ -26,7 +26,7 @@ class HomePageView extends Component {
             else { b[item.user_name] = [item] }
         }
         let result = this.changeDataConstruct(b);////进行数据结构的改变统计
-        let linkAll = [{ user_name: '所有设备', count_data: allDeviceStatusCount }, ...result]
+        let linkAll = [{ user_name: '所有巡检点', count_data: allDeviceStatusCount }, ...result]
         // console.log('linkAll:', linkAll);////如果后期看不懂，要看这里的数据结构
         this.setState({
             groupData: linkAll

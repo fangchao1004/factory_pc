@@ -60,10 +60,10 @@ class EquipmentTypeView extends Component {
     }
     updateStaffOnCancel = () => {
         this.setState({ updateStaffVisible: false })
-    } 
+    }
     deleteStaffConfirm = (record) => {
         HttpApi.obs({ sql: `update device_types set effective = 0 where id = ${record.id} ` }, (data) => {
-        // HttpApi.removeDeviceTypeInfo({ id: record.id }, data => {
+            // HttpApi.removeDeviceTypeInfo({ id: record.id }, data => {
             if (data.data.code === 0) {
                 message.success('删除成功')
                 this.getDeviceTypeData();
@@ -85,6 +85,9 @@ class EquipmentTypeView extends Component {
             {
                 title: '巡检点类型',
                 dataIndex: 'name',
+                sorter: (a, b) => {
+                    return a.name.charCodeAt(0) - b.name.charCodeAt(0)
+                },
                 render: (text, record) => (
                     <div>{text}</div>
                 )
@@ -126,6 +129,10 @@ class EquipmentTypeView extends Component {
                     bordered
                     dataSource={this.state.dataSource}
                     columns={columns}
+                    pagination={{
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                    }}
                 />
                 <AddDeviceTypeView onOk={this.addStaffOnOk} onCancel={this.addStaffOnCancel} visible={this.state.addStaffVisible} />
                 <UpdateDeviceTypeView staff={this.state.updateStaffData} onOk={this.updateStaffOnOk}

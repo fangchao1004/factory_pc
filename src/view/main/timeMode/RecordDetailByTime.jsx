@@ -115,7 +115,7 @@ class RecordDetailByTime extends Component {
     render() {
         const columns = [
             {
-                title: '设备名称',
+                title: '巡检点名称',
                 dataIndex: 'name',
                 render: (text, record) => {
                     return <div>{text || '/'}</div>

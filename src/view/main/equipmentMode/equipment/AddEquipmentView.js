@@ -33,7 +33,7 @@ function AddEquipmentForm(props) {
         </Form.Item>
         <Form.Item label="NFC" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             {getFieldDecorator('nfc_id', {
-                rules: [{ required: true, message: '请选择设备NFC' }]
+                rules: [{ required: true, message: '请选择巡检点NFC' }]
             })(<Select>{nfcOptions}</Select>)}
         </Form.Item>
         <Form.Item label="巡检点名称" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
@@ -47,7 +47,7 @@ function AddEquipmentForm(props) {
 const EquipmentForm = Form.create({ name: 'EquipmentForm' })(AddEquipmentForm)
 
 /**
- * 添加设备界面
+ * 添加巡检点界面
  *
  * @export
  * @param {*} props
@@ -92,7 +92,9 @@ export default class AddEquipmentView extends Component {
     }
     getNfcInfo = () => {
         return new Promise((resolve, reject) => {
-            HttpApi.getNFCInfo({ type: 2, effective: 1 }, res => {
+            let sql = `select * from nfcs where type = 2 and effective = 1
+            order by id desc`
+            HttpApi.obs({ sql }, res => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data;

@@ -8,9 +8,9 @@ import PieViewOfOneDeStus from './PieViewOfOneDeStus';
 import OneRecordDetialView from './OneRecordDetialView'
 import LineViewOfCollection from './LineViewOfCollection';
 
-var device_status_filter = [{ text: '正常', value: 1 }, { text: '故障', value: 2 }, { text: '待检', value: 3 }];///用于筛选设备状态的数据 选项
+var device_status_filter = [{ text: '正常', value: 1 }, { text: '故障', value: 2 }, { text: '待检', value: 3 }];///用于筛选巡检点状态的数据 选项
 var device_type_data_filter = []; ///用于筛选巡检点类型的数据 选项
-var device_switch_filter = [{ text: '运行', value: 1 }, { text: '停运', value: 0 }];///用于筛选设备开停运状态的数据 选项
+var device_switch_filter = [{ text: '运行', value: 1 }, { text: '停运', value: 0 }];///用于筛选巡检点开停运状态的数据 选项
 
 class EquipmentView extends Component {
     constructor(props) {
@@ -115,7 +115,7 @@ class EquipmentView extends Component {
     }
     addEquipmentOk = (newValues) => {
         let area3_id = newValues.area_id.split('-')[2];
-        newValues.status = 3 // 默认设置设备为 1正常 3待检 状态
+        newValues.status = 3 // 默认设置巡检点为 1正常 3待检 状态
         newValues.area_id = area3_id;
         // console.log(newValues)
         // return;
@@ -139,7 +139,7 @@ class EquipmentView extends Component {
             if (res.data.code === 0) {
                 this.setState({ updateEquipmentVisible: false })
                 this.init();
-                message.success('更新设备信息成功');
+                message.success('更新巡检点信息成功');
             } else {
                 message.error(res.data.data)
             }
@@ -149,7 +149,7 @@ class EquipmentView extends Component {
         this.setState({ updateEquipmentVisible: false })
     }
     deleteEquipmentConfirm = (record) => {
-        // console.log('确定删除 某个设备:', record.id);
+        // console.log('确定删除 某个巡检点:', record.id);
         HttpApi.obs({ sql: `update devices set effective = 0 where id = ${record.id} ` }, (data) => {
             if (data.data.code === 0) {
                 message.success('删除巡检点成功')
@@ -170,12 +170,15 @@ class EquipmentView extends Component {
             {
                 title: '巡检点名称',
                 dataIndex: 'name',
+                sorter: (a, b) => {
+                    return a.name.charCodeAt(0) - b.name.charCodeAt(0)
+                },
                 render: (text, record) => (
                     <div>{text}</div>
                 )
             },
             {
-                title: '具体设备范围',
+                title: '具体巡检点范围',
                 dataIndex: 'area_name',
                 // filters: area_data_filter,
                 onFilter: (value, record) => record.area_id === value,
@@ -284,7 +287,7 @@ class EquipmentView extends Component {
                 <Drawer
                     title={(
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span>设备状态历史记录</span>
+                            <span>巡检点状态历史记录</span>
                             <Icon type="close-circle" theme="twoTone" style={{ fontSize: 20 }}
                                 onClick={() => { this.setState({ drawerVisible1: false }) }}
                             />
@@ -335,7 +338,7 @@ class EquipmentView extends Component {
     }
 
     openLastRecord = async (record) => {
-        ///获取该设备，数据库中最近的一条records 记录
+        ///获取该巡检点，数据库中最近的一条records 记录
         let lastRecordData = await this.getLastRecordData(record.id);
         // console.log('lastRecordData:', lastRecordData);
         this.openDrawer(lastRecordData, 3)
@@ -362,12 +365,12 @@ class EquipmentView extends Component {
 
         })
     }
-    ///查询某个设备的所有record记录数据
+    ///查询某个巡检点的所有record记录数据
     openModalHandler = async (record) => {
-        ///查询数据库中某个设备的所有record记录
+        ///查询数据库中某个巡检点的所有record记录
         let OneDeviceAllRecords = await HttpApi.getOneDeviceAllRecords(record.id);
         OneDeviceAllRecords.map((item) => item.key = item.id + '')
-        ///获取了当前的设备id
+        ///获取了当前的巡检点id
         this.setState({
             pieDeviceId: record.id,
             drawerVisible1: true,
@@ -391,8 +394,8 @@ class EquipmentView extends Component {
             drawerVisible3: false
         })
     }
-    ///2 左边的二级抽屉，显示该设备任意一次的record记录 
-    ///3 右边的独立的一级抽屉，显示该设备最新一次的record记录 
+    ///2 左边的二级抽屉，显示该巡检点任意一次的record记录 
+    ///3 右边的独立的一级抽屉，显示该巡检点最新一次的record记录 
     openDrawer = async (record, v) => {
         // console.log('record:',record);
         if (!record) { message.warn('无记录数据'); return }
@@ -509,14 +512,14 @@ class EquipmentView extends Component {
     }
 
     /**
-     * 当前设备的状态统计饼图
+     * 当前巡检点的状态统计饼图
      */
     renderDevicePieView = () => {
         return <PieViewOfOneDeStus pieDeviceId={this.state.pieDeviceId} isShow={this.state.drawerVisible1} />
     }
 
     /**
-     * 当前设备的 采集数据的折线图
+     * 当前巡检点的 采集数据的折线图
      */
     renderCollectionLineView = () => {
         return <LineViewOfCollection deviceId={this.state.pieDeviceId} isShow={this.state.drawerVisible1} />

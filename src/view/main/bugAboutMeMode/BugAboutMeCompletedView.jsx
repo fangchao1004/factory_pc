@@ -290,7 +290,7 @@ export default class BugView extends Component {
                 key: 'user_name', dataIndex: 'user_name', title: '发现人',
             },
             /// {
-            ///     key: 'area_remark', dataIndex: 'area_remark', title: '具体设备范围',
+            ///     key: 'area_remark', dataIndex: 'area_remark', title: '具体巡检点范围',
             ///     render: (text, record) => {
             ///         let result = '/'
             ///         if (text) { result = text }

@@ -26,7 +26,7 @@ export function omitTextLength(text, targetlength) {
  *将数据库查询的 数据进行 三层结构转换
  *123级
  * 三级的节点都可以被选择 (默认三级都可选)
- * 只有在添加 设备时 只能选择第三级
+ * 只有在添加 巡检点时 只能选择第三级
  * 在添加缺陷时，三级区域范围都可以被选择
  * @export
  * @param {*} area123result
@@ -130,7 +130,7 @@ export function transfromDataTo2level(area12result) {
 }
 
 /**
- * 将三级区间结构数+设备信息之间进行绑定
+ * 将三级区间结构数+巡检点信息之间进行绑定
  * 形成了4级结构
  * @export
  * @param {*} level3List
@@ -167,7 +167,7 @@ export function combinAreaAndDevice(level3List, devicesList) {
 }
 
 /**
- *将多级数据+设备信息 形成的新的4级结构数据
+ *将多级数据+巡检点信息 形成的新的4级结构数据
  *渲染成对应的 4级树节点
  * @export
  * @param {*} dataList

@@ -329,7 +329,7 @@ export default class BugCompletedView extends Component {
                 onFilter: (value, record) => record.user_id === value,
             },
             // {
-            //     key: 'area_remark', dataIndex: 'area_remark', title: '具体设备范围',
+            //     key: 'area_remark', dataIndex: 'area_remark', title: '具体巡检点范围',
             //     render: (text, record) => {
             //         let result = '/'
             //         if (text) { result = text }

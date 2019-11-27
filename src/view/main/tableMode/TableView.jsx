@@ -106,7 +106,7 @@ class TableView extends Component {
         return cellsArr
     }
     onConfirmDeleteHandler = (element) => {
-        ///这里不光要删除 sample,还要把 用该sample的所有某类设备的 record 全部删除！！！！
+        ///这里不光要删除 sample,还要把 用该sample的所有某类巡检点的 record 全部删除！！！！
         HttpApi.obs({ sql: `update samples set effective = 0 where id = ${element.id} ` }, (res) => {
             // HttpApi.removeSampleInfo({ id: element.id }, (res) => {
             if (res.data.code === 0) {

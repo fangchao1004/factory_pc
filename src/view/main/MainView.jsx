@@ -162,7 +162,7 @@ export default class MainView extends Component {
                             <Link to={`${this.props.match.url}`} />
                         </Menu.Item>
                         <SubMenu key="巡检点" title={<span><Icon type="scan" /><span>巡检</span></span>}>
-                            <Menu.Item key="设备">
+                            <Menu.Item key="巡检点">
                                 <Icon type="switcher" />
                                 <span>巡检点</span>
                                 <Link to={`${this.props.match.url}/equipment`} />

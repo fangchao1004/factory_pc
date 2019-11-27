@@ -13,7 +13,7 @@ const content = (
 );
 var device_id;
 /**
- * 设备的状态
+ * 巡检点的状态
  * 统计饼图
  */
 class PieViewOfOneDeStus extends Component {
@@ -73,7 +73,7 @@ class PieViewOfOneDeStus extends Component {
     getDateSelect = () => {
         return (
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 16, fontWeight: 500, color: '#000000' }}>设备状态统计图</span>
+                <span style={{ fontSize: 16, fontWeight: 500, color: '#000000' }}>巡检点状态统计图</span>
                 <div>
                     <Popover content={content} title="日期说明">
                         <Icon type="info-circle" theme="twoTone" style={{ fontSize: 20, marginRight: 20 }} />

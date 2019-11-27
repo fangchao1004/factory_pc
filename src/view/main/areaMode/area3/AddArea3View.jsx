@@ -61,7 +61,7 @@ export default class AddArea3View extends Component {
     render() {
         return (
             <Modal
-                title='添加三级设备范围'
+                title='添加三级巡检点范围'
                 visible={this.state.visible}
                 onCancel={this.onCancelHandler}
                 onOk={this.onOkHandler}
@@ -88,10 +88,10 @@ function AddArea3From(props) {
                 placeholder="请选择所属的上级(精确到第二级)"
             />)}
         </Form.Item>
-        <Form.Item label="第三级设备范围:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
+        <Form.Item label="第三级巡检点范围:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('area3_name', {
-                rules: [{ required: true, message: '请输入第三级设备范围名称' }]
-            })(<Input placeholder='请输入第三级设备范围名称'></Input>)}
+                rules: [{ required: true, message: '请输入第三级巡检点范围名称' }]
+            })(<Input placeholder='请输入第三级巡检点范围名称'></Input>)}
         </Form.Item>
     </Form>
 }

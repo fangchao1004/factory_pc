@@ -97,7 +97,7 @@ export default class SampleViewTool {
                     {element.extra_value ? element.extra_value : '请选择表单类型'}
                 </span>
                 <div style={{ marginTop: 30, marginBottom: 20, display: "flex", justifyContent: 'space-between' }} >
-                    <span>设备名:xxxxxxx</span>
+                    <span>巡检点名:xxxxxxx</span>
                     <span>用户名:xxxxxxx</span>
                 </div>
             </div>

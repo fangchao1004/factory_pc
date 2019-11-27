@@ -117,7 +117,7 @@ class EquipmentArea3View extends Component {
                 title: '所属二级位置',
                 dataIndex: 'area2_name'
             }, {
-                title: '设备及范围名称',
+                title: '巡检点及范围名称',
                 dataIndex: 'area3_name'
             }, {
                 title: '操作',
@@ -125,7 +125,7 @@ class EquipmentArea3View extends Component {
                 width: 150,
                 render: (text, record) => {
                     return <div style={{ textAlign: 'center' }}>
-                        <Popconfirm title={<div>确定要删除该第三级设备范围吗？</div>} onConfirm={() => { this.deleteArea3Confirm(record) }}>
+                        <Popconfirm title={<div>确定要删除该第三级巡检点范围吗？</div>} onConfirm={() => { this.deleteArea3Confirm(record) }}>
                             <Button size="small" type="danger">删除</Button>
                         </Popconfirm>
                         <Divider type="vertical" />
@@ -140,7 +140,7 @@ class EquipmentArea3View extends Component {
                     <Row>
                         <Col span={6}>
                             <Button onClick={() => { this.setState({ addVisible: true }) }} type="primary" style={{ marginBottom: 16 }}>
-                                添加第三级设备范围
+                                添加第三级巡检点范围
                          </Button>
                         </Col>
                     </Row>

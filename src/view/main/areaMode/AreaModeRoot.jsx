@@ -18,7 +18,7 @@ const tabListNoTitle2 = [{
     tab: '二级巡检位置',
 }, {
     key: 'EquipmentArea3View',
-    tab: '三级设备范围',
+    tab: '三级巡检点范围',
 }];
 
 const contentListNoTitle = {

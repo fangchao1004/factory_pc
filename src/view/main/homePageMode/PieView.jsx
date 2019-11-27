@@ -104,7 +104,7 @@ export default class PieView extends React.Component {
               formatter={(val, item) => {
                 // let floatVal = parseFloat(val.substring(0, val.length - 1)).toFixed(1)
                 // return item.point.item + ": " + floatVal + '%';
-                return item.point.item + ": " + item.point.count + '台';
+                return item.point.item + ": " + item.point.count + '处';
               }}
             />
           </Geom>
