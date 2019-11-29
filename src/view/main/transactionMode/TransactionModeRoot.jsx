@@ -1,42 +1,34 @@
 import React, { Component } from 'react';
 import { Card } from 'antd';
-import TransactionView from './TransactionView';
-import TransactionViewNew from './TransactionViewNew';
+import TransactionView from './TransactionView'; /// 所有消费数据界面
+import TransactionViewNew from './TransactionViewNew';/// 个人消费数据界面
 // import RechargeView from './RechargeViewNew'
 const storage = window.localStorage;
-var userinfo = null
-var isAdmin = false;
-var tabListNoTitle = [];
-
-const contentListNoTitle = {
-    TransactionView: <TransactionView />,
-    TransactionViewNew: <TransactionViewNew />,
-};
+var userinfo;
+var isAdmin;
+var tabListNoTitle;
+var contentListNoTitle;
 
 class TransactionModeRoot extends Component {
-
-    componentDidMount() {
+    constructor(props) {
+        super(props);
         userinfo = storage.getItem('userinfo');
         isAdmin = JSON.parse(userinfo).isadmin === 1;
+        this.state = {
+            key: isAdmin ? 'TransactionView' : 'TransactionViewNew',
+            noTitleKey: isAdmin ? 'TransactionView' : 'TransactionViewNew',
+        }
+        contentListNoTitle = isAdmin ? {
+            TransactionView: <TransactionView />,
+        } : { TransactionViewNew: <TransactionViewNew />, }
         tabListNoTitle = isAdmin ? [{
             key: 'TransactionView',
             tab: '所有消费记录',
         }] : [{
             key: 'TransactionViewNew',
-            tab: '人员消费记录',
+            tab: '个人消费记录',
         }]
-        this.forceUpdate();
     }
-
-    state = {
-        key: 'TransactionView',
-        noTitleKey: 'TransactionView',
-    }
-
-    onTabChange = (key) => {
-        this.setState({ noTitleKey: key });
-    }
-
     render() {
         return (
             <Card
@@ -44,7 +36,6 @@ class TransactionModeRoot extends Component {
                 style={{ width: '100%' }}
                 tabList={tabListNoTitle}
                 activeTabKey={this.state.noTitleKey}
-                onTabChange={(key) => { this.onTabChange(key); }}
             >
                 {contentListNoTitle[this.state.noTitleKey]}
             </Card>

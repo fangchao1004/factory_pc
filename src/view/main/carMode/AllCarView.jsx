@@ -55,7 +55,7 @@ export default class AllCarView extends Component {
         // console.log('currentPage:', currentPage);
         let CarsData = await this.getCarsInfo(currentPage);
         CarsData = CarsData.map((item, index) => { item.key = index; return item })
-        console.log('CarsData:', CarsData);
+        // console.log('CarsData:', CarsData);
         this.setState({ currentPage, CarsData })
     }
     render() {

@@ -4,37 +4,52 @@ import HttpApi from '../../util/HttpApi';
 import moment from 'moment'
 const { Search } = Input;
 const storage = window.localStorage;
-var userinfo = storage.getItem('userinfo')
+var userinfo;
 
 export default class TransactionView extends Component {
     constructor(props) {
         super(props);
+        userinfo = storage.getItem('userinfo')
         this.state = {
             data: [],
-            filterData: [],
-            isAdmin: false,
+            isAdmin: JSON.parse(userinfo).isadmin === 1,
             loading: true,
+            dataCount: 0,
+            currentPage: 1,
+            currentPageSize: 10,
+            searchName: null,
+            nowIsAll: false, /// 当前是否显示的是全部数据
         }
     }
     componentDidMount() {
-        this.init();
-        this.initOtherConfigData();
+        this.setState({ loading: true }, () => { this.init() })
     }
-    initOtherConfigData = async () => {
-        let filterData = await this.getTransactionType();
-        // console.log('filterData:', filterData);
-        let tempList = [];
-        filterData.forEach((item) => {
-            if (item.text && item.value) { tempList.push(item) }
+    init = async (param = {}) => {
+        let result = await this.getAllTransactionInfo(param); /// 如果你是管理员 那么就获取所有人的数据
+        let dataCount = await this.getTransactionCount();/// 数据统计
+        this.setState({
+            loading: false,
+            data: result.map((item, index) => { item.key = index; return item }),
+            dataCount: dataCount[0].count, ///获取总数据统计数
+            nowIsAll: true,
         })
-        this.setState({ filterData: tempList })
     }
-    getTransactionType = () => {
+    /// 获取数据条数统计
+    getTransactionCount = (name = '') => {
+        let isAll = this.state.isAdmin && !name
+        let sql;
+        if (isAll) {
+            sql = `SELECT count(*) as count from [Transaction]`
+        } else {
+            sql = `SELECT count(*) as count FROM [Transaction] t
+            LEFT JOIN TransactionDetail td
+            ON t.TransactionID = td.TransactionID
+            LEFT JOIN Account a
+            ON t.AccountID = a.AccountID
+            WHERE a.AccountName LIKE '%${name}%'`
+        }
         return new Promise((resolve, reject) => {
             let result = [];
-            let sql = `SELECT DISTINCT td.TransactionDesc text,td.TransactionType value FROM [Transaction] t
-            LEFT JOIN TransactionDetail td
-            ON t.TransactionID = td.TransactionID`
             HttpApi.obsForss({ sql }, (res) => {
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -43,49 +58,60 @@ export default class TransactionView extends Component {
             })
         })
     }
-    init = async () => {
-        userinfo = storage.getItem('userinfo')
-        let isAdmin = JSON.parse(userinfo).isadmin === 1;
-        let data = [];
-        if (isAdmin) {
-            data = await this.getAllTransactionInfo();
-        } else {
-            data = await this.getSomeOneTransactionInfo(JSON.parse(userinfo).name);
+    ///////////////
+    ///获取所有消费数据 分页
+    getAllTransactionInfo = (param) => {
+        return new Promise((resolve, reject) => {
+            let result = [];
+            HttpApi.getAllTransactionInfo(param, (res) => {
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
+    ///获取某个人的消费数据 分页
+    getSomeOneTransactionInfo = (param = {}, name) => {
+        return new Promise((resolve, reject) => {
+            let result = [];
+            HttpApi.getSomeOneTransactionInfo({ ...param, accountName: name }, (res) => {
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
+    /////////////////
+    /// 第一次点击搜索按钮 开始搜索相关人员数据
+    seachPeopleHandler = async () => {
+        if (!this.state.searchName) { return }
+        let dataCount = await this.getTransactionCount(this.state.searchName); /// 获取搜索对象的条数
+        let result = await this.getSomeOneTransactionInfo({}, this.state.searchName);
+        this.setState({
+            data: result.map((item, index) => { item.key = index; return item }),
+            currentPage: 1,
+            currentPageSize: 10,
+            dataCount: dataCount[0].count,
+            nowIsAll: false
+        })
+    }
+    ///翻页器切换
+    getNewInfo = async (page, size) => {
+        // console.log(page, size);///获取到最新的page 和 size 状态
+        let paramObj = { currentPage: page, pageSize: size };
+        this.setState({ loading: true })
+        if (this.state.searchName === null) { ///如果是管理员 且 现在没有查询的数据 则获取所有的数据
+            this.init(paramObj) /// init 即是获取所有数据 并且 传入分页参数
+        } else { ///如果当前有搜索的关键字  每次翻页
+            let result = await this.getSomeOneTransactionInfo(paramObj, this.state.searchName)
+            this.setState({
+                loading: false,
+                data: result.map((item, index) => { item.key = index; return item })
+            })
         }
-        data.map((item, index) => { return item.key = index })
-        this.setState({ data, isAdmin, loading: false })
     }
-    getAllTransactionInfo = () => {
-        return new Promise((resolve, reject) => {
-            let result = [];
-            HttpApi.getAllTransactionInfo({}, (res) => {
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
-    seachPeopleHandler = async (v) => {
-        if (!v) { return }
-        let data = await this.getSomeOneTransactionInfo(v);
-        data.map((item, index) => { return item.key = index });
-        this.setState({ data })
-    }
-
-    getSomeOneTransactionInfo = (v) => {
-        return new Promise((resolve, reject) => {
-            let result = [];
-            HttpApi.getSomeOneTransactionInfo({ accountName: v }, (res) => {
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
-
-
     render() {
         const columns = [
             {
@@ -107,8 +133,6 @@ export default class TransactionView extends Component {
             {
                 title: '消费类型',
                 dataIndex: 'TransactionDesc',
-                filters: this.state.filterData,
-                onFilter: (value, record) => record.TransactionType[1] === value,
                 render: (text, record) => {
                     let color = '#2db7f5'
                     if (record.Increase) {
@@ -135,20 +159,26 @@ export default class TransactionView extends Component {
         ]
         return (
             <div>
-                {userinfo && JSON.parse(userinfo).isadmin ?
-                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>所有消费记录</h2>
-                        <Search
-                            style={{ width: '40%'}}
-                            placeholder="支持人员姓名模糊查询"
-                            enterButton="搜索"
-                            allowClear
-                            onSearch={value => this.seachPeopleHandler(value)}
-                            onChange={e => { if (e.currentTarget.value === '') { this.init() } }}
-                        />
-                    </div> :
-                    <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>个人消费记录</h2>
-                }
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>所有消费记录</h2>
+                    <Search
+                        style={{ width: '40%' }}
+                        placeholder="支持人员姓名模糊查询"
+                        enterButton="搜索"
+                        allowClear
+                        onSearch={value => { this.setState({ searchName: value }, () => { this.seachPeopleHandler() }); }}
+                        onChange={e => {
+                            if (e.currentTarget.value === '') {
+                                this.setState({
+                                    searchName: null,
+                                    loading: true,
+                                    currentPage: 1,
+                                    currentPageSize: 10,
+                                }, () => { this.init() });
+                            }
+                        }}
+                    />
+                </div>
                 <Table
                     loading={this.state.loading}
                     style={{ marginTop: 20 }}
@@ -156,11 +186,15 @@ export default class TransactionView extends Component {
                     dataSource={this.state.data}
                     columns={columns}
                     pagination={{
+                        total: this.state.dataCount,
+                        current: this.state.currentPage,
                         showSizeChanger: true,
                         pageSizeOptions: ['10', '20', '50', '80', '100'],
+                        onShowSizeChange: (currentPage, pageSize) => { this.setState({ currentPage, currentPageSize: pageSize }); this.getNewInfo(currentPage, pageSize) },
+                        onChange: (page) => { this.setState({ currentPage: page }); this.getNewInfo(page, this.state.currentPageSize); },
                     }}
                 />
-            </div>
+            </div >
         );
     }
 }
