@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import { Table } from 'antd'
 import HttpApi from '../../util/HttpApi';
+import moment from 'moment'
+import './Schedule.css'
+const todayLab = moment().format('YYYY-MM-DD')
+
 const columns = [
     {
         title: <div style={{ fontSize: 20 }}>生产运行部倒班表</div>,
@@ -39,7 +43,8 @@ class ScheduleView extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            schedulesData: []
+            schedulesData: [],
+            pageNum: 1
         }
     }
     componentDidMount() {
@@ -47,11 +52,14 @@ class ScheduleView extends Component {
     }
     init = async () => {
         let result = await this.getScheduleData();
+        let todayNum = result.map((item) => item.time).indexOf(todayLab) + 1
+        let pageNum = parseInt(todayNum / 10) + (parseInt(todayNum % 10) > 0 ? 1 : 0)
         this.setState({
-            schedulesData: result.map((item, index) => { item.key = index; return item })
+            schedulesData: result.map((item, index) => { item.key = index; return item }),
+            pageNum
         })
-        // console.log('result:', result);
     }
+
     getScheduleData = () => {
         return new Promise((resolve, reject) => {
             let sql = `select * from schedules`
@@ -69,10 +77,13 @@ class ScheduleView extends Component {
         return (
             <div>
                 <Table
+                    rowClassName={(record, index) => { if (record.time === todayLab) { return 'row' } else { return '' } }}
                     bordered
                     dataSource={this.state.schedulesData}
                     columns={columns}
                     pagination={{
+                        onChange: (pageNum) => { this.setState({ pageNum }) },
+                        current: this.state.pageNum,
                         showSizeChanger: true,
                         pageSizeOptions: ['10', '20', '50', '80', '100'],
                     }}

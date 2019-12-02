@@ -1,7 +1,5 @@
 import React from 'react'
 import { Form, Icon, Input, Button } from 'antd'
-
-
 export default class LoginForm extends React.Component {
   handleSubmit = e => {
     e.preventDefault()
