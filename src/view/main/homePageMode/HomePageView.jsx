@@ -54,9 +54,11 @@ class HomePageView extends Component {
         return finallyResult
     }
     getAllDeviceStatusCount = () => {
-        let sqlText = 'select devices.status as device_status,count(devices.status) as status_count from devices group by devices.status'
+        let sql = `select devices.status as device_status,count(devices.status) as status_count from devices
+        where devices.effective = 1
+        group by devices.status`
         return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data;
