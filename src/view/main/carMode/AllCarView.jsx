@@ -43,6 +43,7 @@ export default class AllCarView extends Component {
             let sql = `select carNumber,inTime as time, 0 as io from p_record_in_history
             union all (select carNumber, inTime as time, 0 as io from p_record_in)
             union all (select carNumber, outTime as time, 1 as io from p_record_out)
+            order by time desc
             limit ${(currentPage - 1) * 10},10`;
             let result = [];
             HttpApi.obsForcar({ sql }, (res) => {
