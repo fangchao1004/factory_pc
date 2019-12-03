@@ -63,8 +63,10 @@ class LineChartView extends Component {
     }
     getDeviceStatusCount = () => {
         return new Promise((resolve, reject) => {
-            let sqlText = 'select des.status,count(des.status) as status_count from devices des group by des.status'
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            let sql = `select des.status,count(des.status) as status_count from devices des 
+            where effective = 1 
+            group by des.status`
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -78,8 +80,8 @@ class LineChartView extends Component {
         let endOfMonth = moment().endOf('month').format('YYYY-MM-DD HH:mm:ss');
         // console.log([startOfMonth, endOfMonth]);
         return new Promise((resolve, reject) => {
-            let sqlText = 'select * from status_counts where createdAt > "' + startOfMonth + '" and createdAt < "' + endOfMonth + '"'
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            let sql = `select * from status_counts where createdAt > '${startOfMonth}' and createdAt < '${endOfMonth}'`
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -96,8 +98,9 @@ class LineChartView extends Component {
             // let sql1 = ' select count(*) as todayDetectCount  from (select distinct rds.device_id from records rds'
             // let sql2 = ' where rds.createdAt > "' + startOfToday + '" and rds.createdAt < "' + endOfToday + '") t1 ';
             // let sqlText = sql1 + sql2;
-            let sql = `select count(*) as todayDetectCount  from (select distinct rds.device_id from records rds
-                where rds.createdAt > "${startOfToday}" and rds.createdAt < "${endOfToday}") t1 
+            let sql = `select count(*) as todayDetectCount  from 
+            (select distinct rds.device_id from records rds
+            where rds.createdAt > "${startOfToday}" and rds.createdAt < "${endOfToday}" and effective = 1 ) t1 
             `
             HttpApi.obs({ sql }, (res) => {
                 let result = null;
