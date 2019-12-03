@@ -225,6 +225,10 @@ class AttendanceView extends Component {
                     bordered
                     dataSource={this.state.users}
                     columns={columns}
+                    pagination={{
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                    }}
                 />
                 <Drawer
                     width={700}
