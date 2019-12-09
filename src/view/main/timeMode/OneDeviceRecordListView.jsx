@@ -121,7 +121,7 @@ class OneDeviceRecordListView extends Component {
     getBugsInfo = (bug_id_arr) => {
         return new Promise((resolve, reject) => {
             let sql = `select bugs.*,mjs.name as major_name from bugs 
-            left join (select * from majors) mjs on mjs.id = bugs.major_id 
+            left join (select * from majors where effective = 1) mjs on mjs.id = bugs.major_id 
             where bugs.id in (${bug_id_arr.join(',')}) and bugs.effective = 1`;
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
