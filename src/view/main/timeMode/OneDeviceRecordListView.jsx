@@ -90,14 +90,18 @@ class OneDeviceRecordListView extends Component {
                 collectAndInputDataList.push(item);
             }
         })
-        let bugs_info_arr = await this.getBugsInfo(bug_id_arr);
-        bugs_info_arr.forEach((oneBugInfo) => {
-            bug_key_id_arr.forEach((one_key_bug_id) => {
-                if (oneBugInfo.id === one_key_bug_id.bug_id) {
-                    oneBugInfo.key = one_key_bug_id.key
-                }
+        let bugs_info_arr = [];
+        if (bug_id_arr.length > 0) {
+            bugs_info_arr = await this.getBugsInfo(bug_id_arr);
+            ///将key 合并到 bugs_info_arr中
+            bugs_info_arr.forEach((oneBugInfo) => {
+                bug_key_id_arr.forEach((one_key_bug_id) => {
+                    if (oneBugInfo.id === one_key_bug_id.bug_id) {
+                        oneBugInfo.key = one_key_bug_id.key
+                    }
+                })
             })
-        })
+        }
 
         let oneRecordData = {
             table_name: record.table_name,

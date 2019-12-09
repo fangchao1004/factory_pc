@@ -47,21 +47,6 @@ class RecordDetailByTime extends Component {
     openDrawer = async (record) => {
         this.setState({ selectDeviceRecord: record, showRecordListDrawer: true })
     }
-    getBugsInfo = (bug_id_arr) => {
-        return new Promise((resolve, reject) => {
-            let sql = `select bugs.*,mjs.name as major_name from bugs 
-            left join (select * from majors) mjs on mjs.id = bugs.major_id 
-            where bugs.id in (${bug_id_arr.join(',')}) and bugs.effective = 1`;
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
-
     getRecordInfo = (record) => {
         let sql = `select records.*,users.name as user_name,devices.name as device_name,
         concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name
