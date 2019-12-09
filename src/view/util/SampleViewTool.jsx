@@ -25,7 +25,7 @@ export default class SampleViewTool {
             return <div key={element.key}>
                 <span>{element.title_name}</span>
                 <List>
-                    <InputItem labelNumber={6} key={element.key} placeholder='这是数字输入框'></InputItem>
+                    <InputItem labelNumber={6} key={element.key} placeholder='这是数字输入框' extra={element.title_remark}></InputItem>
                 </List>
             </div>
         }

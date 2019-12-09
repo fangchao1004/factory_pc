@@ -20,6 +20,7 @@ import TansactionApplyModeRoot from './tansactionApplyMode/TansactionApplyModeRo
 import UserMenuView from './userMenu/UserMenuView'
 import HttpApi from '../util/HttpApi';
 import Store from '../../redux/store/Store';
+// import Socket from '../socket/Socket'
 
 var storage = window.localStorage;
 const { Header, Content, Sider } = Layout;
@@ -51,6 +52,7 @@ export default class MainView extends Component {
             this.init();
         });
         this.openPolling();///开启轮询---定时去获取缺陷了任务数据
+        // Socket();
     }
     init = async () => {
         let bugResult = await this.getBugsInfo();

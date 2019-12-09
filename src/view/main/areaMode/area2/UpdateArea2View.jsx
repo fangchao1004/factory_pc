@@ -70,7 +70,7 @@ function updateArea2From(props) {
             {getFieldDecorator('area1_id', {
                 initialValue: props.area.area1_id,
                 rules: [{ required: true, message: '请选则所属的一级区域' }]
-            })(<Select>
+            })(<Select showSearch={true} filterOption={(inputValue, option)=>{return option.props.children.indexOf(inputValue)!==-1}}>
                 {options}
             </Select>)}
         </Form.Item>

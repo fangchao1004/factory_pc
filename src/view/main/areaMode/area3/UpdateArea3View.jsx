@@ -70,7 +70,7 @@ export default class UpdateArea3View extends Component {
 function updateArea3From(props) {
     const { getFieldDecorator } = props.form
     return <Form>
-        <Form.Item label="所属上级位置:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
+        <Form.Item label="所属上级位置:" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
             {getFieldDecorator('area12_id', {
                 initialValue: props.area.area1_id + '-' + props.area.area2_id,
                 rules: [{ required: true, message: '请选择所属的上级(精确到第二级)' }]
@@ -82,7 +82,7 @@ function updateArea3From(props) {
                 placeholder="请选择所属的上级(精确到第二级)"
             />)}
         </Form.Item>
-        <Form.Item label="第三级巡检点范围:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
+        <Form.Item label="第三级巡检点范围:" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
             {getFieldDecorator('area3_name', {
                 initialValue: props.area.area3_name,
                 rules: [{ required: true, message: '请输入第三级巡检点范围名称' }]

@@ -3,6 +3,7 @@ import { Row, Col, Table, Button, Divider, message, Popconfirm, Input } from 'an
 import HttpApi from '../../util/HttpApi'
 import AddStaffView from './AddStaffView';
 import UpdateStaffView from './UpdateStaffView';
+// import { send, emitter } from '../../socket/Socket'
 var level_filter = [];///用于筛选任务专业的数据 选项
 const { Search } = Input;
 
@@ -11,7 +12,10 @@ class StaffView extends Component {
     state = { users: null, addStaffVisible: false, updateStaffVisible: false, updateStaffData: null }
 
     componentDidMount() {
-        this.getUsersData()
+        this.getUsersData();
+        // emitter.addListener('toClient', (msg) => {
+        //     console.log('StaffView:', msg);
+        // })
     }
     async getUsersData() {
         level_filter.length = 0;
@@ -238,6 +242,9 @@ class StaffView extends Component {
 
         return (
             <div>
+                {/* <Button type="primary" style={{ marginBottom: 16 }} onClick={() => {
+                    send({ name: 'tom' });
+                }}>aaa</Button> */}
                 <Row>
                     <Col span={6}>
                         <Button type="primary" style={{ marginBottom: 16 }} onClick={this.addStaff.bind(this)}>

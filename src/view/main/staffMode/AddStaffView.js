@@ -51,6 +51,8 @@ function AddStaffForm(props) {
                 rules: [{ required: true, message: '请选择员工部门' }]
             })(
                 <TreeSelect
+                    treeNodeFilterProp="title"
+                    showSearch
                     dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
                     treeData={treeData}
                 />
@@ -69,12 +71,12 @@ function AddStaffForm(props) {
         <Form.Item label="员工工卡" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('nfc_id', {
                 rules: [{ required: false, message: '请选择员工NFC' }]
-            })(<Select>{nfcOptions}</Select>)}
+            })(<Select showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{nfcOptions}</Select>)}
         </Form.Item>
         <Form.Item label="员工权限" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('permission', {
                 rules: [{ required: false, message: '请选择员工权限' }]
-            })(<Select mode="multiple">{permissionOptions}</Select>)}
+            })(<Select mode="multiple" showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{permissionOptions}</Select>)}
         </Form.Item>
         <Form.Item label="员工备注" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('remark', {

@@ -105,8 +105,8 @@ class EditTable extends Component {
             dataIndex: 'title_remark',
             render: (text, record) => {
                 return (
-                    <Input disabled={record.type_id !== '12'}
-                        placeholder={record.type_id === '12' ? '可以输入标题备注' : '/'}
+                    <Input disabled={record.type_id !== '12' && record.type_id !== '2'}
+                        placeholder={record.type_id === '12' ? '可以输入标题备注' : (record.type_id === '2' ? '可以输入单位' : '/')}
                         value={text} onChange={(e) => this.onChangeHandler(record, e.target.value, "title_remark")}></Input>
                 )
             }

@@ -54,6 +54,8 @@ function UpdateStaffForm(props) {
                 initialValue: props.staff.group_id ? props.staff.level_id + '_' + props.staff.group_id : props.staff.level_id,
                 rules: [{ required: true, message: '请选择员工部门' }]
             })(<TreeSelect
+                treeNodeFilterProp="title"
+                showSearch
                 dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
                 treeData={treeData}
             />)}
@@ -74,14 +76,14 @@ function UpdateStaffForm(props) {
             {getFieldDecorator('nfc_id', {
                 initialValue: props.staff.nfc_id,
                 rules: [{ required: false, message: '请选择员工工卡' }]
-            })(<Select>{nfcOptions}</Select>)}
+            })(<Select showSearch={true} filterOption={(inputValue, option)=>{return option.props.children.indexOf(inputValue)!==-1}}>{nfcOptions}</Select>)}
         </Form.Item>
         <Form.Item label="员工权限" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('permission', {
                 // initialValue: props.staff.permission && props.staff.permission.split(',').map(permission => parseInt(permission)),
                 initialValue: props.staff.permission ? props.staff.permission.split(',').map(permission => parseInt(permission)) : undefined,
                 rules: [{ required: false, message: '请选择员工权限' }]
-            })(<Select mode="multiple">{permissionOptions}</Select>)}
+            })(<Select mode="multiple" showSearch={true} filterOption={(inputValue, option)=>{return option.props.children.indexOf(inputValue)!==-1}}>{permissionOptions}</Select>)}
         </Form.Item>
         <Form.Item label="员工备注" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('remark', {

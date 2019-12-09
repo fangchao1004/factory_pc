@@ -34,13 +34,13 @@ function UpdateEquipmentForm(props) {
             {getFieldDecorator('type_id', {
                 initialValue: props.device.type_id,
                 rules: [{ required: true, message: '请选择巡检点类型' }]
-            })(<Select>{typeOptions}</Select>)}
+            })(<Select showSearch={true} filterOption={(inputValue, option)=>{return option.props.children.indexOf(inputValue)!==-1}}>{typeOptions}</Select>)}
         </Form.Item>
         <Form.Item label="NFC" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             {getFieldDecorator('nfc_id', {
                 initialValue: props.device.nfc_id,
                 rules: [{ required: true, message: '请选择巡检点NFC' }]
-            })(<Select>{nfcOptions}</Select>)}
+            })(<Select showSearch={true} filterOption={(inputValue, option)=>{return option.props.children.indexOf(inputValue)!==-1}}>{nfcOptions}</Select>)}
         </Form.Item>
         <Form.Item label="巡检点名称" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             {getFieldDecorator('name', {

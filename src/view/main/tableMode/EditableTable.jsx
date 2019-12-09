@@ -83,8 +83,8 @@ export default class EditableTable extends Component {
         dataIndex: 'title_remark',
         render: (text, record) => {
           return (
-            <Input disabled={record.type_id !== '12'}
-              placeholder={record.type_id === '12' ? '可以输入标题备注' : '/'}
+            <Input disabled={record.type_id !== '12' && record.type_id !== '2'}
+              placeholder={record.type_id === '12' ? '可以输入标题备注' : (record.type_id === '2' ? '可以输入单位' : '/')}
               value={text} onChange={(e) => this.onChangeHandler(record, e.target.value, "title_remark")}></Input>
           )
         }
@@ -120,7 +120,7 @@ export default class EditableTable extends Component {
           })
           return (
             record.type_id === '7' ? ///标题--不可修改---是个选项
-              <Select style={{ width: "100%" }}
+              <Select showSearch={true} filterOption={(inputValue, option)=>{return option.props.children.indexOf(inputValue)!==-1}} style={{ width: "100%" }}
                 placeholder='请选择表单类型'
                 onChange={(value, option) => this.onChangeHandler(record, value, "default_values", option.props.children)}
               >
@@ -312,7 +312,6 @@ export default class EditableTable extends Component {
     sample_data.content = JSON.stringify(contentArr);
 
     console.log("模版数据L：", sample_data);
-    // return;
     HttpApi.uploadSample(sample_data, (res) => {
       // console.log(res);
       if (res.data.code === 0) {

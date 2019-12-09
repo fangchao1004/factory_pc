@@ -77,7 +77,7 @@ export default class AddArea3View extends Component {
 function AddArea3From(props) {
     const { getFieldDecorator } = props.form
     return <Form>
-        <Form.Item label="所属上级位置:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
+        <Form.Item label="所属上级位置:" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
             {getFieldDecorator('area12_id', {
                 rules: [{ required: true, message: '请选择所属的上级(精确到第二级)' }]
             })(<TreeSelect
@@ -88,7 +88,7 @@ function AddArea3From(props) {
                 placeholder="请选择所属的上级(精确到第二级)"
             />)}
         </Form.Item>
-        <Form.Item label="第三级巡检点范围:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
+        <Form.Item label="第三级巡检点范围:" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
             {getFieldDecorator('area3_name', {
                 rules: [{ required: true, message: '请输入第三级巡检点范围名称' }]
             })(<Input placeholder='请输入第三级巡检点范围名称'></Input>)}
