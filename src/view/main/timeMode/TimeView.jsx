@@ -106,7 +106,7 @@ class TimeView extends Component {
     getCountInfoFromDB = (element) => {
         // console.log('element:', element);
         let sql = `select count(distinct(device_id)) as count from records
-        where checkedAt>'${element.bt}' and checkedAt<'${element.et}'`;
+        where checkedAt>'${element.bt}' and checkedAt<'${element.et}' and effective = 1`;
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
