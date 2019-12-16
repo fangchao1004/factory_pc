@@ -48,7 +48,9 @@ class CarView extends Component {
             })
         })
     }
-
+    disabledDate = (current) => {
+        return current > moment().endOf('day');
+    }
     render() {
         const columns = [
             { key: 'carNumber', dataIndex: 'carNumber', title: '车牌' },
