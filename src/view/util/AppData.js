@@ -17,7 +17,7 @@ export const tableCellOptionsData = [
     { "value": "13", "text": "副标题" }];
 
 export const VersionlistData = [
-    { title: '版本号', description: 'V 1.3.1' },
+    { title: '版本号', description: 'V 1.3.2' },
     // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
     // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
     // { title: '更新', description: '1.0.9 添加巡检点信息修改功能' }
@@ -43,6 +43,7 @@ export const VersionlistData = [
     // { title: '更新', description: '1.2.7 dev 添加值长功能' }
     // { title: '更新', description: '1.2.8 测试版' }
     // { title: '更新', description: '1.2.9' }
-    // { title: '更新', description: '1.3.0' 部分优化，编辑模版表单时，可以设置数组输入框的单位 }
-    // { title: '更新', description: '1.3.1' 解决部分bug }
+    // { title: '更新', description: '1.3.0 部分优化，编辑模版表单时，可以设置数组输入框的单位' }
+    // { title: '更新', description: '1.3.1 解决部分bug' }
+    { title: '更新', description: '1.3.2 消费记录，车辆记录添加日期筛选 ' }
 ]

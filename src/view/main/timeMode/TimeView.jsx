@@ -176,7 +176,7 @@ class TimeView extends Component {
         const columns = [
             {
                 title: <div><span style={{ marginRight: 10 }}>日期选择</span> <DatePicker disabledDate={this.disabledDate} value={this.state.selectTime} onChange={(v) => {
-                    if (v) { this.setState({ selectTime: v }, () => { this.init() }) } else { message.warn('请选则日期'); }
+                    if (v) { this.setState({ selectTime: v }, () => { this.init() }) } else { message.warn('请选择日期'); }
                 }} /></div>,
                 dataIndex: '/',
                 width: 280,

@@ -69,8 +69,8 @@ function updateArea2From(props) {
         <Form.Item label="所属一级区域:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('area1_id', {
                 initialValue: props.area.area1_id,
-                rules: [{ required: true, message: '请选则所属的一级区域' }]
-            })(<Select showSearch={true} filterOption={(inputValue, option)=>{return option.props.children.indexOf(inputValue)!==-1}}>
+                rules: [{ required: true, message: '请选择所属的一级区域' }]
+            })(<Select showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>
                 {options}
             </Select>)}
         </Form.Item>

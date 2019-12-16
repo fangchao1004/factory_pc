@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table } from 'antd'
+import { Table, DatePicker, message } from 'antd'
 import moment from 'moment'
 import HttpApi from '../../util/HttpApi';
 
@@ -10,7 +10,8 @@ class CarView extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: []
+            data: [],
+            dateRange: [moment(), moment()],
         }
     }
     componentDidMount() {
@@ -19,15 +20,20 @@ class CarView extends Component {
     }
     init = async () => {
         // console.log(JSON.parse(userinfo).name);
-        let sql1 = `select carNumber from p_car_card where employeeId =(select recordId from p_employee where name = '${JSON.parse(userinfo).name}' )`
+        let sql1 = `select carNumber from p_car_card 
+        where employeeId =(select recordId from p_employee where name = '${JSON.parse(userinfo).name}' )`
         let mycar = await this.getCarInfo(sql1);
         // console.log('mycarInfo:', mycar);
         if (mycar.length > 0) {
             let carNumber = mycar[0].carNumber;
-            let sql2 = `select carNumber,inTime as time, 0 as io from p_record_in_history where carNumber = '${carNumber}' 
+            let sql2 = `
+            select * from
+            (select carNumber,inTime as time, 0 as io from p_record_in_history where carNumber = '${carNumber}' 
             union all (select carNumber, inTime as time, 0 as io from p_record_in where carNumber = '${carNumber}')
             union all (select carNumber, outTime as time, 1 as io from p_record_out where carNumber = '${carNumber}')
-            ORDER BY time DESC`
+            ORDER BY time DESC) temp
+            where time > '${this.state.dateRange[0].startOf('day').format('YYYY-MM-DD HH:mm:ss')}'
+            and time < '${this.state.dateRange[1].endOf('day').format('YYYY-MM-DD HH:mm:ss')}'`;
             let resultOfMine = await this.getCarInfo(sql2);
             // console.log(resultOfMine.map((item, index) => { item.key = index; return item }));
             this.setState({ data: resultOfMine.map((item, index) => { item.key = index; return item }) })
@@ -47,7 +53,8 @@ class CarView extends Component {
         const columns = [
             { key: 'carNumber', dataIndex: 'carNumber', title: '车牌' },
             {
-                key: 'time', dataIndex: 'time', title: '时间', render: (text) => { return <div>{moment(text).utcOffset(0).format('YYYY-MM-DD HH:mm:ss')}</div> }
+                key: 'time', dataIndex: 'time', title: '时间日期',
+                render: (text) => { return <div>{moment(text).utcOffset(0).format('YYYY-MM-DD HH:mm:ss')}</div> }
             },
             {
                 key: 'io', dataIndex: 'io', title: '出入', render: (text) => {
@@ -62,11 +69,20 @@ class CarView extends Component {
             }
         ]
         return (
-            <Table
-                bordered
-                dataSource={this.state.data}
-                columns={columns}
-            />
+            <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>个人车辆出入信息</h2>
+                    <DatePicker.RangePicker disabledDate={this.disabledDate} value={this.state.dateRange} onChange={(v) => {
+                        if (v && v.length > 0) { this.setState({ dateRange: v }, () => { this.init() }) } else { message.warn('请选择日期'); }
+                    }} />
+                </div>
+                <Table
+                    style={{ marginTop: 20 }}
+                    bordered
+                    dataSource={this.state.data}
+                    columns={columns}
+                />
+            </div>
         );
     }
 }

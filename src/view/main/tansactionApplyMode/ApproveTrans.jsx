@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, Button, Popconfirm, Divider, Tag, message } from 'antd';
+import { Table, Button, Popconfirm, Divider, Tag, message, DatePicker } from 'antd';
 import HttpApi from '../../util/HttpApi';
 import moment from 'moment'
 import uuidv1 from 'uuid/v1'
@@ -13,7 +13,7 @@ const status_filter = [{ text: '待审批', value: 0 }, { text: '通过', value:
 class ApproveTrans extends Component {
     constructor(props) {
         super(props);
-        this.state = { data: [], loading: false }
+        this.state = { data: [], loading: false, dateRange: [moment(), moment()], }
         userinfo = storage.getItem('userinfo')
     }
     componentDidMount() {
@@ -40,6 +40,8 @@ class ApproveTrans extends Component {
             left join users u1 on u1.id = applyRecords.apply_id
             left join users u2 on u2.id = applyRecords.approve_id
             left join levels on levels.id = u1.level_id
+            where applyRecords.apply_time < '${this.state.dateRange[1].endOf('day').format('YYYY-MM-DD HH:mm:ss')}'
+            and applyRecords.apply_time > '${this.state.dateRange[0].startOf('day').format('YYYY-MM-DD HH:mm:ss')}'
             order by applyRecords.id desc`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -205,17 +207,19 @@ class ApproveTrans extends Component {
             })
         })
     }
-
+    disabledDate = (current) => {
+        return current > moment().endOf('day');
+    }
     render() {
         const columns = [
             {
                 title: '申请时间',
                 dataIndex: 'apply_time',
-                sorter: (a, b) => {
-                    let remain_time = moment(a.apply_time).toDate().getTime() - moment(b.apply_time).toDate().getTime();
-                    return remain_time
-                },
-                defaultSortOrder: 'descend',
+                // sorter: (a, b) => {
+                //     let remain_time = moment(a.apply_time).toDate().getTime() - moment(b.apply_time).toDate().getTime();
+                //     return remain_time
+                // },
+                // defaultSortOrder: 'descend',
             },
             {
                 title: '申请人',
@@ -310,7 +314,12 @@ class ApproveTrans extends Component {
         }
         return (
             <div>
-                <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>申请记录</h2>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>申请记录</h2>
+                    <DatePicker.RangePicker disabledDate={this.disabledDate} value={this.state.dateRange} onChange={(v) => {
+                        if (v && v.length > 0) { this.setState({ dateRange: v }, () => { this.init() }) } else { message.warn('请选择日期'); }
+                    }} />
+                </div>
                 <Table
                     loading={this.state.loading}
                     style={{ marginTop: 20 }}
