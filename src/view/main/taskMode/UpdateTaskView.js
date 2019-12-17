@@ -38,18 +38,18 @@ function UpdateTaskForm(props) {
                 rules: [{ required: true, message: '请输入任务主题' }]
             })(<Input disabled placeholder="请输入任务主题"></Input>)}
         </Form.Item>
-        <Form.Item label="内容" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+        <Form.Item label="内容2" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('content', {
                 initialValue: props.task.content,
                 rules: [{ required: true, message: '请输入任务内容' }]
-            })(<Input.TextArea disabled style={{ height: 50 }} placeholder="请输入任务内容"></Input.TextArea>)}
+            })(<Input.TextArea disabled autosize={{ minRows: 2, maxRows: 6 }} placeholder="请输入任务内容"></Input.TextArea>)}
         </Form.Item>
         {props.task.remark ?
             <Form.Item label="追加内容" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
                 {getFieldDecorator('remark', {
                     initialValue: props.task.remark,
                     rules: [{ required: false, message: '请输入任务内容' }]
-                })(<Input.TextArea disabled style={{ height: 50 }} placeholder="请输入任务内容"></Input.TextArea>)}
+                })(<Input.TextArea disabled autosize={{ minRows: 2, maxRows: 6 }} placeholder="请输入任务内容"></Input.TextArea>)}
             </Form.Item>
             : null}
         <Form.Item label="截止日期" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>

@@ -120,7 +120,7 @@ class TaskFromMeView extends Component {
         newValues.overTime = newValues.overTime.endOf('day').valueOf()
         newValues.isMessage = newValues.isMessage ? 1 : 0;
         newValues.step_remark = JSON.stringify(stepRemark);
-        // console.log('newValues:', newValues);
+        console.log('新任务数据:', newValues);
         // return;
         HttpApi.addTaskInfo(newValues, data => {
             if (data.data.code === 0) {
@@ -154,12 +154,13 @@ class TaskFromMeView extends Component {
     /**
      * 确定修改任务。
      */
-    updateTaskOnOk = (newValues, updateTaskVisible = false) => {
+    updateTaskOnOk = (newValues, isOnlySendMessAgain = false, updateTaskVisible = false) => {
         HttpApi.updateTaskInfo({ query: { id: this.state.updateTaskData.id }, update: newValues }, data => {
             if (data.data.code === 0) {
                 this.setState({ updateTaskVisible })
                 this.init()
-                message.success('任务修改成功')
+                if (isOnlySendMessAgain) { message.success('已再次发送短信给对方') }
+                else { message.success('任务修改成功') }
                 let usersIdArr = newValues.to.split(',');
                 usersIdArr.shift();
                 usersIdArr.pop();

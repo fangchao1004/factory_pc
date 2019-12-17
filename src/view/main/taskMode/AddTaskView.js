@@ -22,7 +22,7 @@ function AddTaskForm(props) {
         <Form.Item label="内容" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('content', {
                 rules: [{ required: true, message: '请输入任务内容' }]
-            })(<Input.TextArea style={{ height: 50 }} placeholder="请输入任务内容"></Input.TextArea>)}
+            })(<Input.TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="请输入任务内容"></Input.TextArea>)}
         </Form.Item>
         <Form.Item label="截止日期" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('overTime', {

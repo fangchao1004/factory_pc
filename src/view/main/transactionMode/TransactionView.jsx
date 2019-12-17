@@ -183,7 +183,10 @@ export default class TransactionView extends Component {
             <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>所有消费记录</h2>
-                    <DatePicker.RangePicker disabledDate={this.disabledDate} value={this.state.dateRange} onChange={(v) => {
+                    <DatePicker.RangePicker disabledDate={this.disabledDate} value={this.state.dateRange} ranges={{
+                        '今日': [moment(), moment()],
+                        '本月': [moment().startOf('month'), moment().endOf('month')],
+                    }} onChange={(v) => {
                         if (v && v.length > 0) { this.setState({ dateRange: v, dataCount: 10, currentPage: 1 }, () => { this.init({}) }) } else { message.warn('请选择日期'); }
                     }} />
                     <Search

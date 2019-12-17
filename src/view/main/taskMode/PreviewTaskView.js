@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react'
-import { Modal, Form, Input, Select, DatePicker, Switch, Button, Divider, Steps, message } from 'antd'
+import { Modal, Form, Input, Select, DatePicker, Switch, Button, Divider, Steps, message, Popconfirm } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 const { Step } = Steps;
@@ -11,6 +11,8 @@ var userinfo;
  * 增加支持修改
  */
 function UpdateTaskForm(props) {
+    const sendMessAgain = props.sendMessAgain
+    const status = props.task.status
     const isEditable = props.isEditable
     const isStaffEditable = props.isStaffEditable
     const isExtra = props.isExtrad
@@ -46,14 +48,14 @@ function UpdateTaskForm(props) {
             {getFieldDecorator('content', {
                 initialValue: props.task.content,
                 rules: [{ required: true, message: '请输入任务内容' }]
-            })(<Input.TextArea disabled={!isEditable || isExtra} style={{ height: 50 }} placeholder="请输入任务内容"></Input.TextArea>)}
+            })(<Input.TextArea disabled={!isEditable || isExtra} autosize={{ minRows: 2, maxRows: 6 }} placeholder="请输入任务内容"></Input.TextArea>)}
         </Form.Item>
         {props.task.remark ?
             <Form.Item label="已追加" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
                 {getFieldDecorator('remark', {
                     initialValue: props.task.remark,
                     rules: [{ required: false, message: '请输入任务内容' }]
-                })(<Input.TextArea disabled={!isEditable || isExtra} style={{ height: 50 }} placeholder="请输入任务内容"></Input.TextArea>)}
+                })(<Input.TextArea disabled={!isEditable || isExtra} autosize={{ minRows: 2, maxRows: 6 }} placeholder="请输入任务内容"></Input.TextArea>)}
             </Form.Item>
             : null}
         {isExtra ?
@@ -61,7 +63,7 @@ function UpdateTaskForm(props) {
                 {getFieldDecorator('newRemark', {
                     initialValue: '',
                     rules: [{ required: true, message: '请输入追加内容' }]
-                })(<Input.TextArea disabled={!isEditable} style={{ height: 50 }} placeholder="请输入任务内容"></Input.TextArea>)}
+                })(<Input.TextArea disabled={!isEditable} autosize={{ minRows: 2, maxRows: 6 }} placeholder="请输入任务内容"></Input.TextArea>)}
             </Form.Item>
             : null}
         <Form.Item label="截止日期" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
@@ -74,7 +76,14 @@ function UpdateTaskForm(props) {
             {getFieldDecorator('isMessage', {
                 initialValue: isMess,
                 rules: [{ required: true, message: '请选择短信通知' }]
-            })(<Switch disabled={!isEditable} checkedChildren="开" unCheckedChildren="关" checked={isMess} onChange={(v) => { setIsMess(v) }} />)}
+            })(
+                <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', paddingTop: 10 }}>
+                    <Switch disabled={!isEditable} checkedChildren="开" unCheckedChildren="关" checked={isMess} onChange={(v) => { setIsMess(v) }} />
+                    <Popconfirm disabled={!isMess || isEditable || status} title="确定要再次发送短信提醒吗?" onConfirm={sendMessAgain}>
+                        <Button disabled={!isMess || isEditable || status} type='primary'>再次发送短信提醒</Button>
+                    </Popconfirm>
+                </div>
+            )}
         </Form.Item>
     </Form >
 }
@@ -110,7 +119,7 @@ export default function PreviewTaskView(props) {
     /**
      * 确定修改
      */
-    const handlerOk = () => {
+    const handlerOk = (isOnlySendMessAgain = false) => {
         TaskFormRef.current.validateFields((error, values) => {
             if (!error) {
                 let newValues = {
@@ -121,7 +130,8 @@ export default function PreviewTaskView(props) {
                     isMessage: values.isMessage ? 1 : 0,
                     remark: values.remark
                 }
-                props.onOk(newValues);
+                // console.log('确定修改稿：', newValues, isOnlySendMessAgain)
+                props.onOk(newValues, isOnlySendMessAgain);
                 setIsEditeable(false)
                 setIsExtra(false)
             }
@@ -149,12 +159,16 @@ export default function PreviewTaskView(props) {
                     isMessage: values.isMessage ? 1 : 0,
                     status: 0
                 }
-                // console.log('newValues:',newValues);
-                props.onOk(newValues);
+                // console.log('newValues:', newValues);
+                props.onOk(newValues, false);
                 setIsEditeable(false)
                 setIsExtra(false)
             }
         })
+    }
+
+    const sendMessAgain = () => {
+        handlerOk(true);
     }
 
     /**
@@ -253,7 +267,6 @@ export default function PreviewTaskView(props) {
     // console.log('props.task.status:', props.task);
     return <Modal width={700}
         centered
-        // onOk={handlerOk}
         title="任务详情"
         onCancel={() => {
             props.onCancel();
@@ -279,12 +292,12 @@ export default function PreviewTaskView(props) {
                         (props.task && props.task.status === 1 ?
                             <Button type={'danger'} onClick={() => { setIsEditeable(true); setIsExtra(true); }}>追加任务内容</Button> :
                             <Button type={'danger'} onClick={() => { setIsEditeable(true); setIsExtra(false); }}>修改任务内容</Button>)}
-                    {isEditable ? (isExtra ? <Button type={'primary'} onClick={handlerAdd}>确定追加</Button> : <Button type={'primary'} onClick={handlerOk}>确定修改</Button>)
+                    {isEditable ? (isExtra ? <Button type={'primary'} onClick={handlerAdd}>确定追加</Button> : <Button type={'primary'} onClick={() => { handlerOk() }}>确定修改</Button>)
                         : null}
                 </div>
             </div>
         }>
-        <TaskForm ref={TaskFormRef} isEditable={isEditable} isStaffEditable={isStaffEditable} isExtra={isExtra} users={users} task={props.task}></TaskForm>
+        <TaskForm ref={TaskFormRef} isEditable={isEditable} isStaffEditable={isStaffEditable} isExtra={isExtra} users={users} task={props.task} sendMessAgain={sendMessAgain}></TaskForm>
         <Divider orientation="left">当前进度</Divider>
         <Steps direction="vertical" size="small" current={props.task && props.task.status + 1}>
             <Step title='任务分配' description={renderStatusX(0)} />
