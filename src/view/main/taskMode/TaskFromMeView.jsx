@@ -162,6 +162,7 @@ class TaskFromMeView extends Component {
                 let usersIdArr = newValues.to.split(',');
                 usersIdArr.shift();
                 usersIdArr.pop();
+                if (!isOnlySendMessAgain) { message.success('任务修改成功') }
                 let usersIdArrInt = usersIdArr.map((item) => parseInt(item))
                 if (isOnlySendMessAgain) { this.sendMessageToStaff(usersIdArrInt, newValues, true); } else {
                     if (newValues.isMessage === 1) {
@@ -220,11 +221,11 @@ class TaskFromMeView extends Component {
             // console.log('tempArr:', tempArr)
             if (isOnlySendMessAgain) {
                 HttpApi.sendMessageToNoticeNew(tempArr, (res) => {
-                    if (res.data.code === 0) { message.success('已再次发送短信给对方'); }
+                    if (res.data.code === 0) { message.success('已发送提醒短信给对方'); }
                 });
             } else {
                 HttpApi.sendMessageToStaffs(tempArr, (res) => {
-                    if (res.data.code === 0) { message.success('任务修改成功'); }
+                    if (res.data.code === 0) { message.success('已发送短信通知对方'); }
                 });
             }
         })
@@ -232,7 +233,6 @@ class TaskFromMeView extends Component {
 
     pushNoticeToApp = (toUsersArr) => {
         console.log('开始向app推送信息。需要推送通知的人员有:', toUsersArr);
-        message.success('任务修改成功');
         toUsersArr.forEach((oneUserId) => {
             HttpApi.pushnotice({ user_id: oneUserId, title: '任务通知', text: '您有最新的任务,请注意查看' })
         })
