@@ -30,7 +30,7 @@ class RecordDetailByTime extends Component {
         }
     }
     getInfoHandler = async (data) => {
-        let devicesResult = await this.getDevicesInfo(data.selected_devices);
+        let devicesResult = await this.getDevicesInfo(data.select_map_device);
         let recordsResult = await this.getRecordInfo(data);
         devicesResult.forEach((deviceItem) => {
             deviceItem.recordList = [];
@@ -57,7 +57,7 @@ class RecordDetailByTime extends Component {
         left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
         left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
         where checkedAt>'${record.bt}' and checkedAt<'${record.et}' and records.effective = 1
-        and device_id in (${JSON.parse(record.selected_devices)})
+        and device_id in (${record.select_map_device})
         order by records.checkedAt desc
         `;
         // sql = `select records.*,users.name as user_name,devices.name as device_name,
@@ -85,7 +85,7 @@ class RecordDetailByTime extends Component {
     getDevicesInfo = (devicesIdListStr) => {
         return new Promise((resolve, reject) => {
             let sql = `select devices.* from devices
-            where devices.effective = 1 and devices.id in (${JSON.parse(devicesIdListStr)})
+            where devices.effective = 1 and devices.id in (${devicesIdListStr})
             `
             let result = []
             HttpApi.obs({ sql }, (res) => {

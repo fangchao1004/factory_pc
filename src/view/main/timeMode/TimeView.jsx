@@ -74,7 +74,12 @@ class TimeView extends Component {
     }
     getAllowTimeInfo = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select * from allow_time where effective = 1`;
+            // let sql = `select * from allow_time where effective = 1`;
+            let sql = `select a_t.id,a_t.begin,a_t.end,a_t.isCross,a_t.name,GROUP_CONCAT(a_m_d.device_id) as select_map_device from allow_time a_t
+            left join (select * from allowTime_map_device where effective = 1) a_m_d
+            on a_t.id = a_m_d.allow_time_id
+            where a_t.effective = 1
+            group by a_t.id`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -118,9 +123,18 @@ class TimeView extends Component {
         })
     }
 
-    onChange = (value, record) => {
-        // console.log('onChange ', value, 'record:', record);
-        let sql = `UPDATE allow_time SET selected_devices = '${JSON.stringify(value)}' where id = ${record.id}`
+    onChange = (extra, record) => {
+        // console.log(extra.selected, extra.triggerValue, record)
+        let device_id = parseInt(extra.triggerValue);
+        let allow_time_id = record.id;
+        let sql = '';
+        if (extra.selected) { /// 增加一条记录到 时间段和设备的映射关系表中
+            // console.log('增加一条记录到 时间段和设备的映射关系表中', device_id, allow_time_id)
+            sql = `INSERT INTO allowTime_map_device SET allow_time_id=${allow_time_id}, device_id=${device_id}`
+        } else { /// 将对应的某一条映射关系 置成 effective = 0
+            // console.log('将对应的某一条映射关系 置成 effective = 0', device_id, allow_time_id)
+            sql = `UPDATE allowTime_map_device SET effective = 0 where allow_time_id=${allow_time_id} and device_id=${device_id}`
+        }
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
                 message.success('修改成功');
@@ -129,6 +143,16 @@ class TimeView extends Component {
                 message.error('修改失败');
             }
         })
+        return;
+        // let sql = `UPDATE allow_time SET selected_devices = '${JSON.stringify(value)}' where id = ${record.id}`
+        // HttpApi.obs({ sql }, (res) => {
+        //     if (res.data.code === 0) {
+        //         message.success('修改成功');
+        //         this.init();
+        //     } else {
+        //         message.error('修改失败');
+        //     }
+        // })
     };
 
     disabledDate = (current) => {
@@ -170,7 +194,6 @@ class TimeView extends Component {
             }
         })
     }
-
     render() {
         const { dataSource } = this.state;
         const columns = [
@@ -187,7 +210,7 @@ class TimeView extends Component {
             },
             {
                 title: `应检测巡检点数量${this.state.isAdmin === 1 ? '(可编辑)' : ''}`,
-                dataIndex: 'selected_devices',
+                dataIndex: 'select_map_device',
                 render: (text, record) => {
                     return <div style={{ display: 'flex', flexDirction: 'row' }}>
                         <TreeSelect
@@ -197,16 +220,16 @@ class TimeView extends Component {
                             showSearch
                             treeNodeFilterProp="title"
                             style={{ width: '85%' }}
-                            value={text ? JSON.parse(text) : []}
+                            value={text ? text.split(',') : []}
                             dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
                             placeholder="请选择需要查看的巡检点"
                             allowClear
                             multiple
-                            onChange={(v) => { this.onChange(v, record) }}
+                            onChange={(value, label, extra) => { this.onChange(extra, record) }}
                         >
                             {this.state.treeNodeList}
                         </TreeSelect>
-                        <div style={{ width: '15%', textAlign: "center", paddingTop: 5 }}>{JSON.parse(text) && JSON.parse(text).length > 0 ? JSON.parse(text).length : ''}</div>
+                        <div style={{ width: '15%', textAlign: "center", paddingTop: 5 }}>{text && text.split(',').length > 0 ? text.split(',').length : ''}</div>
                     </div>;
                 }
             },
