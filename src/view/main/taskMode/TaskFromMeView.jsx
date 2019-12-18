@@ -134,7 +134,7 @@ class TaskFromMeView extends Component {
                 let usersIdArrInt = toIds.map((item) => parseInt(item))
                 if (newValues.isMessage === 1) {
                     console.log('添加任务，短信通知')
-                    this.sendMessageToStaff(usersIdArrInt, newValues);
+                    this.sendMessageToStaff(usersIdArrInt, newValues, false);
                 } else {
                     console.log('添加任务，不必短信通知')
                 }
@@ -159,16 +159,14 @@ class TaskFromMeView extends Component {
             if (data.data.code === 0) {
                 this.setState({ updateTaskVisible })
                 this.init()
-                if (isOnlySendMessAgain) { message.success('已再次发送短信给对方') }
-                else { message.success('任务修改成功') }
                 let usersIdArr = newValues.to.split(',');
                 usersIdArr.shift();
                 usersIdArr.pop();
                 let usersIdArrInt = usersIdArr.map((item) => parseInt(item))
-                if (isOnlySendMessAgain) { this.sendMessageToStaff(usersIdArrInt, newValues); } else {
+                if (isOnlySendMessAgain) { this.sendMessageToStaff(usersIdArrInt, newValues, true); } else {
                     if (newValues.isMessage === 1) {
                         console.log('修改任务，短信通知')
-                        this.sendMessageToStaff(usersIdArrInt, newValues);
+                        this.sendMessageToStaff(usersIdArrInt, newValues, false);
                     } else {
                         console.log('修改任务，不必短信通知')
                     }
@@ -202,7 +200,7 @@ class TaskFromMeView extends Component {
     updateDataByRedux = () => {
         Store.dispatch(showTaskNum(null)); ///随便派发一个值，目的是让 mainView处监听到 执行init();
     }
-    sendMessageToStaff = async (toUsersArr, data) => {
+    sendMessageToStaff = async (toUsersArr, data, isOnlySendMessAgain = false) => {
         let title = data.title;
         let overTimeDate = moment(parseInt(data.overTime)).format('YYYY年MM月DD日');
         HttpApi.getUserInfo({ id: toUsersArr }, (res) => {
@@ -219,7 +217,10 @@ class TaskFromMeView extends Component {
                 // console.log(item)
                 // HttpApi.pushnotice({user_id: item.id, title: '任务通知', text: '您有最新的任务,请注意查看'})
             })
-            HttpApi.sendMessageToStaffs(tempArr)
+            // console.log('tempArr:', tempArr)
+            if (isOnlySendMessAgain) {
+                HttpApi.sendMessageToNoticeNew(tempArr); message.success('已再次发送短信给对方');
+            } else { HttpApi.sendMessageToStaffs(tempArr); message.success('任务修改成功') }
         })
     }
 

@@ -364,6 +364,16 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
+    /**
+     * 独立的短信督促提醒，手动点击触发
+     */
+    static sendMessageToNoticeNew(params, f1, f2) {
+        Axios.post(Testuri + 'sendMessageToNoticeNew', params).then(res => {
+            if (f1) { f1(res) }
+        }).catch(res => {
+            if (f2) { f2(res) }
+        })
+    }
     static pushnotice(params, f1, f2) {
         Axios.post(Testuri + 'push_notice', params).then(res => {
             if (f1) { f1(res) }
