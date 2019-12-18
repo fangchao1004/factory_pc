@@ -79,8 +79,8 @@ function UpdateTaskForm(props) {
             })(
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', paddingTop: 10 }}>
                     <Switch disabled={!isEditable} checkedChildren="开" unCheckedChildren="关" checked={isMess} onChange={(v) => { setIsMess(v) }} />
-                    <Popconfirm disabled={!isMess || isEditable || status} title="确定要再次发送短信提醒吗?" onConfirm={sendMessAgain}>
-                        <Button disabled={!isMess || isEditable || status} type='primary'>再次发送短信提醒</Button>
+                    <Popconfirm disabled={isEditable || status} title="确定要发送督促短信提醒吗?" onConfirm={sendMessAgain}>
+                        <Button disabled={isEditable || status} type='primary'>督促短信</Button>
                     </Popconfirm>
                 </div>
             )}

@@ -165,11 +165,13 @@ class TaskFromMeView extends Component {
                 usersIdArr.shift();
                 usersIdArr.pop();
                 let usersIdArrInt = usersIdArr.map((item) => parseInt(item))
-                if (newValues.isMessage === 1) {
-                    console.log('修改任务，短信通知')
-                    this.sendMessageToStaff(usersIdArrInt, newValues);
-                } else {
-                    console.log('修改任务，不必短信通知')
+                if (isOnlySendMessAgain) { this.sendMessageToStaff(usersIdArrInt, newValues); } else {
+                    if (newValues.isMessage === 1) {
+                        console.log('修改任务，短信通知')
+                        this.sendMessageToStaff(usersIdArrInt, newValues);
+                    } else {
+                        console.log('修改任务，不必短信通知')
+                    }
                 }
                 this.pushNoticeToApp(usersIdArrInt);
             } else {
