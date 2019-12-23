@@ -76,16 +76,28 @@ class EquipmentView extends Component {
     }
     getDevicesInfo = () => {
         return new Promise((resolve, reject) => {
+            // let sql = `select des.*,dts.name as device_type_name,nfcs.name as nfc_name,
+            // concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
+            // concat_ws('-',area_1.id,area_2.id,area_3.id) as area_id
+            // from devices des
+            // left join (select * from device_types where effective = 1) dts on dts.id = des.type_id 
+            // left join (select * from area_3 where effective = 1) area_3 on area_3.id = des.area_id 
+            // left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
+            // left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id 
+            // left join nfcs on nfcs.id = des.nfc_id
+            // where des.effective = 1`;
             let sql = `select des.*,dts.name as device_type_name,nfcs.name as nfc_name,
             concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
-            concat_ws('-',area_1.id,area_2.id,area_3.id) as area_id
+            concat_ws('-',area_1.id,area_2.id,area_3.id) as area_id,
+            tmp.newCheckTime
             from devices des
             left join (select * from device_types where effective = 1) dts on dts.id = des.type_id 
             left join (select * from area_3 where effective = 1) area_3 on area_3.id = des.area_id 
             left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
             left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id 
             left join nfcs on nfcs.id = des.nfc_id
-            where des.effective = 1`;
+            left join (select rds.device_id,max(rds.checkedAt) newCheckTime from records rds group by rds.device_id) tmp on tmp.device_id = des.id
+            where des.effective = 1`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -232,13 +244,13 @@ class EquipmentView extends Component {
             },
             {
                 title: '巡检时间 (或 状态更新时间)',
-                dataIndex: 'updatedAt',
+                dataIndex: 'newCheckTime',
                 sorter: (a, b) => {
-                    return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+                    return new Date(a.newCheckTime).getTime() - new Date(b.newCheckTime).getTime()
                 },
                 defaultSortOrder: 'descend',
                 render: (text, record) => {
-                    return <div>{moment(text).format('YYYY-MM-DD HH:mm:ss')}</div>
+                    return <div>{text || '/'}</div>
                 }
             },
             {
