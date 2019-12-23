@@ -17,7 +17,7 @@ export const tableCellOptionsData = [
     { "value": "13", "text": "副标题" }];
 
 export const VersionlistData = [
-    { title: '版本号', description: 'V 1.3.4' },
+    { title: '版本号', description: 'V 1.3.5' },
     // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
     // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
     // { title: '更新', description: '1.0.9 添加巡检点信息修改功能' }
@@ -47,5 +47,6 @@ export const VersionlistData = [
     // { title: '更新', description: '1.3.1 解决部分bug' }
     // { title: '更新', description: '1.3.2 消费记录，车辆记录添加日期筛选 ' }
     // { title: '更新', description: '1.3.3 任务支持的再次手动发送短信提醒' }
-    { title: '更新', description: '1.3.4 时间段和设备之间-映射关系调整' }
+    // { title: '更新', description: '1.3.4 时间段和设备之间-映射关系调整' }
+    { title: '更新', description: '1.3.5 部分bug修复' }
 ]

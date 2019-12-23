@@ -15,7 +15,7 @@ function UpdateTaskForm(props) {
     const status = props.task.status
     const isEditable = props.isEditable
     const isStaffEditable = props.isStaffEditable
-    const isExtra = props.isExtrad
+    const isExtra = props.isExtra
     const { getFieldDecorator } = props.form
     const userOptions = props.users.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
     const tos = props.task.to.split(',').map(item => parseInt(item))

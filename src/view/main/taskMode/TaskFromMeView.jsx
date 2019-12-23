@@ -218,7 +218,6 @@ class TaskFromMeView extends Component {
                 // console.log(item)
                 // HttpApi.pushnotice({user_id: item.id, title: '任务通知', text: '您有最新的任务,请注意查看'})
             })
-            // console.log('tempArr:', tempArr)
             if (isOnlySendMessAgain) {
                 HttpApi.sendMessageToNoticeNew(tempArr, (res) => {
                     if (res.data.code === 0) { message.success('已发送提醒短信给对方'); }

@@ -38,7 +38,7 @@ function UpdateTaskForm(props) {
                 rules: [{ required: true, message: '请输入任务主题' }]
             })(<Input disabled placeholder="请输入任务主题"></Input>)}
         </Form.Item>
-        <Form.Item label="内容2" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+        <Form.Item label="内容" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('content', {
                 initialValue: props.task.content,
                 rules: [{ required: true, message: '请输入任务内容' }]
