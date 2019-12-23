@@ -109,6 +109,8 @@ class RecordDetailByTime extends Component {
             {
                 title: '是否巡检',
                 dataIndex: 'recordList',
+                filters: [{ value: false, text: '否' }, { value: true, text: '是' }],
+                onFilter: (value, record) => { return ((record.recordList.length > 0) === value) },
                 render: (text, record) => {
                     let flag = text.length > 0;
                     return <div style={{ color: flag ? '#66CC00' : '#FF3333' }}>{flag ? '是' : '否'}</div>

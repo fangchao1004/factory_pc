@@ -139,15 +139,23 @@ export function transfromDataTo2level(area12result) {
  */
 export function combinAreaAndDevice(level3List, devicesList) {
     level3List.forEach((area1Item) => {
+        area1Item.status2_count = 0;
         if (area1Item.children.length > 0) {
             let area2ItemList = area1Item.children;
             area2ItemList.forEach((area2Item) => {
+                area2Item.status2_count = 0;
                 if (area2Item.children.length > 0) {
                     let area3ItemList = area2Item.children;
                     area3ItemList.forEach((area3Item) => {
                         area3Item.children = []
+                        area3Item.status2_count = 0;
                         devicesList.forEach((deviceItem) => {
                             if (area3Item.value.split('-')[2] === deviceItem.area_id + '') {
+                                if (deviceItem.status === 2) {
+                                    area3Item.status2_count = area3Item.status2_count + 1;
+                                    area2Item.status2_count = area2Item.status2_count + 1;
+                                    area1Item.status2_count = area1Item.status2_count + 1;
+                                }
                                 area3Item.children.push({
                                     key: deviceItem.id + '',
                                     value: deviceItem.id + '',
@@ -169,31 +177,24 @@ export function combinAreaAndDevice(level3List, devicesList) {
 /**
  *将多级数据+巡检点信息 形成的新的4级结构数据
  *渲染成对应的 4级树节点
+ <span style={{marginLeft:5,color:'red'}}>{area1Item.status2_count||null}</span>
+ <Badge style={{ marginLeft: 5 }} count={area2Item.status2_count} />
  * @export
  * @param {*} dataList
  * @param {*} TargetNode
  * @returns
  */
 export function renderTreeNodeListByData(dataList, TargetNode) {
-    let nodeList = dataList.map((area1Item) => {
-        return <TargetNode title={omitTextLength(area1Item.title, 25)} key={area1Item.key} value={area1Item.value} selectable={false} icon={<Icon type="environment" />}>
+    let nodeList = dataList.map((area1Item, index) => {
+        return <TargetNode title={<span>{omitTextLength(area1Item.title, 25)}<span style={{ marginLeft: 5, color: 'red' }}>{area1Item.status2_count || null}</span></span>} key={area1Item.key} value={area1Item.value} selectable={false} icon={<span><Icon type="environment" />
+        </span>}>
             {area1Item.children.length > 0 ?
                 area1Item.children.map(area2Item => {
-                    return <TargetNode title={omitTextLength(area2Item.title, 25)} key={area2Item.key} value={area2Item.value} selectable={false} icon={<Icon type="environment" />}>
+                    return <TargetNode title={<span>{omitTextLength(area2Item.title, 25)}<span style={{ marginLeft: 5, color: 'red' }}>{area2Item.status2_count || null}</span></span>} key={area2Item.key} value={area2Item.value} selectable={false} icon={<Icon type="environment" />}>
                         {area2Item.children.length > 0 ?
                             area2Item.children.map(area3Item => {
-                                return <TargetNode title={omitTextLength(area3Item.title, 25)} key={area3Item.key} value={area3Item.value} selectable={false} icon={<Icon type="environment" />}>
-                                    {area3Item.children.length > 0 ?
-                                        area3Item.children.map(deviceItem => {
-                                            let color = '#33CC66' /// 绿色 正常
-                                            if (deviceItem.status === 2) {
-                                                color = '#FF0000' /// 红色 故障
-                                            } else if (deviceItem.status === 3) {
-                                                color = '#AAAAAA' /// 灰色 待检
-                                            }
-                                            return <TargetNode {...deviceItem} icon={<Icon type="laptop" style={{ color }} />} ></TargetNode>
-                                        })
-                                        : null}
+                                return <TargetNode title={<span>{omitTextLength(area3Item.title, 25)}<span style={{ marginLeft: 5, color: 'red' }}>{area3Item.status2_count || null}</span></span>} key={area3Item.key} value={area3Item.value} selectable={false} icon={<Icon type="environment" />}>
+                                    {renderDevice(area3Item, TargetNode)}
                                 </TargetNode>
                             })
                             : null}
@@ -203,6 +204,22 @@ export function renderTreeNodeListByData(dataList, TargetNode) {
         </TargetNode>
     })
     return nodeList
+}
+
+function renderDevice(area3Item, TargetNode) {
+    return area3Item.children.length > 0 ?
+        area3Item.children.map(deviceItem => {
+            let color = '#33CC66' /// 绿色 正常
+            if (deviceItem.status === 2) {
+                color = '#FF0000' /// 红色 故障
+            } else if (deviceItem.status === 3) {
+                color = '#AAAAAA' /// 灰色 待检
+            }
+            // console.log('status2_count:', status2_count, 'status3_count:', status3_count)
+            // console.log('deviceItem:', deviceItem)
+            return <TargetNode {...deviceItem} icon={<Icon type="laptop" style={{ color }} />} ></TargetNode>
+        })
+        : null
 }
 
 /**
