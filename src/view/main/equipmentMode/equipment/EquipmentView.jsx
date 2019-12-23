@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Table, Button, Row, Col, Drawer, Icon, message, Popconfirm, Divider, Tag } from 'antd'
 import HttpApi from '../../../util/HttpApi';
-import moment from 'moment';
 import AddEquipmentView from './AddEquipmentView';
 import UpdateEquipmentView from './UpdateEquipmentView';
 import PieViewOfOneDeStus from './PieViewOfOneDeStus';
