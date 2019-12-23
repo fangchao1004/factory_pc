@@ -48,5 +48,5 @@ export const VersionlistData = [
     // { title: '更新', description: '1.3.2 消费记录，车辆记录添加日期筛选 ' }
     // { title: '更新', description: '1.3.3 任务支持的再次手动发送短信提醒' }
     // { title: '更新', description: '1.3.4 时间段和设备之间-映射关系调整' }
-    { title: '更新', description: '1.3.5 部分bug修复' }
+    // { title: '更新', description: '1.3.5 部分bug修复' }
 ]
