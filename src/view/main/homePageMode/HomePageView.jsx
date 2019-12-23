@@ -17,7 +17,19 @@ class HomePageView extends Component {
     init = async () => {
         ///获取所有巡检点的当前的状态统计信息。
         let allDeviceStatusCount = await this.getAllDeviceStatusCount();///获取所有巡检点的 状态统计 信息
-        // console.log(allDeviceStatusCount);////[{device_status: 1, status_count: 3},{device_status: 2, status_count: 4}]
+        if (allDeviceStatusCount.length < 3) { /// 如果有某个状态没有设备数，那么就补0。为的是饼图颜色统一
+            let temp = [{ lab: 1, value: false }, { lab: 2, value: false }, { lab: 3, value: false }] /// 1 正常 2故障 3待检
+            allDeviceStatusCount.forEach((element, index) => {
+                temp.forEach((item) => {
+                    if (element.device_status === item.lab) { item.value = true }
+                })
+            });
+            temp.forEach((item) => {
+                if (item.value === false) { allDeviceStatusCount.push({ device_status: item.lab, status_count: 0 }) }
+            })
+        }
+        allDeviceStatusCount.sort((a, b) => { return a.device_status - b.device_status })///按照device_status的大小排序
+        // console.log('获取所有巡检点的 状态统计 信息:', allDeviceStatusCount);////[{device_status: 1, status_count: 3},{device_status: 2, status_count: 4}]
         let allTodayRecordInfo = await this.getEveryUserRecordToday(); ///获取当日 所有巡检点的巡检情况（针对参加巡检的人员的分组）
         // console.log('allTodayRecordInfo:', allTodayRecordInfo); ////这里的数据很有指导性---如果后期修改要看这个数据结构
         let b = {};

@@ -27,11 +27,11 @@ export default class PieView extends React.Component {
     let totalCount = 0;
     data.datasouce.forEach((ele) => {
       // if (ele.status_count > 0) {
-        totalCount += ele.status_count;
-        let stautsTxt = '待检'
-        if (ele.device_status === 1) { stautsTxt = '正常' }
-        else if (ele.device_status === 2) { stautsTxt = '故障' }
-        newArr.push({ item: stautsTxt, count: ele.status_count });
+      totalCount += ele.status_count;
+      let stautsTxt = '待检'
+      if (ele.device_status === 1) { stautsTxt = '正常' }
+      else if (ele.device_status === 2) { stautsTxt = '故障' }
+      newArr.push({ item: stautsTxt, count: ele.status_count });
       // }
     })
     // console.log('处理后的数据：', newArr);
