@@ -15,14 +15,15 @@ export default class PieView extends React.Component {
     this.state = {
       data: [],
       titleStr: '',
-      allCount: ''
+      allCount: '',
+      checkMan: '',
     }
   }
   componentDidMount = () => {
     this.transConstruct(this.props.data);
   }
   transConstruct = (data) => {
-    // console.log('获取原始数据：', data.datasouce, '对应的标题：', data.title);
+    // console.log('获取原始数据：', data.datasouce, '对应的标题：', data.title, data.checkMan);
     let newArr = [];
     let totalCount = 0;
     data.datasouce.forEach((ele) => {
@@ -35,13 +36,14 @@ export default class PieView extends React.Component {
       // }
     })
     // console.log('处理后的数据：', newArr);
-    this.setState({ data: newArr, titleStr: data.title, allCount: totalCount })
+    this.setState({ data: newArr, titleStr: data.title, allCount: totalCount, checkMan: data.checkMan || '' })
   }
   render() {
     const { DataView } = DataSet;
     const { Html } = Guide;
     const dv = new DataView();
-    const str = '<div style="color:#8c8c8c;font-size:14px;text-align: center;width: 10em;">' + this.state.titleStr + '<br><span style="color:#262626;font-size:24px">' + this.state.allCount + '</span></div>'
+    const str = '<div style="color:#8c8c8c;font-size:10px;text-align: center;width: 12em;">' + this.state.titleStr + '<br><span style="color:#262626;font-size:24px">' + this.state.allCount + '</span></div>'
+    const str2 = '<div style="#262626;font-size:14px;text-align: center;width: 12em;">' + this.state.checkMan + '</div>'
 
     dv.source(this.state.data).transform({
       type: "percent",
@@ -75,6 +77,12 @@ export default class PieView extends React.Component {
             <Html
               position={["50%", "50%"]}
               html={str}
+              alignX="middle"
+              alignY="middle"
+            />
+            <Html
+              position={["80%", "5%"]}
+              html={str2}
               alignX="middle"
               alignY="middle"
             />

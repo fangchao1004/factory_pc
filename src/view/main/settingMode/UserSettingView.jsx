@@ -15,7 +15,6 @@ export default function UserSettingView(props) {
         ]
         setData(listData)
     }, [])
-
     return <div>
         <List
             itemLayout="horizontal"

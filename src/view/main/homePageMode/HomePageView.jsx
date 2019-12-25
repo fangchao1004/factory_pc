@@ -3,6 +3,7 @@ import PieView from './PieView'
 import LineChartView from './LineChartView'
 import { Row, Col } from 'antd'
 import HttpApi from '../../util/HttpApi'
+import { getAllowTime, findCountInfoByTime } from '../../util/Tool'
 
 class HomePageView extends Component {
     constructor(props) {
@@ -30,19 +31,48 @@ class HomePageView extends Component {
         }
         allDeviceStatusCount.sort((a, b) => { return a.device_status - b.device_status })///按照device_status的大小排序
         // console.log('获取所有巡检点的 状态统计 信息:', allDeviceStatusCount);////[{device_status: 1, status_count: 3},{device_status: 2, status_count: 4}]
-        let allTodayRecordInfo = await this.getEveryUserRecordToday(); ///获取当日 所有巡检点的巡检情况（针对参加巡检的人员的分组）
+        // let allTodayRecordInfo = await this.getEveryUserRecordToday(); ///获取当日 所有巡检点的巡检情况（针对参加巡检的人员的分组）
         // console.log('allTodayRecordInfo:', allTodayRecordInfo); ////这里的数据很有指导性---如果后期修改要看这个数据结构
-        let b = {};
-        for (let item of allTodayRecordInfo) {
-            if (b.hasOwnProperty(item.user_name)) { b[item.user_name].push(item) }
-            else { b[item.user_name] = [item] }
-        }
-        let result = this.changeDataConstruct(b);////进行数据结构的改变统计
-        let linkAll = [{ user_name: '所有巡检点', count_data: allDeviceStatusCount }, ...result]
+        // let b = {};
+        // for (let item of allTodayRecordInfo) {
+        //     if (b.hasOwnProperty(item.user_name)) { b[item.user_name].push(item) }
+        //     else { b[item.user_name] = [item] }
+        // }
+        // let result = this.changeDataConstruct(b);////进行数据结构的改变统计
+        let result = await this.testHandler();
+        // console.log('asdasdas:', result)
+        let linkAll = [{ label: '所有巡检点', count_data: allDeviceStatusCount }, ...result]
         // console.log('linkAll:', linkAll);////如果后期看不懂，要看这里的数据结构
         this.setState({
             groupData: linkAll
         })
+    }
+    testHandler = async () => {
+        let allowTimeList = await getAllowTime();
+        let countResultList = [];
+        for (let index = 0; index < allowTimeList.length; index++) {
+            const element = allowTimeList[index];
+            let result = await findCountInfoByTime(element);
+            const data = result[0];
+            if (data) {
+                let status_1_count = 0;
+                let status_2_count = 0;
+                data.status_arr.split(',').forEach(element => {
+                    if (element + "" === "1") { status_1_count++ } else { status_2_count++ }
+                });
+                // data['status_1_count'] = status_1_count;
+                // data['status_2_count'] = status_2_count;
+                // data['正常'] = status_1_count;
+                // data['故障'] = status_2_count;
+                // data['待检'] = data.need_count - data.actu_count
+                delete data['status_arr']
+                data['label'] = data.date === -1 ? '昨天 ' + data.begin + '~' + data.end : '今天 ' + data.begin + '~' + data.end
+                data['count_data'] = [{ device_status: 1, status_count: status_1_count },
+                { device_status: 2, status_count: status_2_count }, { device_status: 3, status_count: data.need_count - data.actu_count }]
+                countResultList.push(data)
+            }
+        }
+        return countResultList;
     }
     changeDataConstruct = (v) => {
         let finallyResult = [];
@@ -94,9 +124,10 @@ class HomePageView extends Component {
         let cellsArr = [];
         let copy_data = JSON.parse(JSON.stringify(this.state.groupData))
         if (copy_data.length === 0) { return null }
+        // console.log('copy_data:', copy_data)
         copy_data.forEach((item, index) => {
             // console.log(item);
-            let dataObj = { datasouce: item.count_data, title: item.user_name }
+            let dataObj = { datasouce: item.count_data, title: item.label, checkMan: item.users_name }
             // console.log('dataObj:',dataObj);
             cellsArr.push(
                 <Col span={8} key={index}>

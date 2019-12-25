@@ -75,7 +75,7 @@ class TimeView extends Component {
     getAllowTimeInfo = () => {
         return new Promise((resolve, reject) => {
             // let sql = `select * from allow_time where effective = 1`;
-            let sql = `select a_t.id,a_t.begin,a_t.end,a_t.isCross,a_t.name,GROUP_CONCAT(a_m_d.device_id) as select_map_device from allow_time a_t
+            let sql = `select a_t.id,a_t.begin,a_t.end,a_t.isCross,a_t.name,GROUP_CONCAT(distinct a_m_d.device_id) as select_map_device,count(distinct a_m_d.device_id) need_count from allow_time a_t
             left join (select * from allowTime_map_device where effective = 1) a_m_d
             on a_t.id = a_m_d.allow_time_id
             where a_t.effective = 1
@@ -98,7 +98,8 @@ class TimeView extends Component {
             element.bt = beginTime;
             element.et = endTime;
             let result = await this.getCountInfoFromDB(element);
-            element.actually = result[0].count;
+            element.actually = result[0] ? result[0].actu_count : '/';
+            element.checkMan = result[0] ? result[0].users_name : '/'
         }
         this.setState({
             dataSource: resultList.map((item, index) => { item.key = index + ''; return item })
@@ -110,8 +111,21 @@ class TimeView extends Component {
      */
     getCountInfoFromDB = (element) => {
         // console.log('element:', element);
-        let sql = `select count(distinct(device_id)) as count from records
-        where checkedAt>'${element.bt}' and checkedAt<'${element.et}' and effective = 1`;
+        // let sql = `select count(distinct(device_id)) as count from records
+        // where checkedAt>'${element.bt}' and checkedAt<'${element.et}' and effective = 1`;
+        let sql = `select a_t.id,a_t.begin,a_t.end,count(distinct a_m_d.device_id) actu_count,temp_table.need_count, group_concat(distinct user_name) users_name from allow_time a_t
+        left join (select * from allowTime_map_device where effective = 1) a_m_d on a_t.id = a_m_d.allow_time_id
+        inner join (select distinct device_id,user_name from records 
+                    left join (select users.id,users.name as user_name from users where effective = 1) users 
+                    on users.id = records.user_id  
+                    where checkedAt>'${element.bt}' and checkedAt<'${element.et}' and effective = 1) actully_device_List 
+        on actully_device_List.device_id = a_m_d.device_id
+        left join (select a_t.id,count(distinct a_m_d.device_id) need_count from allow_time a_t
+        left join (select * from allowTime_map_device where effective = 1) a_m_d on a_t.id = a_m_d.allow_time_id
+        where a_t.id = ${element.id} and a_t.effective = 1
+        group by a_t.id) temp_table on temp_table.id = a_t.id
+        where a_t.id = ${element.id} and a_t.effective = 1
+        group by a_t.id`
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -144,15 +158,6 @@ class TimeView extends Component {
             }
         })
         return;
-        // let sql = `UPDATE allow_time SET selected_devices = '${JSON.stringify(value)}' where id = ${record.id}`
-        // HttpApi.obs({ sql }, (res) => {
-        //     if (res.data.code === 0) {
-        //         message.success('修改成功');
-        //         this.init();
-        //     } else {
-        //         message.error('修改失败');
-        //     }
-        // })
     };
 
     disabledDate = (current) => {
@@ -161,7 +166,6 @@ class TimeView extends Component {
     AddTimeOk = (data) => {
         let sql = `INSERT INTO allow_time SET begin='${data.begin.format('HH:mm:ss')}', end='${data.end.format('HH:mm:ss')}', isCross=${data.isCross ? 1 : 0}, name='${data.name}'`
         HttpApi.obs({ sql }, (res) => {
-            console.log('res.data:', res.data);
             if (res.data.code === 0) {
                 message.success('添加成功');
                 this.init();
@@ -229,13 +233,17 @@ class TimeView extends Component {
                         >
                             {this.state.treeNodeList}
                         </TreeSelect>
-                        <div style={{ width: '15%', textAlign: "center", paddingTop: 5 }}>{text && text.split(',').length > 0 ? text.split(',').length : ''}</div>
+                        <div style={{ width: '15%', textAlign: "center", paddingTop: 5 }}>{record.need_count}</div>
                     </div>;
                 }
             },
             {
-                title: '实际检测巡检点数量',
+                title: '实际有效巡检数',
                 dataIndex: 'actually',
+            },
+            {
+                title: '巡检人员',
+                dataIndex: 'checkMan',
             }, {
                 title: '操作',
                 dataIndex: 'actions',

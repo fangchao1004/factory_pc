@@ -1,5 +1,8 @@
 import React from "react";
 import { Icon } from 'antd'
+import HttpApi from './HttpApi'
+import moment from 'moment';
+
 /**
  * Tool 工具类 
  * 将可以重复利用的函数，或是代码量很大的函数进行封装
@@ -299,4 +302,75 @@ export function transfromDataToRunerAndGroupLeader(runnerList) {
         })
     }]
     return treeData;
-} 
+}
+
+///
+export async function getAllowTime() {
+    ///首先获取最新的 allow_time 表。因为要根据它来，指定分组的sql语句
+    return new Promise((resolve, reject) => {
+        let sql = `select id,begin,end,name,isCross from allow_time where effective = 1`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                // console.log('res:', res.data.data)
+                res.data.data.map((item) => {
+                    // if (item.isCross) { allowTimeList.unshift(item) }
+                    item.begin = moment().format('YYYY-MM-DD ') + item.begin
+                    if (item.isCross) {
+                        item.date = 1;
+                        item.end = moment().add('day', 1).format('YYYY-MM-DD ') + item.end
+                    } else {
+                        item.date = 0;
+                        item.end = moment().format('YYYY-MM-DD ') + item.end
+                    }
+                    return item;
+                })
+                res.data.data.forEach((item) => {
+                    if (item.isCross) {
+                        let item_copy = JSON.parse(JSON.stringify(item));
+                        // item_copy.id = -1; ///赋值一个不存在的id值 -1
+                        item_copy.date = -1;/// 昨天
+                        item_copy.begin = moment(item.begin).add('day', -1).format('YYYY-MM-DD HH:mm:ss')
+                        item_copy.end = moment(item.end).add('day', -1).format('YYYY-MM-DD HH:mm:ss')
+                        res.data.data.unshift(item_copy)
+                    }
+                })
+                resolve(res.data.data)
+            } else {
+                resolve([])
+            }
+        })
+    })
+}
+
+/**
+ * 根据某个时间段去数据库查询-当前时间区间的巡检统计情况
+ */
+export async function findCountInfoByTime(oneTime) {
+    // console.log('oneTime:', oneTime)
+    let sql = `select a_t.id,a_t.begin,a_t.end,a_t.name,count(distinct a_m_d.device_id) actu_count,temp_table.need_count, group_concat(distinct user_name) users_name,group_concat(actully_device_List.device_status) status_arr from allow_time a_t
+    left join (select * from allowTime_map_device where effective = 1) a_m_d on a_t.id = a_m_d.allow_time_id
+    inner join (select distinct device_id,user_name,device_status from records 
+                left join (select users.id,users.name as user_name from users where effective = 1) users 
+                on users.id = records.user_id  
+                where checkedAt>'${oneTime.begin}' and checkedAt<'${oneTime.end}' and effective = 1) actully_device_List 
+    on actully_device_List.device_id = a_m_d.device_id
+    left join (select a_t.id,count(distinct a_m_d.device_id) need_count from allow_time a_t
+    left join (select * from allowTime_map_device where effective = 1) a_m_d on a_t.id = a_m_d.allow_time_id
+    where a_t.id = ${oneTime.id} and a_t.effective = 1
+    group by a_t.id) temp_table on temp_table.id = a_t.id
+    where a_t.id = ${oneTime.id} and a_t.effective = 1
+    group by a_t.id`
+    // console.log('sql:', sql)
+    return new Promise((resolve, reject) => {
+        let result = [];
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                let copy = JSON.parse(JSON.stringify(res.data.data))
+                if (copy[0])
+                    copy[0].date = oneTime.date;
+                result = copy
+            }
+            resolve(result);
+        })
+    })
+}
