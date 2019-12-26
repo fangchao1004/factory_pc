@@ -721,7 +721,7 @@ export default class BugView extends Component {
                 render: (text, record) => (
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <Button size="small" type="primary" onClick={() => { this.actionsHandler(record) }}>处理</Button>
-                        {JSON.parse(localUserInfo).permission.indexOf('0') !== -1 || JSON.parse(localUserInfo).permission.indexOf('3') !== -1 ?
+                        {(JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('0') !== -1) || (JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('3') !== -1) ?
                             <Fragment>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                 <Button size="small" type="ghost" onClick={() => { this.setState({ showModal9: true, currentRecord: record }) }}>备注</Button>

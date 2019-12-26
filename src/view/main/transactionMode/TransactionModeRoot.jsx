@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Card } from 'antd';
 import TransactionView from './TransactionView'; /// 所有消费数据界面
-import TransactionViewNew from './TransactionViewNew';/// 个人消费数据界面
+import OneTransactionView from './OneTransactionView';/// 个人消费数据界面
 // import RechargeView from './RechargeViewNew'
 const storage = window.localStorage;
 var userinfo;
@@ -15,17 +15,17 @@ class TransactionModeRoot extends Component {
         userinfo = storage.getItem('userinfo');
         isAdmin = JSON.parse(userinfo).isadmin === 1;
         this.state = {
-            key: isAdmin ? 'TransactionView' : 'TransactionViewNew',
-            noTitleKey: isAdmin ? 'TransactionView' : 'TransactionViewNew',
+            key: isAdmin ? 'TransactionView' : 'OneTransactionView',
+            noTitleKey: isAdmin ? 'TransactionView' : 'OneTransactionView',
         }
         contentListNoTitle = isAdmin ? {
             TransactionView: <TransactionView />,
-        } : { TransactionViewNew: <TransactionViewNew />, }
+        } : { OneTransactionView: <OneTransactionView />, }
         tabListNoTitle = isAdmin ? [{
             key: 'TransactionView',
             tab: '所有消费记录',
         }] : [{
-            key: 'TransactionViewNew',
+            key: 'OneTransactionView',
             tab: '个人消费记录',
         }]
     }
