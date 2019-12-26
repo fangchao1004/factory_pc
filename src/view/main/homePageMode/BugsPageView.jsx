@@ -4,12 +4,13 @@ import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 import PieViewOfBug from './PieViewOfBug';
 import LineChartViewOfBug from './LineChartViewOfBug'
+import { getCheckManIdToday, getSomeOneBugsCountToday } from '../../util/Tool'
 
 export default class BugsPageView extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: {}
+            data: []
         }
     }
     componentDidMount() {
@@ -18,9 +19,24 @@ export default class BugsPageView extends Component {
     init = async () => {
         let data = await this.getTodayBugsInfo();
         // console.log('今日的缺陷统计:', data.length);
-        let result = { datasouce: data, title: '今日缺陷统计' }
-        // console.log('result:', result);
-        this.setState({ data: result })
+        let result = { datasource: data, title: '今日缺陷统计' }
+        let dataList = await this.testHandler();
+        // console.log('dataList:', dataList)
+        this.setState({ data: [result, ...dataList] })
+
+    }
+    testHandler = async () => {
+        let checkManIdList = await getCheckManIdToday();
+        let dataList = [];
+        for (const key in checkManIdList) {
+            const oneUserInfo = checkManIdList[key]
+            let result = await getSomeOneBugsCountToday(oneUserInfo.user_id);
+            let oneData = {};
+            oneData.title = result[0].user_name;
+            oneData.datasource = result;
+            dataList.push(oneData);
+        }
+        return dataList;
     }
     getTodayBugsInfo = () => {
         return new Promise((resolve, reject) => {
@@ -44,8 +60,7 @@ export default class BugsPageView extends Component {
         })
     }
     renderPieView = () => {
-        // console.log('this.state.data:', this.state.data);
-        if (JSON.stringify(this.state.data) === '{}' || this.state.data.datasouce.length === 0) {
+        if (this.state.data.length === 0) {
             return <Col span={24} style={{ backgroundColor: '#F0F2F5', height: 280, marginTop: 16, borderRadius: 5 }}>
                 <Empty
                     image="https://gw.alipayobjects.com/mdn/miniapp_social/afts/img/A*pevERLJC9v0AAAAAAAAAAABjAQAAAQ/original"
@@ -55,12 +70,19 @@ export default class BugsPageView extends Component {
                     }}
                     description={'今日缺陷-暂无数据'} />
             </Col>
+        } else {
+            let cellsArr = [];
+            let copy_data = JSON.parse(JSON.stringify(this.state.data))
+            // console.log('copy_data:', copy_data)
+            copy_data.forEach((item, index) => {
+                cellsArr.push(
+                    <Col span={8} key={index}>
+                        <PieViewOfBug data={item} />
+                    </Col>
+                )
+            })
+            return cellsArr
         }
-        let result =
-            <Col span={8}>
-                <PieViewOfBug data={this.state.data} />
-            </Col>
-        return result
     }
     render() {
         return (

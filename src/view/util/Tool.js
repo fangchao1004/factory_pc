@@ -374,3 +374,41 @@ export async function findCountInfoByTime(oneTime) {
         })
     })
 }
+/**
+ * 查询，今天有那几个人上传过缺陷。获取他们的id
+ */
+export async function getCheckManIdToday() {
+    let beginOfToday = moment().startOf('day').format('YYYY-MM-DD HH:mm:ss');
+    let endOfToday = moment().endOf('day').format('YYYY-MM-DD HH:mm:ss');
+    let sql = `select distinct bugs.user_id from bugs where effective = 1 and createdAt>'${beginOfToday}' and createdAt<'${endOfToday}'`
+    return new Promise((resolve, reject) => {
+        let result = [];
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                result = res.data.data
+            }
+            resolve(result);
+        })
+    })
+}
+/**
+ * 获取某个人，今天上传的缺陷信息的 统计信息
+ */
+export async function getSomeOneBugsCountToday(oneId) {
+    let beginOfToday = moment().startOf('day').format('YYYY-MM-DD HH:mm:ss');
+    let endOfToday = moment().endOf('day').format('YYYY-MM-DD HH:mm:ss');
+    let sql = `select users.id as user_id,users.name as user_name,major_id,majors.name as major_name,count(major_id) as major_count from bugs
+    left join (select * from users where effective = 1) users  on users.id = bugs.user_id
+    left join (select * from majors where effective = 1) majors on majors.id = bugs.major_id
+    where bugs.createdAt>'${beginOfToday}' and bugs.createdAt<'${endOfToday}' and bugs.effective = 1 and bugs.user_id = ${oneId}
+    group by bugs.major_id`
+    return new Promise((resolve, reject) => {
+        let result = [];
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                result = res.data.data
+            }
+            resolve(result);
+        })
+    })
+}

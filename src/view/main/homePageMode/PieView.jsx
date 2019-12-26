@@ -23,10 +23,10 @@ export default class PieView extends React.Component {
     this.transConstruct(this.props.data);
   }
   transConstruct = (data) => {
-    // console.log('获取原始数据：', data.datasouce, '对应的标题：', data.title, data.checkMan);
+    // console.log('获取原始数据：', data.datasource, '对应的标题：', data.title, data.checkMan);
     let newArr = [];
     let totalCount = 0;
-    data.datasouce.forEach((ele) => {
+    data.datasource.forEach((ele) => {
       // if (ele.status_count > 0) {
       totalCount += ele.status_count;
       let stautsTxt = '待检'

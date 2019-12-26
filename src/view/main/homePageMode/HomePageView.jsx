@@ -127,7 +127,7 @@ class HomePageView extends Component {
         // console.log('copy_data:', copy_data)
         copy_data.forEach((item, index) => {
             // console.log(item);
-            let dataObj = { datasouce: item.count_data, title: item.label, checkMan: item.users_name }
+            let dataObj = { datasource: item.count_data, title: item.label, checkMan: item.users_name }
             // console.log('dataObj:',dataObj);
             cellsArr.push(
                 <Col span={8} key={index}>

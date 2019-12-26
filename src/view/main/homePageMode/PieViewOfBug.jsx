@@ -22,10 +22,10 @@ export default class PieViewOfBug extends React.Component {
     this.transConstruct(this.props.data);
   }
   transConstruct = (data) => {
-    // console.log('获取原始数据：',data.datasouce,'对应的标题：',data.title);
+    // console.log('获取原始数据：',data.datasource,'对应的标题：',data.title);
     let totalCount = 0;
     let newArr = [];
-    data.datasouce.forEach((ele) => {
+    data.datasource.forEach((ele) => {
       if (ele.major_count > 0) {
         totalCount += ele.major_count;
         newArr.push({ item: ele.major_name, count: ele.major_count });

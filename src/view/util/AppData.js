@@ -17,7 +17,7 @@ export const tableCellOptionsData = [
     { "value": "13", "text": "副标题" }];
 
 export const VersionlistData = [
-    { title: '版本号', description: 'V 1.3.8' },
+    { title: '版本号', description: 'V 1.3.9' },
     // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
     // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
     // { title: '更新', description: '1.0.9 添加巡检点信息修改功能' }
@@ -52,4 +52,5 @@ export const VersionlistData = [
     // { title: '更新', description: '1.3.6 区域模块添加故障统计数显示' }
     // { title: '更新', description: '1.3.7 首页巡检统计调整' }
     // { title: '更新', description: '1.3.8 缺陷图片列整合置内容列中' }
+    // { title: '更新', description: '1.3.9 首页缺陷统计调整' }
 ]
