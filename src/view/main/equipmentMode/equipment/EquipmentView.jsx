@@ -245,26 +245,25 @@ class EquipmentView extends Component {
             {
                 title: '记录查询',
                 dataIndex: 'actions',
-                width: 250,
                 render: (text, record) => (
-                    <div style={{ textAlign: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                         {
                             this.state.isAdmin ?
                                 <span>
                                     <Popconfirm title="确定要删除该巡检点吗?" onConfirm={() => { this.deleteEquipmentConfirm(record) }}>
                                         <Button size="small" type="danger">删除</Button>
                                     </Popconfirm>
-                                    <Divider type="vertical" />
+                                    <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                     <Button size="small" type='ghost' onClick={() => { this.changeDeviceInfo(record) }} >修改</Button>
                                 </span>
                                 : null
                         }
                         {
                             this.state.isAdmin ?
-                                <Divider type="vertical" />
+                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                 : null
                         }
-                        <Button size="small" type='primary' onClick={() => this.openModalHandler(record)} >巡检记录</Button>
+                        <Button size="small" type='primary' onClick={() => this.openModalHandler(record)} >查看</Button>
                     </div>
                 )
             }
