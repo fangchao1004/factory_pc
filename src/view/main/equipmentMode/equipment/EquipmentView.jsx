@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Table, Button, Row, Col, Drawer, Icon, message, Popconfirm, Divider, Tag } from 'antd'
 import HttpApi from '../../../util/HttpApi';
 import AddEquipmentView from './AddEquipmentView';
@@ -247,23 +247,17 @@ class EquipmentView extends Component {
                 dataIndex: 'actions',
                 render: (text, record) => (
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        {
-                            this.state.isAdmin ?
-                                <span>
-                                    <Popconfirm title="确定要删除该巡检点吗?" onConfirm={() => { this.deleteEquipmentConfirm(record) }}>
-                                        <Button size="small" type="danger">删除</Button>
-                                    </Popconfirm>
-                                    <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                                    <Button size="small" type='ghost' onClick={() => { this.changeDeviceInfo(record) }} >修改</Button>
-                                </span>
-                                : null
-                        }
-                        {
-                            this.state.isAdmin ?
-                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                                : null
-                        }
                         <Button size="small" type='primary' onClick={() => this.openModalHandler(record)} >查看</Button>
+                        {this.state.isAdmin ?
+                            <Fragment>
+                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                                <Button size="small" type='ghost' onClick={() => { this.changeDeviceInfo(record) }} >修改</Button>
+                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                                <Popconfirm title="确定要删除该巡检点吗?" onConfirm={() => { this.deleteEquipmentConfirm(record) }}>
+                                    <Button size="small" type="danger">删除</Button>
+                                </Popconfirm>
+                            </Fragment>
+                            : null}
                     </div>
                 )
             }
