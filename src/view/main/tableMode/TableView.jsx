@@ -83,7 +83,7 @@ class TableView extends Component {
                         title={(<div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                             <div style={{ width: '70%' }}>{omitTextLength(element.table_name, 15)}</div>
                             <Popconfirm title="确定删除吗?" onConfirm={() => this.onConfirmDeleteHandler(element)}>
-                                <div><Icon type="delete" theme="twoTone" style={{ fontSize: 20 }} /></div>
+                                <div><Icon type="delete" theme="twoTone" style={{ fontSize: 20, cursor: "pointer" }} /></div>
                             </Popconfirm></div>)}
                         bordered={true}
                         style={{ marginTop: 16, height: 170, borderRadius: 5 }}>
