@@ -534,6 +534,34 @@ export default class BugView extends Component {
                 title: '内容',
                 render: (text, record) => {
                     let obj = JSON.parse(text);
+                    let contentobj = JSON.parse(record.content);
+                    let imgs_arr = JSON.parse(JSON.stringify(contentobj.imgs));
+                    let result_arr = [];
+                    imgs_arr.forEach((item, index) => {
+                        result_arr.push({ key: index + item, name: ('图片' + (index + 1)), uuid: item });
+                    })
+                    let comArr = [];
+                    result_arr.forEach((item, index) => {
+                        comArr.push(<span key={item.uuid} style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
+                            onClick={e => {
+                                if (this.state.preImguuid !== item.uuid) {
+                                    this.setState({
+                                        showLoading: true,
+                                    })
+                                } else {
+                                    this.setState({
+                                        showLoading: false,
+                                    })
+                                }
+                                this.setState({
+                                    imguuid: item.uuid,
+                                    showModal1: true,
+                                    preImguuid: item.uuid,
+                                })
+                            }}>{item.name}</span>)
+                    });
+                    let result = ''
+                    if (comArr.length > 0) { result = comArr }
                     return <div>
                         <div className='hideText lineClamp3' style={{ fontWeight: 900, minWidth: 120 }}>
                             <Tooltip title={<span>{record.title_name}{record.title_remark}</span>} placement='topLeft'>
@@ -549,6 +577,8 @@ export default class BugView extends Component {
                                 <span>{obj.text}</span>
                             </Tooltip>
                         </div>
+                        {imgs_arr && imgs_arr.length > 0 ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
+                        <div>{result}</div>
                     </div>
                 }
             },
@@ -599,41 +629,41 @@ export default class BugView extends Component {
                     }</div>
                 }
             },
-            {
-                key: 'img', dataIndex: 'content', title: '图片', render: (text) => {
-                    let obj = JSON.parse(text);
-                    let imgs_arr = JSON.parse(JSON.stringify(obj.imgs));
-                    let result_arr = [];
-                    imgs_arr.forEach((item, index) => {
-                        result_arr.push({ key: index + item, name: ('图片' + (index + 1)), uuid: item });
-                    })
-                    let comArr = [];
-                    result_arr.forEach((item, index) => {
-                        comArr.push(<span key={item.uuid} style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
-                            onClick={e => {
-                                if (this.state.preImguuid !== item.uuid) {
-                                    this.setState({
-                                        showLoading: true,
-                                    })
-                                } else {
-                                    this.setState({
-                                        showLoading: false,
-                                    })
-                                }
-                                this.setState({
-                                    imguuid: item.uuid,
-                                    showModal1: true,
-                                    preImguuid: item.uuid,
-                                })
-                            }}>{item.name}</span>)
-                    });
-                    let result = '/'
-                    if (comArr.length > 0) { result = comArr }
-                    return <div>{result}</div>
-                    // return <div><span style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}>图片1,</span>
-                    // <span style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}>图片2,</span></div> 
-                }
-            },
+            // {
+            //     key: 'img', dataIndex: 'content', title: '图片', render: (text) => {
+            //         let obj = JSON.parse(text);
+            //         let imgs_arr = JSON.parse(JSON.stringify(obj.imgs));
+            //         let result_arr = [];
+            //         imgs_arr.forEach((item, index) => {
+            //             result_arr.push({ key: index + item, name: ('图片' + (index + 1)), uuid: item });
+            //         })
+            //         let comArr = [];
+            //         result_arr.forEach((item, index) => {
+            //             comArr.push(<span key={item.uuid} style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
+            //                 onClick={e => {
+            //                     if (this.state.preImguuid !== item.uuid) {
+            //                         this.setState({
+            //                             showLoading: true,
+            //                         })
+            //                     } else {
+            //                         this.setState({
+            //                             showLoading: false,
+            //                         })
+            //                     }
+            //                     this.setState({
+            //                         imguuid: item.uuid,
+            //                         showModal1: true,
+            //                         preImguuid: item.uuid,
+            //                     })
+            //                 }}>{item.name}</span>)
+            //         });
+            //         let result = '/'
+            //         if (comArr.length > 0) { result = comArr }
+            //         return <div>{result}</div>
+            //         // return <div><span style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}>图片1,</span>
+            //         // <span style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}>图片2,</span></div> 
+            //     }
+            // },
             {
                 title: '缺陷状态',
                 dataIndex: 'status',
