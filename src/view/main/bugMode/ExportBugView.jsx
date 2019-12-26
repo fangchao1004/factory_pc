@@ -120,7 +120,7 @@ class ExportBugView extends Component {
             tempObj.uploadman = item.user_name;
             tempObj.area = item.area_name ? item.area_name : (item.area_remark ? item.area_remark : '/')
             tempObj.level = item.buglevel ? (item.buglevel === 1 ? '一级' : (item.buglevel === 2 ? '二级' : '三级')) : '/';
-            tempObj.content = item.title_name ? item.title_name + item.title_remark + ' ' + JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text : JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text;
+            tempObj.content = item.title_name ? item.title_name + (item.title_remark || '') + ' ' + JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text : JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text;
             tempObj.major = item.major_name;
             tempObj.type_name = item.bug_type_name;
             tempObj.last_remark = item.last_remark;
