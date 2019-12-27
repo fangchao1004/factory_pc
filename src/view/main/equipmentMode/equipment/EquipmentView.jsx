@@ -396,19 +396,17 @@ class EquipmentView extends Component {
     ///2 左边的二级抽屉，显示该巡检点任意一次的record记录 
     ///3 右边的独立的一级抽屉，显示该巡检点最新一次的record记录 
     openDrawer = async (record, v) => {
-        // console.log('record:',record);
         if (!record) { message.warn('无记录数据'); return }
         // if (record.device_status === 1) {
         //     message.success('正常');
         //     return;
         // }
-        // console.log('JSON.parse(record.content):', JSON.parse(record.content));
         ///对record.content内容进行处理。
         let bug_id_arr = [];
         let bug_key_id_arr = [];///key标题和bugId的对应关系
         let collectAndInputDataList = [];/// 采集组件 和 输入组件 对应的
         JSON.parse(record.content).forEach((item) => {
-            if (item.bug_id !== null) {
+            if (item.bug_id) {
                 bug_id_arr.push(item.bug_id);
                 bug_key_id_arr.push({ key: item.key, bug_id: item.bug_id });
             }
