@@ -94,7 +94,16 @@ class TableView extends Component {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'space-between', width: '102%', marginTop: 20 }}>
                             <div>
-                                <Button type='ghost' onClick={() => { this.setState({ drawerVisible: true, currentTable: element }) }}>修改</Button>
+                                <Button type='ghost' onClick={() => {
+                                    HttpApi.getDeviceInfo({ effective: 1, type_id: element.device_type_id, status: 2 }, (res) => {
+                                        if (res.data.code === 0) {
+                                            if (res.data.data.length > 0) { message.error('使用该表单模版的某类巡检点中，某些巡检点还有未消除的缺陷，请消缺后再尝试变动表单', 5); return }
+                                            else {
+                                                this.setState({ drawerVisible: true, currentTable: element })
+                                            }
+                                        }
+                                    })
+                                }}>修改</Button>
                                 <Button style={{ marginLeft: 20 }} type='primary' onClick={() => { this.openModalHandler(element) }}>详情</Button>
                             </div>
                         </div>
@@ -106,11 +115,17 @@ class TableView extends Component {
         return cellsArr
     }
     onConfirmDeleteHandler = (element) => {
-        ///这里不光要删除 sample,还要把 用该sample的所有某类巡检点的 record 全部删除！！！！
-        HttpApi.obs({ sql: `update samples set effective = 0 where id = ${element.id} ` }, (res) => {
-            // HttpApi.removeSampleInfo({ id: element.id }, (res) => {
+        ///要先判断用这个表单的某类设备中，是否还有是故障状态的。则说明该设备还有缺陷未消除，则不允许删除或修改表单
+        HttpApi.getDeviceInfo({ effective: 1, type_id: element.device_type_id, status: 2 }, (res) => {
             if (res.data.code === 0) {
-                this.init();
+                if (res.data.data.length > 0) { message.error('使用该表单模版的某类巡检点中，某些巡检点还有未消除的缺陷，请消缺后再尝试变动表单', 5); return }
+                else {
+                    HttpApi.obs({ sql: `update samples set effective = 0 where id = ${element.id} ` }, (res) => {
+                        if (res.data.code === 0) {
+                            this.init();
+                        }
+                    })
+                }
             }
         })
     }
