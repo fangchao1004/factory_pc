@@ -64,7 +64,7 @@ class OneRecordDetialView extends Component {
                             }}>图片{i + 1}</Button>)}
                         </span> :
                             ((question.type_id === '10' || question.type_id === '11' || question.type_id === '2') ?
-                                `${question.value}${question.title_remark}` :
+                                `${question.type_id === '11' ? question.value / 1000 : question.value}${question.title_remark}` :
                                 <span style={{ color: 'green' }}>正常</span>)}
                     </Descriptions.Item>
                 })}

@@ -109,6 +109,7 @@ class OneDeviceRecordListView extends Component {
                 placement="left"
                 width={500}
                 closable={false}
+                destroyOnClose
                 onClose={() => { this.setState({ showDetailDrawer: false }) }}
                 visible={this.state.showDetailDrawer}
             >
