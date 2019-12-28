@@ -28,12 +28,12 @@ export default class AllCarView extends Component {
         return new Promise((resolve, reject) => {
             let sql = `select count(*) count from
             (
-            select carNumber,inTime as time, 0 as io from p_record_in_history
-            union all (select carNumber, inTime as time, 0 as io from p_record_in)
-            union all (select carNumber, outTime as time, 1 as io from p_record_out)
+            select terminalId,carNumber,inTime as time, 0 as io from p_record_in_history
+            union all (select terminalId,carNumber, inTime as time, 0 as io from p_record_in)
+            union all (select terminalId,carNumber, outTime as time, 1 as io from p_record_out)
             ) t1
             where time > '${this.state.dateRange[0].startOf('day').format('YYYY-MM-DD HH:mm:ss')}'
-            and time < '${this.state.dateRange[1].endOf('day').format('YYYY-MM-DD HH:mm:ss')}'`;
+            and time < '${this.state.dateRange[1].endOf('day').format('YYYY-MM-DD HH:mm:ss')}' and terminalId = 6`;
             let result = 0;
             HttpApi.obsForcar({ sql }, (res) => {
                 if (res.data.code === 0) { result = res.data.data[0].count }
@@ -45,11 +45,11 @@ export default class AllCarView extends Component {
         return new Promise((resolve, reject) => {
             let sql = `
             select * from
-            (select carNumber,inTime as time, 0 as io from p_record_in_history
-            union all (select carNumber, inTime as time, 0 as io from p_record_in)
-            union all (select carNumber, outTime as time, 1 as io from p_record_out)) as temp
+            (select employeeName,terminalId, carNumber,inTime as time, 0 as io from p_record_in_history
+            union all (select employeeName,terminalId,carNumber, inTime as time, 0 as io from p_record_in)
+            union all (select employeeName,terminalId,carNumber, outTime as time, 1 as io from p_record_out)) as temp
             where time > '${this.state.dateRange[0].startOf('day').format('YYYY-MM-DD HH:mm:ss')}'
-            and time < '${this.state.dateRange[1].endOf('day').format('YYYY-MM-DD HH:mm:ss')}'
+            and time < '${this.state.dateRange[1].endOf('day').format('YYYY-MM-DD HH:mm:ss')}' and terminalId = 6
             order by time desc
             limit ${(currentPage - 1) * 10},10`;
             let result = [];
@@ -79,6 +79,7 @@ export default class AllCarView extends Component {
         }
         const columns = [
             { key: 'carNumber', dataIndex: 'carNumber', title: '车牌' },
+            { key: 'employeeName', dataIndex: 'employeeName', title: '所属单位(人)' },
             {
                 key: 'time', dataIndex: 'time', title: '时间日期',
                 render: (text) => { return <div>{moment(text).utcOffset(0).format('YYYY-MM-DD HH:mm:ss')}</div> }
