@@ -1,8 +1,9 @@
-import React, { Component, Fragment } from 'react';
-import { Checkbox, Input, Divider, Row, Col, Empty } from 'antd';
-import { Testuri } from '../../../util/HttpApi';
+import React, { Component } from 'react';
+import { Descriptions, Button, Modal } from 'antd';
+import HttpApi from '../../../util/HttpApi';
+import { connect } from 'react-redux';
+import { Testuri } from '../../../util/HttpApi'
 
-const { TextArea } = Input;
 /**
  * 一次record记录中所包含的bugs的详情
  * 位于抽屉界面显示
@@ -14,140 +15,67 @@ class OneRecordDetialView extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            renderData: null
+            renderData: null,
+            imguuid: null,
+            imgtitle: null
         }
     }
-    shouldComponentUpdate(nextProps, nextState) {
-        return JSON.stringify(this.state.renderData) !== JSON.stringify(nextProps.renderData)
-    }
-    componentDidMount() {
-        this.setState({ renderData: this.props.renderData })
-    }
-    componentWillReceiveProps(nextProps, nextState) {
-        this.setState({ renderData: nextProps.renderData })
-    }
-    renderView = () => {
-        if (!this.state.renderData) { return }
-        let titleComponent = this.renderTitleView();
-        let bugContentComponent = this.state.renderData.content.length > 0 ? this.renderBugView() : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />;
-        let collectContentComponent = this.state.renderData.collect.length > 0 ? this.renderCollectView() : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />;
-        return (<Fragment>
-            {titleComponent}
-            <Divider orientation="left">缺陷展示:</Divider>
-            {bugContentComponent}
-            <Divider orientation="left">采集数据:</Divider>
-            {collectContentComponent}
-        </Fragment>)
-    }
-    ///渲染标题
-    renderTitleView = () => {
-        return (<div style={{ width: '100%', display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-            <div style={{ fontWeight: 600, fontSize: 24, color: '#40A9FF' }}>{this.state.renderData.table_name || '/'}</div>
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: 16, marginTop: 10, marginBottom: 20 }}>
-                <span>巡检点名: {this.state.renderData.device_name || '/'}</span>
-                <span>上传者: {this.state.renderData.user_name || '/'}</span>
-            </div>
-        </div >)
-    }
-    ///渲染bug界面
-    renderBugView = () => {
-        if (!this.state.renderData) {
-            console.log('this.state.renderData is null return');
-            return;
-        }
-        console.log('渲染bug界面', this.state.renderData.content);
-        ///将content中，bug_id 值不为null都的提取处理
-        this.state.renderData.content.sort((a, b) => {
-            return parseInt(a.key) - parseInt(b.key)
-        })
-        let result = [];
-        // console.log('state.renderData.content:',this.state.renderData);
-        for (const oneBug of this.state.renderData.content) {
-            let oneBugContent = [];
-            oneBugContent.push(<div key={0} >{oneBug.title_name}<span style={{ color: '#40A9FF' }}>{oneBug.title_remark}</span></div>)
-            oneBugContent.push(<div key={1} style={{ marginBottom: 20 }}>{this.renderOneSelectOption(JSON.parse(oneBug.content))}</div>);
-            oneBugContent.push(<div key={2} style={{ marginBottom: 20 }}>{oneBug.major_name ? '缺陷专业 ' + oneBug.major_name : null}</div>);
-            oneBugContent.push(<div key={3} style={{ marginBottom: 20 }}>{this.renderOneTextArea(JSON.parse(oneBug.content))}</div>);
-            oneBugContent.push(<div key={4} style={{ marginBottom: 20 }}>{this.renderOneImg(JSON.parse(oneBug.content))}</div>)
-            result.push(oneBugContent);
-        }
-        return result
-    }
-    ///渲染采集界面
-    renderCollectView = () => {
-        console.log('渲染采集界面', this.state.renderData.collect);
-        let oneBugContent = [];
-        let cell = null;
-        this.state.renderData.collect.forEach(element => {
-            if (element.type_id === '11') {
-                cell = parseFloat(element.value / 1000).toFixed(3);
-            } else if (element.type_id === '10' || element.type_id === '2') {
-                cell = element.value
-            } else if (element.type_id === '6') {
-                cell = element.value.map((oneImgUUID) => { return <img key={oneImgUUID} alt='' src={Testuri + 'get_jpg?uuid=' + oneImgUUID} style={{ width: 450, height: 600, marginTop: 15 }} /> })
-            } else if (element.type_id === '13') {
-                cell = element.title_name
-            }
+    componentDidMount() { this.parseData() }
+    parseData() {
+        const { id, table_name } = this.props.renderData
+        const content = JSON.parse(this.props.renderData.content)
 
-            oneBugContent.push(<div key={element.key} style={{ borderBottomStyle: 'solid', borderBottomColor: '#d0d0d0', borderBottomWidth: element.type_id === '13'? 0:1, marginBottom: 20 }} >
-                {element.type_id === '6' ?
-                    <div>
-                        <div style={{ color: '#40A9FF' }}>{element.title_name}</div>
-                        {cell}
-                    </div>
-                    :
-                    (
-                        element.type_id === '13' ?
-                            <div style={{ color: '#55555', fontSize: 16,fontWeight:500 }}>{cell}</div>
-                            :
-                            <Row>
-                                <Col span={12} style={{ color: '#40A9FF' }}>
-                                    {element.title_name}
-                                </Col>
-                                <Col span={12} >
-                                    {cell}
-                                </Col>
-                            </Row>
-                    )
+        if (content && connect.length > 0) {
+            let index = 0
+            const fillBugInfo = () => {
+                if (index >= content.length) {
+                    // fillBugInfo over
+                    this.setState({ renderData: { id, table_name, content } })
+                } else {
+                    let question = content[index]
+                    HttpApi.getBugInfo({ id: question.bug_id },
+                        res => {
+                            if (res.data && res.data.code === 0 && res.data.data && res.data.data.length > 0) {
+                                question.bug = res.data.data[0]
+                                question.bug.content = JSON.parse(question.bug.content)
+                            }
+                            index++
+                            fillBugInfo()
+                        }, err => {
+                            index++
+                            fillBugInfo()
+                        })
                 }
-            </div>)
-        });
-        return oneBugContent
-    }
-    ///渲染那些选中的选项
-    renderOneSelectOption = (content) => {
-        let select = content.select;
-        let result_arr = [];
-        if (select) {
-            select.split('/').forEach((oneSelectOption) => {
-                result_arr.push(<Checkbox checked disable key={result_arr.length - 1}>{oneSelectOption}</Checkbox>);
-            })
+            }
+            fillBugInfo()
         }
-        return result_arr;
     }
-    ///渲染一个文本域
-    renderOneTextArea = (content) => {
-        return <Fragment>{content.text ? <div>问题描述<TextArea style={{ marginTop: 10 }} value={content.text} /></div> : null}</Fragment>
-    }
-    renderOneImg = (content) => {
-        let imgArr = [];
-        let result = [];
-        // console.log('content:', content.imgs);
-        if (content.imgs.length > 0) {
-            content.imgs.forEach((oneImgUUID) => {
-                imgArr.push(<img key={oneImgUUID} alt='' src={Testuri + 'get_jpg?uuid=' + oneImgUUID} style={{ width: 450, height: 600, marginTop: 15 }} />);
-            })
-            result = [<div key={0}>图片补充</div>, ...imgArr]
-        }
-        return result;
-    }
-
     render() {
-        return (
-            <div>
-                {this.renderView()}
-            </div>
-        );
+        if (!this.state.renderData) { return <></> }
+        return <>
+            <Descriptions title={this.state.renderData.table_name} column={1} bordered>
+                {this.state.renderData.content.map(question => {
+                    // type 10 测温 11 测震 2 数字输入框
+                    return <Descriptions.Item key={question.key + "1"} span={1} label={question.title_name}>
+                        {question.bug && question.bug.content ? <span style={{ color: 'red' }}>
+                            {question.bug.content.text}
+                            {question.bug.content.imgs.map((img, i) => <Button key={i} type="link" onClick={() => {
+                                this.setState({ imguuid: img, imgtitle: '图片' + (i + 1) })
+                            }}>图片{i + 1}</Button>)}
+                        </span> :
+                            ((question.type_id === '10' || question.type_id === '11' || question.type_id === '2') ?
+                                `${question.value}${question.title_remark}` :
+                                <span style={{ color: 'green' }}>正常</span>)}
+                    </Descriptions.Item>
+                })}
+            </Descriptions>
+            <Modal visible={this.state.imguuid !== null} destroyOnClose centered
+                width={410} bodyStyle={{ textAlign: 'center', padding: 5, margin: 0 }} footer={null} onCancel={() => {
+                    this.setState({ imguuid: null })
+                }}>
+                <img alt='' style={{ width: 400 }} src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} />
+            </Modal>
+        </>
     }
 }
 

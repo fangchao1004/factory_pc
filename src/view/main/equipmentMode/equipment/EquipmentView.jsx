@@ -296,7 +296,7 @@ class EquipmentView extends Component {
                     closable={false}
                     onClose={this.onCloseDrawer}
                     visible={this.state.drawerVisible1}
-                    width={600}
+                    width={document.documentElement.clientWidth / 2}
                 >
                     {this.renderDeviceRecordsView()}
                     <Divider orientation="left"></Divider>
@@ -309,8 +309,9 @@ class EquipmentView extends Component {
                             <span>{this.state.oneRecordData.checkedAt}</span>
                         </div>}
                         placement="left"
-                        width={500}
+                        width={document.documentElement.clientWidth / 2}
                         closable={false}
+                        destroyOnClose
                         onClose={this.closeDrawer2}
                         visible={this.state.drawerVisible2}
                     >
@@ -323,8 +324,9 @@ class EquipmentView extends Component {
                         <span>{this.state.oneRecordData.checkedAt}</span>
                     </div>}
                     placement="right"
-                    width={500}
+                    width={document.documentElement.clientWidth / 2}
                     closable={false}
+                    destroyOnClose
                     onClose={this.closeDrawer3}
                     visible={this.state.drawerVisible3}
                 >
@@ -396,57 +398,15 @@ class EquipmentView extends Component {
     ///2 左边的二级抽屉，显示该巡检点任意一次的record记录 
     ///3 右边的独立的一级抽屉，显示该巡检点最新一次的record记录 
     openDrawer = async (record, v) => {
-        if (!record) { message.warn('无记录数据'); return }
-        // if (record.device_status === 1) {
-        //     message.success('正常');
-        //     return;
-        // }
-        ///对record.content内容进行处理。
-        let bug_id_arr = [];
-        let bug_key_id_arr = [];///key标题和bugId的对应关系
-        let collectAndInputDataList = [];/// 采集组件 和 输入组件 对应的
-        JSON.parse(record.content).forEach((item) => {
-            if (item.bug_id) {
-                bug_id_arr.push(item.bug_id);
-                bug_key_id_arr.push({ key: item.key, bug_id: item.bug_id });
-            }
-            if (item.type_id === '2' || item.type_id === '6' || item.type_id === '10' || item.type_id === '11' || item.type_id === '13') { /// 2 数字输入框 6 图片选择器 10 测温 11 测振
-                collectAndInputDataList.push(item);
-            }
-        })
-        let bugs_info_arr = [];
-        if (bug_id_arr.length > 0) {
-            bugs_info_arr = await this.getBugsInfo(bug_id_arr);
-            ///将key 合并到 bugs_info_arr中
-            bugs_info_arr.forEach((oneBugInfo) => {
-                bug_key_id_arr.forEach((one_key_bug_id) => {
-                    if (oneBugInfo.id === one_key_bug_id.bug_id) {
-                        oneBugInfo.key = one_key_bug_id.key
-                    }
-                })
-            })
-        }
-        // console.log('待渲染的缺陷数据:', bugs_info_arr);
-        // console.log('待渲染的测量数据和输入数据:', collectAndInputDataList);
-
-        let oneRecordData = {
-            table_name: record.table_name,
-            device_name: record.device_name,
-            user_name: record.user_name,
-            content: bugs_info_arr,///bugs数据
-            collect: collectAndInputDataList,///采集的数据
-            updatedAt: record.updatedAt,
-            checkedAt: record.checkedAt
-        }
         if (v === 2) {
             this.setState({
                 drawerVisible2: true,
-                oneRecordData
+                oneRecordData: record
             })
         } else if (v === 3) {
             this.setState({
                 drawerVisible3: true,
-                oneRecordData
+                oneRecordData: record
             })
         }
     }
