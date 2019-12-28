@@ -173,9 +173,7 @@ export default class EditableTable extends Component {
           bordered
           dataSource={dataSource}
           columns={columns}
-          pagination={{
-            pageSize: 100
-          }}
+          pagination={false}
         />
         <Modal
           // confirmLoading={this.state.modalvisible}
@@ -311,7 +309,7 @@ export default class EditableTable extends Component {
     sample_data.table_name = table_name;
     sample_data.content = JSON.stringify(contentArr);
 
-    console.log("模版数据L：", sample_data);
+    // console.log("模版数据L：", sample_data);
     HttpApi.uploadSample(sample_data, (res) => {
       // console.log(res);
       if (res.data.code === 0) {

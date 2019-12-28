@@ -251,9 +251,7 @@ class EditTable extends Component {
                     dataSource={this.state.dataSource}
                     components={this.components}
                     columns={this.columns}
-                    pagination={{
-                        pageSize: 100
-                    }}
+                    pagination={false}
                     onRow={(record, index) => ({
                         index,
                         moveRow: this.moveRow

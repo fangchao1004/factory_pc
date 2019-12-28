@@ -78,44 +78,10 @@ class OneDeviceRecordListView extends Component {
 
     openDrawer = async (record) => {
         if (!record) { message.warn('无记录数据'); return }
-        let bug_id_arr = [];
-        let bug_key_id_arr = [];///key标题和bugId的对应关系
-        let collectAndInputDataList = [];/// 采集组件 和 输入组件 对应的
-        JSON.parse(record.content).forEach((item) => {
-            if (item.bug_id !== null) {
-                bug_id_arr.push(item.bug_id);
-                bug_key_id_arr.push({ key: item.key, bug_id: item.bug_id });
-            }
-            if (item.type_id === '2' || item.type_id === '6' || item.type_id === '10' || item.type_id === '11' || item.type_id === '13') {
-                collectAndInputDataList.push(item);
-            }
-        })
-        let bugs_info_arr = [];
-        if (bug_id_arr.length > 0) {
-            bugs_info_arr = await this.getBugsInfo(bug_id_arr);
-            ///将key 合并到 bugs_info_arr中
-            bugs_info_arr.forEach((oneBugInfo) => {
-                bug_key_id_arr.forEach((one_key_bug_id) => {
-                    if (oneBugInfo.id === one_key_bug_id.bug_id) {
-                        oneBugInfo.key = one_key_bug_id.key
-                    }
-                })
-            })
-        }
-
-        let oneRecordData = {
-            table_name: record.table_name,
-            device_name: record.device_name,
-            user_name: record.user_name,
-            content: bugs_info_arr,///bugs数据
-            collect: collectAndInputDataList,///采集的数据
-            updatedAt: record.updatedAt,
-            checkedAt: record.checkedAt
-        }
         this.setState({
             selectRecord: record,
             showDetailDrawer: true,
-            oneRecordData
+            oneRecordData: record
         })
     }
     getBugsInfo = (bug_id_arr) => {
