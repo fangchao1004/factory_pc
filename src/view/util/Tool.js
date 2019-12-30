@@ -412,3 +412,17 @@ export async function getSomeOneBugsCountToday(oneId) {
         })
     })
 }
+/**
+ * 判断今日距离某一天的天数是不是奇数
+ * 距离2019年1月1日 00:00:00的天数
+ * 
+ * @param {Date} paramDate 传入参数 date类型
+ * @returns {Boolean} isOdd 是不是奇数天
+ */
+export function getTodayIsOdd(paramDate = moment().startOf('day').toDate()) {
+    let originDate = new Date(2019, 0, 1, 0, 0, 0, 0)
+    let duringDate = (paramDate.getTime() - originDate.getTime()) / (24 * 1000 * 3600);
+    let isOdd = duringDate % 2 === 1; ///奇数天
+    // console.log('天数：', duringDate)
+    return isOdd;
+}

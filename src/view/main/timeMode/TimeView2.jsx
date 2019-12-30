@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Button, TreeSelect, message, DatePicker, Popconfirm } from 'antd';
+import { Table, Button, TreeSelect, message, Popconfirm } from 'antd';
 import moment from 'moment';
 import HttpApi from '../../util/HttpApi';
 import RecordDetailByTime from './RecordDetailByTime';
@@ -12,10 +12,10 @@ var allowTime_map_device_name;
 var allow_time_name;
 /**
  * 时间区间 模块界面
- * 这个选项卡中，如果是奇数天 就显示 allow_time
- * 偶数天 就显示 allow_time2
+ * 这个选项卡中，如果是奇数天 就显示 allow_time2
+ * 偶数天 就显示 allow_time1
  */
-class TimeView extends Component {
+class TimeView2 extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -36,8 +36,8 @@ class TimeView extends Component {
         this.init();
     }
     exchangeSearhTarget = (isOdd) => {
-        allow_time_name = isOdd ? 'allow_time' : 'allow_time2'
-        allowTime_map_device_name = isOdd ? 'allowTime_map_device' : 'allowTime_map_device2'
+        allow_time_name = !isOdd ? 'allow_time' : 'allow_time2'
+        allowTime_map_device_name = !isOdd ? 'allowTime_map_device' : 'allowTime_map_device2'
     }
     closeHandler = () => {
         this.setState({
@@ -213,15 +213,7 @@ class TimeView extends Component {
         const { dataSource } = this.state;
         const columns = [
             {
-                title: <div><span style={{ marginRight: 10 }}>日期选择</span> <DatePicker disabledDate={this.disabledDate} value={this.state.selectTime} onChange={(v) => {
-                    if (v) {
-                        this.setState({ selectTime: v }, () => {
-                            let isOdd = getTodayIsOdd(v.startOf('day').toDate());
-                            this.exchangeSearhTarget(isOdd);
-                            this.init()
-                        })
-                    } else { message.warn('请选择日期'); }
-                }} /></div>,
+                title: <div><span style={{ marginRight: 10 }}>日期选择</span> </div>,
                 dataIndex: '/',
                 width: 280,
                 align: 'center',
@@ -254,14 +246,15 @@ class TimeView extends Component {
                     </div>;
                 }
             },
+            // {
+            //     title: '实际有效巡检数',
+            //     dataIndex: 'actually',
+            // },
+            // {
+            //     title: '巡检人员',
+            //     dataIndex: 'checkMan',
+            // },
             {
-                title: '实际有效巡检数',
-                dataIndex: 'actually',
-            },
-            {
-                title: '巡检人员',
-                dataIndex: 'checkMan',
-            }, {
                 title: '操作',
                 dataIndex: 'actions',
                 render: (text, record) => (
@@ -305,4 +298,4 @@ class TimeView extends Component {
     }
 }
 
-export default TimeView;
+export default TimeView2;
