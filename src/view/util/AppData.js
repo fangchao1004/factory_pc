@@ -17,7 +17,7 @@ export const tableCellOptionsData = [
     { "value": "13", "text": "副标题" }];
 
 export const VersionlistData = [
-    { title: '版本号', description: 'V 1.4.2' },
+    { title: '版本号', description: 'V 1.4.3' },
     // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
     // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
     // { title: '更新', description: '1.0.9 添加巡检点信息修改功能' }
@@ -56,4 +56,5 @@ export const VersionlistData = [
     // { title: '更新', description: '1.4.0 修改和删除表单-增加了限制。只有当该类的设备中都为正常时（没有缺陷时）才能变动表单' }
     // { title: '更新', description: '1.4.1 巡检详情界面展示改动-展示所有信息' }
     // { title: '更新', description: '1.4.2 支持巡检时间表单来回替换' }
+    // { title: '更新', description: '1.4.3 人员被删除后，任务模块显示空对象的问题' }
 ]

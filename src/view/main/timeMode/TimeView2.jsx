@@ -38,6 +38,7 @@ class TimeView2 extends Component {
     exchangeSearhTarget = (isOdd) => {
         allow_time_name = !isOdd ? 'allow_time' : 'allow_time2'
         allowTime_map_device_name = !isOdd ? 'allowTime_map_device' : 'allowTime_map_device2'
+        console.log('替换：', allow_time_name, allowTime_map_device_name)
     }
     closeHandler = () => {
         this.setState({

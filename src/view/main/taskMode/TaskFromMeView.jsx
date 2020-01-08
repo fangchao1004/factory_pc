@@ -285,7 +285,7 @@ class TaskFromMeView extends Component {
                 dataIndex: 'toArrname',
                 width: '20%',
                 render: (text, record) => {
-                    return <div>{text.join(',')}</div>
+                    return <div>{text.join(',') || '/'}</div>
                 }
             },
             {

@@ -182,7 +182,7 @@ class TaskToMeView extends Component {
                         }
                         return false
                     })
-                    return <span>{u.name}</span>
+                    return <span>{u ? u.name : '/'}</span>
                 }
             },
             {
