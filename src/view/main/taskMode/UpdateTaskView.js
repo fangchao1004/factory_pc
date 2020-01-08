@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react'
-import { Modal, Form, Input, Select, DatePicker, Switch, Button, Divider, Steps, message } from 'antd'
+import { Modal, Form, Input, Select, DatePicker, Switch, Button, Divider, Steps, message, Popconfirm } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 const { Step } = Steps;
@@ -81,10 +81,11 @@ export default function UpdateTaskView(props) {
             }
         })
     }, [])
+    /**
+     * 已完成
+     */
     const handlerOk = () => {
-        let newTask = JSON.parse(JSON.stringify(props.task));
-        newTask.status = 1;
-        props.onOk(newTask)
+        updateStepRemark(1, 1, '已完成，待检');
     }
     /**
      * 渲染步骤条中的组件
@@ -131,15 +132,18 @@ export default function UpdateTaskView(props) {
     /**
      * 更新步骤数据 类似于修改
      * @param {Number} currentStep  当前所在步骤  0是分配完成 1是执行人的备注
+     * @param {Number} targetStatus 任务的status目标状态 0初始化状态未完成状态(已经分配了人员)    1人员已经完成了该任务 待验收确认的状态  2任务发布者已经验收通过处理完结状态
+     * @param {String} defaultRmkTxt 默认备注
      */
-    const updateStepRemark = (currentStep) => {
+    const updateStepRemark = (currentStep, targetStatus = 0, defaultRmkTxt = null) => {
         if (!props.task.step_remark) { message.warning('老的任务数据中-不包含步骤数据-请创建新的任务'); return }
         let oldStepRemarkCopy = JSON.parse(props.task.step_remark);
         let currentList = oldStepRemarkCopy[currentStep]
-        currentList.push({ from: userinfo.id + '', remark: remarkText ? remarkText : '已收到，开始处理', time: moment().format('YYYY-MM-DD HH:mm:ss') });
+        currentList.push({ from: userinfo.id + '', remark: remarkText ? remarkText : defaultRmkTxt, time: moment().format('YYYY-MM-DD HH:mm:ss') });
         oldStepRemarkCopy[currentStep] = currentList;
         let newValues = {
-            step_remark: JSON.stringify(oldStepRemarkCopy)
+            step_remark: JSON.stringify(oldStepRemarkCopy),
+            status: targetStatus
         }
         props.onOk(newValues, true);
         setRemarkText(null)
@@ -170,26 +174,28 @@ export default function UpdateTaskView(props) {
         visible={props.visible}
         onCancel={props.onCancel}
         footer={
-            props.task && props.task.status === 1 ?
-                null :
+            props.task && props.task.status < 1 ?
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <div>
-                        <Button onClick={() => { updateStepRemark(1); }}>{remarkText ? '说明情况' : '收到-开始处理'}</Button>
+                        <Button onClick={() => { updateStepRemark(1, 0, '已收到，开始处理'); }}>{remarkText ? '说明情况' : '收到-开始处理'}</Button>
                         <Input style={{ width: 300, marginLeft: 30 }} placeholder="可以输入备注说明" value={remarkText} onChange={(e) => { setRemarkText(e.target.value) }} />
                     </div>
                     <div>
                         <Button onClick={props.onCancel}>取消</Button>
-                        <Button type={'primary'} onClick={handlerOk}>已完成</Button>
+                        <Popconfirm title="确定已完成进入待检吗?" onConfirm={() => handlerOk()}>
+                            <Button type={'primary'}>已完成-送检</Button>
+                        </Popconfirm>
                     </div>
-                </div>
+                </div> : null
         }
     >
         <TaskForm ref={taskFormRef} users={users} task={props.task}></TaskForm>
         <Divider orientation="left">当前进度</Divider>
         <Steps direction="vertical" size="small" current={props.task && props.task.status + 1}>
             <Step title='任务分配' description={renderStatusX(0)} />
-            <Step title='处理过程' description={renderStatusX(1)} />
-            <Step title='已完成' />
+            <Step title='正在处理' description={renderStatusX(1)} />
+            <Step title='待检' description={renderStatusX(2)} />
+            <Step title='完结' />
         </Steps>
     </Modal>
 }

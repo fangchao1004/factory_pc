@@ -215,9 +215,12 @@ export default function PreviewTaskView(props) {
 
     /**
      * 更新步骤数据 类似于修改
-     * @param {Number} currentStep  当前所在步骤  0是分配完成 1是执行人的备注
+     * @param {Number} currentStep  当前所在步骤  0是分配完成 1是执行人的备注 
+     * @param {Number} targetStatus 任务的status目标状态 0初始化状态未完成状态(已经分配了人员)    1人员已经完成了该任务 待验收确认的状态  2任务发布者已经验收通过处理完结状态
+     * @param {String} defaultRmkTxt 默认备注
+     * @param {Boolean} isOnlySendMessAgain 是否一定要再发送一次短信  这里发送的短信模版是 你有任务未完成的任务，请及时处理
      */
-    const updateStepRemark = (currentStep) => {
+    const updateStepRemark = (currentStep, targetStatus = 0, defaultRmkTxt = null, isOnlySendMessAgain = false) => {
         if (!props.task.step_remark) { message.warning('老的任务数据中-不包含步骤数据-请创建新的任务'); return }
         TaskFormRef.current.validateFields((error, values) => {
             if (!error) {
@@ -225,7 +228,11 @@ export default function PreviewTaskView(props) {
                 let toStr = values.to.join(',');
                 let oldStepRemarkCopy = JSON.parse(props.task.step_remark);
                 let currentList = oldStepRemarkCopy[currentStep]
-                currentList.push({ from: userinfo.id + '', to: toStr, remark: remarkText, time: moment().format('YYYY-MM-DD HH:mm:ss') });
+                if (isOnlySendMessAgain) {///利用要不要另外发短信通知的标识位 来判断 是任务在修改，人员重新分配，还是仅仅在任务验收阶段。 要不要添加 to 这里字段到 步骤json中
+                    currentList.push({ from: userinfo.id + '', to: toStr, remark: remarkText || defaultRmkTxt, time: moment().format('YYYY-MM-DD HH:mm:ss') });
+                } else {
+                    currentList.push({ from: userinfo.id + '', remark: remarkText || defaultRmkTxt, time: moment().format('YYYY-MM-DD HH:mm:ss') });
+                }
                 // console.log('currentList:', currentList);
                 oldStepRemarkCopy[currentStep] = currentList;
                 let newValues = {
@@ -235,13 +242,14 @@ export default function PreviewTaskView(props) {
                     overTime: values.overTime.toDate().getTime(),
                     isMessage: values.isMessage ? 1 : 0,
                     remark: values.remark,
-                    step_remark: JSON.stringify(oldStepRemarkCopy)
+                    step_remark: JSON.stringify(oldStepRemarkCopy),
+                    status: targetStatus,
                 }
-                // console.log('newValues:', newValues);
-                props.onOk(newValues, true);
+                props.onOk(newValues, isOnlySendMessAgain, true);///是否一定要再发送一次短信
                 setIsEditeable(false)
                 setIsExtra(false)
                 setStaffIsEditeable(false);
+                setRemarkText(null)
             }
         })
     }
@@ -279,30 +287,37 @@ export default function PreviewTaskView(props) {
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div>
                     {!isStaffEditable ?
-                        <Button disabled={props.task && props.task.status === 1} onClick={() => { setStaffIsEditeable(true); setIsExtra(false); setRemarkText(null) }}>人员重新分配</Button> :
+                        (props.task && props.task.status > 0 ? null : <Button disabled={props.task && props.task.status > 0} onClick={() => { setStaffIsEditeable(true); setIsExtra(false); setRemarkText(null) }}>人员重新分配</Button>) :
                         <div style={{ flexDirection: 'column' }}>
-                            <Button type='primary' onClick={() => { setStaffIsEditeable(false); setIsExtra(false); updateStepRemark(0); }}>确认分配</Button>
+                            <Button type='primary' onClick={() => { setStaffIsEditeable(false); setIsExtra(false); updateStepRemark(0, 0, null, true); }}>确认分配</Button>
                             <Input style={{ width: 300, marginLeft: 30 }} placeholder="可以输入备注说明" value={remarkText} onChange={(e) => { setRemarkText(e.target.value) }} />
                         </div>
                     }
                 </div>
                 <div>
-                    <Button onClick={() => { props.onCancel(); setIsEditeable(false); setIsExtra(false); setStaffIsEditeable(false); }}>取消</Button>
+                    {/* <Button onClick={() => { props.onCancel(); setIsEditeable(false); setIsExtra(false); setStaffIsEditeable(false); }}>取消</Button> */}
                     {isEditable ? null :
-                        (props.task && props.task.status === 1 ?
-                            <Button type={'danger'} onClick={() => { setIsEditeable(true); setIsExtra(true); }}>追加任务内容</Button> :
-                            <Button type={'danger'} onClick={() => { setIsEditeable(true); setIsExtra(false); }}>修改任务内容</Button>)}
+                        (props.task && props.task.status === 0 ? <Button type={'danger'} onClick={() => { setIsEditeable(true); setIsExtra(false); }}>修改任务内容</Button> : (
+                            props.task && props.task.status === 1 ?
+                                <span>
+                                    <Input style={{ width: 300, marginLeft: 30 }} placeholder="可以输入备注说明" value={remarkText} onChange={(e) => { setRemarkText(e.target.value) }} />
+                                    <Popconfirm title="确定打回吗?" onConfirm={() => { updateStepRemark(2, 0, '任务未完成打回', false) }}><Button style={{ marginLeft: 10 }} type='danger'>任务未完成打回</Button></Popconfirm>
+                                    <Popconfirm title="确定完结该任务吗?" onConfirm={() => { updateStepRemark(2, 2, '任务确认已完成', false) }}><Button type='primary'>任务确认已完成</Button></Popconfirm>
+                                </span>
+                                : <Button type={'danger'} onClick={() => { setIsEditeable(true); setIsExtra(true); }}>追加任务内容</Button>))}
                     {isEditable ? (isExtra ? <Button type={'primary'} onClick={handlerAdd}>确定追加</Button> : <Button type={'primary'} onClick={() => { handlerOk() }}>确定修改</Button>)
                         : null}
                 </div>
             </div>
-        }>
+        }
+    >
         <TaskForm ref={TaskFormRef} isEditable={isEditable} isStaffEditable={isStaffEditable} isExtra={isExtra} users={users} task={props.task} sendMessAgain={sendMessAgain}></TaskForm>
         <Divider orientation="left">当前进度</Divider>
         <Steps direction="vertical" size="small" current={props.task && props.task.status + 1}>
             <Step title='任务分配' description={renderStatusX(0)} />
-            <Step title='处理过程' description={renderStatusX(1)} />
-            <Step title='已完成' />
+            <Step title='正在处理' description={renderStatusX(1)} />
+            <Step title='待检' description={renderStatusX(2)} />
+            <Step title='完结' />
         </Steps>
     </Modal>
 }

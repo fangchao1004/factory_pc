@@ -9,7 +9,7 @@ import { showTaskNum } from '../../../redux/actions/TaskAction';
 var storage = window.localStorage;
 var userinfo;
 var currentTime = moment().toDate().getTime();
-var task_status_filter = [{ text: '已完成', value: 1 }, { text: '未完成', value: 0 }];///用于筛选任务状态的数据 选项
+var task_status_filter = [{ text: '未完成', value: 0 }, { text: '待检', value: 1 }, { text: '完结', value: 2 }];///用于筛选任务状态的数据 选项
 /**
  * 给我的任务界面
  */
@@ -216,7 +216,8 @@ class TaskToMeView extends Component {
                     let str = '';
                     let remain_time = record.overTime - currentTime; ///剩余时间 ms
                     let one_day_time = 24 * 60 * 60 * 1000; ///一天的时间 ms
-                    if (text === 1) { str = '已完成'; strColor = 'blue' }
+                    if (text === 2) { str = '完结'; strColor = 'blue' }
+                    else if (text === 1) { str = '待检'; strColor = 'purple' }
                     else {
                         str = '未完成';
                         if (remain_time > 0) {
