@@ -130,7 +130,7 @@ class HomePageView extends Component {
             let dataObj = { datasource: item.count_data, title: item.label, checkMan: item.users_name }
             // console.log('dataObj:',dataObj);
             cellsArr.push(
-                <Col span={8} key={index}>
+                <Col span={8} key={index} style={{ marginTop: -5 }}>
                     <PieView data={dataObj} />
                 </Col>
             )
@@ -140,13 +140,13 @@ class HomePageView extends Component {
 
     render() {
         return (
-            <div style={{ marginTop: -16, paddingLeft: 10, paddingRight: 10 }}>
-                <Row gutter={5}>
+            <div style={{ marginTop: -10 }}>
+                <Row gutter={10}>
                     {this.renderPieView()}
                 </Row>
                 <Row gutter={10}>
                     <Col span={24}>
-                        <div style={{ marginTop: 16, marginBottom: 20 }}>
+                        <div style={{ marginTop: 10 }}>
                             <LineChartView />
                         </div>
                     </Col>

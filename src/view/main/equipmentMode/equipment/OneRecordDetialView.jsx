@@ -24,7 +24,6 @@ class OneRecordDetialView extends Component {
     parseData() {
         const { id, table_name } = this.props.renderData
         const content = JSON.parse(this.props.renderData.content)
-
         if (content && connect.length > 0) {
             let index = 0
             const fillBugInfo = () => {
@@ -33,18 +32,23 @@ class OneRecordDetialView extends Component {
                     this.setState({ renderData: { id, table_name, content } })
                 } else {
                     let question = content[index]
-                    HttpApi.getBugInfo({ id: question.bug_id },
-                        res => {
-                            if (res.data && res.data.code === 0 && res.data.data && res.data.data.length > 0) {
-                                question.bug = res.data.data[0]
-                                question.bug.content = JSON.parse(question.bug.content)
-                            }
-                            index++
-                            fillBugInfo()
-                        }, err => {
-                            index++
-                            fillBugInfo()
-                        })
+                    if (question.bug_id) {
+                        HttpApi.getBugInfo({ id: question.bug_id },
+                            res => {
+                                if (res.data && res.data.code === 0 && res.data.data && res.data.data.length > 0) {
+                                    question.bug = res.data.data[0]
+                                    question.bug.content = JSON.parse(question.bug.content)
+                                }
+                                index++
+                                fillBugInfo()
+                            }, err => {
+                                index++
+                                fillBugInfo()
+                            })
+                    } else {
+                        index++
+                        fillBugInfo()
+                    }
                 }
             }
             fillBugInfo()

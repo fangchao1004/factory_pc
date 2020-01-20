@@ -33,17 +33,16 @@ class StaffModeRoot extends Component {
 
     render() {
         return (
-            <div>
-                <Card
-                    bordered={false}
-                    style={{ width: '100%' }}
-                    tabList={tabListNoTitle}
-                    activeTabKey={this.state.noTitleKey}
-                    onTabChange={(key) => { this.onTabChange(key); }}
-                >
-                    {contentListNoTitle[this.state.noTitleKey]}
-                </Card>
-            </div>
+            <Card
+                bodyStyle={{ padding: 20 }}
+                bordered={false}
+                style={{ width: '100%' }}
+                tabList={tabListNoTitle}
+                activeTabKey={this.state.noTitleKey}
+                onTabChange={(key) => { this.onTabChange(key); }}
+            >
+                {contentListNoTitle[this.state.noTitleKey]}
+            </Card>
         );
     }
 }

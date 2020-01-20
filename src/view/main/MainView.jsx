@@ -17,6 +17,7 @@ import CarModeRoot from './carMode/CarModeRoot'
 import AttendanceModeRoot from './attendanceMode/AttendanceModeRoot'
 import ScheduleRoot from './scheduleMode/ScheduleRoot'
 import TansactionApplyModeRoot from './tansactionApplyMode/TansactionApplyModeRoot'
+import SchemeModeRoot from './schemeMode/SchemeModeRoot'
 import UserMenuView from './userMenu/UserMenuView'
 import HttpApi from '../util/HttpApi';
 import Store from '../../redux/store/Store';
@@ -185,6 +186,11 @@ export default class MainView extends Component {
                                 <span>巡检时间段</span>
                                 <Link to={`${this.props.match.url}/time`} />
                             </Menu.Item>
+                            {this.state.isAdmin ? <Menu.Item key="巡检方案">
+                                <Icon type="edit" />
+                                <span>巡检方案</span>
+                                <Link to={`${this.props.match.url}/scheme`} />
+                            </Menu.Item> : null}
                         </SubMenu>
                         <SubMenu key="缺陷" title={
                             <span>
@@ -265,7 +271,7 @@ export default class MainView extends Component {
                     </Menu>
                 </Sider>
                 <Layout>
-                    <Header style={{ background: '#fff', padding: 0 }}>
+                    <Header style={{ background: '#fff', padding: 0, borderBottomStyle: 'solid', borderBottomWidth: 1, borderBottomColor: '#e8e8e8' }}>
                         <Row>
                             <Col span={2}>
                                 <Icon className="trigger" style={{ fontSize: 24, marginLeft: 30 }} type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'} onClick={this.toggle} />
@@ -294,7 +300,7 @@ class ContentView extends Component {
         return false ///目的是让 MainView中重新渲染时，ContentView 始终不会被重复渲染
     }
     render() {
-        return <Content style={{ background: '#fff', margin: 26, paddingTop: 20, paddingLeft: 0, paddingRight: 0, minHeight: 280, height: '100%' }}>
+        return <Content style={{ background: '#fff', minHeight: 280, height: '100%' }}>
             <section>
                 <Route
                     exact
@@ -369,6 +375,11 @@ class ContentView extends Component {
                     exact
                     path={`${this.props.match.path}/schedule`}
                     component={() => (storage.getItem('userinfo') ? <ScheduleRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/scheme`}
+                    component={() => (storage.getItem('userinfo') ? <SchemeModeRoot /> : <Redirect to='/' />)}
                 />
             </section>
         </Content>

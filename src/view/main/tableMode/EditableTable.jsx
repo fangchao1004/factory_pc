@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
-import { Table, Input, Button, Popconfirm, Select, Modal, message, Row, Col } from 'antd';
+import { Table, Input, Button, Popconfirm, Select, Modal, message, Row, Col, Icon } from 'antd';
 import SampleViewTool from '../../util/SampleViewTool';
 import HttpApi from '../../util/HttpApi'
 import { tableCellOptionsData } from '../../util/AppData'
 const Option = Select.Option;
-
+var OptionsOfDateScheme = [];
+var OptionsOfAllowTimeScheme = [];
+var OptionsOfTitle = [];
+var haveExistSampleIDs = [];
 /**
  * 表格创建区---只用于创建模版
  */
@@ -12,53 +15,85 @@ export default class EditableTable extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      titleData: [],
       uploadLoading: false,
+      dataSource: [],
+      count: "1",
+      modalvisible: false,
+      sampleView: null,
+    };
+  }
+
+  componentDidMount() {
+    this.init();
+  }
+  init = async () => {
+    await this.getSampleData();
+    this.getTitleData();
+    this.getDateSchemeData();
+    this.getAllowTimeSchemeData();
+    this.setState({
       dataSource: [{
         key: '0',
         title_name: '表头',
         type_id: '7',
         default_values: '',
         title_remark: ''
-      }],
-      count: "1",
-      modalvisible: false,
-      sampleView: null,
-      haveExistSampleIDs: []
-    };
-  }
-
-  componentDidMount() {
-    this.getTitleData();
-    this.getSampleData();
+      }]
+    })
   }
 
   getTitleData = () => {
     HttpApi.getDeviceTypeInfo({ effective: 1 }, (res) => {
       if (res.data.code === 0) {
-        // console.log(res.data.data);
         let copyArrData = JSON.parse(JSON.stringify(res.data.data))
         let titleDataArr = [];
         copyArrData.forEach(element => {
           titleDataArr.push({ "value": element.id + "", "text": element.sample_name })
         });
-        this.setState({
-          titleData: titleDataArr
+        OptionsOfTitle.length = 0;
+        titleDataArr.forEach((item, index) => {
+          OptionsOfTitle.push(<Option key={index} disabled={haveExistSampleIDs.indexOf(item.value) !== -1} value={item.value}>{item.text}</Option>)
         })
       }
     })
   }
 
   getSampleData = () => {
-    HttpApi.getSampleInfo({ effective: 1 }, (res) => {
+    return new Promise((resolve, reject) => {
+      HttpApi.getSampleInfo({ effective: 1 }, (res) => {
+        if (res.data.code === 0) {
+          // console.log(res.data.data);
+          let sampleIdArr = [];
+          res.data.data.forEach(element => {
+            sampleIdArr.push(element.device_type_id + "")
+          });
+          haveExistSampleIDs = sampleIdArr;
+          resolve(true);
+        }
+      })
+    })
+  }
+
+  getDateSchemeData = () => {
+    let sql = `select * from scheme_of_cycleDate where effective = 1`
+    HttpApi.obs({ sql }, (res) => {
       if (res.data.code === 0) {
-        // console.log(res.data.data);
-        let sampleIdArr = [];
-        res.data.data.forEach(element => {
-          sampleIdArr.push(element.device_type_id + "")
-        });
-        this.setState({
-          haveExistSampleIDs: sampleIdArr
+        // console.log('getDateSchemeData:', res.data.data);
+        OptionsOfDateScheme.length = 0;
+        res.data.data.forEach((item, index) => {
+          OptionsOfDateScheme.push(<Option key={index} value={item.id}>{item.title}</Option>)
+        })
+      }
+    })
+  }
+  getAllowTimeSchemeData = () => {
+    let sql = `select * from scheme_of_allowTime where effective = 1`
+    HttpApi.obs({ sql }, (res) => {
+      if (res.data.code === 0) {
+        // console.log('getAllowTimeSchemeData:', res.data.data);
+        OptionsOfAllowTimeScheme.length = 0;
+        res.data.data.forEach((item, index) => {
+          OptionsOfAllowTimeScheme.push(<Option key={index} value={item.id}>{item.title}</Option>)
         })
       }
     })
@@ -79,20 +114,25 @@ export default class EditableTable extends Component {
           )
         }
       }, {
-        title: '标题备注',
+        title: '说明',
         dataIndex: 'title_remark',
         render: (text, record) => {
-          return (
-            <Input disabled={record.type_id !== '12' && record.type_id !== '2'}
-              placeholder={record.type_id === '12' ? '可以输入标题备注' : (record.type_id === '2' ? '可以输入单位' : '/')}
-              value={text} onChange={(e) => this.onChangeHandler(record, e.target.value, "title_remark")}></Input>
-          )
+          if (record.key === '0') {
+            return <Select showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }} style={{ width: "100%" }}
+              placeholder='请选择表单类型' value={record.default_values}
+              onChange={(value, option) => this.onChangeHandler(record, value, "default_values", option.props.children)}
+            >
+              {OptionsOfTitle}
+            </Select>
+          }
+          return <Input disabled={record.type_id !== '12' && record.type_id !== '2'}
+            placeholder={record.type_id === '12' ? '可以输入标题备注' : (record.type_id === '2' ? '可以输入单位' : '/')}
+            value={text} onChange={(e) => this.onChangeHandler(record, e.target.value, "title_remark")}></Input>
         }
       }, {
         title: '元素类型',
         dataIndex: 'type_id',
         render: (text, record) => {
-          // console.log(record);
           let Options = [];
           tableCellOptionsData.forEach((item) => {
             if (record.key === '0') {
@@ -110,33 +150,34 @@ export default class EditableTable extends Component {
             </Select>
           )
         }
-      }, {
-        title: '选择器的选项',
-        dataIndex: 'default_values',
+      },
+      {
+        title: '日期方案',
+        dataIndex: 'cyc_scheme_id',
         render: (text, record) => {
-          let Options = [];
-          this.state.titleData.forEach((item) => {
-            Options.push(<Option key={item.value} disabled={this.state.haveExistSampleIDs.indexOf(item.value) !== -1} value={item.value}>{item.text}</Option>)
-          })
-          return (
-            record.type_id === '7' ? ///标题--不可修改---是个选项
-              <Select showSearch={true} filterOption={(inputValue, option)=>{return option.props.children.indexOf(inputValue)!==-1}} style={{ width: "100%" }}
-                placeholder='请选择表单类型'
-                onChange={(value, option) => this.onChangeHandler(record, value, "default_values", option.props.children)}
-              >
-                {Options}
-              </Select> :
-              <Input
-                value={text}
-                disabled={record.type_id !== '4'}
-                placeholder={record.type_id !== '4' ? "/" : "请设置选项-选项之间请用/隔开"}
-                onChange={(e) => this.onChangeHandler(record, e.target.value, "default_values")}></Input>
-          )
+          if (record.type_id === '7') { return null }
+          return <div style={{ display: 'flex', justifyContent: 'space-between' }}><Select style={{ width: "100%" }} value={text}
+            onChange={(value, option) => this.onChangeHandler(record, value, "cyc_scheme_id")}
+          >{OptionsOfDateScheme}</Select><Icon type="minus-circle" theme="twoTone" style={{ fontSize: 20, marginLeft: 15, alignSelf: 'center', cursor: "pointer" }}
+            onClick={() => { this.onChangeHandler(record, null, "cyc_scheme_id") }}
+            /></div>
         }
       }, {
+        title: '时间段方案',
+        dataIndex: 'atm_scheme_id',
+        render: (text, record) => {
+          if (record.type_id === '7') { return null }
+          return <div style={{ display: 'flex', justifyContent: 'space-between' }}><Select style={{ width: "100%" }} value={text}
+            onChange={(value, option) => this.onChangeHandler(record, value, "atm_scheme_id")}
+          >{OptionsOfAllowTimeScheme}</Select><Icon type="minus-circle" theme="twoTone" style={{ fontSize: 20, marginLeft: 15, alignSelf: 'center', cursor: "pointer" }}
+            onClick={() => { this.onChangeHandler(record, null, "atm_scheme_id") }}
+            /></div>
+        }
+      },
+      {
         title: '操作',
         dataIndex: 'operation',
-        width: 150,
+        width: 100,
         render: (text, record) => {
           if (this.state.dataSource.length >= 1) {
             if ((record.type_id === '7' && record.key === '0') || (record.type_id === '3' && record.key === '1')) {
@@ -212,6 +253,8 @@ export default class EditableTable extends Component {
       type_id: "12", ///默认添加的是 id=12 的 通用组件（无需默认值）
       default_values: '',
       title_remark: '',///标题备注
+      cyc_scheme_id: null,
+      atm_scheme_id: null,
     };
     this.setState({
       dataSource: [...dataSource, newData],
@@ -221,8 +264,6 @@ export default class EditableTable extends Component {
 
   onChangeHandler = (record, val, targetField, extraData) => {
     let copyData = JSON.parse(JSON.stringify(this.state.dataSource))
-    // console.log(record, 'newValue:', val, 'oldValue:', record[targetField]);
-
     copyData.forEach(element => {
       if (element.key === record.key) {
         element[targetField] = val
@@ -236,7 +277,6 @@ export default class EditableTable extends Component {
         }
       }
     });
-
     this.setState({
       dataSource: copyData
     })
@@ -254,7 +294,8 @@ export default class EditableTable extends Component {
   }
 
   onConfirmHandler = () => {
-    // console.log('确定上传');
+    console.log('确定上传');
+    console.log('this.state.dataSource:', this.state.dataSource)
     this.checkDataConstruct()
   }
 
@@ -292,6 +333,7 @@ export default class EditableTable extends Component {
     this.setState({
       uploadLoading: true
     })
+    let schemeList = [];
     let device_type_id;
     let table_name;
     let contentArr = [];
@@ -302,6 +344,11 @@ export default class EditableTable extends Component {
         device_type_id = element.default_values
         table_name = element.extra_value;
       } else {
+        if (element.cyc_scheme_id || element.atm_scheme_id) {
+          schemeList.push({ "key_id": parseInt(element.key), "cyc_scheme_id": element.cyc_scheme_id, "atm_scheme_id": element.atm_scheme_id });
+        }
+        delete element.cyc_scheme_id;
+        delete element.atm_scheme_id;
         contentArr.push(element);
       }
     });
@@ -310,17 +357,53 @@ export default class EditableTable extends Component {
     sample_data.content = JSON.stringify(contentArr);
 
     // console.log("模版数据L：", sample_data);
+    // console.log('schemeList:', schemeList)
+
     HttpApi.uploadSample(sample_data, (res) => {
       // console.log(res);
       if (res.data.code === 0) {
-        // console.log('模版上传成功');
-        message.success('模版上传成功');
+        // console.log('模版上传成功了');
+        // message.success('模版上传成功');
+        let sql = `select max(id) as max_id from samples`
+        HttpApi.obs({ sql }, (res) => {
+          if (res.data.code === 0) {
+            let max_id = res.data.data[0].max_id;
+            if (schemeList.length > 0) {
+              let schemeListHasSampleId = [];
+              schemeList.forEach((item, key) => {
+                schemeListHasSampleId.push({ sample_id: max_id, ...item })
+              })
+              // console.log('schemeListHasSampleId:', schemeListHasSampleId)
+              let sqlString = this.transformSqlLanguage(schemeListHasSampleId);
+              let sql = `insert into sche_cyc_atm_map_sample(sample_id,key_id,cyc_scheme_id,atm_scheme_id) values ${sqlString}`
+              // console.log('sql:', sql)
+              HttpApi.obs({ sql }, (res) => {
+                if (res.data.code === 0) {
+                  message.success('添加表单以及方案成功');
+                  this.init();
+                } else { message.error('添加表单以及方案失败'); }
+              })
+            } else {
+              message.success('添加表单成功');
+              console.log('不需要添加日期方案和时间段方案 与 模版直接的映射关系了')
+            }
+          }
+        })
         this.setState({
           uploadLoading: false,
           modalvisible: false
         })
       }
     })
+  }
+  transformSqlLanguage = (schemeListHasSampleId) => {
+    let string = '';
+    for (let index = 0; index < schemeListHasSampleId.length; index++) {
+      let elememt = schemeListHasSampleId[index];
+      let cellStr = '(' + elememt.sample_id + ',' + elememt.key_id + ',' + elememt.cyc_scheme_id + ',' + elememt.atm_scheme_id + ')' + (index === schemeListHasSampleId.length - 1 ? ';' : ',')
+      string = string + cellStr
+    }
+    return string
   }
 
   handleOk = () => {

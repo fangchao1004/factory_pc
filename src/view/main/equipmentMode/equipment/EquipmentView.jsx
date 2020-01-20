@@ -154,10 +154,15 @@ class EquipmentView extends Component {
         HttpApi.obs({ sql: `update devices set effective = 0 where id = ${record.id} ` }, (data) => {
             if (data.data.code === 0) {
                 /// 删除某个巡检点后，还要把对应的设备和时间端映射关系表给删了
-                HttpApi.obs({ sql: `UPDATE allowTime_map_device SET effective = 0 where device_id=${record.id}` }, (res) => {
+                HttpApi.obs({ sql: `UPDATE allowTime_map_device SET effective = 0 where device_id = ${record.id}` }, (res) => {
                     if (res.data.code === 0) {
-                        message.success('删除巡检点成功')
-                        this.init();
+                        let sql = `update sche_cyc_map_device set effective = 0 where device_id = ${record.id}`
+                        HttpApi.obs({ sql }, (res) => {
+                            if (res.data.code === 0) {
+                                message.success('删除巡检点成功')
+                                this.init();
+                            }
+                        })
                     }
                 })
             } else {

@@ -25,6 +25,7 @@ class AttendanceModeRoot extends Component {
         return (
             <div>
                 <Card
+                    bodyStyle={{ padding: 20 }}
                     bordered={false}
                     style={{ width: '100%' }}
                     tabList={tabListNoTitle}

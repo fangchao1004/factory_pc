@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Button, TreeSelect, message, DatePicker, Popconfirm } from 'antd';
+import { Table, Button, TreeSelect, message, DatePicker, Popconfirm, Tag } from 'antd';
 import moment from 'moment';
 import HttpApi from '../../util/HttpApi';
 import RecordDetailByTime from './RecordDetailByTime';
@@ -36,9 +36,11 @@ class TimeView extends Component {
         this.init();
     }
     exchangeSearhTarget = (isOdd) => {
-        allow_time_name = isOdd ? 'allow_time' : 'allow_time2'
-        allowTime_map_device_name = isOdd ? 'allowTime_map_device' : 'allowTime_map_device2'
-        console.log('当前：', allow_time_name, allowTime_map_device_name)
+        // allow_time_name = isOdd ? 'allow_time' : 'allow_time2'
+        // allowTime_map_device_name = isOdd ? 'allowTime_map_device' : 'allowTime_map_device2'
+        allow_time_name = "allow_time"
+        allowTime_map_device_name = "allowTime_map_device"
+        // console.log('当前：', allow_time_name, allowTime_map_device_name)
     }
     closeHandler = () => {
         this.setState({
@@ -234,7 +236,7 @@ class TimeView extends Component {
                 title: `应检测巡检点数量${this.state.isAdmin === 1 ? '(可编辑)' : ''}`,
                 dataIndex: 'select_map_device',
                 render: (text, record) => {
-                    return <div style={{ display: 'flex', flexDirction: 'row' }}>
+                    return <div style={{ display: 'flex', flexDirction: 'row', justifyContent: 'space-around' }}>
                         <TreeSelect
                             maxTagCount={5}
                             maxTagTextLength={8}
@@ -251,7 +253,7 @@ class TimeView extends Component {
                         >
                             {this.state.treeNodeList}
                         </TreeSelect>
-                        <div style={{ width: '15%', textAlign: "center", paddingTop: 5 }}>{record.need_count}</div>
+                        <Tag color='blue' style={{ alignSelf: "center" }}>{record.need_count}</Tag>
                     </div>;
                 }
             },

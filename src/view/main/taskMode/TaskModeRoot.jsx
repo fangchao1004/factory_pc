@@ -30,6 +30,7 @@ class TaskModeRoot extends Component {
     render() {
         return (
             <Card
+                bodyStyle={{ padding: 20 }}
                 bordered={false}
                 style={{ width: '100%' }}
                 tabList={tabListNoTitle}

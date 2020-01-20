@@ -17,7 +17,7 @@ export const tableCellOptionsData = [
     { "value": "13", "text": "副标题" }];
 
 export const VersionlistData = [
-    { title: '版本号', description: 'V 1.4.4' },
+    { title: '版本号', description: 'V 1.4.5' },
     // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
     // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
     // { title: '更新', description: '1.0.9 添加巡检点信息修改功能' }
@@ -58,4 +58,5 @@ export const VersionlistData = [
     // { title: '更新', description: '1.4.2 支持巡检时间表单来回替换' }
     // { title: '更新', description: '1.4.3 人员被删除后，任务模块显示空对象的问题' }
     // { title: '更新', description: '1.4.4 任务添加处理验收机制' }
+    // { title: '更新', description: '1.4.5 巡检详情模块考虑到bug_id不存在（undefinde）的情况' }
 ]

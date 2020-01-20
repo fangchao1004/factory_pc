@@ -6,7 +6,7 @@ import BugsPageView from './BugsPageView';
 const tabListNoTitle = [{
     key: 'HomePageView',
     tab: '巡检统计',
-},{
+}, {
     key: 'BugsPageView',
     tab: '缺陷统计',
 }];
@@ -28,17 +28,16 @@ class HomePageRoot extends Component {
 
     render() {
         return (
-            <div>
-                <Card
-                    bordered={false}
-                    style={{ width: '100%' }}
-                    tabList={tabListNoTitle}
-                    activeTabKey={this.state.noTitleKey}
-                    onTabChange={(key) => { this.onTabChange(key); }}
-                >
-                    {contentListNoTitle[this.state.noTitleKey]}
-                </Card>
-            </div>
+            <Card
+                bodyStyle={{ padding: 20 }}
+                bordered={false}
+                style={{ width: '100%' }}
+                tabList={tabListNoTitle}
+                activeTabKey={this.state.noTitleKey}
+                onTabChange={(key) => { this.onTabChange(key); }}
+            >
+                {contentListNoTitle[this.state.noTitleKey]}
+            </Card>
         );
     }
 }

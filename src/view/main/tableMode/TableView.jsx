@@ -27,53 +27,21 @@ class TableView extends Component {
     }
     init = async () => {
         sample_data.length = device_type_data.length = 0;
-        sample_data = await this.getSampleData();
-        device_type_data = await this.getDeviceTypeData();
-        let newData = await this.transfromConstruct();
+        sample_data = await this.getSampleWithSchemeInfo();
+        // console.log('sample_data:', sample_data);
         this.setState({
-            dataSource: newData
+            dataSource: sample_data.map((item, index) => { item.key = index; return item })
         })
     }
-    getSampleData = () => {
-        let p = new Promise((resolve, reject) => {
-            HttpApi.getSampleInfo({ effective: 1 }, (res) => {
+    getSampleWithSchemeInfo = () => {
+        return new Promise((resolve, reject) => {
+            HttpApi.getSampleWithSchemeInfo({}, (res) => {
                 if (res.data.code === 0) {
                     resolve(res.data.data)
                 }
             })
         })
-        return p;
     }
-    getDeviceTypeData = () => {
-        let p = new Promise((resolve, reject) => {
-            HttpApi.getDeviceTypeInfo({ effective: 1 }, (res) => {
-                if (res.data.code === 0) {
-                    resolve(res.data.data)
-                }
-            })
-        })
-        return p;
-    }
-    transfromConstruct = async () => {
-        for (const item of sample_data) {
-            item.key = item.id + ""
-            item.device_type_name = await this.findTypeName(item)
-        }
-        return sample_data
-    }
-    findTypeName = (deviceItem) => {
-        let result = '类型被删除';
-        let p = new Promise((resolve, reject) => {
-            device_type_data.forEach((item) => {
-                if (item.id === deviceItem.device_type_id) {
-                    result = item.name
-                }
-            })
-            resolve(result)
-        })
-        return p;
-    }
-
     renderEachCard = () => {
         let cellsArr = [];
         this.state.dataSource.forEach((element, index) => {
@@ -122,7 +90,14 @@ class TableView extends Component {
                 else {
                     HttpApi.obs({ sql: `update samples set effective = 0 where id = ${element.id} ` }, (res) => {
                         if (res.data.code === 0) {
-                            this.init();
+                            let sql = `update sche_cyc_atm_map_sample set effective = 0 where sample_id = ${element.id}`
+                            HttpApi.obs({ sql }, () => {
+                                if (res.data.code === 0) {
+                                    message.success('删除表单成功');
+                                    this.init();
+                                }
+                            })
+
                         }
                     })
                 }
@@ -158,11 +133,10 @@ class TableView extends Component {
             <div>
                 {this.state.dataSource.length === 0 ?
                     <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} /> :
-                    <div style={{ padding: 16, paddingTop: 0 }}>
-                        <Row gutter={16}>
-                            {this.renderEachCard()}
-                        </Row>
-                    </div>}
+                    <Row gutter={10}>
+                        {this.renderEachCard()}
+                    </Row>
+                }
                 <Modal
                     centered
                     width={450}

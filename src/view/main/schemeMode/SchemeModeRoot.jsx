@@ -1,26 +1,25 @@
 import React, { Component } from 'react';
 import { Card } from 'antd';
-import ApplyTrans from './ApplyTrans';
-import ApproveTrans from './ApproveTrans'
+import SchemeOfDate from './date/SchemeOfDate';
+import SchemeOfAllowTime from './allowTime/SchemeOfAllowTime';
 
 const tabListNoTitle = [{
-    key: 'ApplyTrans',
-    tab: '消费申请',
+    key: 'SchemeOfDate',
+    tab: '日期方案',
 }, {
-    key: 'ApproveTrans',
-    tab: '消费审批'
+    key: 'SchemeOfAllowTime',
+    tab: '时间段方案',
 }];
 
 const contentListNoTitle = {
-    ApplyTrans: <ApplyTrans />,
-    ApproveTrans: <ApproveTrans />,
+    SchemeOfDate: <SchemeOfDate />,
+    SchemeOfAllowTime: <SchemeOfAllowTime />,
 };
 
-class TansactionApplyModeRoot extends Component {
-
+class SchemeModeRoot extends Component {
     state = {
-        key: 'ApplyTrans',
-        noTitleKey: 'ApplyTrans',
+        key: 'SchemeOfDate',
+        noTitleKey: 'SchemeOfDate',
     }
 
     onTabChange = (key) => {
@@ -43,4 +42,4 @@ class TansactionApplyModeRoot extends Component {
     }
 }
 
-export default TansactionApplyModeRoot;
+export default SchemeModeRoot;
