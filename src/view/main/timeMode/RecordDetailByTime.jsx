@@ -11,6 +11,7 @@ class RecordDetailByTime extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin,
             visible: false,
             showRecordListDrawer: false,
             record: {},
@@ -55,8 +56,9 @@ class RecordDetailByTime extends Component {
                     return (
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <Button size="small" type='primary' onClick={() => { this.openDrawer(record) }} >详情</Button>
-                            <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                            <Button size="small" type='dashed' onClick={() => { this.openModal(record) }} >变更方案</Button>
+                            {this.state.isAdmin ? <>
+                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                                <Button size="small" type='dashed' onClick={() => { this.openModal(record) }} >变更方案</Button></> : null}
                         </div>
                     )
                 },
