@@ -59,8 +59,8 @@ class OneRecordDetialView extends Component {
         return <>
             <Descriptions title={this.state.renderData.table_name} column={1} bordered>
                 {this.state.renderData.content.map(question => {
-                    // type 10 测温 11 测震 2 数字输入框
-                    return <Descriptions.Item key={question.key + "1"} span={1} label={question.title_name}>
+                    // type 10 测温 11 测震 2 数字输入框 question.title_name
+                    return <Descriptions.Item key={question.key + "1"} span={1} label={<div style={{ maxWidth: 300,  wordBreak: 'break-all',  whiteSpace: "normal" }}>{question.title_name}</div>}>
                         {question.bug && question.bug.content ? <span style={{ color: 'red' }}>
                             {question.bug.content.text}
                             {question.bug.content.imgs.map((img, i) => <Button key={i} type="link" onClick={() => {
