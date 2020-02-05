@@ -61,7 +61,7 @@ export default class BugsPageView extends Component {
     }
     renderPieView = () => {
         if (this.state.data.length === 0) {
-            return <Col span={24} style={{ backgroundColor: '#F0F2F5', height: 280, borderRadius: 5, marginTop: 10 }}>
+            return <Col span={24} style={{ backgroundColor: '#F0F2F5', height: 280, marginBottom: 10, borderRadius: 5 }}>
                 <Empty
                     image="https://gw.alipayobjects.com/mdn/miniapp_social/afts/img/A*pevERLJC9v0AAAAAAAAAAABjAQAAAQ/original"
                     imageStyle={{
@@ -76,7 +76,7 @@ export default class BugsPageView extends Component {
             // console.log('copy_data:', copy_data)
             copy_data.forEach((item, index) => {
                 cellsArr.push(
-                    <Col span={8} key={index} style={{ marginTop: -5 }}>
+                    <Col span={8} key={index}>
                         <PieViewOfBug data={item} />
                     </Col>
                 )
@@ -86,13 +86,13 @@ export default class BugsPageView extends Component {
     }
     render() {
         return (
-            <div style={{ marginTop: -10 }}>
+            <div>
                 <Row gutter={10}>
                     {this.renderPieView()}
                 </Row>
-                <Row gutter={10}>
+                <Row>
                     <Col span={24}>
-                        <div style={{ marginTop: 10 }}>
+                        <div style={{ marginBottom: 10 }}>
                             <LineChartViewOfBug />
                         </div>
                     </Col>
