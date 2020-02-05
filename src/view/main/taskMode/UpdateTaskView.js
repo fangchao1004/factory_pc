@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react'
-import { Modal, Form, Input, Select, DatePicker, Switch, Button, Divider, Steps, message, Popconfirm } from 'antd'
+import { Modal, Form, Input, Select, DatePicker, Switch, Button, Divider, Steps, message, Popconfirm, Row, Col } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 const { Step } = Steps;
@@ -52,18 +52,24 @@ function UpdateTaskForm(props) {
                 })(<Input.TextArea disabled autosize={{ minRows: 2, maxRows: 6 }} placeholder="请输入任务内容"></Input.TextArea>)}
             </Form.Item>
             : null}
-        <Form.Item label="截止日期" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('overTime', {
-                initialValue: moment(props.task.overTime),
-                rules: [{ required: true, message: '请选择截止日期' }]
-            })(<DatePicker disabled={true} />)}
-        </Form.Item>
-        <Form.Item label="短信通知" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('overTime', {
-                initialValue: null,
-                rules: [{ required: true, message: '请选择短信通知' }]
-            })(<Switch disabled={true} checkedChildren="开" unCheckedChildren="关" checked={props.task.isMessage === 1} />)}
-        </Form.Item>
+        <Row>
+            <Col span={12}>
+                <Form.Item label="截止日期" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
+                    {getFieldDecorator('overTime', {
+                        initialValue: moment(props.task.overTime),
+                        rules: [{ required: true, message: '请选择截止日期' }]
+                    })(<DatePicker disabled={true} />)}
+                </Form.Item>
+            </Col>
+            <Col span={12}>
+                <Form.Item label="短信通知" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
+                    {getFieldDecorator('overTime', {
+                        initialValue: null,
+                        rules: [{ required: true, message: '请选择短信通知' }]
+                    })(<Switch disabled={true} checkedChildren="开" unCheckedChildren="关" checked={props.task.isMessage === 1} />)}
+                </Form.Item>
+            </Col>
+        </Row>
     </Form >
 }
 

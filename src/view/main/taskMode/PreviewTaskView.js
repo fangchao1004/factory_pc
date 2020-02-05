@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react'
-import { Modal, Form, Input, Select, DatePicker, Switch, Button, Divider, Steps, message, Popconfirm } from 'antd'
+import { Modal, Form, Input, Select, DatePicker, Switch, Button, Divider, Steps, message, Popconfirm, Row, Col } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 const { Step } = Steps;
@@ -66,25 +66,31 @@ function UpdateTaskForm(props) {
                 })(<Input.TextArea disabled={!isEditable} autosize={{ minRows: 2, maxRows: 6 }} placeholder="请输入任务内容"></Input.TextArea>)}
             </Form.Item>
             : null}
-        <Form.Item label="截止日期" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('overTime', {
-                initialValue: moment(props.task.overTime),
-                rules: [{ required: true, message: '请选择截止日期' }]
-            })(<DatePicker disabled={!isEditable} disabledDate={disabledDate} />)}
-        </Form.Item>
-        <Form.Item label="短信通知" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('isMessage', {
-                initialValue: isMess,
-                rules: [{ required: true, message: '请选择短信通知' }]
-            })(
-                <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', paddingTop: 10 }}>
-                    <Switch disabled={!isEditable} checkedChildren="开" unCheckedChildren="关" checked={isMess} onChange={(v) => { setIsMess(v) }} />
-                    <Popconfirm disabled={isEditable || status} title="确定要发送督促短信提醒吗?" onConfirm={sendMessAgain}>
-                        <Button disabled={isEditable || status} type='primary'>督促短信</Button>
-                    </Popconfirm>
-                </div>
-            )}
-        </Form.Item>
+        <Row>
+            <Col span={12}>
+                <Form.Item label="截止日期" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
+                    {getFieldDecorator('overTime', {
+                        initialValue: moment(props.task.overTime),
+                        rules: [{ required: true, message: '请选择截止日期' }]
+                    })(<DatePicker disabled={!isEditable} disabledDate={disabledDate} />)}
+                </Form.Item>
+            </Col>
+            <Col span={12}>
+                <Form.Item label="短信通知" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
+                    {getFieldDecorator('isMessage', {
+                        initialValue: isMess,
+                        rules: [{ required: true, message: '请选择短信通知' }]
+                    })(
+                        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Switch disabled={!isEditable} checkedChildren="开" unCheckedChildren="关" checked={isMess} onChange={(v) => { setIsMess(v) }} />
+                            <Popconfirm disabled={isEditable || status} title="确定要发送督促短信提醒吗?" onConfirm={sendMessAgain}>
+                                <Button disabled={isEditable || status} type='primary'>督促短信</Button>
+                            </Popconfirm>
+                        </div>
+                    )}
+                </Form.Item>
+            </Col>
+        </Row>
     </Form >
 }
 
