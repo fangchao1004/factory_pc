@@ -158,35 +158,35 @@ export default class MainView extends Component {
                             <span style={{ position: 'absolute', top: 18, left: 60, width: 180, color: '#fff', fontSize: 17, marginLeft: 20 }}>信息综合管理平台</span>
                         }
                     </div>
-                    <Menu theme="dark" mode="inline" onClick={this.onMeunClick}>
-                        <Menu.Item key="首页">
+                    <Menu theme="dark" mode="inline" selectedKeys={[this.props.location.pathname]}>
+                        <Menu.Item key="/mainView">
                             <Icon type="home" />
                             <span>首页</span>
                             <Link to={`${this.props.match.url}`} />
                         </Menu.Item>
                         <SubMenu key="巡检点" title={<span><Icon type="scan" /><span>巡检</span></span>}>
-                            <Menu.Item key="巡检点">
+                            <Menu.Item key="/mainView/equipment">
                                 <Icon type="switcher" />
                                 <span>巡检点</span>
                                 <Link to={`${this.props.match.url}/equipment`} />
                             </Menu.Item>
                             {this.state.isAdmin ?
-                                <Menu.Item key="表单">
+                                <Menu.Item key="/mainView/table">
                                     <Icon type="file" />
                                     <span>巡检表单</span>
                                     <Link to={`${this.props.match.url}/table`} />
                                 </Menu.Item> : null}
-                            <Menu.Item key="巡检区域">
+                            <Menu.Item key="/mainView/area">
                                 <Icon type="environment" />
                                 <span>巡检区域</span>
                                 <Link to={`${this.props.match.url}/area`} />
                             </Menu.Item>
-                            <Menu.Item key="巡检时间段">
+                            <Menu.Item key="/mainView/time">
                                 <Icon type="clock-circle" />
                                 <span>巡检时间段</span>
                                 <Link to={`${this.props.match.url}/time`} />
                             </Menu.Item>
-                            {this.state.isAdmin ? <Menu.Item key="巡检方案">
+                            {this.state.isAdmin ? <Menu.Item key="/mainView/scheme">
                                 <Icon type="edit" />
                                 <span>巡检方案</span>
                                 <Link to={`${this.props.match.url}/scheme`} />
@@ -200,26 +200,26 @@ export default class MainView extends Component {
                                 </Badge>
                             </span>
                         }>
-                            <Menu.Item key="与我相关">
+                            <Menu.Item key="/mainView/bugAboutMe">
                                 <Icon type="hdd" />
                                 <span>与我相关</span>
                                 <Badge count={this.state.aboutMeBugNum} overflowCount={99} style={{ marginLeft: 30, }} >
                                 </Badge>
                                 <Link to={`${this.props.match.url}/bugAboutMe`} />
                             </Menu.Item>
-                            <Menu.Item key="所有缺陷">
+                            <Menu.Item key="/mainView/bug">
                                 <Icon type="hdd" />
                                 <span>所有缺陷</span>
                                 <Link to={`${this.props.match.url}/bug`} />
                             </Menu.Item>
                         </SubMenu>
                         {this.state.isAdmin ?
-                            <Menu.Item key="员工">
+                            <Menu.Item key="/mainView/staff">
                                 <Icon type="team" />
                                 <span>员工</span>
                                 <Link to={`${this.props.match.url}/staff`} />
                             </Menu.Item> : null}
-                        <Menu.Item key="任务">
+                        <Menu.Item key="/mainView/task">
                             <Icon type="project" />
                             <span>任务</span>
                             <Badge count={this.state.aboutMeTaskNum} overflowCount={99} style={{ marginLeft: 30 }}>
@@ -232,12 +232,12 @@ export default class MainView extends Component {
                                 <span>消费</span>
                             </span>
                         }>
-                            <Menu.Item key="消费记录">
+                            <Menu.Item key="/mainView/transaction">
                                 <Icon type="ordered-list" />
                                 <span>消费记录</span>
                                 <Link to={`${this.props.match.url}/transaction`} />
                             </Menu.Item>
-                            <Menu.Item key="消费申请">
+                            <Menu.Item key="/mainView/applytrans">
                                 <Icon type="form" />
                                 <span>消费申请</span>
                                 <Link to={`${this.props.match.url}/applytrans`} />
@@ -249,24 +249,24 @@ export default class MainView extends Component {
                                 <span>考勤</span>
                             </span>
                         }>
-                            <Menu.Item key="考勤信息">
+                            <Menu.Item key="/mainView/attendance">
                                 <Icon type="contacts" />
                                 <span>考勤信息</span>
                                 <Link to={`${this.props.match.url}/attendance`} />
                             </Menu.Item>
-                            <Menu.Item key="工作排班">
+                            <Menu.Item key="/mainView/schedule">
                                 <Icon type="schedule" />
                                 <span>工作排班</span>
                                 <Link to={`${this.props.match.url}/schedule`} />
                             </Menu.Item>
                         </SubMenu>
-                        <Menu.Item key="车辆">
+                        <Menu.Item key="/mainView/car">
                             <Icon type="car" />
                             <span>车辆</span>
                             <Link to={`${this.props.match.url}/car`} />
                         </Menu.Item>
                         <SubMenu key="设置" title={<span><Icon type="setting" /><span>设置</span></span>}>
-                            <Menu.Item key="个人设置"><Icon type="switcher" /><span>个人设置</span><Link to={`${this.props.match.url}/usersetting`} /></Menu.Item>
+                            <Menu.Item key="/mainView/usersetting"><Icon type="switcher" /><span>个人设置</span><Link to={`${this.props.match.url}/usersetting`} /></Menu.Item>
                         </SubMenu>
                     </Menu>
                 </Sider>
