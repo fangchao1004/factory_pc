@@ -68,6 +68,7 @@ export default class UpdateAtmSchemeView extends Component {
 
 function UpdateSchemeFrom(props) {
     const { getFieldDecorator } = props.form
+    let initData = props.record.timeId_list ? { initialValue: props.record.timeId_list.split(',').map((item) => parseInt(item)) } : {}
     return <Form>
         <Form.Item label="方案名称:" labelCol={{ span: 5 }} wrapperCol={{ span: 19 }}>
             {getFieldDecorator('title', {
@@ -77,7 +78,7 @@ function UpdateSchemeFrom(props) {
         </Form.Item>
         <Form.Item label="选择时间段:" labelCol={{ span: 5 }} wrapperCol={{ span: 19 }}>
             {getFieldDecorator('atm_options', {
-                initialValue: props.record.timeId_list.split(',').map((item) => parseInt(item)),
+                ...initData,
                 rules: [{ required: true, message: '请选择时间段' }],
             })(<Select mode="multiple">{options1}</Select>)}
         </Form.Item>

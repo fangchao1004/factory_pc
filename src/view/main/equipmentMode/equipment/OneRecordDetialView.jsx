@@ -59,8 +59,9 @@ class OneRecordDetialView extends Component {
         return <>
             <Descriptions title={this.state.renderData.table_name} column={1} bordered>
                 {this.state.renderData.content.map(question => {
+                    // console.log('question:', question)
                     // type 10 测温 11 测震 2 数字输入框 question.title_name
-                    return <Descriptions.Item key={question.key + "1"} span={1} label={<div style={{ maxWidth: 300,  wordBreak: 'break-all',  whiteSpace: "normal" }}>{question.title_name}</div>}>
+                    return <Descriptions.Item key={question.key + "1"} span={1} label={<div style={{ maxWidth: 300, wordBreak: 'break-all', whiteSpace: "normal" }}>{question.title_name}</div>}>
                         {question.bug && question.bug.content ? <span style={{ color: 'red' }}>
                             {question.bug.content.text}
                             {question.bug.content.imgs.map((img, i) => <Button key={i} type="link" onClick={() => {
@@ -69,7 +70,11 @@ class OneRecordDetialView extends Component {
                         </span> :
                             ((question.type_id === '10' || question.type_id === '11' || question.type_id === '2') ?
                                 `${question.type_id === '11' ? question.value / 1000 : question.value}${question.title_remark}` :
-                                <span style={{ color: 'green' }}>正常</span>)}
+                                (question.type_id === '6' ?
+                                    question.value.map((img, i) => <Button key={i} type="link" onClick={() => {
+                                        this.setState({ imguuid: img, imgtitle: '图片' + (i + 1) })
+                                    }}>图片{i + 1}</Button>)
+                                    : <span style={{ color: 'green' }}>正常</span>))}
                     </Descriptions.Item>
                 })}
             </Descriptions>
@@ -78,6 +83,7 @@ class OneRecordDetialView extends Component {
                     this.setState({ imguuid: null })
                 }}>
                 <img alt='' style={{ width: 400 }} src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} />
+                {/* <img alt='' style={{ width: 400 }} src={'http://ixiaomu.cn:3008/get_jpg?uuid=' + this.state.imguuid} /> */}
             </Modal>
         </>
     }

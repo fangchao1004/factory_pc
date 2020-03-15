@@ -18,6 +18,7 @@ import AttendanceModeRoot from './attendanceMode/AttendanceModeRoot'
 import ScheduleRoot from './scheduleMode/ScheduleRoot'
 import TansactionApplyModeRoot from './tansactionApplyMode/TansactionApplyModeRoot'
 import SchemeModeRoot from './schemeMode/SchemeModeRoot'
+import RunlogModeRoot from './runlogMode/RunlogModeRoot'
 import UserMenuView from './userMenu/UserMenuView'
 import HttpApi from '../util/HttpApi';
 import Store from '../../redux/store/Store';
@@ -191,6 +192,11 @@ export default class MainView extends Component {
                                 <span>巡检方案</span>
                                 <Link to={`${this.props.match.url}/scheme`} />
                             </Menu.Item> : null}
+                            <Menu.Item key="/mainView/runlog">
+                                <Icon type="unordered-list" />
+                                <span>运行日志</span>
+                                <Link to={`${this.props.match.url}/runlog`} />
+                            </Menu.Item>
                         </SubMenu>
                         <SubMenu key="缺陷" title={
                             <span>
@@ -321,6 +327,11 @@ class ContentView extends Component {
                     exact
                     path={`${this.props.match.path}/time`}
                     component={() => (storage.getItem('userinfo') ? <TimeModeRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/runlog`}
+                    component={() => (storage.getItem('userinfo') ? <RunlogModeRoot /> : <Redirect to='/' />)}
                 />
                 <Route
                     exact

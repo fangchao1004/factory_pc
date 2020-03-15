@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
-import { Row, Col, Card, Button, Tag, Icon, Popconfirm, Empty, Modal, message } from 'antd'
+import { Row, Col, Card, Button, Tag, Icon, Popconfirm, Empty, Modal, message, Input } from 'antd'
 import HttpApi from '../../util/HttpApi';
 import SampleViewTool from '../../util/SampleViewTool';
 import ChangeTableView from './ChangeTableView';
 import { omitTextLength } from '../../util/Tool'
-
+const { Search } = Input;
 var TagColor = ['magenta', 'orange', 'green', 'blue', 'purple', 'geekblue', 'cyan'];
 var sample_data = [];
 var device_type_data = [];
+var dataSourceCopy = [];
 /**
  * 表单模版展示(卡片)界面--（仅支持删除）
  */
@@ -28,9 +29,10 @@ class TableView extends Component {
     init = async () => {
         sample_data.length = device_type_data.length = 0;
         sample_data = await this.getSampleWithSchemeInfo();
-        // console.log('sample_data:', sample_data);
         this.setState({
             dataSource: sample_data.map((item, index) => { item.key = index; return item })
+        }, () => {
+            dataSourceCopy = JSON.parse(JSON.stringify(this.state.dataSource))
         })
     }
     getSampleWithSchemeInfo = () => {
@@ -131,6 +133,24 @@ class TableView extends Component {
     render() {
         return (
             <div>
+                <div style={{ textAlign: 'right' }}>
+                    <Search style={{ width: 400 }} placeholder="名称模糊查询" enterButton
+                        onChange={(e) => {
+                            if (e.target.value === '') { this.init(); }
+                        }}
+                        onSearch={(value) => {
+                            if (value.length > 0) {
+                                let searchResult = [];
+                                dataSourceCopy.forEach((item) => {
+                                    if (item.table_name.indexOf(value) !== -1) {
+                                        searchResult.push(item);
+                                    }
+                                })
+                                this.setState({ dataSource: searchResult })
+                            }
+                        }}
+                    />
+                </div>
                 {this.state.dataSource.length === 0 ?
                     <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} /> :
                     <Row gutter={10}>

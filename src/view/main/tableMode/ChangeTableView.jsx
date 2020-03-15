@@ -84,6 +84,7 @@ class EditTable extends Component {
         const { id, content, scheme_data } = this.props.data
         // console.log("id:", id)
         let finaResult = this.changeDataConstruct(content, scheme_data);
+        console.log('finaResult:', finaResult)
         await this.getDateSchemeData();
         await this.getAllowTimeSchemeData();
         this.setState({
@@ -242,8 +243,12 @@ class EditTable extends Component {
         })
     }
     handleDelete = (key) => {
+        ///每次删除都要重置key
+        let temp = (this.state.dataSource.filter(item => item.key !== key)).map((item, index) => { item.key = String(index + 1); return item })
         this.setState({
-            dataSource: this.state.dataSource.filter(item => item.key !== key)
+            dataSource: temp
+        }, () => {
+            console.log('删除后的数据：', this.state.dataSource)
         })
     }
     handleAdd = () => {
@@ -261,12 +266,13 @@ class EditTable extends Component {
         })
     }
     okHandler = () => {
-        // console.log('this.state.dataSource:', this.state.dataSource)
-        // this.setState({
-        //     loading: true
-        // })
+        // console.log('okHandler this.state.dataSource:', this.state.dataSource)
+        this.setState({
+            loading: true
+        })
         this.transFromDataConstruct();
     }
+    ///改变数据结构
     transFromDataConstruct = () => {
         let schemeList = [];/// 将方案重新提取处理
         let contentArr = [];///content 内容
@@ -303,11 +309,23 @@ class EditTable extends Component {
                                     })
                                     message.success('修改表单以及方案成功');
                                     this.props.onOk();
-                                }
+                                } else { message.error('修改表单以及方案失败'); }
                             })
                         } else { message.error('修改表单以及方案失败'); }
                     })
-                } else {
+                } else {///没有方案？
+                    console.log('没有方案-直接修改表单')
+                    HttpApi.updateSampleInfo({ query: { id: this.state.id }, update: { content: JSON.stringify(contentArr) } }, (res) => {
+                        if (res.data.code === 0) {
+                            this.setState({
+                                loading: false
+                            })
+                            message.success('修改表单成功');
+                            this.props.onOk();
+                        } else {
+                            message.error('修改表单失败');
+                        }
+                    })
                     console.log('不需要添加日期方案和时间段方案 与 模版直接的映射关系了')
                 }
             } else { message.error('修改表单以及方案失败'); }
@@ -338,6 +356,8 @@ class EditTable extends Component {
         }), () => {///每次拖动都要重置key
             this.setState({
                 dataSource: this.state.dataSource.map((item, index) => { item.key = String(index + 1); return item })
+            }, () => {
+                console.log('每次拖动都要重置key:', this.state.dataSource)
             })
         })
 
