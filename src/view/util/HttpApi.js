@@ -1,6 +1,6 @@
 import Axios from 'axios';
 
-export const Testuri = 'http://ixiaomu.cn:3010/'///小木服务器数据库
+export const Testuri = 'http://ixiaomu.cn:3008/'///小木服务器数据库
 // export const Testuri = 'http://localhost:3008/'///本地服务器测试用
 // export const Testuri = 'http://localhost:2019/'///本地服务器测试用 socket.io 服务测试
 

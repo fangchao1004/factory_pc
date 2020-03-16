@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Card } from 'antd';
 import StaffView from './StaffView';
 import StaffTypeView from './StaffTypeView'
-import StaffMajorView from './StaffMajorView'
+// import StaffMajorView from './StaffMajorView'
 
 const tabListNoTitle = [{
     key: 'StaffView',
@@ -10,15 +10,17 @@ const tabListNoTitle = [{
 }, {
     key: 'StaffTypeView',
     tab: '部门管理'
-}, {
-    key: 'StaffMajorView',
-    tab: '专业管理'
-}];
+},
+    // {
+    //     key: 'StaffMajorView',
+    //     tab: '专业管理'
+    // }
+];
 
 const contentListNoTitle = {
     StaffView: <StaffView />,
     StaffTypeView: <StaffTypeView />,
-    StaffMajorView: <StaffMajorView />
+    // StaffMajorView: <StaffMajorView />
 };
 
 class StaffModeRoot extends Component {
