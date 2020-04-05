@@ -223,6 +223,7 @@ class ApproveTrans extends Component {
             },
             {
                 title: '申请人',
+                width: 80,
                 dataIndex: 'apply_name',
             },
             {
@@ -279,6 +280,7 @@ class ApproveTrans extends Component {
             {
                 title: '审批人',
                 dataIndex: 'approve_name',
+                width: 80,
                 render: (text) => {
                     return <div>
                         {text ? text : '/'}

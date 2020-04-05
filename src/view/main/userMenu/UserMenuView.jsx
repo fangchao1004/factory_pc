@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Modal, Row, Col, Input, message, Card, Tooltip } from 'antd';
+import { Button, Modal, Row, Col, Input, message, Card, Tooltip, Tag } from 'antd';
 import HttpApi from '../../util/HttpApi'
 import moment from 'moment'
 import { permisstionWithDes, adminPermission } from '../../util/AppData'
@@ -33,10 +33,14 @@ export default class UserMenuView extends Component {
             isadmin: JSON.parse(userinfo).isadmin === 1,
             showModal1: false,
             notiveTxt: '',
-            permissionList: []
+            permissionList: [],
+            majorName: '',
         }
     }
     componentDidMount() {
+        if (JSON.parse(userinfo).major_id) {
+            this.getMajorNameByIds(JSON.parse(userinfo).major_id);
+        }
         this.setState({
             permissionList: JSON.parse(userinfo).permission ? changeIdListToNameListForPer(JSON.parse(userinfo).permission.split(',')) : []
         })
@@ -88,15 +92,28 @@ export default class UserMenuView extends Component {
             )
         })
     }
+    getMajorNameByIds = async (major_ids) => {
+        let major_name = await this.getMajorName(major_ids);
+        this.setState({ majorName: major_name })
+    }
+    getMajorName = (major_ids) => {
+        return new Promise((resolve, reject) => {
+            let sql = `select name from majors where effective =1 and id in (${major_ids})`;
+            let result = '';
+            HttpApi.obs({ sql }, (res) => {
+                if (res.data.code === 0) {
+                    result = res.data.data.map((item) => item.name).join(',')
+                }
+                resolve(result);
+            })
+        })
+    }
+
     render() {
         return (
-            <div>
-                {
-                    this.state.permissionList.length > 0 || this.state.isadmin ?
-                        <Card size="small" title="所有权限">
-                            {this.renderHandler()}
-                        </Card> : null
-                }
+            <div style={{ minWidth: 220 }}>
+                {this.state.majorName ? <Tag color={'#FF9900'} style={{ marginBottom: 10 }}>{'所属专业: ' + this.state.majorName}</Tag> : ''}
+                {this.state.permissionList.length > 0 || this.state.isadmin ? <Card size="small" title="所有权限">{this.renderHandler()}</Card> : null}
                 {this.state.isadmin ? <Button type='primary' style={{ width: "100%", marginTop: 10 }} onClick={() => { this.setState({ showModal1: true }) }}>发布通知</Button> : null}
                 < Button type='danger' style={{ width: "100%", marginTop: 10 }}
                     onClick={() => {

@@ -1,13 +1,15 @@
 /**
  * 固定数据统一存放类
  */
+export const originStatus = [{ text: '待维修', value: 0 }, { text: '维修中', value: 1 },
+{ text: '专工验收中', value: 2 }, { text: '运行验收中', value: 3 }, { text: '申请转专业中', value: 6 }, { text: '申请挂起中', value: 7 }]///固定状态
 export const permisstion = [{ name: '专工权限', value: 0 }, { name: '运行权限', value: 1 }, { name: '消费审批权限', value: 2 }, { name: '维修权限', value: 3 }]
 export const permisstionWithDes = [
-    { name: '专工权限', value: 0, des: '可以在缺陷处理过程中，进行缺陷的分配和验收工作，可以直接消除缺陷，同时可以添加缺陷备注' },
-    { name: '运行权限', value: 1, des: '可以在缺陷处理过程中，进行最后的运行验收工作' },
-    { name: '维修权限', value: 3, des: '可以自行维修处理未分配过的缺陷，无需专工分配，同时可以添加缺陷备注' },
-    { name: '消费审批权限', value: 2, des: '可以处理消费申请，进行审批操作' }]
-export const adminPermission = { name: '管理员权限', des: '管理员权限，可以增减修改各个选项，查看所有信息' }
+    { name: '维修权限', value: 3, des: '可以申请切换缺陷专业和申请挂起缺陷;维修缺陷' },
+    { name: '专工权限', value: 0, des: '拥有修改缺陷专业和挂起缺陷的操作能力;处理维修人员的相关申请;验收维修成果' },
+    { name: '运行权限', value: 1, des: '参与缺陷的最后验收步骤' },
+    { name: '消费审批权限', value: 2, des: '可以处理消费申请;进行审批操作' }]
+export const adminPermission = { name: '管理员权限', des: '管理员权限;可以增减修改各个选项;查看所有信息' }
 // const optionsDataOld = [{ "value": "1", "text": "文本输入框" }, { "value": "2", "text": "数字输入框" }, { "value": "3", "text": "单选" },
 // { "value": "4", "text": "多选" }, { "value": "5", "text": "文本域" }, { "value": "6", "text": "图片选择器" }, { "value": "7", "text": "表单类型",{ "value": "10", "text": "测温组件" }, { "value": "11", "text": "测振组件" },{ "value": "12", "text": "默认" }];
 export const tableCellOptionsData = [
@@ -17,7 +19,7 @@ export const tableCellOptionsData = [
     { "value": "13", "text": "副标题" }];
 
 export const VersionlistData = [
-    { title: '版本号', description: 'V 1.4.7.1' },
+    { title: '版本号', description: 'V 1.4.7.2 test' },
     // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
     // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
     // { title: '更新', description: '1.0.9 添加巡检点信息修改功能' }
@@ -62,4 +64,5 @@ export const VersionlistData = [
     // { title: '更新', description: '1.4.5 test 添加方案功能。进入测试环境' }
     // { title: '更新', description: '1.4.6 是1.4.5 test版本的正式版' }
     // { title: '更新', description: '1.4.7 添加运行日志模块' }
+    { title: '更新', description: '1.4.7.2 test 缺陷流程重新处理' }
 ]

@@ -34,8 +34,9 @@ function UpdateStaffForm(props) {
     const { getFieldDecorator } = props.form
     // const levelOptions = props.levels.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
     const nfcOptions = props.nfcs.map(nfc => <Select.Option value={nfc.id} key={nfc.id}>{nfc.name}</Select.Option>)
-    let treeData = getTreeData(props.levels) ///部门 选项数据
+    const majorOptions = props.majors.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
 
+    let treeData = getTreeData(props.levels) ///部门 选项数据
     return <Form>
         <Form.Item label="登陆账户" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('username', {
@@ -76,14 +77,19 @@ function UpdateStaffForm(props) {
             {getFieldDecorator('nfc_id', {
                 initialValue: props.staff.nfc_id,
                 rules: [{ required: false, message: '请选择员工工卡' }]
-            })(<Select showSearch={true} filterOption={(inputValue, option)=>{return option.props.children.indexOf(inputValue)!==-1}}>{nfcOptions}</Select>)}
+            })(<Select showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{nfcOptions}</Select>)}
         </Form.Item>
         <Form.Item label="员工权限" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('permission', {
-                // initialValue: props.staff.permission && props.staff.permission.split(',').map(permission => parseInt(permission)),
                 initialValue: props.staff.permission ? props.staff.permission.split(',').map(permission => parseInt(permission)) : undefined,
                 rules: [{ required: false, message: '请选择员工权限' }]
-            })(<Select mode="multiple" showSearch={true} filterOption={(inputValue, option)=>{return option.props.children.indexOf(inputValue)!==-1}}>{permissionOptions}</Select>)}
+            })(<Select mode="multiple" showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{permissionOptions}</Select>)}
+        </Form.Item>
+        <Form.Item label="所属专业" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('major_id', {
+                initialValue: props.staff.major_id ? props.staff.major_id.split(',').map(major => parseInt(major)) : undefined,
+                rules: [{ required: false, message: '请选择员工专业' }]
+            })(<Select mode="multiple" showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{majorOptions}</Select>)}
         </Form.Item>
         <Form.Item label="员工备注" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('remark', {
@@ -119,16 +125,21 @@ export default function UpdateStaffView(props) {
     const staffFormRef = React.useRef(null)
     const [levels, setLevels] = React.useState(null)
     const [nfcs, setNfcs] = React.useState(null)
-
+    const [majors, setMajors] = React.useState(null)
     React.useEffect(() => {
         HttpApi.getUserLevel({}, data => {
             if (data.data.code === 0) {
                 setLevels(data.data.data)
             }
         })
-        HttpApi.getNFCInfo({ type: 1 }, data => {
+        HttpApi.getNFCInfo({ type: 1, effective: 1 }, data => {
             if (data.data.code === 0) {
                 setNfcs(data.data.data)
+            }
+        })
+        HttpApi.getUserMajor({ effective: 1 }, data => {
+            if (data.data.code === 0) {
+                setMajors(data.data.data)
             }
         })
     }, [])
@@ -150,6 +161,6 @@ export default function UpdateStaffView(props) {
     return <Modal centered onOk={handlerOk} title="修改员工"
         onCancel={props.onCancel}
         visible={props.visible}>
-        <StaffForm ref={staffFormRef} staff={props.staff} levels={levels} nfcs={nfcs}></StaffForm>
+        <StaffForm ref={staffFormRef} staff={props.staff} levels={levels} nfcs={nfcs} majors={majors}></StaffForm>
     </Modal>
 }

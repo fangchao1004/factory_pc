@@ -283,7 +283,7 @@ export default class MainView extends Component {
                                 <Icon className="trigger" style={{ fontSize: 24, marginLeft: 30 }} type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'} onClick={this.toggle} />
                             </Col>
                             <Col span={22} style={{ textAlign: 'right', paddingRight: 24 }}>
-                                <Popover width={100} placement="topLeft" trigger="click"
+                                <Popover width={200} placement="bottomRight" trigger="click"
                                     title={storage.getItem('userinfo') ? "用户名: " + JSON.parse(storage.getItem('userinfo')).username + "(" + JSON.parse(storage.getItem('userinfo')).name + ")" :
                                         "不存在"}
                                     content={

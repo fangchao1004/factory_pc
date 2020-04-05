@@ -33,6 +33,7 @@ function getTreeData(levels) { ///目的是 让生产运行部 产生子选项 �
 function AddStaffForm(props) {
     const { getFieldDecorator } = props.form
     const nfcOptions = props.nfcs.map(nfc => <Select.Option value={nfc.id} key={nfc.id}>{nfc.name}</Select.Option>)
+    const majorOptions = props.majors.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
     let treeData = getTreeData(props.levels) ///部门 选项数据
 
     return <Form>
@@ -78,6 +79,11 @@ function AddStaffForm(props) {
                 rules: [{ required: false, message: '请选择员工权限' }]
             })(<Select mode="multiple" showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{permissionOptions}</Select>)}
         </Form.Item>
+        <Form.Item label="所属专业" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            {getFieldDecorator('major_id', {
+                rules: [{ required: false, message: '请选择员工专业' }]
+            })(<Select mode="multiple" showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{majorOptions}</Select>)}
+        </Form.Item>
         <Form.Item label="员工备注" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('remark', {
                 rules: [{ required: false, message: '请输入员工备注' }]
@@ -106,15 +112,21 @@ export default function AddStaffView(props) {
     const staffFormRef = React.useRef(null)
     const [levels, setLevels] = React.useState(null)
     const [nfcs, setNfcs] = React.useState(null)
+    const [majors, setMajors] = React.useState(null)
     React.useEffect(() => {
         HttpApi.getUserLevel({ effective: 1 }, data => {
             if (data.data.code === 0) {
                 setLevels(data.data.data)
             }
         })
-        HttpApi.getNFCInfo({ type: 1 }, data => {
+        HttpApi.getNFCInfo({ type: 1, effective: 1 }, data => {
             if (data.data.code === 0) {
                 setNfcs(data.data.data)
+            }
+        })
+        HttpApi.getUserMajor({ effective: 1 }, data => {
+            if (data.data.code === 0) {
+                setMajors(data.data.data)
             }
         })
     }, [])
@@ -128,6 +140,6 @@ export default function AddStaffView(props) {
     return <Modal centered onOk={handlerOk} title="添加员工"
         onCancel={props.onCancel}
         visible={props.visible}>
-        <StaffForm ref={staffFormRef} levels={levels} nfcs={nfcs}></StaffForm>
+        <StaffForm ref={staffFormRef} levels={levels} nfcs={nfcs} majors={majors}></StaffForm>
     </Modal>
 }

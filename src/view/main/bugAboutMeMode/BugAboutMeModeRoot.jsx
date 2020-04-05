@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Card } from 'antd';
-import BugAboutMeView from './BugAboutMeView';
-import BugAboutMeCompletedView from './BugAboutMeCompletedView'
+import BugAboutMeView from './new/BugAboutMeViewNew';
+import BugAboutMeCompletedView from './new/BugAboutMeCompletedViewNew'
 
 const tabListNoTitle = [{
     key: 'BugAboutMeView',

@@ -1,23 +1,20 @@
 import React, { Component, Fragment } from 'react';
 import { Table, Tag, Button, message, Popconfirm, Tooltip } from 'antd'
-import HttpApi from '../../util/HttpApi'
-import Store from '../../../redux/store/Store';
-import { showBugNum } from '../../../redux/actions/BugAction';
-import ShowImgView from './ShowImgView';
-import BaseModal from './actions/BaseModal';
-import './BugViewCss.css'
+import HttpApi from '../../../util/HttpApi'
+import Store from '../../../../redux/store/Store';
+import { showBugNum } from '../../../../redux/actions/BugAction';
+import '../BugViewCss.css'
+import StepLogView from './StepLogView';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
 var bug_type_filter = [];///用于筛选类别的数据 选项
-const status_filter = [{ text: '待分配', value: 0 }, { text: '维修中', value: 1 },
-{ text: '专工验收中', value: 2 }, { text: '运行验收中', value: 3 }];///用于筛选状态的数据
-const bug_level_filter = []
+const bug_level_filter = [];
 var uploader_filter = [];///用于筛选上传者的数据 选项
 
 var storage = window.localStorage;
 var localUserInfo = '';
 
-export default class BugCompletedView extends Component {
+export default class BugViewNewComplete extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -25,10 +22,12 @@ export default class BugCompletedView extends Component {
             showModal1: false,///img显示框
             showLoading: true,///现实loading图片
             preImguuid: null,///上一次加载的图片的uuid
-            showModal2: false,
             imguuid: null,
             userData: [],
             currentRecord: {},///当前选择的某一行。某一个缺陷对象
+            bugTypes: [],///所有缺陷备注类型
+
+            stepLogVisible: false,
         }
     }
     componentDidMount() {
@@ -56,9 +55,9 @@ export default class BugCompletedView extends Component {
         let uploaderData = await this.getUploaderInfo();
         uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
-        // console.log('finallyData:', finallyData);
         finallyData.forEach((item) => { item.key = item.id + '' })
         let userData = await this.getUsersInfo();
+        // console.log('finallyData:', finallyData);
         this.setState({
             data: finallyData,
             userData,
@@ -66,12 +65,12 @@ export default class BugCompletedView extends Component {
     }
     getUsersInfo = () => {
         return new Promise((resolve, reject) => {
-            let sqlText = `select users.*,users.name as title,levels.name level_name,  CONCAT(users.level_id,'-',users.id) 'key',CONCAT(users.level_id,'-',users.id) 'value' from users
+            let sql = `select users.*,users.name as title,levels.name level_name,  CONCAT(users.level_id,'-',users.id) 'key',CONCAT(users.level_id,'-',users.id) 'value' from users
             left join (select * from levels where effective = 1)levels
             on users.level_id = levels.id
             where users.effective = 1
             order by users.level_id`
-            HttpApi.obs({ sql: sqlText }, (res) => {
+            HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data
@@ -99,8 +98,8 @@ export default class BugCompletedView extends Component {
             })
         })
     }
-    getMajorInfo = () => {
-        let sql = `select m.id,m.name from majors m where effective = 1`
+    getBugTypeInfo = () => {
+        let sql = `select * from bug_types  where effective = 1`
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -122,8 +121,8 @@ export default class BugCompletedView extends Component {
             })
         })
     }
-    getBugTypeInfo = () => {
-        let sql = `select * from bug_types  where effective = 1`
+    getMajorInfo = () => {
+        let sql = `select m.id,m.name from majors m where effective = 1`
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -134,8 +133,8 @@ export default class BugCompletedView extends Component {
             })
         })
     }
-    getOneBugInfo = (bug_id) => {
-        let sql = `select bugs.* from bugs where id = ${bug_id} and effective = 1`;
+    getOneBugInfo = (bug_id, isDelete) => {
+        let sql = `select bugs.* from bugs where id = ${bug_id} and effective = ${isDelete ? 0 : 1}`;
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = null;
@@ -152,8 +151,7 @@ export default class BugCompletedView extends Component {
             area_1.name as area1_name,area_1.id as area1_id,
             area_2.name as area2_name,area_2.id as area3_id,
             area_3.name as area3_name,area_3.id as area3_id,
-            concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
-            bug_types.name as bug_type_name
+            concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name
             from bugs
             left join (select * from devices where effective = 1) des on bugs.device_id = des.id
             left join (select * from users where effective = 1) urs on bugs.user_id = urs.id
@@ -161,7 +159,6 @@ export default class BugCompletedView extends Component {
             left join (select * from area_3 where effective = 1) area_3 on des.area_id = area_3.id
             left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
             left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
-            left join (select * from bug_types where effective = 1) bug_types on bug_types.id = bugs.bug_type_id
             where bugs.status = 4 and bugs.effective = 1 order by bugs.id desc`
         }
         return new Promise((resolve, reject) => {
@@ -187,92 +184,68 @@ export default class BugCompletedView extends Component {
             })
         })
     }
-    actionsHandler = (record) => {
-        // console.log('详情：', record);
-        // console.log('localUserInfo:',localUserInfo);
-        this.setState({ showModal2: true, currentRecord: record })
-    }
     ///根据userid 查找 username
     getLocalUserName = (userId) => {
         let name = '';
         if (this.state.userData && this.state.userData.length > 0) { this.state.userData.forEach((item) => { if (item.id === userId) { name = item.name } }) }
         return name;
     }
-    ///////////////////////////////////////
-    ///////////////////////////////////////
-    ///////////////////////////////////////
 
-    ///状态0 时渲染的界面
-    renderStatusX = (statusValue) => {
-        let oneStepContent = [];///每一步的所以内容
-        if (this.state.currentRecord.remark) {
-            let stepRemarkObj = JSON.parse(this.state.currentRecord.remark);
-            // console.log("每一步的操作流程数据：", stepRemarkObj[statusValue]);
-            if (stepRemarkObj[statusValue]) {
-                let renderArr = stepRemarkObj[statusValue];
-                renderArr.forEach((item, index) => {
-                    let text = ''
-                    let remarkText = item.remark ? item.remark : '';
-                    /////////////////
-                    let result_arr = [];
-                    let comArr = [];///组件数组
-                    if (item.imgs) {
-                        item.imgs.forEach((item, index) => {
-                            result_arr.push({ key: index + item, name: ('图片' + (index + 1)), uuid: item });
-                        })
-                        result_arr.forEach((item, index) => {
-                            comArr.push(<Button size={'small'} type={'primary'} key={item.uuid} style={{ marginLeft: 10, cursor: "pointer" }}
-                                onClick={e => {
-                                    if (this.state.preImguuid !== item.uuid) {
-                                        this.setState({
-                                            showLoading: true,
-                                        })
-                                    } else {
-                                        this.setState({
-                                            showLoading: false,
-                                        })
-                                    }
-                                    this.setState({
-                                        imguuid: item.uuid,
-                                        showModal1: true,
-                                        preImguuid: item.uuid,
-                                    })
-                                }}>{item.name}</Button>)
-                        });
-                    }
-                    /////////////////
-                    if (item.to || item.to >= 0) {
-                        // text = '  ' + this.getLocalUserName(item.from) + '  分配给 ' + this.getLocalUserName(item.to);
-                        text = <Fragment><span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{item.time}</span>
-                            <span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{' ' + this.getLocalUserName(item.from)}</span>
-                            <span> 分配给 </span>
-                            <span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{' ' + item.to.map((id) => { return this.getLocalUserName(id) })}</span>
-                            {remarkText ? <span style={{ color: '#888888' }}> 备注: </span> : null}
-                            <span style={{ color: renderArr.length - 1 === index ? 'orange' : '#888888' }}>{remarkText}</span>
-                        </Fragment>
-                    } else {
-                        text = '  ' + this.getLocalUserName(item.from);
-                        text = <Fragment><span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{item.time}</span>
-                            <span style={{ color: renderArr.length - 1 === index ? '#888888' : '#888888' }}>{' ' + this.getLocalUserName(item.from)}</span>
-                            {remarkText ? <span style={{ color: '#888888' }}> 备注: </span> : null}
-                            <span style={{ color: renderArr.length - 1 === index ? 'orange' : '#888888' }}>{remarkText}</span>
-                        </Fragment>
-                    }
-                    oneStepContent.push(<div key={index}>
-                        {text}
-                        {comArr}
-                    </div>)
-                })
+    ////改变包含了这个bug_id 的record 再数据库中的值。 isDelete 是否为 删除缺陷的操作
+    changeRecordData = async (bugId, isDelete = false) => {
+        // let bugId = this.state.currentRecord.id;
+        ///1，要根据bug_id 去bugs表中去查询该条数据，获取其中的 device_id 字段信息
+        let oneBugInfo = await this.getOneBugInfo(bugId, isDelete);
+        let device_id = oneBugInfo.device_id;
+        // return;
+        if (!device_id) { return }
+        ///2，根据 device_id 去record 表中 找到 这个巡检点最新的一次record。 获取到后，在本地修改。再最为一条新数据插入到records表中
+        let oneRecordInfo = await this.getOneRecordInfo(device_id);
+        let bug_content = JSON.parse(oneRecordInfo.content);
+        ///content 数组。找到其中bug_id 不为null的。把bug_id 和 bugId 相同的给至null,再手动判断是不是bug_id字段都是null了。如果是device_status就要至1（正常）
+        let bug_id_count = 0;
+        ///先知道 有多少个 bug_id 不为null
+        bug_content.forEach((oneSelect) => {
+            if (oneSelect.bug_id !== null) {
+                bug_id_count++;
+            }
+        })
+        // console.log('这个巡检点还有几个bug:', bug_id_count);
+        if (bug_id_count > 0) {
+            ///如果找到对应的bug_id。将它至null,说明这个缺陷已经解决了。就不要再出现在record中了。同时bug_id_count减1
+            bug_content.forEach((oneSelect) => {
+                if (oneSelect.bug_id === bugId) {
+                    oneSelect.bug_id = null;
+                    bug_id_count--;
+                }
+            })
+            // console.log('处理完一个bug后的content为:', bug_content);
+            oneRecordInfo.content = JSON.stringify(bug_content);
+            if (bug_id_count === 0) {
+                oneRecordInfo.device_status = 1;
             }
         }
-        return oneStepContent
+        // oneRecordInfo.user_id = JSON.parse(localUserInfo).id;///更新record的上传人。
+        delete oneRecordInfo.id;
+        delete oneRecordInfo.createdAt;
+        delete oneRecordInfo.updatedAt;
+        // console.log('待入库的最新record:', oneRecordInfo);
+        HttpApi.insertRecordInfo(oneRecordInfo, (res) => {
+            if (res.data.code === 0) {
+                // console.log('入库成功。');
+                if (oneRecordInfo.device_status === 1) {
+                    ///手动更新数据库中，对应巡检点的状态
+                    HttpApi.updateDeviceInfo({ query: { id: device_id }, update: { status: 1 } }, (res) => {
+                        if (res.data.code === 0) { message.success('对应巡检点最新巡检记录更新-巡检点状态恢复正常'); }
+                    })
+                } else {
+                    HttpApi.updateDeviceInfo({ query: { id: device_id }, update: { status: 2 } }, (res) => {
+                        if (res.data.code === 0) { message.info('对应巡检点最新巡检记录更新'); } ///这么做的目的是只要有record上传，就要更新对应巡检点的updateAt
+                    })
+                }
+            }
+        })
     }
-
-    /////判断每一个button 在各种情况下，是否禁用
-    checkDisable = (btnV) => {
-        return true;
-    }
-
     deleteBugsHandler = (record) => {
         HttpApi.obs({ sql: `update bugs set effective = 0 where id = ${record.id} ` }, (res) => {
             if (res.data.code === 0) {
@@ -280,15 +253,14 @@ export default class BugCompletedView extends Component {
                 this.init();
                 ///要利用redux刷新 mainView处的徽标数
                 this.updateDataByRedux();
+                ///再创建一个新的record记录插入records表
+                this.changeRecordData(record.id, true);
             }
         })
     }
     updateDataByRedux = () => {
         ///每次删除
         Store.dispatch(showBugNum(null)) ///随便派发一个值，目的是让 mainView处监听到 执行init();
-    }
-    openDrawerHandler = (dataObj) => {
-        this.setState({ ...dataObj })
     }
     render() {
         const columns = [
@@ -306,7 +278,6 @@ export default class BugCompletedView extends Component {
                 sorter: (a, b) => {
                     return new Date(a.checkedAt).getTime() - new Date(b.checkedAt).getTime()
                 },
-                // defaultSortOrder: 'descend',
                 render: (text, record) => { return <div>{text || '/'}</div> }
             },
             {
@@ -324,19 +295,19 @@ export default class BugCompletedView extends Component {
             },
             {
                 key: 'user_name', dataIndex: 'user_name', title: '发现人',
-                width: 80,
+                width: 100,
                 filters: uploader_filter,
                 onFilter: (value, record) => record.user_id === value,
             },
-            // {
-            //     key: 'area_remark', dataIndex: 'area_remark', title: '具体巡检点范围',
-            //     render: (text, record) => {
-            //         let result = '/'
-            //         if (text) { result = text }
-            //         else { result = record.area_name }
-            //         return <div>{result}</div>
-            //     }
-            // },
+            {
+                key: 'area_remark', dataIndex: 'area_remark', title: '具体巡检点范围',
+                render: (text, record) => {
+                    let result = '/'
+                    if (text) { result = text }
+                    else { result = record.area_name }
+                    return <div>{result}</div>
+                }
+            },
             {
                 key: 'content',
                 dataIndex: 'content',
@@ -393,11 +364,9 @@ export default class BugCompletedView extends Component {
             },
             {
                 key: 'buglevel', dataIndex: 'buglevel', title: '缺陷类型',
-                width: 80,
                 filters: bug_level_filter,
                 onFilter: (value, record) => record.buglevel === value,
                 render: (text) => {
-                    // console.log(text);
                     let result = null;
                     let resultCom = '/'
                     let color = '#505659';
@@ -411,7 +380,7 @@ export default class BugCompletedView extends Component {
                 }
             },
             {
-                key: 'major_name', dataIndex: 'major_name', title: '专业',
+                key: 'major_name', dataIndex: 'major_name', title: '缺陷专业',
                 filters: major_filter,
                 onFilter: (value, record) => record.major_id === value,
                 render: (text, record) => {
@@ -419,75 +388,13 @@ export default class BugCompletedView extends Component {
                 }
             },
             {
-                key: 'bug_type_name', dataIndex: 'bug_type_name', title: '备注类别',
-                filters: bug_type_filter,
-                onFilter: (value, record) => record.bug_type_id === value,
-                render: (text, record) => {
-                    return <div>{text || '/'}</div>
-                }
-            },
-            {
-                key: 'last_remark', dataIndex: 'last_remark', title: '备注内容',
-                render: (text, record) => {
-                    return <div className='hideText lineClamp5' style={{ minWidth: 80 }}>{text ?
-                        < Tooltip title={text}>
-                            <span>{text}</span>
-                        </Tooltip> : '/'
-                    }</div>
-                }
-            },
-            // {
-            //     key: 'img', dataIndex: 'content', title: '图片', render: (text) => {
-            //         let obj = JSON.parse(text);
-            //         let imgs_arr = JSON.parse(JSON.stringify(obj.imgs));
-            //         let result_arr = [];
-            //         imgs_arr.forEach((item, index) => {
-            //             result_arr.push({ key: index + item, name: ('图片' + (index + 1)), uuid: item });
-            //         })
-            //         let comArr = [];
-            //         result_arr.forEach((item, index) => {
-            //             comArr.push(<span key={item.uuid} style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
-            //                 onClick={e => {
-            //                     if (this.state.preImguuid !== item.uuid) {
-            //                         this.setState({
-            //                             showLoading: true,
-            //                         })
-            //                     } else {
-            //                         this.setState({
-            //                             showLoading: false,
-            //                         })
-            //                     }
-            //                     this.setState({
-            //                         imguuid: item.uuid,
-            //                         showModal1: true,
-            //                         preImguuid: item.uuid,
-            //                     })
-            //                 }}>{item.name}</span>)
-            //         });
-            //         let result = '/'
-            //         if (comArr.length > 0) { result = comArr }
-            //         return <div>{result}</div>
-            //     }
-            // },
-            {
                 title: '缺陷状态',
                 dataIndex: 'status',
-                filters: status_filter,
                 align: 'center',
-                onFilter: (value, record) => record.status === value,
                 render: (text, record) => {
-                    let str = '';
+                    let str = '完毕';
                     let color = '#888888'
-                    if (text === 0) { str = '待分配' } else if (text === 1) { str = '维修中'; color = '#FF9999' } else if (text === 2) { str = '专工验收中'; color = '#6699CC' }
-                    else if (text === 3) { str = '运行验收中'; color = '#9933CC' } else if (text === 4) { str = '处理完毕'; color = '#87d068' }
                     return <Tag color={color}>{str}</Tag>;
-                }
-            },
-            {
-                title: '当前处理人员',
-                dataIndex: 'a',
-                render: (text, record) => {
-                    return <div>/</div>;
                 }
             },
             {
@@ -495,7 +402,7 @@ export default class BugCompletedView extends Component {
                 dataIndex: 'actions',
                 render: (text, record) => (
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <Button size="small" type="primary" onClick={() => { this.actionsHandler(record) }}>查看</Button>
+                        <Button size="small" type="default" onClick={() => { this.setState({ stepLogVisible: true, currentRecord: record }) }}>日志</Button>
                         {JSON.parse(localUserInfo).isadmin === 1 ?
                             <Fragment>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
@@ -519,10 +426,7 @@ export default class BugCompletedView extends Component {
                         pageSizeOptions: ['10', '20', '50', '80', '100'],
                     }}
                 />
-                {/* 进度界面 */}
-                <BaseModal showModal={this.state.showModal2} onClose={() => { this.setState({ showModal2: false }) }} renderStatusX={this.renderStatusX} currentStatus={this.state.currentRecord.status} openDrawer={this.openDrawerHandler} checkDisable={this.checkDisable} />
-                {/* 图片显示界面 */}
-                <ShowImgView showModal={this.state.showModal1} cancel={() => { this.setState({ showModal1: false }) }} showLoading={this.state.showLoading} imguuid={this.state.imguuid} />
+                <StepLogView visible={this.state.stepLogVisible} onCancel={() => { this.setState({ stepLogVisible: false }) }} bugId={this.state.currentRecord.id} />
             </Fragment >
         );
     }

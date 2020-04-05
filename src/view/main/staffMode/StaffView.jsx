@@ -66,6 +66,9 @@ class StaffView extends Component {
         if (newValues.permission) {
             newValues.permission = newValues.permission.join(',')
         }
+        if (newValues.major_id) {
+            newValues.major_id = newValues.major_id.join(',')
+        }
         newValues.isGroupLeader = newValues.isGroupLeader ? 1 : 0
         HttpApi.addUserInfo(newValues, data => {
             if (data.data.code === 0) {
@@ -92,6 +95,7 @@ class StaffView extends Component {
         newValues.isadmin = newValues.isadmin ? 1 : 0
         newValues.isGroupLeader = newValues.isGroupLeader ? 1 : 0
         if (newValues.permission) newValues.permission = newValues.permission.join(',')
+        if (newValues.major_id) newValues.major_id = newValues.major_id.join(',')
         HttpApi.updateUserInfo({ query: { id: this.state.updateStaffData.id }, update: newValues }, data => {
             if (data.data.code === 0) {
                 this.setState({ updateStaffVisible: false })
