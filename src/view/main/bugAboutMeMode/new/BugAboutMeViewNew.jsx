@@ -9,6 +9,7 @@ import StepLogView from '../../bugMode/new/StepLogView';
 import FuncPanelForEngineer from '../../bugMode/new/FuncPanelForEngineer';
 import FuncPanelForRunner from '../../bugMode/new/FuncPanelForRunner';
 import { originStatus } from '../../../util/AppData'
+import ShowImgView from '../../bugMode/ShowImgView';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
 var bug_type_filter = [];///用于筛选类别的数据 选项
@@ -506,14 +507,14 @@ export default class BugAboutMeViewNew extends Component {
                             <>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                 <Button disabled={
-                                    JSON.parse(localUserInfo).major_id !== record.major_id || !(record.status < 2 || record.status === 6 || record.status === 7)
+                                    JSON.parse(localUserInfo).major_id.indexOf(record.major_id) === -1 || !(record.status < 2 || record.status === 6 || record.status === 7)
                                 } size="small" type="primary" onClick={() => { this.repairHandler(record) }}>维修处理</Button>
                             </> : null}
                         {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('0') !== -1 ?
                             <>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                 <Button disabled={
-                                    JSON.parse(localUserInfo).major_id !== record.major_id || !(record.status < 3 || record.status > 4)
+                                    JSON.parse(localUserInfo).major_id.indexOf(record.major_id) === -1 || !(record.status < 3 || record.status > 4)
                                 } size="small" type="primary" onClick={() => { this.engineerHandler(record) }}>专工处理</Button>
                             </> : null}
                         {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('1') !== -1 ?
@@ -549,6 +550,7 @@ export default class BugAboutMeViewNew extends Component {
                         pageSizeOptions: ['10', '20', '50', '80', '100'],
                     }}
                 />
+                <ShowImgView showModal={this.state.showModal1} cancel={() => { this.setState({ showModal1: false }) }} showLoading={this.state.showLoading} imguuid={this.state.imguuid} />
                 <StepLogView visible={this.state.stepLogVisible} onCancel={() => { this.setState({ stepLogVisible: false }) }} bugId={this.state.currentRecord.id} />
                 <FuncPanelForRepair visible={this.state.repairVisible} onOk={(v) => {
                     switch (v.selectValue) {

@@ -5,6 +5,7 @@ import Store from '../../../../redux/store/Store';
 import { showBugNum } from '../../../../redux/actions/BugAction';
 import '../BugViewCss.css'
 import StepLogView from './StepLogView';
+import ShowImgView from '../ShowImgView';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
 var bug_type_filter = [];///用于筛选类别的数据 选项
@@ -426,6 +427,7 @@ export default class BugViewNewComplete extends Component {
                         pageSizeOptions: ['10', '20', '50', '80', '100'],
                     }}
                 />
+                <ShowImgView showModal={this.state.showModal1} cancel={() => { this.setState({ showModal1: false }) }} showLoading={this.state.showLoading} imguuid={this.state.imguuid} />
                 <StepLogView visible={this.state.stepLogVisible} onCancel={() => { this.setState({ stepLogVisible: false }) }} bugId={this.state.currentRecord.id} />
             </Fragment >
         );
