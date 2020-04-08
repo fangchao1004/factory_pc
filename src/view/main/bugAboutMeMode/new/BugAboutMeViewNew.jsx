@@ -507,14 +507,14 @@ export default class BugAboutMeViewNew extends Component {
                             <>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                 <Button disabled={
-                                    JSON.parse(localUserInfo).major_id.indexOf(record.major_id) === -1 || !(record.status < 2 || record.status === 6 || record.status === 7)
+                                    !JSON.parse(localUserInfo).major_id || JSON.parse(localUserInfo).major_id.indexOf(record.major_id) === -1 || !(record.status < 2 || record.status === 6 || record.status === 7)
                                 } size="small" type="primary" onClick={() => { this.repairHandler(record) }}>维修处理</Button>
                             </> : null}
                         {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('0') !== -1 ?
                             <>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                 <Button disabled={
-                                    JSON.parse(localUserInfo).major_id.indexOf(record.major_id) === -1 || !(record.status < 3 || record.status > 4)
+                                    !JSON.parse(localUserInfo).major_id || JSON.parse(localUserInfo).major_id.indexOf(record.major_id) === -1 || !(record.status < 3 || record.status > 4)
                                 } size="small" type="primary" onClick={() => { this.engineerHandler(record) }}>专工处理</Button>
                             </> : null}
                         {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('1') !== -1 ?
