@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import HttpApi from '../../../util/HttpApi';
-import { Modal, Timeline, Tag, Empty } from 'antd';
+import HttpApi, { Testuri } from '../../../util/HttpApi';
+import { Modal, Timeline, Tag, Empty, Button } from 'antd';
 /**
  * 缺陷处理日志界面
  */
@@ -10,6 +10,7 @@ export default class StepLogView extends Component {
         this.state = {
             visible: false,
             stepList: [],
+            imguuid: null,
         }
     }
     init = async (bugId) => {
@@ -59,12 +60,21 @@ export default class StepLogView extends Component {
                                     <Tag color={'#1690FF'}>{item.createdAt}</Tag>
                                     <Tag color={'#FF9900'} >{item.user_name}</Tag>
                                     {item.tag_des ? <Tag color={'blue'}>{item.tag_des} {item.freeze_des ? '- ' + item.freeze_des : (item.major_name ? '- ' + item.major_name : '')}</Tag> : null}
-                                    {item.remark ? <span style={{ color: '#FF9900' }}>{'备注: ' + item.remark}</span> : ''}
+                                    <div>{item.imgs ? item.imgs.split(',').map((img, i) => <Button style={{ marginTop: 4 }} size='small' type='link' key={i} onClick={() => {
+                                        this.setState({ imguuid: img })
+                                    }}>图片{i + 1}</Button>) : ''}</div>
+                                    {item.remark ? <div style={{ color: '#FF9900', marginTop: item.imgs ? 5 : 10 }}>{'备注: ' + item.remark}</div> : ''}
                                 </Timeline.Item>
                             })}
                         </Timeline> : <Empty />}
                 </div>
-
+                <Modal visible={this.state.imguuid !== null} destroyOnClose centered
+                    width={410} bodyStyle={{ textAlign: 'center', padding: 5, margin: 0 }} footer={null} onCancel={() => {
+                        this.setState({ imguuid: null })
+                    }}>
+                    <img alt='' style={{ width: 400 }} src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} />
+                    {/* <img alt='' style={{ width: 400 }} src={'http://ixiaomu.cn:3008/get_jpg?uuid=' + this.state.imguuid} /> */}
+                </Modal>
             </Modal>
         );
     }

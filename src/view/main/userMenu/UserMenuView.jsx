@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Button, Modal, Row, Col, Input, message, Card, Tooltip, Tag } from 'antd';
-import HttpApi from '../../util/HttpApi'
+import HttpApi, { environmentIsTest } from '../../util/HttpApi'
 import moment from 'moment'
 import { permisstionWithDes, adminPermission } from '../../util/AppData'
 
@@ -118,7 +118,7 @@ export default class UserMenuView extends Component {
                 < Button type='danger' style={{ width: "100%", marginTop: 10 }}
                     onClick={() => {
                         storage.removeItem('userinfo');
-                        window.location.href = "/";
+                        window.location.href = environmentIsTest ? '/test/' : '/';
                     }}> 退出登录</Button >
                 <Modal
                     title="发布通知"
