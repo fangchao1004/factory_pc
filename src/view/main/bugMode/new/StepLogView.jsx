@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import HttpApi, { Testuri } from '../../../util/HttpApi';
-import { Modal, Timeline, Tag, Empty, Button } from 'antd';
+import { Modal, Timeline, Tag, Empty } from 'antd';
 /**
  * 缺陷处理日志界面
  */
@@ -60,9 +60,14 @@ export default class StepLogView extends Component {
                                     <Tag color={'#1690FF'}>{item.createdAt}</Tag>
                                     <Tag color={'#FF9900'} >{item.user_name}</Tag>
                                     {item.tag_des ? <Tag color={'blue'}>{item.tag_des} {item.freeze_des ? '- ' + item.freeze_des : (item.major_name ? '- ' + item.major_name : '')}</Tag> : null}
-                                    <div>{item.imgs ? item.imgs.split(',').map((img, i) => <Button style={{ marginTop: 4 }} size='small' type='link' key={i} onClick={() => {
-                                        this.setState({ imguuid: img })
-                                    }}>图片{i + 1}</Button>) : ''}</div>
+                                    <div>{item.imgs ? item.imgs.split(',').map((img, i) =>
+                                        <img alt='' style={{ width: 50, height: 50,marginTop: 10, marginRight: 10 }} key={img} src={Testuri + 'get_jpg?uuid=' + img}
+                                            onClick={() => {
+                                                this.setState({ imguuid: img })
+                                            }}
+                                        />
+                                    )
+                                        : ''}</div>
                                     {item.remark ? <div style={{ color: '#FF9900', marginTop: item.imgs ? 5 : 10 }}>{'备注: ' + item.remark}</div> : ''}
                                 </Timeline.Item>
                             })}
