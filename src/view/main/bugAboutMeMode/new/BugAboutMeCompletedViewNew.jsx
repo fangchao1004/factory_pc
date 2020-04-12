@@ -135,18 +135,6 @@ export default class BugAboutMeCompletedViewNew extends Component {
             })
         })
     }
-    getOneBugInfo = (bug_id, isDelete) => {
-        let sql = `select bugs.* from bugs where id = ${bug_id} and effective = ${isDelete ? 0 : 1} `;
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
-                let result = null;
-                if (res.data.code === 0) {
-                    result = res.data.data[0]
-                }
-                resolve(result);
-            })
-        })
-    }
     getBugsInfo = (sql = null) => {
         if (!sql) {
             sql = `select bugs.*, des.name as device_name, urs.name as user_name, mjs.name as major_name,
@@ -173,83 +161,6 @@ export default class BugAboutMeCompletedViewNew extends Component {
             })
         })
     }
-    getOneRecordInfo = (device_id) => {
-        let sql1 = ' select * from records rds where device_id = ' + device_id + ' order by rds.id desc limit 1';
-        let sqlText = sql1;
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql: sqlText }, (res) => {
-                let result = null;
-                if (res.data.code === 0) {
-                    result = res.data.data[0]
-                }
-                resolve(result);
-            })
-        })
-    }
-
-    ///根据userid 查找 username
-    getLocalUserName = (userId) => {
-        let name = '';
-        if (this.state.userData && this.state.userData.length > 0) { this.state.userData.forEach((item) => { if (item.id === userId) { name = item.name } }) }
-        return name;
-    }
-
-    ////改变包含了这个bug_id 的record 再数据库中的值。 isDelete 是否为 删除缺陷的操作
-    changeRecordData = async (bugId, isDelete = false) => {
-        // let bugId = this.state.currentRecord.id;
-        ///1，要根据bug_id 去bugs表中去查询该条数据，获取其中的 device_id 字段信息
-        let oneBugInfo = await this.getOneBugInfo(bugId, isDelete);
-        let device_id = oneBugInfo.device_id;
-        // return;
-        if (!device_id) { return }
-        ///2，根据 device_id 去record 表中 找到 这个巡检点最新的一次record。 获取到后，在本地修改。再最为一条新数据插入到records表中
-        let oneRecordInfo = await this.getOneRecordInfo(device_id);
-        let bug_content = JSON.parse(oneRecordInfo.content);
-        ///content 数组。找到其中bug_id 不为null的。把bug_id 和 bugId 相同的给至null,再手动判断是不是bug_id字段都是null了。如果是device_status就要至1（正常）
-        let bug_id_count = 0;
-        ///先知道 有多少个 bug_id 不为null
-        bug_content.forEach((oneSelect) => {
-            if (oneSelect.bug_id !== null) {
-                bug_id_count++;
-            }
-        })
-        // console.log('这个巡检点还有几个bug:', bug_id_count);
-        if (bug_id_count > 0) {
-            ///如果找到对应的bug_id。将它至null,说明这个缺陷已经解决了。就不要再出现在record中了。同时bug_id_count减1
-            bug_content.forEach((oneSelect) => {
-                if (oneSelect.bug_id === bugId) {
-                    oneSelect.bug_id = null;
-                    bug_id_count--;
-                }
-            })
-            // console.log('处理完一个bug后的content为:', bug_content);
-            oneRecordInfo.content = JSON.stringify(bug_content);
-            if (bug_id_count === 0) {
-                oneRecordInfo.device_status = 1;
-            }
-        }
-        // oneRecordInfo.user_id = JSON.parse(localUserInfo).id;///更新record的上传人。
-        delete oneRecordInfo.id;
-        delete oneRecordInfo.createdAt;
-        delete oneRecordInfo.updatedAt;
-        // console.log('待入库的最新record:', oneRecordInfo);
-        HttpApi.insertRecordInfo(oneRecordInfo, (res) => {
-            if (res.data.code === 0) {
-                // console.log('入库成功。');
-                if (oneRecordInfo.device_status === 1) {
-                    ///手动更新数据库中，对应巡检点的状态
-                    HttpApi.updateDeviceInfo({ query: { id: device_id }, update: { status: 1 } }, (res) => {
-                        if (res.data.code === 0) { message.success('对应巡检点最新巡检记录更新-巡检点状态恢复正常'); }
-                    })
-                } else {
-                    HttpApi.updateDeviceInfo({ query: { id: device_id }, update: { status: 2 } }, (res) => {
-                        if (res.data.code === 0) { message.info('对应巡检点最新巡检记录更新'); } ///这么做的目的是只要有record上传，就要更新对应巡检点的updateAt
-                    })
-                }
-            }
-        })
-    }
-
     deleteBugsHandler = (record) => {
         HttpApi.obs({ sql: `update bugs set effective = 0 where id = ${record.id} ` }, (res) => {
             if (res.data.code === 0) {
@@ -258,7 +169,6 @@ export default class BugAboutMeCompletedViewNew extends Component {
                 ///要利用redux刷新 mainView处的徽标数
                 this.updateDataByRedux();
                 ///再创建一个新的record记录插入records表
-                this.changeRecordData(record.id, true);
             }
         })
     }

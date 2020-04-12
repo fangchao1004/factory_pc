@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm, Tooltip, Alert,Modal } from 'antd'
+import { Table, Tag, Button, message, Popconfirm, Tooltip, Alert, Modal } from 'antd'
 import HttpApi, { Testuri } from '../../../util/HttpApi'
 import moment from 'moment'
 import Store from '../../../../redux/store/Store';
@@ -207,7 +207,7 @@ export default class BugViewNew extends Component {
         })
     }
     getOneRecordInfo = (device_id) => {
-        let sql1 = ' select * from records rds where device_id = ' + device_id + ' order by rds.id desc limit 1';
+        let sql1 = ' select * from records rds where effective = 1 and device_id = ' + device_id + ' order by rds.id desc limit 1';
         let sqlText = sql1;
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql: sqlText }, (res) => {
@@ -219,14 +219,6 @@ export default class BugViewNew extends Component {
             })
         })
     }
-
-    ///根据userid 查找 username
-    getLocalUserName = (userId) => {
-        let name = '';
-        if (this.state.userData && this.state.userData.length > 0) { this.state.userData.forEach((item) => { if (item.id === userId) { name = item.name } }) }
-        return name;
-    }
-
     ////改变包含了这个bug_id 的record 再数据库中的值。 isDelete 是否为 删除缺陷的操作
     changeRecordData = async (bugId, isDelete = false) => {
         // let bugId = this.state.currentRecord.id;
@@ -246,7 +238,7 @@ export default class BugViewNew extends Component {
                 bug_id_count++;
             }
         })
-        // console.log('这个巡检点还有几个bug:', bug_id_count);
+        // console.log('1 这个巡检点还有几个bug:', bug_id_count);
         if (bug_id_count > 0) {
             ///如果找到对应的bug_id。将它至null,说明这个缺陷已经解决了。就不要再出现在record中了。同时bug_id_count减1
             bug_content.forEach((oneSelect) => {
@@ -261,14 +253,14 @@ export default class BugViewNew extends Component {
                 oneRecordInfo.device_status = 1;
             }
         }
-        // oneRecordInfo.user_id = JSON.parse(localUserInfo).id;///更新record的上传人。
+        oneRecordInfo.user_id = JSON.parse(localUserInfo).id;///更新record的上传人。
         delete oneRecordInfo.id;
         delete oneRecordInfo.createdAt;
         delete oneRecordInfo.updatedAt;
         // console.log('待入库的最新record:', oneRecordInfo);
         HttpApi.insertRecordInfo(oneRecordInfo, (res) => {
             if (res.data.code === 0) {
-                // console.log('入库成功。');
+                // console.log('所有 入库成功。');
                 if (oneRecordInfo.device_status === 1) {
                     ///手动更新数据库中，对应巡检点的状态
                     HttpApi.updateDeviceInfo({ query: { id: device_id }, update: { status: 1 } }, (res) => {
@@ -378,10 +370,10 @@ export default class BugViewNew extends Component {
                             //         })
                             //     }}>{item.name}</span>
                             <img alt='' style={{ width: 50, height: 50, marginRight: 10 }} key={index} src={Testuri + 'get_jpg?uuid=' + item.uuid}
-                                            onClick={() => {
-                                                this.setState({ imguuid: item.uuid })
-                                            }}
-                                        />
+                                onClick={() => {
+                                    this.setState({ imguuid: item.uuid })
+                                }}
+                            />
                         )
                     });
                     let result = ''
@@ -580,17 +572,17 @@ export default class BugViewNew extends Component {
                 <FuncPanelForRunner visible={this.state.runnerVisible} onOk={(v) => {
                     switch (v.selectValue) {
                         case 1:
-                            this.CompleteByRunner(v);
+                            this.completeByRunner(v);
                             break;
                         case 2:
-                            this.GoBackEngineerByRunner(v);
+                            this.goBackEngineerByRunner(v);
                             break;
                         default:
                             break;
                     }
                     this.setState({ runnerVisible: false })
                 }} onCancel={() => { this.setState({ runnerVisible: false }) }} />
-               <Modal visible={this.state.imguuid !== null} destroyOnClose centered
+                <Modal visible={this.state.imguuid !== null} destroyOnClose centered
                     width={410} bodyStyle={{ textAlign: 'center', padding: 5, margin: 0 }} footer={null} onCancel={() => {
                         this.setState({ imguuid: null })
                     }}>
@@ -609,7 +601,7 @@ export default class BugViewNew extends Component {
     runnerHandler = (record) => {
         this.setState({ runnerVisible: true, currentRecord: record })
     }
-    //////////////////////
+    ////////////////////// 维修人员处理
     exchangeBugMajorByRepair = (v) => {
         let remark = v.remarkText;
         let bug_id = this.state.currentRecord.id;
@@ -668,7 +660,7 @@ export default class BugViewNew extends Component {
             } else { message.error('维修人员认为无需维修操作失败') }
         })
     }
-    //////////////////////
+    ////////////////////// 专工处理
     exchangeBugMajorByEngineer = (v) => {
         let remark = v.remarkText;
         let bug_id = this.state.currentRecord.id;
@@ -753,8 +745,8 @@ export default class BugViewNew extends Component {
             } else { message.error('专工确认无需维修操作失败') }
         })
     }
-    ///////////////
-    CompleteByRunner = (v) => {
+    /////////////// 运行处理
+    completeByRunner = (v) => {
         let remark = v.remarkText;
         let bug_id = this.state.currentRecord.id;
         let user_id = JSON.parse(localUserInfo).id;
@@ -763,12 +755,12 @@ export default class BugViewNew extends Component {
             if (res.data.code === 0) {
                 let sql = `update bugs set status = 4 where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
-                    if (res.data.code === 0) { message.success('运行验收操作成功'); this.init(); } else { message.error('运行验收操作失败') }
+                    if (res.data.code === 0) { message.success('运行验收操作成功'); this.init(); this.changeRecordData(bug_id); } else { message.error('运行验收操作失败') }
                 })
             } else { message.error('运行验收操作失败') }
         })
     }
-    GoBackEngineerByRunner = (v) => {
+    goBackEngineerByRunner = (v) => {
         let remark = v.remarkText;
         let bug_id = this.state.currentRecord.id;
         let user_id = JSON.parse(localUserInfo).id;
