@@ -83,13 +83,13 @@ export default class BugAboutMeCompletedViewNew extends Component {
     }
     /**
      * 查询上传者 去重
-     * 未完成的缺陷
+     * 完成的缺陷
      */
     getUploaderInfo = () => {
         let sql = `select distinct(users.name) as user_name, bugs.user_id from bugs
                 left join(select * from users where effective = 1) users
                 on users.id = bugs.user_id
-                where bugs.effective = 1 and bugs.status != 4`
+                where bugs.effective = 1 and bugs.status = 4`
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
