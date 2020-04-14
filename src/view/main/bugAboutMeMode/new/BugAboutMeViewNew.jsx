@@ -494,27 +494,28 @@ export default class BugAboutMeViewNew extends Component {
             {
                 title: '操作',
                 dataIndex: 'actions',
-                render: (_, record) => (
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                render: (_, record) => {
+                    let majorHasFlag = JSON.parse(localUserInfo).major_id && JSON.parse(localUserInfo).major_id.split(',').indexOf(String(record.major_id)) !== -1
+                    let fixable = majorHasFlag && (record.status < 2 || record.status === 6 || record.status === 7);
+                    let engable = majorHasFlag && (record.status < 3 || record.status > 4);
+                    let runable = record.status === 3;
+
+                    return <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <Button size="small" type="default" onClick={() => { this.setState({ stepLogVisible: true, currentRecord: record }) }}>日志</Button>
                         {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('3') !== -1 ?
                             <>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                                <Button disabled={
-                                    !JSON.parse(localUserInfo).major_id || JSON.parse(localUserInfo).major_id.indexOf(record.major_id) === -1 || !(record.status < 2 || record.status === 6 || record.status === 7)
-                                } size="small" type="primary" onClick={() => { this.repairHandler(record) }}>维修处理</Button>
+                                <Button disabled={!fixable} size="small" type="primary" onClick={() => { this.repairHandler(record) }}>维修处理</Button>
                             </> : null}
                         {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('0') !== -1 ?
                             <>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                                <Button disabled={
-                                    !JSON.parse(localUserInfo).major_id || JSON.parse(localUserInfo).major_id.indexOf(record.major_id) === -1 || !(record.status < 3 || record.status > 4)
-                                } size="small" type="primary" onClick={() => { this.engineerHandler(record) }}>专工处理</Button>
+                                <Button disabled={!engable} size="small" type="primary" onClick={() => { this.engineerHandler(record) }}>专工处理</Button>
                             </> : null}
                         {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('1') !== -1 ?
                             <>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                                <Button disabled={record.status !== 3} size="small" type="primary" onClick={() => { this.runnerHandler(record) }}>运行处理</Button>
+                                <Button disabled={!runable} size="small" type="primary" onClick={() => { this.runnerHandler(record) }}>运行处理</Button>
                             </> : null}
                         {JSON.parse(localUserInfo).isadmin === 1 ?
                             <>
@@ -524,7 +525,7 @@ export default class BugAboutMeViewNew extends Component {
                                 </Popconfirm>
                             </> : null}
                     </div>
-                )
+                }
             }
         ]
         return (

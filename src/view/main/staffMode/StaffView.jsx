@@ -60,9 +60,9 @@ class StaffView extends Component {
     }
     ///添加员工-确定
     addStaffOnOk = (newValues) => {
-        let level_group = newValues.level_id.split('_');
+        // let level_group = newValues.level_id.split('_');
         ///将 组的数据 从部门 分离出来
-        if (level_group.length > 1) { newValues.level_id = parseInt(level_group[0]); newValues.group_id = parseInt(level_group[1]); }
+        // if (level_group.length > 1) { newValues.level_id = parseInt(level_group[0]); newValues.group_id = parseInt(level_group[1]); }
         if (newValues.permission) {
             newValues.permission = newValues.permission.join(',')
         }
@@ -182,32 +182,32 @@ class StaffView extends Component {
                 filters: level_filter,
                 onFilter: (value, record) => record.level_id === value,
                 render: (text, record, index) => {
-                    if (record.group_id === null) {
-                        return {
-                            children: <div>{record.level_name}</div>,
-                            props: {
-                                colSpan: 2,
-                            },
-                        }
-                    }
+                    // if (record.group_id === null) {
+                    //     return {
+                    //         children: <div>{record.level_name}</div>,
+                    //         props: {
+                    //             colSpan: 2,
+                    //         },
+                    //     }
+                    // }
                     return <div>{record.level_name}</div>;
                 }
             },
-            {
-                title: '组别',
-                dataIndex: 'group_id',
-                render: (text) => {
-                    if (text === null) {
-                        return {
-                            children: null,
-                            props: {
-                                colSpan: 0,
-                            },
-                        }
-                    }
-                    return <div>{text === 1 ? '甲组' : (text === 2 ? '乙组' : (text === 3 ? '丙组' : '丁组'))}</div>;
-                }
-            },
+            // {
+            //     title: '组别',
+            //     dataIndex: 'group_id',
+            //     render: (text) => {
+            //         if (text === null) {
+            //             return {
+            //                 children: null,
+            //                 props: {
+            //                     colSpan: 0,
+            //                 },
+            //             }
+            //         }
+            //         return <div>{text === 1 ? '甲组' : (text === 2 ? '乙组' : (text === 3 ? '丙组' : '丁组'))}</div>;
+            //     }
+            // },
             {
                 title: '密码',
                 dataIndex: 'password',

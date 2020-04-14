@@ -103,7 +103,7 @@ export default class StepLogView extends Component {
                 onCancel={() => { this.props.onCancel(); }}
                 footer={null}
             >
-                <Descriptions size='small' bordered>
+                {/* <Descriptions size='small' bordered>
                     <Descriptions.Item label="编号">{this.state.record.id || '/'}</Descriptions.Item>
                     <Descriptions.Item label="巡检点">{this.state.record.device_name || this.state.record.area_remark || '/'}</Descriptions.Item>
                     <Descriptions.Item label="专业">{this.state.record.major_name || '/'}</Descriptions.Item>
@@ -111,8 +111,8 @@ export default class StepLogView extends Component {
                     <Descriptions.Item label="状态">{this.changeStatusToStr(this.state.record) || '/'}</Descriptions.Item>
                     <Descriptions.Item label="上报人">{this.state.record.user_name || '/'}</Descriptions.Item>
                     <Descriptions.Item label="内容">{this.state.record.content && JSON.parse(this.state.record.content).text}</Descriptions.Item>
-                </Descriptions>
-                <div style={{ height: this.state.stepList.length > 0 ? 400 : 200, overflow: "scroll", marginTop: 10 }}>
+                </Descriptions> */}
+                <div style={{ height: this.state.stepList.length > 0 ? 400 : 200, overflow: "scroll" }}>
                     {this.state.stepList.length > 0 ?
                         <Timeline style={{ marginTop: 10 }} >
                             {this.state.stepList.map((item, index) => {

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Form, Input, Select, TreeSelect, Switch } from 'antd'
+import { Modal, Form, Input, Select, Switch } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import { permisstion } from '../../util/AppData'
 
@@ -7,22 +7,22 @@ const permissionOptions = permisstion.map(
     permission => <Select.Option value={permission.value} key={permission.value}>{permission.name}</Select.Option>
 )
 
-function getTreeData(levels) { ///目的是 让生产运行部 产生子选项 甲乙丙丁组
-    // console.log('levelsL;', levels);
-    let tempList = [];
-    levels.forEach((item) => {
-        let cellObj = {};
-        cellObj.title = item.name;
-        cellObj.value = item.id + '';
-        cellObj.key = item.id + '';
-        if (item.name === '生产运行部') { /// 直接用名称匹配了 因为 甲乙丙丁分组和部门之间没有id的关联性 
-            cellObj.children = [{ title: '生产运行部-甲组', value: item.id + '_1', key: item.id + '_1' }, { title: '生产运行部-乙组', value: item.id + '_2', key: item.id + '_2' }, { title: '生产运行部-丙组', value: item.id + '_3', key: item.id + '_3' }, { title: '生产运行部-丁组', value: item.id + '_4', key: item.id + '_4' }]
-            cellObj.selectable = false;///屏蔽 生产运行部 大选项 使用户只用选中子选选项
-        }
-        tempList.push(cellObj);
-    })
-    return tempList
-}
+// function getTreeData(levels) { ///目的是 让生产运行部 产生子选项 甲乙丙丁组
+//     // console.log('levelsL;', levels);
+//     let tempList = [];
+//     levels.forEach((item) => {
+//         let cellObj = {};
+//         cellObj.title = item.name;
+//         cellObj.value = item.id + '';
+//         cellObj.key = item.id + '';
+//         if (item.name === '生产运行部') { /// 直接用名称匹配了 因为 甲乙丙丁分组和部门之间没有id的关联性 
+//             cellObj.children = [{ title: '生产运行部-甲组', value: item.id + '_1', key: item.id + '_1' }, { title: '生产运行部-乙组', value: item.id + '_2', key: item.id + '_2' }, { title: '生产运行部-丙组', value: item.id + '_3', key: item.id + '_3' }, { title: '生产运行部-丁组', value: item.id + '_4', key: item.id + '_4' }]
+//             cellObj.selectable = false;///屏蔽 生产运行部 大选项 使用户只用选中子选选项
+//         }
+//         tempList.push(cellObj);
+//     })
+//     return tempList
+// }
 
 /**
  * 添加员工的表单界面
@@ -34,7 +34,8 @@ function AddStaffForm(props) {
     const { getFieldDecorator } = props.form
     const nfcOptions = props.nfcs.map(nfc => <Select.Option value={nfc.id} key={nfc.id}>{nfc.name}</Select.Option>)
     const majorOptions = props.majors.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
-    let treeData = getTreeData(props.levels) ///部门 选项数据
+    // let treeData = getTreeData(props.levels) ///部门 选项数据
+    let levelOptions = props.levels.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
 
     return <Form>
         <Form.Item label="登陆账户" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
@@ -51,13 +52,13 @@ function AddStaffForm(props) {
             {getFieldDecorator('level_id', {
                 rules: [{ required: true, message: '请选择员工部门' }]
             })(
-                <TreeSelect
-                    treeNodeFilterProp="title"
-                    showSearch
-                    dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-                    treeData={treeData}
-                />
-            )}
+                // <TreeSelect
+                //     treeNodeFilterProp="title"
+                //     showSearch
+                //     dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                //     treeData={treeData}
+                // />
+                <Select showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{levelOptions}</Select>)}
         </Form.Item>
         <Form.Item label="密码" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('password', {
@@ -87,7 +88,7 @@ function AddStaffForm(props) {
         <Form.Item label="员工备注" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('remark', {
                 rules: [{ required: false, message: '请输入员工备注' }]
-            })(<Input></Input>)}
+            })(<Input.TextArea></Input.TextArea>)}
         </Form.Item>
         <Form.Item label="值长" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('isGroupLeader', {
@@ -137,7 +138,7 @@ export default function AddStaffView(props) {
             }
         })
     }
-    return <Modal centered onOk={handlerOk} title="添加员工"
+    return <Modal maskClosable={false} destroyOnClose centered onOk={handlerOk} title="添加员工"
         onCancel={props.onCancel}
         visible={props.visible}>
         <StaffForm ref={staffFormRef} levels={levels} nfcs={nfcs} majors={majors}></StaffForm>
