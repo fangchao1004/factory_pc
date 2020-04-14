@@ -340,7 +340,7 @@ export default class BugViewNewComplete extends Component {
                     }}
                 />
                 <ShowImgView showModal={this.state.showModal1} cancel={() => { this.setState({ showModal1: false }) }} showLoading={this.state.showLoading} imguuid={this.state.imguuid} />
-                <StepLogView visible={this.state.stepLogVisible} onCancel={() => { this.setState({ stepLogVisible: false }) }} bugId={this.state.currentRecord.id} />
+                <StepLogView visible={this.state.stepLogVisible} onCancel={() => { this.setState({ stepLogVisible: false }) }} record={this.state.currentRecord} />
             </Fragment >
         );
     }

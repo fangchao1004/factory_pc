@@ -529,7 +529,7 @@ export default class BugViewNew extends Component {
                     showModal={this.state.showModal8}
                     cancel={() => { this.setState({ showModal8: false }) }} />
                 <ShowImgView showModal={this.state.showModal1} cancel={() => { this.setState({ showModal1: false }) }} showLoading={this.state.showLoading} imguuid={this.state.imguuid} />
-                <StepLogView visible={this.state.stepLogVisible} onCancel={() => { this.setState({ stepLogVisible: false }) }} bugId={this.state.currentRecord.id} />
+                <StepLogView visible={this.state.stepLogVisible} onCancel={() => { this.setState({ stepLogVisible: false }) }} record={this.state.currentRecord} />
                 <FuncPanelForRepair visible={this.state.repairVisible} onOk={(v) => {
                     switch (v.selectValue) {
                         case 1:
