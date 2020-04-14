@@ -96,6 +96,7 @@ export default class StepLogView extends Component {
     render() {
         return (
             <Modal
+                destroyOnClose
                 width={600}
                 title='缺陷日志'
                 visible={this.state.visible}

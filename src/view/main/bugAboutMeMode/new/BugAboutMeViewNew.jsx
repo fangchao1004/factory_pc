@@ -19,6 +19,7 @@ var uploader_filter = [];///用于筛选上传者的数据 选项
 
 var storage = window.localStorage;
 var localUserInfo = '';
+var orignData = [];
 
 export default class BugAboutMeViewNew extends Component {
     constructor(props) {
@@ -69,6 +70,7 @@ export default class BugAboutMeViewNew extends Component {
         finallyData.forEach((item) => { item.key = item.id + '' })
         let userData = await this.getUsersInfo();
         this.autoFixHandler(finallyData);
+        orignData = finallyData;
         this.setState({
             data: finallyData,
             userData,
@@ -602,7 +604,7 @@ export default class BugAboutMeViewNew extends Component {
         );
     }
     filterBySearch = (v) => {
-        let data = JSON.parse(JSON.stringify(this.state.data));
+        let data = JSON.parse(JSON.stringify(orignData));
         data.forEach((item) => {
             if (item.area_remark && item.area_remark.indexOf(v) !== -1) { item.exist = true }
             if (item.content && JSON.parse(item.content).text && JSON.parse(item.content).text.indexOf(v) !== -1) { item.exist = true }
