@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import HttpApi, { Testuri } from '../../../util/HttpApi';
-import { Modal, Timeline, Tag, Empty, Descriptions } from 'antd';
+import { Modal, Timeline, Tag, Empty } from 'antd';
 import { originStatus } from '../../../util/AppData'
 /**
  * 缺陷处理日志界面
