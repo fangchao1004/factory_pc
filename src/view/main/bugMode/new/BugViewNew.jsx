@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm, Tooltip, Alert, Modal } from 'antd'
+import { Table, Tag, Button, message, Popconfirm, Tooltip, Alert, Modal, Input } from 'antd'
 import HttpApi, { Testuri } from '../../../util/HttpApi'
 import moment from 'moment'
 import Store from '../../../../redux/store/Store';
@@ -502,9 +502,14 @@ export default class BugViewNew extends Component {
         return (
             < Fragment >
                 <Alert message="当个人专业与缺陷专业匹配且当前进度符合流程顺序, 权限操作按钮才可正常使用; 可点击日志按钮查看每个缺陷的处理流程记录" type="info" showIcon />
-                <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
-                    <Button style={{ marginTop: 10 }} type={'primary'} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
-                    {/* <Button type={'primary'} style={{ marginTop: 10 }} onClick={() => { this.setState({ showModal8: true }) }}>导出缺陷</Button> */}
+                <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
+                    <Button type={'primary'} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
+                    <div style={{ textAlign: 'right' }}>
+                        <Input.Search style={{ width: 340 }} allowClear placeholder="支持内容、巡检点和巡检范围的模糊查询"
+                            onChange={(e) => { if (e.target.value === '') { this.init(); } }}
+                            onPressEnter={(e) => { this.filterBySearch(e.target.value) }} onSearch={this.filterBySearch} enterButton />
+                        {/* <Button style={{ marginLeft: 10 }} type={'primary'} onClick={() => { this.setState({ showModal8: true }) }}>导出缺陷</Button> */}
+                    </div>
                 </div>
                 <Table
                     style={{ marginTop: 10 }}
@@ -591,6 +596,18 @@ export default class BugViewNew extends Component {
                 </Modal>
             </Fragment >
         );
+    }
+    filterBySearch = (v) => {
+        let data = JSON.parse(JSON.stringify(this.state.data));
+        data.forEach((item) => {
+            if (item.area_remark && item.area_remark.indexOf(v) !== -1) { item.exist = true }
+            if (item.content && JSON.parse(item.content).text && JSON.parse(item.content).text.indexOf(v) !== -1) { item.exist = true }
+            if (item.device_name && item.device_name.indexOf(v) !== -1) { item.exist = true }
+        })
+        let newResult = data.filter((item) => {
+            return item.exist === true
+        })
+        this.setState({ data: newResult })
     }
     repairHandler = (record) => {
         this.setState({ repairVisible: true, currentRecord: record })
