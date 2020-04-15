@@ -233,9 +233,11 @@ class TaskFromMeView extends Component {
 
     pushNoticeToApp = (toUsersArr) => {
         console.log('开始向app推送信息。需要推送通知的人员有:', toUsersArr);
-        toUsersArr.forEach((oneUserId) => {
-            HttpApi.pushnotice({ user_id: oneUserId, title: '任务通知', text: '您有最新的任务,请注意查看' })
-        })
+        ///后台接口已经做了调整，前端可以直接发送人员的id数组，后台自动群发。
+        HttpApi.pushnotice({ user_id: toUsersArr, title: '任务通知', text: '您有最新的任务,请注意查看' })
+        // toUsersArr.forEach((oneUserId) => {
+        //     HttpApi.pushnotice({ user_id: oneUserId, title: '任务通知', text: '您有最新的任务,请注意查看' })
+        // })
     }
 
     getDuration = (my_time) => {

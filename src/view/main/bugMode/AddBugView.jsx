@@ -121,7 +121,7 @@ class AddBugView extends Component {
                     area_remark: values.area_remark,
                     status: 0,
                     checkedAt: moment().format('YYYY-MM-DD HH:mm:ss'),
-                    remark: JSON.stringify({ '0': [], '1': [], '2': [], '3': [] }),
+                    // remark: JSON.stringify({ '0': [], '1': [], '2': [], '3': [] }),
                     // bug_type_id: values.bug_type_id,
                 }
                 HttpApi.addBugInfo(valueObj, (res) => {
@@ -129,6 +129,20 @@ class AddBugView extends Component {
                         message.success('上传成功');
                         this.props.ok();
                         this.onCancelHandler();
+                        let sql = `select users.id,users.major_id from users where users.effective = 1 and
+                        major_id like '%${values.major_id}%'` ///先利用数据库缩小范围
+                        HttpApi.obs({ sql }, (res) => {
+                            if (res.data.code === 0 && res.data.data.length > 0) {
+                                /// 再手动代码过滤
+                                let result = res.data.data.filter((item) => {
+                                    // console.log('item 过滤判断:', item.id, item.major_id, item.major_id.split(',').indexOf(String(values.major_id)))
+                                    return item.major_id.split(',').indexOf(String(values.major_id)) !== -1
+                                })
+                                let useridList = result.map((item) => { return item.id })
+                                console.log('useridList:', useridList)
+                                HttpApi.pushnotice({ user_id: useridList, title: '缺陷通知', text: '您有最新的相关缺陷,请注意查看' })
+                            }
+                        })
                     }
                 })
             }

@@ -110,26 +110,56 @@ class ExportBugView extends Component {
             })
         })
     }
+    bugStatusToStr = (item) => {
+        let str = '/';
+        switch (item.status) {
+            case 0:
+                str = '待维修'
+                break;
+            case 1:
+                str = '维修中'
+                break;
+            case 2:
+                str = '专工验收中'
+                break;
+            case 3:
+                str = '运行验收中'
+                break;
+            case 4:
+                str = '完毕'
+                break;
+            case 5:
+                str = item.bug_freeze_des || '该挂起子状态被删除'
+                break;
+            case 6:
+                str = '申请转专业中'
+                break;
+            case 7:
+                str = '申请挂起中'
+                break;
+            default:
+                break;
+        }
+        return str;
+    }
     transConstract = (result) => {
         let tempList = {};
         result.forEach(item => {
             let tempObj = {};
-            tempObj.id = item.id + '';
-            tempObj.time = moment(item.createdAt).format('YYYY-MM-DD HH:mm:ss');
+            tempObj.id = String(item.id);
+            tempObj.time = item.checkedAt;
             tempObj.device = item.device_name ? item.device_name : item.area_remark;
             tempObj.uploadman = item.user_name;
             tempObj.area = item.area_name ? item.area_name : (item.area_remark ? item.area_remark : '/')
             tempObj.level = item.buglevel ? (item.buglevel === 1 ? '一级' : (item.buglevel === 2 ? '二级' : '三级')) : '/';
-            tempObj.content = item.title_name ? item.title_name + (item.title_remark || '') + ' ' + JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text : JSON.parse(item.content).select + ' ' + JSON.parse(item.content).text;
+            tempObj.content = item.title_name ? item.title_name + (item.title_remark || '') + '' + JSON.parse(item.content).select + '' + JSON.parse(item.content).text : JSON.parse(item.content).select + '' + JSON.parse(item.content).text;
             tempObj.major = item.major_name;
-            tempObj.type_name = item.bug_type_name;
-            tempObj.last_remark = item.last_remark;
-            tempObj.status = item.status === 0 ? '待分配' : (item.status === 1 ? '维修中' : (item.status === 2 ? '专工验收中' : (item.status === 3 ? '运行验收中' : '处理完毕')));
-            tempObj.nowdoman = item.status === 4 || item.status === 0 ? '/' : (item.status === 2 ? '专工' : this.getusernameById(JSON.parse(item.remark)[item.status === 1 ? 0 : 2][JSON.parse(item.remark)[item.status === 1 ? 0 : 2].length - 1].to));
+            tempObj.status = this.bugStatusToStr(item);
             if (tempList[item.major_name]) { tempList[item.major_name].push(tempObj) }
             else { tempList[item.major_name] = [tempObj] }
         });
-        // console.log(tempList);
+        // console.log("tempList:", tempList);
+        // return;
         let excelOptionList = [];
         for (const key in tempList) {
             // console.log(key);
@@ -137,9 +167,9 @@ class ExportBugView extends Component {
             excelOptionList.push({
                 sheetData: tempList[key],
                 sheetName: key,
-                sheetFilter: ['id', 'time', 'device', 'uploadman', 'content', 'level', 'major', 'type_name', 'last_remark', 'status', 'nowdoman'],
-                sheetHeader: ['编号', '上报时间', '巡检点', '发现人', '内容', '缺陷专业', '专业', '备注类型', '备注内容', '当前状态', '当前处理人'],
-                columnWidths: ['3', '8', '30', '5', '20', '5', '5', '5', '20', '5', '5'], // 列宽
+                sheetFilter: ['id', 'time', 'device', 'uploadman', 'area', 'content', 'level', 'major', 'status'],
+                sheetHeader: ['编号', '上报时间', '巡检点', '发现人', '位置', '内容', '等级', '专业', '当前状态'],
+                columnWidths: ['3', '8', '15', '5', '15', '15', '5', '10', '5'], // 列宽
             })
         }
         // console.log('excelOptionList:', excelOptionList);
@@ -170,12 +200,13 @@ class ExportBugView extends Component {
         let sql2 = '';///条件语句2
         if (!mca) { sql2 = 'and (' + (mjl.map((item) => { item = 'major_id = ' + item; return item })).join(' or ') + ')'; }
         let sql3 = '';///条件语句3
-        sql3 = `and createdAt > '${tsl[0]}' and createdAt < '${tsl[1]}'`
+        sql3 = `and checkedAt > '${tsl[0]}' and checkedAt < '${tsl[1]}'`
         let sqlText = `select * from bugs where effective = 1 ${sql3} ${sql1} ${sql2}`
         let finallySql = `select t1.*,des.name device_name,
         concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
         majors.name major_name,users.name user_name,
-        bug_types.name as bug_type_name
+        tmp_freeze_table.freeze_id as bug_freeze_id,
+        tmp_freeze_table.freeze_des as bug_freeze_des
         from (${sqlText}) t1
         left join (select * from devices where effective = 1) des on des.id = t1.device_id
         left join (select * from area_3 where effective = 1) area_3 on area_3.id = des.area_id
@@ -183,7 +214,12 @@ class ExportBugView extends Component {
         left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
         left join (select * from majors where effective = 1) majors on majors.id = t1.major_id
         left join (select * from users where effective = 1) users on users.id = t1.user_id
-        left join (select * from bug_types where effective = 1) bug_types on bug_types.id = t1.bug_type_id
+        left join (select t2.*,bug_tag_status.des as tag_des,bug_freeze_status.des as freeze_des 
+            from (select bug_id,max(id) as max_id from bug_step_log where effective = 1 group by bug_id) t1
+         left join (select * from bug_step_log where effective = 1) t2 on t2.id = t1.max_id
+         left join (select * from bug_tag_status where effective = 1) bug_tag_status on bug_tag_status.id = t2.tag_id
+         left join (select * from bug_freeze_status where effective = 1) bug_freeze_status on bug_freeze_status.id = t2.freeze_id
+         ) tmp_freeze_table on tmp_freeze_table.bug_id = t1.id
         order by major_id
         `;
         let result = await this.getBugsInfo(finallySql);///获取符合条件的缺陷数据
