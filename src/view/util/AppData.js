@@ -19,7 +19,7 @@ export const tableCellOptionsData = [
     { "value": "13", "text": "副标题" }];
 
 export const VersionlistData = [
-    { title: '版本号', description: 'V 1.4.7.8 test' },
+    { title: '版本号', description: 'V 1.4.7.9 test' },
     // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
     // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
     // { title: '更新', description: '1.0.9 添加巡检点信息修改功能' }
