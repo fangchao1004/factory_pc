@@ -41,13 +41,15 @@ export default props => {
     }
     const deleteHandler = (recordValue) => {
         HttpApi.updateUserMajor({ query: { id: recordValue.id }, update: { effective: 0 } }, (res) => {
-            let sql = `update user_map_major set effective = 0 where mj_id = ${recordValue.id}`
-            HttpApi.obs({ sql }, (res) => {
-                if (res.data.code === 0) {
-                    message.success('删除成功');
-                    init();
-                }
-            })
+            if (res.data.code === 0) {
+                let sql = `update user_map_major set effective = 0 where mj_id = ${recordValue.id}`
+                HttpApi.obs({ sql }, (res) => {
+                    if (res.data.code === 0) {
+                        message.success('删除成功');
+                        init();
+                    }
+                })
+            }
         })
     }
     const columns = [
