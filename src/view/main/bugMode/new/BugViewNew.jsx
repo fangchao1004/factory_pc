@@ -33,9 +33,7 @@ export default class BugViewNew extends Component {
             showLoading: true,///现实loading图片
             preImguuid: null,///上一次加载的图片的uuid
             imguuid: null,
-            userData: [],
             currentRecord: {},///当前选择的某一行。某一个缺陷对象
-
             repairVisible: false,
             engineerVisible: false,
             runnerVisible: false,
@@ -72,28 +70,10 @@ export default class BugViewNew extends Component {
         uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
         finallyData.forEach((item) => { item.key = item.id + '' })
-        let userData = await this.getUsersInfo();
         // console.log('finallyData:', finallyData);
         orignData = finallyData;
         this.setState({
             data: finallyData,
-            userData,
-        })
-    }
-    getUsersInfo = () => {
-        return new Promise((resolve, reject) => {
-            let sql = `select users.*,users.name as title,levels.name level_name,  CONCAT(users.level_id,'-',users.id) 'key',CONCAT(users.level_id,'-',users.id) 'value' from users
-            left join (select * from levels where effective = 1)levels
-            on users.level_id = levels.id
-            where users.effective = 1
-            order by users.level_id`
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
         })
     }
     /**
@@ -469,7 +449,7 @@ export default class BugViewNew extends Component {
                 title: '操作',
                 dataIndex: 'actions',
                 render: (text, record) => {
-                    let majorHasFlag = JSON.parse(localUserInfo).major_id && JSON.parse(localUserInfo).major_id.split(',').indexOf(String(record.major_id)) !== -1
+                    let majorHasFlag = JSON.parse(localUserInfo).major_id_all && JSON.parse(localUserInfo).major_id_all.split(',').indexOf(String(record.major_id)) !== -1
                     let fixable = majorHasFlag && (record.status < 2 || record.status === 6 || record.status === 7);
                     let engable = majorHasFlag && (record.status < 3 || record.status > 4);
                     let runable = record.status === 3;

@@ -43,10 +43,17 @@ class StaffView extends Component {
     }
     getUserList = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select users.*,levels.name as level_name from users 
+            // let sql = `select users.*,levels.name as level_name from users 
+            // left join (select * from levels where effective = 1)levels on levels.id = users.level_id
+            // where users.effective = 1
+            // order by level_id`;
+            let sql = `select users.* ,group_concat(u_m_j.mj_id) as major_id_all, group_concat(majors.name) as major_name_all,levels.name as level_name from users
             left join (select * from levels where effective = 1)levels on levels.id = users.level_id
+            left join (select * from user_map_major where effective = 1) u_m_j on u_m_j.user_id = users.id
+            left join (select * from majors  where effective = 1) majors on majors.id = u_m_j.mj_id
             where users.effective = 1
-            order by level_id`;
+            group by users.id
+            order by level_id`
             let result = [];
             HttpApi.obs({ sql }, (res) => {
                 if (res.data.code === 0) { result = res.data.data }
@@ -66,17 +73,27 @@ class StaffView extends Component {
         if (newValues.permission) {
             newValues.permission = newValues.permission.join(',')
         }
-        if (newValues.major_id) {
-            newValues.major_id = newValues.major_id.join(',')
-        }
         newValues.isGroupLeader = newValues.isGroupLeader ? 1 : 0
-        HttpApi.addUserInfo(newValues, data => {
-            if (data.data.code === 0) {
+        HttpApi.addUserInfo(newValues, res => {
+            if (res.data.code === 0) {
                 this.setState({ addStaffVisible: false })
-                this.getUsersData()
-                message.success('添加成功')
+                let lastUserId = res.data.data.id; ///刚刚添加的一个user的数据库id
+                let str = '';
+                if (newValues.major_id) { ///数组
+                    newValues.major_id.forEach((major_id) => {
+                        str = str + `(${lastUserId},${major_id}),`
+                    })
+                    str = str.substring(0, str.length - 1)
+                    let sql = `insert into user_map_major (user_id,mj_id) VALUES ${str}`
+                    HttpApi.obs({ sql }, (res) => {
+                        if (res.data.code === 0) {
+                            this.getUsersData()
+                            message.success('添加成功')
+                        }
+                    })
+                }
             } else {
-                message.error(data.data.data)
+                message.error(res.data.data)
             }
         })
     }
@@ -88,19 +105,35 @@ class StaffView extends Component {
     }
     ///更新员工-确定
     updateStaffOnOk = (newValues) => {
-        let level_group = (newValues.level_id + '').split('_');
-        ///将 组的数据 从部门 分离出来
-        if (level_group.length > 1) { newValues.level_id = parseInt(level_group[0]); newValues.group_id = parseInt(level_group[1]); }
-        else { newValues.group_id = null; }
+        let user_id = this.state.updateStaffData.id;
         newValues.isadmin = newValues.isadmin ? 1 : 0
         newValues.isGroupLeader = newValues.isGroupLeader ? 1 : 0
         if (newValues.permission) newValues.permission = newValues.permission.join(',')
-        if (newValues.major_id) newValues.major_id = newValues.major_id.join(',')
-        HttpApi.updateUserInfo({ query: { id: this.state.updateStaffData.id }, update: newValues }, data => {
+        HttpApi.updateUserInfo({ query: { id: user_id }, update: newValues }, data => {
             if (data.data.code === 0) {
                 this.setState({ updateStaffVisible: false })
-                this.getUsersData()
-                message.success('更新成功')
+                let sql = `update user_map_major set effective = 0 where user_id = ${user_id}`
+                HttpApi.obs({ sql }, (res) => {
+                    if (res.data.code === 0) {
+                        if (newValues.major_id && newValues.major_id.length > 0) { ///数组
+                            let str = ''
+                            newValues.major_id.forEach((major_id) => {
+                                str = str + `(${user_id},${major_id}),`
+                            })
+                            str = str.substring(0, str.length - 1)
+                            let sql = `insert into user_map_major (user_id,mj_id) VALUES ${str}`
+                            HttpApi.obs({ sql }, (res) => {
+                                if (res.data.code === 0) {
+                                    this.getUsersData()
+                                    message.success('更新成功')
+                                }
+                            })
+                        } else {
+                            this.getUsersData()
+                            message.success('更新成功')
+                        }
+                    }
+                })
             } else {
                 message.error(data.data.data)
             }
@@ -222,6 +255,13 @@ class StaffView extends Component {
                     <div>{text}</div>
                 )
             },
+            // {
+            //     title: '专业',
+            //     dataIndex: 'major_name_all',
+            //     render: (text, record) => (
+            //         <div>{text || '/'}</div>
+            //     )
+            // },
             {
                 title: '备注',
                 dataIndex: 'remark',

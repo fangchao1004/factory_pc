@@ -1,13 +1,12 @@
 import React, { Component, Fragment } from 'react';
 import { Table, Tag, Button, message, Popconfirm, Tooltip } from 'antd'
 import HttpApi from '../../../util/HttpApi'
-import Store from '../../../../redux/store/Store';
-import { showBugNum } from '../../../../redux/actions/BugAction';
+// import Store from '../../../../redux/store/Store';
+// import { showBugNum } from '../../../../redux/actions/BugAction';
 import StepLogView from '../../bugMode/new/StepLogView';
 import ShowImgView from '../../bugMode/ShowImgView';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
-var bug_type_filter = [];///用于筛选类别的数据 选项
 const bug_level_filter = [];
 var uploader_filter = [];///用于筛选上传者的数据 选项
 
@@ -23,12 +22,7 @@ export default class BugAboutMeCompletedViewNew extends Component {
             showLoading: true,///现实loading图片
             preImguuid: null,///上一次加载的图片的uuid
             imguuid: null,
-            userData: [],
             currentRecord: {},///当前选择的某一行。某一个缺陷对象
-
-            repairVisible: false,
-            engineerVisible: false,
-            runnerVisible: false,
             stepLogVisible: false,
         }
     }
@@ -40,12 +34,7 @@ export default class BugAboutMeCompletedViewNew extends Component {
     init = async () => {
         major_filter.length = 0;
         uploader_filter.length = 0;
-        bug_type_filter.length = 0;
         bug_level_filter.length = 0;
-        let bugTypeData = await this.getBugTypeInfo();
-        bugTypeData.forEach((item) => {
-            bug_type_filter.push({ text: item.name, value: item.id });
-        })
         let bugLevelData = await this.getBugLevelInfo();
         bugLevelData.forEach((item) => {
             bug_level_filter.push({ text: item.name, value: item.id });
@@ -58,27 +47,8 @@ export default class BugAboutMeCompletedViewNew extends Component {
         uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
         finallyData.forEach((item) => { item.key = item.id + '' })
-        let userData = await this.getUsersInfo();
         this.setState({
             data: finallyData,
-            userData,
-        })
-    }
-
-    getUsersInfo = () => {
-        return new Promise((resolve, reject) => {
-            let sql = `select users.*, users.name as title, levels.name level_name, CONCAT(users.level_id, '-', users.id) 'key', CONCAT(users.level_id, '-', users.id) 'value' from users
-                left join(select * from levels where effective = 1)levels
-                on users.level_id = levels.id
-                where users.effective = 1
-                order by users.level_id`
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
         })
     }
     /**
@@ -90,18 +60,6 @@ export default class BugAboutMeCompletedViewNew extends Component {
                 left join(select * from users where effective = 1) users
                 on users.id = bugs.user_id
                 where bugs.effective = 1 and bugs.status = 4`
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
-    getBugTypeInfo = () => {
-        let sql = `select * from bug_types  where effective = 1`
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -149,7 +107,7 @@ export default class BugAboutMeCompletedViewNew extends Component {
                 left join(select * from area_3 where effective = 1) area_3 on des.area_id = area_3.id
                 left join(select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
                 left join(select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
-                where bugs.status = 4 and bugs.major_id in (${ JSON.parse(localUserInfo).major_id}) and bugs.effective = 1 order by bugs.id desc`
+                where bugs.status = 4 and bugs.major_id in (${ JSON.parse(localUserInfo).major_id_all}) and bugs.effective = 1 order by bugs.id desc`
         }
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
@@ -167,15 +125,15 @@ export default class BugAboutMeCompletedViewNew extends Component {
                 message.success('移除缺陷成功');
                 this.init();
                 ///要利用redux刷新 mainView处的徽标数
-                this.updateDataByRedux();
+                // this.updateDataByRedux();
                 ///再创建一个新的record记录插入records表
             }
         })
     }
-    updateDataByRedux = () => {
-        ///每次删除
-        Store.dispatch(showBugNum(null)) ///随便派发一个值，目的是让 mainView处监听到 执行init();
-    }
+    // updateDataByRedux = () => {
+    //     ///每次删除
+    //     Store.dispatch(showBugNum(null)) ///随便派发一个值，目的是让 mainView处监听到 执行init();
+    // }
     render() {
         const columns = [
             {

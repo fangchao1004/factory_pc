@@ -57,7 +57,10 @@ export default class MainView extends Component {
         // Socket();
     }
     init = async () => {
-        let bugResult = await this.getBugsInfo();
+        let bugResult = [];
+        if (JSON.parse(localUserInfo).major_id_all) {
+            bugResult = await this.getBugsInfo();
+        }
         let taskResult = await this.getTaskInfo();
         ///初始化的时候，就先获取所需数据，展示在导航栏处
         ////如果有变化 才刷新
@@ -93,7 +96,7 @@ export default class MainView extends Component {
                         left join (select * from bug_tag_status where effective = 1) bug_tag_status on bug_tag_status.id = t2.tag_id
                         left join (select * from bug_freeze_status where effective = 1) bug_freeze_status on bug_freeze_status.id = t2.freeze_id
                         ) tmp_freeze_table on tmp_freeze_table.bug_id = bugs.id
-            where bugs.status != 4 and bugs.major_id in (${ JSON.parse(localUserInfo).major_id}) and bugs.effective = 1 order by bugs.id desc`
+            where bugs.status != 4 and bugs.major_id in (${ JSON.parse(localUserInfo).major_id_all}) and bugs.effective = 1 order by bugs.id desc`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {

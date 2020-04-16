@@ -38,10 +38,9 @@ export default class UserMenuView extends Component {
         }
     }
     componentDidMount() {
-        if (JSON.parse(userinfo).major_id) {
-            this.getMajorNameByIds(JSON.parse(userinfo).major_id);
-        }
+        let major_name = JSON.parse(userinfo).major_name_all
         this.setState({
+            majorName: major_name,
             permissionList: JSON.parse(userinfo).permission ? changeIdListToNameListForPer(JSON.parse(userinfo).permission.split(',')) : []
         })
     }
@@ -92,23 +91,6 @@ export default class UserMenuView extends Component {
             )
         })
     }
-    getMajorNameByIds = async (major_ids) => {
-        let major_name = await this.getMajorName(major_ids);
-        this.setState({ majorName: major_name })
-    }
-    getMajorName = (major_ids) => {
-        return new Promise((resolve, reject) => {
-            let sql = `select name from majors where effective =1 and id in (${major_ids})`;
-            let result = '';
-            HttpApi.obs({ sql }, (res) => {
-                if (res.data.code === 0) {
-                    result = res.data.data.map((item) => item.name).join(',')
-                }
-                resolve(result);
-            })
-        })
-    }
-
     render() {
         return (
             <div style={{ minWidth: 220 }}>

@@ -35,7 +35,7 @@ function UpdateStaffForm(props) {
     // const levelOptions = props.levels.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
     const nfcOptions = props.nfcs.map(nfc => <Select.Option value={nfc.id} key={nfc.id}>{nfc.name}</Select.Option>)
     const majorOptions = props.majors.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
-    console.log('props:', props)
+    // console.log('props:', props)
     // let treeData = getTreeData(props.levels) ///部门 选项数据
     let levelOptions = props.levels.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
 
@@ -92,7 +92,7 @@ function UpdateStaffForm(props) {
         </Form.Item>
         <Form.Item label="所属专业" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('major_id', {
-                initialValue: props.staff.major_id ? props.staff.major_id.split(',').map(major => parseInt(major)) : undefined,
+                initialValue: props.staff.major_id_all ? props.staff.major_id_all.split(',').map(major => parseInt(major)) : undefined,
                 rules: [{ required: false, message: '请选择员工专业' }]
             })(<Select mode="multiple" showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{majorOptions}</Select>)}
         </Form.Item>

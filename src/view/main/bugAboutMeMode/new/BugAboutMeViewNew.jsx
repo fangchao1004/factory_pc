@@ -12,7 +12,6 @@ import { originStatus } from '../../../util/AppData'
 import ShowImgView from '../../bugMode/ShowImgView';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
-var bug_type_filter = [];///用于筛选类别的数据 选项
 var status_filter = [];///用于筛选状态的数据
 const bug_level_filter = [];
 var uploader_filter = [];///用于筛选上传者的数据 选项
@@ -30,7 +29,6 @@ export default class BugAboutMeViewNew extends Component {
             showLoading: true,///现实loading图片
             preImguuid: null,///上一次加载的图片的uuid
             imguuid: null,
-            userData: [],
             currentRecord: {},///当前选择的某一行。某一个缺陷对象
 
             repairVisible: false,
@@ -42,20 +40,16 @@ export default class BugAboutMeViewNew extends Component {
     componentDidMount() {
         localUserInfo = storage.getItem('userinfo');
         this.init();
+        console.log('个人所有专业:', JSON.parse(localUserInfo).major_id_all)
     }
 
     init = async () => {
         status_filter.length = 0;
         major_filter.length = 0;
         uploader_filter.length = 0;
-        bug_type_filter.length = 0;
         bug_level_filter.length = 0;
         let bugFreezeData = await this.getBugFreezeData();
         status_filter = [...originStatus, ...bugFreezeData.map((item) => { return { text: item.des, value: 5 + '-' + item.id, freeze_value: item.id } })]
-        let bugTypeData = await this.getBugTypeInfo();
-        bugTypeData.forEach((item) => {
-            bug_type_filter.push({ text: item.name, value: item.id });
-        })
         let bugLevelData = await this.getBugLevelInfo();
         bugLevelData.forEach((item) => {
             bug_level_filter.push({ text: item.name, value: item.id });
@@ -66,15 +60,15 @@ export default class BugAboutMeViewNew extends Component {
         })
         let uploaderData = await this.getUploaderInfo();
         uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
-        let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
-        finallyData.forEach((item) => { item.key = item.id + '' })
-        let userData = await this.getUsersInfo();
-        this.autoFixHandler(finallyData);
-        orignData = finallyData;
-        this.setState({
-            data: finallyData,
-            userData,
-        })
+        if (JSON.parse(localUserInfo).major_id_all) {
+            let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
+            finallyData.forEach((item) => { item.key = item.id + '' })
+            this.autoFixHandler(finallyData);
+            orignData = finallyData;
+            this.setState({
+                data: finallyData,
+            })
+        }
     }
     autoFixHandler = (list) => {
         let user_id = JSON.parse(localUserInfo).id;
@@ -113,22 +107,6 @@ export default class BugAboutMeViewNew extends Component {
             console.log('没有维修权限')
         }
     }
-    getUsersInfo = () => {
-        return new Promise((resolve, reject) => {
-            let sql = `select users.*,users.name as title,levels.name level_name,CONCAT(users.level_id,'-',users.id) 'key',CONCAT(users.level_id,'-',users.id) 'value' from users
-                left join(select * from levels where effective = 1)levels
-                on users.level_id = levels.id
-                where users.effective = 1
-                order by users.level_id`
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
     /**
      * 查询上传者 去重
      * 未完成的缺陷
@@ -150,18 +128,6 @@ export default class BugAboutMeViewNew extends Component {
     }
     getBugFreezeData = () => {
         let sql = `select * from bug_freeze_status  where effective = 1`
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
-    getBugTypeInfo = () => {
-        let sql = `select * from bug_types  where effective = 1`
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -229,7 +195,7 @@ export default class BugAboutMeViewNew extends Component {
                         left join (select * from bug_tag_status where effective = 1) bug_tag_status on bug_tag_status.id = t2.tag_id
                         left join (select * from bug_freeze_status where effective = 1) bug_freeze_status on bug_freeze_status.id = t2.freeze_id
                         ) tmp_freeze_table on tmp_freeze_table.bug_id = bugs.id
-            where bugs.status != 4 and bugs.major_id in (${ JSON.parse(localUserInfo).major_id}) and bugs.effective = 1 order by bugs.id desc`
+            where bugs.status != 4 and bugs.major_id in (${ JSON.parse(localUserInfo).major_id_all}) and bugs.effective = 1 order by bugs.id desc`
         }
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
@@ -495,7 +461,7 @@ export default class BugAboutMeViewNew extends Component {
                 title: '操作',
                 dataIndex: 'actions',
                 render: (_, record) => {
-                    let majorHasFlag = JSON.parse(localUserInfo).major_id && JSON.parse(localUserInfo).major_id.split(',').indexOf(String(record.major_id)) !== -1
+                    let majorHasFlag = JSON.parse(localUserInfo).major_id_all && JSON.parse(localUserInfo).major_id_all.split(',').indexOf(String(record.major_id)) !== -1
                     let fixable = majorHasFlag && (record.status < 2 || record.status === 6 || record.status === 7);
                     let engable = majorHasFlag && (record.status < 3 || record.status > 4);
                     let runable = record.status === 3;
