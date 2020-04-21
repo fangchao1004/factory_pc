@@ -293,6 +293,7 @@ export default class BugViewNew extends Component {
             },
             {
                 key: 'device_name', dataIndex: 'device_name', title: '巡检点',
+                width: 100,
                 render: (text, record) => {
                     let result = '/'
                     if (text && text !== '') { result = text }
@@ -312,11 +313,16 @@ export default class BugViewNew extends Component {
             },
             {
                 key: 'area_remark', dataIndex: 'area_remark', title: '具体巡检点范围',
+                width: 100,
                 render: (text, record) => {
                     let result = '/'
                     if (text) { result = text }
                     else { result = record.area_name }
-                    return <div>{result}</div>
+                    return <div className='hideText lineClamp5'>
+                        <Tooltip title={result}>
+                            <span>{result}</span>
+                        </Tooltip>
+                    </div>
                 }
             },
             {
@@ -370,7 +376,7 @@ export default class BugViewNew extends Component {
                             </Tooltip>
                         </div>
                         {record.title_name ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
-                        <div className='hideText lineClamp2'>
+                        <div className={record.title_name ? 'hideText lineClamp2' : 'hideText lineClamp5'}>
                             <Tooltip title={obj.text}>
                                 <span>{obj.text}</span>
                             </Tooltip>
@@ -382,6 +388,7 @@ export default class BugViewNew extends Component {
             },
             {
                 key: 'buglevel', dataIndex: 'buglevel', title: '缺陷类型',
+                width: 80,
                 filters: bug_level_filter,
                 onFilter: (value, record) => record.buglevel === value,
                 render: (text) => {
@@ -399,10 +406,15 @@ export default class BugViewNew extends Component {
             },
             {
                 key: 'major_name', dataIndex: 'major_name', title: '缺陷专业',
+                width: 140,
                 filters: major_filter,
                 onFilter: (value, record) => record.major_id === value,
                 render: (text, record) => {
-                    return <div>{text}</div>
+                    return <div className='hideText lineClamp5'>
+                        <Tooltip title={text}>
+                            <span>{text}</span>
+                        </Tooltip>
+                    </div>
                 }
             },
             {
@@ -476,8 +488,8 @@ export default class BugViewNew extends Component {
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                 <Popconfirm title="确定要删除该缺陷吗?" onConfirm={() => { this.deleteBugsHandler(record); }}>
                                     <Button size="small" type="danger">删除</Button>
-                                </Popconfirm> </> : null
-                        }
+                                </Popconfirm>
+                            </> : null}
                     </div>
                 }
             }

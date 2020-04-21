@@ -181,10 +181,17 @@ class StaffView extends Component {
     }
     searchUserData(value) {
         return new Promise((resolve, reject) => {
-            let sql = `select users.*,levels.name as level_name from users 
-            left join levels on levels.id = users.level_id
+            // let sql = `select users.*,levels.name as level_name from users 
+            // left join levels on levels.id = users.level_id
+            // where users.effective = 1 and users.name like '%${value}%'
+            // order by users.level_id`;
+            let sql = `select users.* ,group_concat(u_m_j.mj_id) as major_id_all, group_concat(majors.name) as major_name_all,levels.name as level_name from users
+            left join (select * from levels where effective = 1)levels on levels.id = users.level_id
+            left join (select * from user_map_major where effective = 1) u_m_j on u_m_j.user_id = users.id
+            left join (select * from majors  where effective = 1) majors on majors.id = u_m_j.mj_id
             where users.effective = 1 and users.name like '%${value}%'
-            order by users.level_id`;
+            group by users.id
+            order by users.level_id`
             let result = [];
             HttpApi.obs({ sql }, (res) => {
                 if (res.data.code === 0) { result = res.data.data }

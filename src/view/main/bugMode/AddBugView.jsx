@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Select, TreeSelect, Input, message, Modal, Form } from 'antd'
+import { Select, TreeSelect, Input, message, Modal, Form, Tooltip } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import { transfromDataTo3level } from '../../util/Tool'
 import moment from 'moment'
@@ -68,7 +68,7 @@ class AddBugView extends Component {
         area123_List = transfromDataTo3level(result);/// 获取三级区域数据后，给添加的区域的对话框中，选择区域的树形组件添加数据源
         loops(area123_List);
         let marjorData = await this.getMajorInfo();
-        major_Options = marjorData.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
+        major_Options = marjorData.map((major, index) => <Select.Option value={major.id} key={major.id}><Tooltip key={index} title={major.name}>{major.name}</Tooltip></Select.Option>)
         this.forceUpdate();
     }
     reset = () => {
