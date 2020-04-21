@@ -169,7 +169,7 @@ class ExportBugView extends Component {
                 sheetName: key,
                 sheetFilter: ['id', 'time', 'device', 'uploadman', 'area', 'content', 'level', 'major', 'status'],
                 sheetHeader: ['编号', '上报时间', '巡检点', '发现人', '位置', '内容', '等级', '专业', '当前状态'],
-                columnWidths: ['3', '8', '15', '5', '15', '15', '5', '10', '5'], // 列宽
+                columnWidths: ['3', '8', '15', '5', '15', '20', '5', '10', '5'], // 列宽
             })
         }
         // console.log('excelOptionList:', excelOptionList);
