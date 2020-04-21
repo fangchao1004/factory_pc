@@ -115,7 +115,7 @@ export default class BugAboutMeViewNew extends Component {
         let sql = `select distinct(users.name) as user_name,bugs.user_id from bugs
                 left join(select * from users where effective = 1) users
                 on users.id = bugs.user_id
-                where bugs.effective = 1 and bugs.status != 4`
+                where bugs.effective = 1 and bugs.status != 4 and bugs.major_id in (${JSON.parse(localUserInfo).major_id_all})`
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -298,6 +298,7 @@ export default class BugAboutMeViewNew extends Component {
                 key: 'id',
                 dataIndex: 'id',
                 title: '编号',
+                align: 'center',
                 render: (text, record) => {
                     return <div>{text}</div>
                 }
@@ -305,6 +306,7 @@ export default class BugAboutMeViewNew extends Component {
             {
                 key: 'checkedAt', dataIndex: 'checkedAt', title: '时间',
                 width: 120,
+                align: 'center',
                 sorter: (a, b) => {
                     return new Date(a.checkedAt).getTime() - new Date(b.checkedAt).getTime()
                 },
@@ -313,6 +315,7 @@ export default class BugAboutMeViewNew extends Component {
             {
                 key: 'device_name', dataIndex: 'device_name', title: '巡检点',
                 width: 100,
+                align: 'center',
                 render: (text, record) => {
                     let result = '/'
                     if (text && text !== '') { result = text }
@@ -327,12 +330,14 @@ export default class BugAboutMeViewNew extends Component {
             {
                 key: 'user_name', dataIndex: 'user_name', title: '发现人',
                 width: 100,
+                align: 'center',
                 filters: uploader_filter,
                 onFilter: (value, record) => record.user_id === value,
             },
             {
                 key: 'area_remark', dataIndex: 'area_remark', title: '具体巡检点范围',
                 width: 100,
+                align: 'center',
                 render: (text, record) => {
                     let result = '/'
                     if (text) { result = text }
@@ -348,6 +353,7 @@ export default class BugAboutMeViewNew extends Component {
                 key: 'content',
                 dataIndex: 'content',
                 title: '内容',
+                align: 'center',
                 render: (text, record) => {
                     let obj = JSON.parse(text);
                     let contentobj = JSON.parse(record.content);
@@ -401,6 +407,7 @@ export default class BugAboutMeViewNew extends Component {
             {
                 key: 'buglevel', dataIndex: 'buglevel', title: '缺陷类型',
                 width: 80,
+                align: 'center',
                 filters: bug_level_filter,
                 onFilter: (value, record) => record.buglevel === value,
                 render: (text) => {
@@ -419,6 +426,7 @@ export default class BugAboutMeViewNew extends Component {
             {
                 key: 'major_id', dataIndex: 'major_id', title: '缺陷专业',
                 width: 140,
+                align: 'center',
                 filters: major_filter,
                 onFilter: (value, record) => record.major_id === value,
                 render: (text, record) => {
@@ -468,6 +476,7 @@ export default class BugAboutMeViewNew extends Component {
             {
                 title: '操作',
                 dataIndex: 'actions',
+                align: 'center',
                 render: (_, record) => {
                     let majorHasFlag = JSON.parse(localUserInfo).major_id_all && JSON.parse(localUserInfo).major_id_all.split(',').indexOf(String(record.major_id)) !== -1
                     let fixable = majorHasFlag && (record.status < 2 || record.status === 6 || record.status === 7);
