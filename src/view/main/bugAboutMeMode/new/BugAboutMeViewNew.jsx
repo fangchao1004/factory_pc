@@ -522,7 +522,7 @@ export default class BugAboutMeViewNew extends Component {
                     </div>
                 </div>
                 <Table
-                    style={{ marginTop: 20 }}
+                    style={{ marginTop: 10 }}
                     bordered
                     dataSource={this.state.data}
                     columns={columns}
