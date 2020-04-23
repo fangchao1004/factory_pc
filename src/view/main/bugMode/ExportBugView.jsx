@@ -3,7 +3,10 @@ import { Row, Col, DatePicker, Checkbox, Modal, Button, message } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import ExportJsonExcel from 'js-export-excel'
 import moment from 'moment';
+import { VersionlistData } from '../../util/AppData'
 
+var storage = window.localStorage;
+var localUserInfo = '';
 const { RangePicker } = DatePicker;
 const CheckboxGroup = Checkbox.Group;
 const majorPlainOptions = [];
@@ -28,6 +31,7 @@ class ExportBugView extends Component {
     }
     componentDidMount() {
         this.init();
+        localUserInfo = storage.getItem('userinfo');
     }
     componentWillReceiveProps(nextProps) {
         this.setState({
@@ -235,6 +239,12 @@ class ExportBugView extends Component {
         this.props.cancel();
         this.reset();
         message.info('正在导出Excel文件，请从浏览器下载文件夹中查看');
+        this.addLog();
+    }
+    addLog = () => {
+        let userinfo = JSON.parse(localUserInfo);
+        let sql = `insert into export_bug_log (name,time,version) values ('${userinfo.name}','${moment().format('YYYY-MM-DD HH:mm:ss')}','${VersionlistData[0].description}')`
+        HttpApi.obs({ sql })
     }
     renderExportExcelView = () => {
         return (

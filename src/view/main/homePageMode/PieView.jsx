@@ -42,8 +42,8 @@ export default class PieView extends React.Component {
     const { DataView } = DataSet;
     const { Html } = Guide;
     const dv = new DataView();
-    const str = '<div style="color:#8c8c8c;font-size:10px;text-align: center;width: 12em;">' + this.state.titleStr + '<br><span style="color:#262626;font-size:24px">' + this.state.allCount + '</span></div>'
-    const str2 = '<div style="#262626;font-size:14px;text-align: center;width: 12em;">' + this.state.checkMan + '</div>'
+    const str = '<div style="color:#8c8c8c;font-size:10px;text-align:center;width: 12em;">' + this.state.titleStr + '<br><span style="color:#262626;font-size:24px">' + this.state.allCount + '</span></div>'
+    let str2 = this.state.checkMan ? '<div style="color:#8c8c8c;font-size:14px;text-align:center;width: 12em;">[' + this.state.checkMan + ']</div>' : '<div></div>'
 
     dv.source(this.state.data).transform({
       type: "percent",
@@ -81,7 +81,7 @@ export default class PieView extends React.Component {
               alignY="middle"
             />
             <Html
-              position={["80%", "5%"]}
+              position={["85%", "5%"]}
               html={str2}
               alignX="middle"
               alignY="middle"

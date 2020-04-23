@@ -31,7 +31,6 @@ export default class PieViewOfBug extends React.Component {
         newArr.push({ item: ele.major_name, count: ele.major_count });
       }
     })
-    // console.log('处理后的数据：', newArr);
     this.setState({ data: newArr, titleStr: data.title, allCount: totalCount })
   }
   render() {
@@ -85,7 +84,7 @@ export default class PieViewOfBug extends React.Component {
               (item, percent) => {
                 percent = `${(percent * 100).toFixed(2)}%`;
                 return {
-                  name: item + '率',
+                  name: item + '比例',
                   value: percent
                 };
               }
@@ -96,11 +95,15 @@ export default class PieViewOfBug extends React.Component {
             }}
           >
             <Label
+              type='map' ///scatter| treemap | map
               content="percent"
               formatter={(val, item) => {
                 // let floatVal = parseFloat(val.substring(0, val.length - 1)).toFixed(1)
                 // return item.point.item + ": " + floatVal + '%';
-                return item.point.item + ": " + item.point.count + '次';
+                ///截取（前面的字符
+                let originStr = item.point.item;
+                let tempStr = originStr.substring(0, originStr.indexOf('（') || originStr.indexOf('('))
+                return tempStr + ":" + item.point.count + '次';
               }}
             />
           </Geom>
