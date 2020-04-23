@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm, Tooltip, Alert, Input } from 'antd'
-import HttpApi from '../../../util/HttpApi'
+import { Table, Tag, Button, message, Popconfirm, Tooltip, Alert, Input, Modal } from 'antd'
+import HttpApi, { Testuri } from '../../../util/HttpApi'
 import moment from 'moment'
 import Store from '../../../../redux/store/Store';
 import { showBugNum } from '../../../../redux/actions/BugAction';
@@ -364,23 +364,30 @@ export default class BugAboutMeViewNew extends Component {
                     })
                     let comArr = [];
                     result_arr.forEach((item, index) => {
-                        comArr.push(<span key={item.uuid} style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
-                            onClick={e => {
-                                if (this.state.preImguuid !== item.uuid) {
-                                    this.setState({
-                                        showLoading: true,
-                                    })
-                                } else {
-                                    this.setState({
-                                        showLoading: false,
-                                    })
-                                }
-                                this.setState({
-                                    imguuid: item.uuid,
-                                    showModal1: true,
-                                    preImguuid: item.uuid,
-                                })
-                            }}>{item.name}</span>)
+                        comArr.push(
+                            // <span key={item.uuid} style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
+                            //     onClick={e => {
+                            //         if (this.state.preImguuid !== item.uuid) {
+                            //             this.setState({
+                            //                 showLoading: true,
+                            //             })
+                            //         } else {
+                            //             this.setState({
+                            //                 showLoading: false,
+                            //             })
+                            //         }
+                            //         this.setState({
+                            //             imguuid: item.uuid,
+                            //             showModal1: true,
+                            //             preImguuid: item.uuid,
+                            //         })
+                            //     }}>{item.name}</span>
+                            <img alt='' style={{ width: 50, height: 50, marginRight: 10 }} key={index} src={Testuri + 'get_jpg?uuid=' + item.uuid}
+                                onClick={() => {
+                                    this.setState({ imguuid: item.uuid })
+                                }}
+                            />
+                        )
                     });
                     let result = ''
                     if (comArr.length > 0) { result = comArr }
@@ -584,6 +591,13 @@ export default class BugAboutMeViewNew extends Component {
                     }
                     this.setState({ runnerVisible: false })
                 }} onCancel={() => { this.setState({ runnerVisible: false }) }} />
+                <Modal visible={this.state.imguuid !== null} destroyOnClose centered
+                    width={410} bodyStyle={{ textAlign: 'center', padding: 5, margin: 0 }} footer={null} onCancel={() => {
+                        this.setState({ imguuid: null })
+                    }}>
+                    <img alt='' style={{ width: 400 }} src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} />
+                    {/* <img alt='' style={{ width: 400 }} src={'http://ixiaomu.cn:3008/get_jpg?uuid=' + this.state.imguuid} /> */}
+                </Modal>
             </Fragment >
         );
     }

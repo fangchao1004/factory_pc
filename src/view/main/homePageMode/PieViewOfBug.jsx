@@ -102,7 +102,16 @@ export default class PieViewOfBug extends React.Component {
                 // return item.point.item + ": " + floatVal + '%';
                 ///截取（前面的字符
                 let originStr = item.point.item;
-                let tempStr = originStr.substring(0, originStr.indexOf('（') || originStr.indexOf('('))
+                let tempStr = originStr;
+                let index;
+                if (originStr.indexOf('（') !== -1) {
+                  index = originStr.indexOf('（')
+                } else if (originStr.indexOf('(') !== -1) {
+                  index = originStr.indexOf('(');
+                }
+                if (index > 0) {
+                  tempStr = originStr.substring(0, index)
+                }
                 return tempStr + ":" + item.point.count + '次';
               }}
             />
