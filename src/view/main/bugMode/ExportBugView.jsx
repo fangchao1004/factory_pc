@@ -4,6 +4,7 @@ import HttpApi from '../../util/HttpApi'
 import ExportJsonExcel from 'js-export-excel'
 import moment from 'moment';
 import { VersionlistData } from '../../util/AppData'
+import { substringBrackets } from '../../util/Tool'
 
 var storage = window.localStorage;
 var localUserInfo = '';
@@ -42,7 +43,7 @@ class ExportBugView extends Component {
         majorPlainOptions.length = 0;
         let marjorData = await this.getMajorInfo();
         marjorData.forEach((item) => {
-            majorPlainOptions.push({ label: item.name, value: item.id })
+            majorPlainOptions.push({ label: substringBrackets(item.name), value: item.id })
         })
         let userData = await this.getUsersInfo();
         this.setState({ userData })
@@ -170,7 +171,7 @@ class ExportBugView extends Component {
             // console.log(tempList[key]);
             excelOptionList.push({
                 sheetData: tempList[key],
-                sheetName: key,
+                sheetName: substringBrackets(key),
                 sheetFilter: ['id', 'time', 'device', 'uploadman', 'area', 'content', 'level', 'major', 'status'],
                 sheetHeader: ['编号', '上报时间', '巡检点', '发现人', '位置', '内容', '等级', '专业', '当前状态'],
                 columnWidths: ['3', '8', '15', '5', '15', '20', '5', '10', '5'], // 列宽

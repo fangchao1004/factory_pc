@@ -8,6 +8,7 @@ import {
   Guide,
 } from "bizcharts";
 import DataSet from "@antv/data-set";
+import { substringBrackets } from '../../util/Tool'
 
 export default class PieViewOfBug extends React.Component {
   constructor(props) {
@@ -102,17 +103,7 @@ export default class PieViewOfBug extends React.Component {
                 // return item.point.item + ": " + floatVal + '%';
                 ///截取（前面的字符
                 let originStr = item.point.item;
-                let tempStr = originStr;
-                let index;
-                if (originStr.indexOf('（') !== -1) {
-                  index = originStr.indexOf('（')
-                } else if (originStr.indexOf('(') !== -1) {
-                  index = originStr.indexOf('(');
-                }
-                if (index > 0) {
-                  tempStr = originStr.substring(0, index)
-                }
-                return tempStr + ":" + item.point.count + '次';
+                return substringBrackets(originStr) + ":" + item.point.count + '次';
               }}
             />
           </Geom>

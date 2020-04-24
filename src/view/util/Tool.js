@@ -426,3 +426,29 @@ export function getTodayIsOdd(paramDate = moment().startOf('day').toDate()) {
     // console.log('天数：', duringDate)
     return isOdd;
 }
+
+/**
+ * 截去括号里面的内容(或（
+ */
+export function substringBrackets(originStr) {
+    let tempStr = originStr;
+    let index1 = originStr.length;
+    let index2 = originStr.length;
+    let index = 0;
+    if (originStr.indexOf('（') !== -1) {
+        index1 = originStr.indexOf('（')
+    }
+    if (originStr.indexOf('(') !== -1) {
+        index2 = originStr.indexOf('(');
+    }
+    if (index1 < index2 && index1 > 0) {
+        index = index1
+    }
+    else if (index2 < index1 && index2 > 0) {
+        index = index2
+    }
+    if (index > 0) {
+        tempStr = originStr.substring(0, index)
+    }
+    return tempStr;
+}
