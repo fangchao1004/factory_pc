@@ -72,7 +72,7 @@ export default class BugAboutMeViewNew extends Component {
     }
     autoFixHandler = (list) => {
         let user_id = JSON.parse(localUserInfo).id;
-        let user_major_id = JSON.parse(localUserInfo).major_id;
+        let user_major_id = JSON.parse(localUserInfo).major_id_all;
         if (JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('3') !== -1 && user_major_id && user_major_id.length > 0) { ///有维修权限
             let needList = [];
             list.forEach(element => {
