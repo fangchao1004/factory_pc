@@ -6,6 +6,7 @@ import PreviewTaskView from './PreviewTaskView'
 import moment from 'moment'
 import Store from '../../../redux/store/Store';
 import { showTaskNum } from '../../../redux/actions/TaskAction';
+import { getDuration } from '../../util/Tool';
 
 var storage = window.localStorage;
 var userinfo;
@@ -230,7 +231,6 @@ class TaskFromMeView extends Component {
             }
         })
     }
-
     pushNoticeToApp = (toUsersArr) => {
         console.log('开始向app推送信息。需要推送通知的人员有:', toUsersArr);
         ///后台接口已经做了调整，前端可以直接发送人员的id数组，后台自动群发。
@@ -239,26 +239,6 @@ class TaskFromMeView extends Component {
         //     HttpApi.pushnotice({ user_id: oneUserId, title: '任务通知', text: '您有最新的任务,请注意查看' })
         // })
     }
-
-    getDuration = (my_time) => {
-        var days = my_time / 1000 / 60 / 60 / 24;
-        var daysRound = Math.floor(days);
-        var hours = my_time / 1000 / 60 / 60 - (24 * daysRound);
-        var hoursRound = Math.floor(hours);
-        var minutes = my_time / 1000 / 60 - (24 * 60 * daysRound) - (60 * hoursRound);
-        var minutesRound = Math.floor(minutes);
-        // var seconds = my_time / 1000 - (24 * 60 * 60 * daysRound) - (60 * 60 * hoursRound) - (60 * minutesRound);
-        // console.log('转换时间:', daysRound + '天', hoursRound + '时', minutesRound + '分', seconds + '秒');
-        var time;
-        if (daysRound > 0) {
-            time = daysRound + '天 ' + hoursRound + '小时 ' + minutesRound + '分钟'
-        } else {
-            time = hoursRound + '小时 ' + minutesRound + '分钟'
-        }
-        return time;
-    }
-
-
     render() {
         const columns = [
             {
@@ -305,7 +285,7 @@ class TaskFromMeView extends Component {
                     // console.log('剩余时间ms:', remain_time);
                     let result = '/'
                     if (record.status === 0) { ///未完成 计算超时
-                        result = this.getDuration(Math.abs(remain_time));
+                        result = getDuration(Math.abs(remain_time));
                     }
                     return <div>{record.status === 0 ? (remain_time > 0 ? result : "超时 " + result) : result}</div>
                 }

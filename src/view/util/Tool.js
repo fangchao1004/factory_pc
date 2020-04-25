@@ -467,10 +467,10 @@ export function getDuration(my_time, resultType = 1) {
     // console.log('转换时间:', daysRound + '天', hoursRound + '时', minutesRound + '分', seconds + '秒');
     let time;
     if (daysRound > 0) {
-        time = daysRound + '天 ' + hoursRound + '小时 ' + minutesRound + '分钟'
+        time = daysRound + '天' + hoursRound + '小时' + minutesRound + '分钟'
     } else if (hoursRound > 0) {
         let temp = minutesRound > 0 ? minutesRound + '分钟' : ''
-        time = hoursRound + '小时 ' + temp
+        time = hoursRound + '小时' + temp
     } else {
         time = minutesRound + '分钟'
     }

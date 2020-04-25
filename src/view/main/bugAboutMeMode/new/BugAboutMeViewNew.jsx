@@ -381,23 +381,6 @@ export default class BugAboutMeViewNew extends Component {
                     let comArr = [];
                     result_arr.forEach((item, index) => {
                         comArr.push(
-                            // <span key={item.uuid} style={{ color: '#438ef7', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
-                            //     onClick={e => {
-                            //         if (this.state.preImguuid !== item.uuid) {
-                            //             this.setState({
-                            //                 showLoading: true,
-                            //             })
-                            //         } else {
-                            //             this.setState({
-                            //                 showLoading: false,
-                            //             })
-                            //         }
-                            //         this.setState({
-                            //             imguuid: item.uuid,
-                            //             showModal1: true,
-                            //             preImguuid: item.uuid,
-                            //         })
-                            //     }}>{item.name}</span>
                             <img alt='' style={{ width: 50, height: 50, marginRight: 10 }} key={index} src={Testuri + 'get_jpg?uuid=' + item.uuid}
                                 onClick={() => {
                                     this.setState({ imguuid: item.uuid })

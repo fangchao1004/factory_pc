@@ -5,6 +5,7 @@ import UpdateTaskView from './UpdateTaskView'
 import moment from 'moment'
 import Store from '../../../redux/store/Store';
 import { showTaskNum } from '../../../redux/actions/TaskAction';
+import { getDuration } from '../../util/Tool';
 
 var storage = window.localStorage;
 var userinfo;
@@ -126,23 +127,6 @@ class TaskToMeView extends Component {
             })
         })
     }
-    getDuration = (my_time) => {
-        var days = my_time / 1000 / 60 / 60 / 24;
-        var daysRound = Math.floor(days);
-        var hours = my_time / 1000 / 60 / 60 - (24 * daysRound);
-        var hoursRound = Math.floor(hours);
-        var minutes = my_time / 1000 / 60 - (24 * 60 * daysRound) - (60 * hoursRound);
-        var minutesRound = Math.floor(minutes);
-        // var seconds = my_time / 1000 - (24 * 60 * 60 * daysRound) - (60 * 60 * hoursRound) - (60 * minutesRound);
-        // console.log('转换时间:', daysRound + '天', hoursRound + '时', minutesRound + '分', seconds + '秒');
-        var time;
-        if (daysRound > 0) {
-            time = daysRound + '天 ' + hoursRound + '小时 ' + minutesRound + '分钟'
-        } else {
-            time = hoursRound + '小时 ' + minutesRound + '分钟'
-        }
-        return time;
-    }
     updateDataByRedux = () => {
         Store.dispatch(showTaskNum(null)); ///随便派发一个值，目的是让 mainView处监听到 执行init();
     }
@@ -199,7 +183,7 @@ class TaskToMeView extends Component {
                     // console.log('剩余时间ms:', remain_time);
                     let result = '/'
                     if (record.status === 0) { ///未完成 计算超时
-                        result = this.getDuration(Math.abs(remain_time));
+                        result = getDuration(Math.abs(remain_time));
                     }
                     return <div>{record.status === 0 ? (remain_time > 0 ? result : "超时 " + result) : result}</div>
                 }
