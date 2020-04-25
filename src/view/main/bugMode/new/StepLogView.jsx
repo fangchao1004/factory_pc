@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import HttpApi, { Testuri } from '../../../util/HttpApi';
 import { Modal, Timeline, Tag, Empty } from 'antd';
 import { originStatus } from '../../../util/AppData'
+import moment from 'moment'
+import { getDuration } from '../../../util/Tool';
 /**
  * 缺陷处理日志界面
  */
@@ -41,12 +43,13 @@ export default class StepLogView extends Component {
     }
     getStepData = (bugId) => {
         return new Promise((resolve, reject) => {
-            let sql = `select bug_step_log.*,users.name as user_name,bug_tag_status.des as tag_des,majors.name as major_name,bug_freeze_status.des as freeze_des from bug_step_log 
+            let sql = `select bug_step_log.*,users.name as user_name,bsd.duration_time as bug_next_status_duration,bug_tag_status.bug_next_status,bug_tag_status.des as tag_des,majors.name as major_name,bug_freeze_status.des as freeze_des from bug_step_log 
             left join (select * from users where effective = 1) users on users.id = bug_step_log.user_id
             left join (select * from majors where effective = 1) majors on majors.id = bug_step_log.major_id
             left join (select * from bug_tag_status where effective = 1) bug_tag_status on bug_tag_status.id = bug_step_log.tag_id
             left join (select * from bug_freeze_status where effective = 1) bug_freeze_status on bug_freeze_status.id = bug_step_log.freeze_id
-            where bug_step_log.effective = 1 and bug_step_log.bug_id = ${bugId}`
+            left join (select * from bug_status_duration where effective = 1) bsd on bsd.status = bug_tag_status.bug_next_status
+            where bug_step_log.effective = 1 and bug_step_log.bug_id = ${bugId} order by bug_step_log.id`
             let result = [];
             HttpApi.obs({ sql }, (res) => {
                 if (res.data.code === 0) {
@@ -93,6 +96,37 @@ export default class StepLogView extends Component {
         if (record.status === 5) { str = record.bug_freeze_des }
         return str
     }
+    getLineRender = () => {
+        let resultList = [];
+        this.state.stepList.forEach((item, index) => {
+            let createdAtTime = moment(item.createdAt).toDate().getTime();
+            let preCreatedAtTime = index > 0 ? moment(this.state.stepList[index - 1].createdAt).toDate().getTime() : 0
+            let duration = index > 0 ? this.state.stepList[index - 1].bug_next_status_duration : 0 ///设定时间
+            let color = 'green'
+            if (index > 0 && (createdAtTime - preCreatedAtTime) > duration) {
+                color = 'red'
+            }
+            resultList.push(<Timeline.Item key={index}>
+                <Tag color={'#1690FF'}>{item.createdAt}</Tag>
+                <Tag color={'#FF9900'} >{item.user_name}</Tag>
+                {item.tag_des ? <Tag color={'blue'}>{item.tag_des} {item.freeze_des ? '- ' + item.freeze_des : (item.major_name ? '- ' + item.major_name : '')}</Tag> : null}
+                {index > 0 && this.state.stepList[index - 1].bug_next_status === 3 ? <Tag color={color} >{
+                    "用时:" +
+                    getDuration(createdAtTime - preCreatedAtTime)
+                }</Tag> : null}
+                <div>{item.imgs ? item.imgs.split(',').map((img, i) =>
+                    <img alt='' style={{ width: 50, height: 50, marginTop: 10, marginRight: 10 }} key={img} src={Testuri + 'get_jpg?uuid=' + img}
+                        onClick={() => {
+                            this.setState({ imguuid: img })
+                        }}
+                    />
+                )
+                    : ''}</div>
+                {item.remark ? <div style={{ color: '#FF9900', marginTop: item.imgs ? 5 : 10 }}>{'备注: ' + item.remark}</div> : ''}
+            </Timeline.Item>)
+        })
+        return resultList;
+    }
     render() {
         return (
             <Modal
@@ -103,34 +137,10 @@ export default class StepLogView extends Component {
                 onCancel={() => { this.props.onCancel(); }}
                 footer={null}
             >
-                {/* <Descriptions size='small' bordered>
-                    <Descriptions.Item label="编号">{this.state.record.id || '/'}</Descriptions.Item>
-                    <Descriptions.Item label="巡检点">{this.state.record.device_name || this.state.record.area_remark || '/'}</Descriptions.Item>
-                    <Descriptions.Item label="专业">{this.state.record.major_name || '/'}</Descriptions.Item>
-                    <Descriptions.Item label="级别">{this.changeNumToStr(this.state.record.buglevel) || '/'}</Descriptions.Item>
-                    <Descriptions.Item label="状态">{this.changeStatusToStr(this.state.record) || '/'}</Descriptions.Item>
-                    <Descriptions.Item label="上报人">{this.state.record.user_name || '/'}</Descriptions.Item>
-                    <Descriptions.Item label="内容">{this.state.record.content && JSON.parse(this.state.record.content).text}</Descriptions.Item>
-                </Descriptions> */}
                 <div style={{ height: this.state.stepList.length > 0 ? 400 : 200, overflow: "scroll" }}>
                     {this.state.stepList.length > 0 ?
                         <Timeline style={{ marginTop: 10 }} >
-                            {this.state.stepList.map((item, index) => {
-                                return <Timeline.Item key={index}>
-                                    <Tag color={'#1690FF'}>{item.createdAt}</Tag>
-                                    <Tag color={'#FF9900'} >{item.user_name}</Tag>
-                                    {item.tag_des ? <Tag color={'blue'}>{item.tag_des} {item.freeze_des ? '- ' + item.freeze_des : (item.major_name ? '- ' + item.major_name : '')}</Tag> : null}
-                                    <div>{item.imgs ? item.imgs.split(',').map((img, i) =>
-                                        <img alt='' style={{ width: 50, height: 50, marginTop: 10, marginRight: 10 }} key={img} src={Testuri + 'get_jpg?uuid=' + img}
-                                            onClick={() => {
-                                                this.setState({ imguuid: img })
-                                            }}
-                                        />
-                                    )
-                                        : ''}</div>
-                                    {item.remark ? <div style={{ color: '#FF9900', marginTop: item.imgs ? 5 : 10 }}>{'备注: ' + item.remark}</div> : ''}
-                                </Timeline.Item>
-                            })}
+                            {this.getLineRender()}
                         </Timeline> : <Empty />}
                 </div>
                 <Modal visible={this.state.imguuid !== null} destroyOnClose centered

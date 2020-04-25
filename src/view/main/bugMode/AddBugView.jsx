@@ -107,6 +107,7 @@ class AddBugView extends Component {
                     area_remark: values.area_remark,
                     status: 0,
                     checkedAt: moment().format('YYYY-MM-DD HH:mm:ss'),
+                    last_status_time: moment().format('YYYY-MM-DD HH:mm:ss'),
                 }
                 HttpApi.addBugInfo(valueObj, (res) => {
                     if (res.data.code === 0) {

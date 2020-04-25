@@ -5,6 +5,7 @@ import BugViewNewComplete from './new/BugViewNewComplete'
 import BugLevelView from './BugLevelView'
 import BugMajorView from './BugMajorView'
 import BugFreezeView from './BugFreezeView'
+import BugDurationView from './BugDurationView'
 
 const tabListNoTitle = [{
     key: 'BugViewNew',
@@ -17,13 +18,15 @@ const tabListNoTitle = [{
 const tabListNoTitle2 = [{
     key: 'BugLevelView',
     tab: '缺陷类型管理',
-},
-{
+}, {
     key: 'BugMajorView',
     tab: '缺陷专业管理',
 }, {
     key: 'BugFreezeView',
     tab: '缺陷状态管理'
+}, {
+    key: 'BugDurationView',
+    tab: '时间区间管理'
 }];
 
 const contentListNoTitle = {
@@ -32,6 +35,7 @@ const contentListNoTitle = {
     BugLevelView: <BugLevelView />,
     BugMajorView: <BugMajorView />,
     BugFreezeView: <BugFreezeView />,
+    BugDurationView: <BugDurationView />,
 };
 
 class BugModeRoot extends Component {

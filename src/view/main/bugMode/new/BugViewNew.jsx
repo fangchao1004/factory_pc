@@ -13,6 +13,7 @@ import FuncPanelForEngineer from './FuncPanelForEngineer';
 import FuncPanelForRunner from './FuncPanelForRunner';
 import { originStatus } from '../../../util/AppData'
 import ShowImgView from '../ShowImgView';
+import { getDuration } from '../../../util/Tool';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
 var bug_type_filter = [];///用于筛选类别的数据 选项
@@ -23,7 +24,8 @@ var uploader_filter = [];///用于筛选上传者的数据 选项
 var storage = window.localStorage;
 var localUserInfo = '';
 var orignData = [];
-
+var time;
+var currentTime;
 export default class BugViewNew extends Component {
     constructor(props) {
         super(props);
@@ -43,9 +45,20 @@ export default class BugViewNew extends Component {
     componentDidMount() {
         this.init();
         localUserInfo = storage.getItem('userinfo');
+        this.openPolling();
+    }
+    openPolling = () => {
+        time = setInterval(() => {
+            this.init();
+        }, 60000);////60秒轮询一次
+    }
+    componentWillUnmount() {
+        console.log('所有缺陷界面销毁')
+        clearInterval(time);
     }
 
     init = async () => {
+        currentTime = moment().toDate().getTime();
         status_filter.length = 0;
         major_filter.length = 0;
         uploader_filter.length = 0;
@@ -162,8 +175,10 @@ export default class BugViewNew extends Component {
             area_3.name as area3_name,area_3.id as area3_id,
             concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
            	tmp_freeze_table.freeze_id as bug_freeze_id,
-           	tmp_freeze_table.freeze_des as bug_freeze_des
+            tmp_freeze_table.freeze_des as bug_freeze_des,
+            bsd.duration_time
             from bugs
+            left join (select * from bug_status_duration where effective = 1) bsd on bsd.status = bugs.status
             left join (select * from devices where effective = 1) des on bugs.device_id = des.id
             left join (select * from users where effective = 1) urs on bugs.user_id = urs.id
             left join (select * from majors where effective = 1) mjs on bugs.major_id = mjs.id
@@ -430,10 +445,11 @@ export default class BugViewNew extends Component {
                 dataIndex: 'status',
                 filters: status_filter,
                 align: 'center',
+                width: 120,
                 onFilter: (value, record) => record.status === value || record.status + '-' + record.bug_freeze_id === value,
                 render: (text, record) => {
                     let str = '';
-                    let color = '#888888'
+                    let color = '#AAAAAA'
                     switch (text) {
                         case 0:
                             str = '待维修'
@@ -462,7 +478,14 @@ export default class BugViewNew extends Component {
                         default:
                             break;
                     }
-                    return <Tag color={color}>{str}</Tag>;
+                    let durationTime;
+                    if (record.last_status_time) { durationTime = currentTime - moment(record.last_status_time).toDate().getTime() }
+                    let timeColor = 'green'
+                    if (durationTime > record.duration_time && record.duration_time) { timeColor = 'red' }
+                    return <div>
+                        <Tag color={color}>{str}</Tag>
+                        {record.last_status_time && record.status !== 5 ? <Tag style={{ marginTop: 8 }} color={timeColor}>{getDuration(durationTime)}</Tag> : null}
+                    </div>;
                 }
             },
             {
@@ -631,7 +654,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,major_id,user_id,remark,createdAt) VALUES (${bug_id},1,${major_id},${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 6 where id = ${bug_id}`;
+                let sql = `update bugs set status = 6,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('申请转专业成功'); this.init(); } else { message.error('申请转专业失败') }
                 })
@@ -646,7 +669,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (freeze_id,bug_id,tag_id,user_id,remark,createdAt) VALUES (${freeze_id},${bug_id},2,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 7 where id = ${bug_id}`;
+                let sql = `update bugs set status = 7,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('申请挂起成功'); this.init(); } else { message.error('申请挂起失败') }
                 })
@@ -660,7 +683,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},4,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 2 where id = ${bug_id}`;
+                let sql = `update bugs set status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('完成维修'); this.init(); } else { message.error('维修失败') }
                 })
@@ -674,7 +697,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},16,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 2 where id = ${bug_id}`;
+                let sql = `update bugs set status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('维修人员认为无需维修'); this.init(); } else { message.error('维修人员认为无需维修操作失败') }
                 })
@@ -689,7 +712,7 @@ export default class BugViewNew extends Component {
         let major_id = v.selectMajorId;
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,major_id,user_id,remark,createdAt) VALUES (${bug_id},3,${major_id},${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
-            let sql = `update bugs set major_id = ${major_id},status = 0 where id = ${bug_id}`;
+            let sql = `update bugs set major_id = ${major_id},status = 0,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
             HttpApi.obs({ sql }, (res) => {
                 if (res.data.code === 0) { message.success('转专业成功'); this.init(); } else { message.error('转专业失败') }
             })
@@ -703,7 +726,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (freeze_id,bug_id,tag_id,user_id,remark,createdAt) VALUES (${freeze_id},${bug_id},15,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 5 where id = ${bug_id}`;
+                let sql = `update bugs set status = 5,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('挂起成功'); this.init(); } else { message.error('挂起失败') }
                 })
@@ -717,7 +740,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},9,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 0 where id = ${bug_id}`;
+                let sql = `update bugs set status = 0,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('恢复维修流程成功'); this.init(); } else { message.error('恢复维修流程失败') }
                 })
@@ -731,7 +754,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},5,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 3 where id = ${bug_id}`;
+                let sql = `update bugs set status = 3,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('专工完成验收'); this.init(); } else { message.error('专工验收操作失败') }
                 })
@@ -745,7 +768,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},7,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 1 where id = ${bug_id}`;
+                let sql = `update bugs set status = 1,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('专工打回操作成功'); this.init(); } else { message.error('专工打回操作失败') }
                 })
@@ -759,7 +782,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},17,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 3 where id = ${bug_id}`;
+                let sql = `update bugs set status = 3,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('专工确认无需维修'); this.init(); } else { message.error('专工确认无需维修操作失败') }
                 })
@@ -774,7 +797,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},6,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 4 where id = ${bug_id}`;
+                let sql = `update bugs set status = 4,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('运行验收操作成功'); this.init(); this.changeRecordData(bug_id); } else { message.error('运行验收操作失败') }
                 })
@@ -788,7 +811,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},8,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 2 where id = ${bug_id}`;
+                let sql = `update bugs set status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('运行打回操作成功'); this.init(); } else { message.error('运行打回操作失败') }
                 })
