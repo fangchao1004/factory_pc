@@ -565,13 +565,16 @@ export default class BugAboutMeViewNew extends Component {
                             this.freezeBugStepByEngineer(v);
                             break;
                         case 3:
-                            this.GoBackStartByEngineer(v);
+                            this.goBackFixByEngineer(v);
                             break;
                         case 4:
-                            this.CompleteByEngineer(v);
+                            this.completeByEngineer(v);
                             break;
                         case 5:
-                            this.GoBackFixByEngineer(v);
+                            this.goBackFixByEngineer(v);
+                            break;
+                        case 6:
+                            this.passByEngineer(v);
                             break;
                         default:
                             break;
@@ -696,7 +699,7 @@ export default class BugAboutMeViewNew extends Component {
             } else { message.error('挂起失败') }
         })
     }
-    GoBackStartByEngineer = (v) => {
+    goBackFixByEngineer = (v) => {
         let remark = v.remarkText;
         let bug_id = this.state.currentRecord.id;
         let user_id = JSON.parse(localUserInfo).id;
@@ -710,7 +713,7 @@ export default class BugAboutMeViewNew extends Component {
             } else { message.error('恢复维修流程失败') }
         })
     }
-    CompleteByEngineer = (v) => {
+    completeByEngineer = (v) => {
         let remark = v.remarkText;
         let bug_id = this.state.currentRecord.id;
         let user_id = JSON.parse(localUserInfo).id;
@@ -724,7 +727,7 @@ export default class BugAboutMeViewNew extends Component {
             } else { message.error('专工验收操作失败') }
         })
     }
-    GoBackFixByEngineer = (v) => {
+    goBackFixByEngineer = (v) => {
         let remark = v.remarkText;
         let bug_id = this.state.currentRecord.id;
         let user_id = JSON.parse(localUserInfo).id;
@@ -736,6 +739,20 @@ export default class BugAboutMeViewNew extends Component {
                     if (res.data.code === 0) { message.success('专工打回操作成功'); this.init(); } else { message.error('专工打回操作失败') }
                 })
             } else { message.error('专工打回操作失败') }
+        })
+    }
+    passByEngineer = (v) => {
+        let remark = v.remarkText;
+        let bug_id = this.state.currentRecord.id;
+        let user_id = JSON.parse(localUserInfo).id;
+        let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},17,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                let sql = `update bugs set status = 3 where id = ${bug_id}`;
+                HttpApi.obs({ sql }, (res) => {
+                    if (res.data.code === 0) { message.success('专工确认无需维修'); this.init(); } else { message.error('专工确认无需维修操作失败') }
+                })
+            } else { message.error('专工确认无需维修操作失败') }
         })
     }
     /////////////// 运行处理
