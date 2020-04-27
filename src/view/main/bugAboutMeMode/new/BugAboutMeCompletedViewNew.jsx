@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm, Tooltip, Modal } from 'antd'
+import { Table, Tag, Button, message, Popconfirm, Tooltip, Modal, Icon } from 'antd'
 import HttpApi, { Testuri } from '../../../util/HttpApi'
 // import Store from '../../../../redux/store/Store';
 // import { showBugNum } from '../../../../redux/actions/BugAction';
@@ -160,11 +160,12 @@ export default class BugAboutMeCompletedViewNew extends Component {
                 align: 'center',
                 render: (text, record) => {
                     let result = '/'
+                    let iconType = 'laptop'
                     if (text && text !== '') { result = text }
-                    else { result = record.area_remark }
+                    else { result = record.area_remark; iconType = 'environment' }
                     return <div className='hideText lineClamp5'>
                         <Tooltip title={result}>
-                            <span>{result}</span>
+                            <Icon type={iconType} style={{ marginRight: 4 }} /><span>{result}</span>
                         </Tooltip>
                     </div>
                 }
@@ -182,11 +183,12 @@ export default class BugAboutMeCompletedViewNew extends Component {
                 align: 'center',
                 render: (text, record) => {
                     let result = '/'
+                    let iconType = 'environment'
                     if (text) { result = text }
                     else { result = record.area_name }
                     return <div className='hideText lineClamp5'>
                         <Tooltip title={result}>
-                            <span>{result}</span>
+                            <Icon type={iconType} style={{ marginRight: 4 }} /><span>{result}</span>
                         </Tooltip>
                     </div>
                 }
