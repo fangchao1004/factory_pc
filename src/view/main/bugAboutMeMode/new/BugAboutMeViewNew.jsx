@@ -480,7 +480,11 @@ export default class BugAboutMeViewNew extends Component {
                             break;
                     }
                     let durationTime;
-                    if (record.last_status_time) { durationTime = currentTime - moment(record.last_status_time).toDate().getTime() }
+                    if (record.status === 0) {
+                        durationTime = currentTime - moment(record.createdAt).toDate().getTime()
+                    } else if (record.last_status_time) {
+                        durationTime = currentTime - moment(record.last_status_time).toDate().getTime()
+                    }
                     let timeColor = 'green'
                     if (durationTime > record.duration_time && record.duration_time) { timeColor = 'red' }
                     return <div>
