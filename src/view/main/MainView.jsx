@@ -233,7 +233,7 @@ export default class MainView extends Component {
                             <Menu.Item key="/mainView/bugAboutMe">
                                 <Icon type="hdd" />
                                 <span>与我相关</span>
-                                <Badge count={this.state.aboutMeBugNum} overflowCount={99} style={{ marginLeft: 30, }} >
+                                <Badge count={this.state.aboutMeBugNum} overflowCount={99} style={{ marginLeft: 35 }} >
                                 </Badge>
                                 <Link to={`${this.props.match.url}/bugAboutMe`} />
                             </Menu.Item>
@@ -252,7 +252,7 @@ export default class MainView extends Component {
                         <Menu.Item key="/mainView/task">
                             <Icon type="project" />
                             <span>任务</span>
-                            <Badge count={this.state.aboutMeTaskNum} overflowCount={99} style={{ marginLeft: 30 }}>
+                            <Badge count={this.state.aboutMeTaskNum} overflowCount={99} style={{ marginLeft: 35 }}>
                             </Badge>
                             <Link to={`${this.props.match.url}/task`} />
                         </Menu.Item>
