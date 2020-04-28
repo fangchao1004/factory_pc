@@ -499,6 +499,7 @@ export default class BugAboutMeViewNew extends Component {
                 title: '操作',
                 dataIndex: 'actions',
                 align: 'center',
+                width: 120,
                 render: (_, record) => {
                     let majorHasFlag = JSON.parse(localUserInfo).major_id_all && JSON.parse(localUserInfo).major_id_all.split(',').indexOf(String(record.major_id)) !== -1
                     let fixable = majorHasFlag && (record.status < 2 || record.status === 6 || record.status === 7);

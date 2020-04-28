@@ -288,6 +288,7 @@ export default class BugAboutMeCompletedViewNew extends Component {
                 title: '缺陷状态',
                 dataIndex: 'status',
                 align: 'center',
+                width: 120,
                 render: (text, record) => {
                     let str = '完毕';
                     let color = '#888888'
@@ -298,6 +299,7 @@ export default class BugAboutMeCompletedViewNew extends Component {
                 title: '操作',
                 dataIndex: 'actions',
                 align: 'center',
+                width: 120,
                 render: (text, record) => (
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <Button size="small" type="default" onClick={() => { this.setState({ stepLogVisible: true, currentRecord: record }) }}>日志</Button>
