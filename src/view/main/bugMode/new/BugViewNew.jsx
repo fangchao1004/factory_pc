@@ -58,7 +58,7 @@ export default class BugViewNew extends Component {
     }
 
     init = async () => {
-        currentTime = moment().toDate().getTime();
+        currentTime = moment().add('second', 10).toDate().getTime(); ///由于数据插入有时间差--为了防止出现当前时间戳比数据库的插入时间还早的情况--加10秒
         status_filter.length = 0;
         major_filter.length = 0;
         uploader_filter.length = 0;
@@ -82,7 +82,7 @@ export default class BugViewNew extends Component {
         let uploaderData = await this.getUploaderInfo();
         uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
-        finallyData.forEach((item) => { item.key = item.id + '' })
+        finallyData.forEach((item) => { item.key = item.id })
         // console.log('finallyData:', finallyData);
         orignData = finallyData;
         this.setState({
@@ -176,6 +176,8 @@ export default class BugViewNew extends Component {
             concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
            	tmp_freeze_table.freeze_id as bug_freeze_id,
             tmp_freeze_table.freeze_des as bug_freeze_des,
+            tmp_freeze_table.major_id as bug_step_major_id,
+            tmp_freeze_table.tag_id as bug_step_tag_id,
             bsd.duration_time
             from bugs
             left join (select * from bug_status_duration where effective = 1) bsd on bsd.status = bugs.status

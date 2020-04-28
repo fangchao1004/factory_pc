@@ -11,7 +11,7 @@ export default class FuncPanelForEngineer extends Component {
         this.state = {
             record: {},
             visible: false,
-            selectValue: 1,
+            selectValue: 4,
             majorList: [],
             freezeList: [],
             selectMajorId: null,
@@ -48,7 +48,29 @@ export default class FuncPanelForEngineer extends Component {
         })
     }
     componentWillReceiveProps(nextProps) {
+        // console.log('nextProps.record:', nextProps.record)
+        let selectValue = nextProps.record.bug_step_tag_id === 16 ? 6 : 4
+        let selectMajorId = null;
+        let selectFreezeId = null;
+        switch (nextProps.record.status) {
+            case 6:
+                selectValue = 1; ///转专业
+                selectMajorId = nextProps.record.bug_step_major_id
+                break;
+            case 7:
+                selectValue = 2; ///挂起
+                selectFreezeId = nextProps.record.bug_freeze_id
+                break;
+            case 5:
+                selectValue = 3; ///解除挂起
+                break;
+            default:
+                break;
+        }
         this.setState({
+            selectValue,
+            selectMajorId,
+            selectFreezeId,
             visible: nextProps.visible,
             record: nextProps.record || {}
         })
@@ -56,7 +78,7 @@ export default class FuncPanelForEngineer extends Component {
     }
     reset = () => {
         this.setState({
-            selectValue: 1,
+            selectValue: 4,
             selectMajorId: null,
             selectFreezeId: null,
             remarkText: '',

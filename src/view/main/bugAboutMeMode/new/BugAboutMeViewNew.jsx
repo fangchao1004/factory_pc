@@ -76,7 +76,7 @@ export default class BugAboutMeViewNew extends Component {
         uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
         if (JSON.parse(localUserInfo).major_id_all) {
             let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
-            finallyData.forEach((item) => { item.key = item.id + '' })
+            finallyData.forEach((item) => { item.key = item.id })
             this.autoFixHandler(finallyData);
             orignData = finallyData;
             this.setState({
@@ -196,6 +196,8 @@ export default class BugAboutMeViewNew extends Component {
             concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
             tmp_freeze_table.freeze_id as bug_freeze_id,
             tmp_freeze_table.freeze_des as bug_freeze_des,
+            tmp_freeze_table.major_id as bug_step_major_id,
+            tmp_freeze_table.tag_id as bug_step_tag_id,
             bsd.duration_time
             from bugs
             left join (select * from bug_status_duration where effective = 1) bsd on bsd.status = bugs.status
@@ -564,6 +566,9 @@ export default class BugAboutMeViewNew extends Component {
                         case 3:
                             this.fixCompleteByRepair(v);
                             break;
+                        case 4:
+                            this.dontNeedfixByRepair(v);
+                            break;
                         default:
                             break;
                     }
@@ -681,6 +686,20 @@ export default class BugAboutMeViewNew extends Component {
                     if (res.data.code === 0) { message.success('完成维修'); this.init(); } else { message.error('维修失败') }
                 })
             } else { message.error('操作失败') }
+        })
+    }
+    dontNeedfixByRepair = (v) => {
+        let remark = v.remarkText;
+        let bug_id = this.state.currentRecord.id;
+        let user_id = JSON.parse(localUserInfo).id;
+        let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},16,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                let sql = `update bugs set status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                HttpApi.obs({ sql }, (res) => {
+                    if (res.data.code === 0) { message.success('维修人员认为无需维修'); this.init(); } else { message.error('维修人员认为无需维修操作失败') }
+                })
+            } else { message.error('维修人员认为无需维修操作失败') }
         })
     }
     ////////////////////// 专工处理

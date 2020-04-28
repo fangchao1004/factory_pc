@@ -10,7 +10,7 @@ export default class FuncPanelForRepair extends Component {
         super(props);
         this.state = {
             visible: false,
-            selectValue: 1,
+            selectValue: 3,
             freezeList: [],
             majorList: [],
             remarkText: '',
@@ -57,7 +57,7 @@ export default class FuncPanelForRepair extends Component {
     }
     reset = () => {
         this.setState({
-            selectValue: 1,
+            selectValue: 3,
             remarkText: '',
             selectMajorId: null,
             selectFreezeId: null,
