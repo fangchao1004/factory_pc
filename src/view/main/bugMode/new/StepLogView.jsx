@@ -129,7 +129,7 @@ export default class StepLogView extends Component {
             <Modal
                 destroyOnClose
                 width={600}
-                title='缺陷日志'
+                title='缺陷处理记录'
                 visible={this.state.visible}
                 onCancel={() => { this.props.onCancel(); }}
                 footer={null}

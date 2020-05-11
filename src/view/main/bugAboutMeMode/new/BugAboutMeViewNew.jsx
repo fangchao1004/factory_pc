@@ -8,9 +8,9 @@ import FuncPanelForRepair from '../../bugMode/new/FuncPanelForRepair';
 import StepLogView from '../../bugMode/new/StepLogView';
 import FuncPanelForEngineer from '../../bugMode/new/FuncPanelForEngineer';
 import FuncPanelForRunner from '../../bugMode/new/FuncPanelForRunner';
-import { originStatus } from '../../../util/AppData'
+import { originStatus, NOTIFY_MP3, BUGLOOPTIME, MAXBUGIDMY, NOTICEMUSICOPEN } from '../../../util/AppData'
 import ShowImgView from '../../bugMode/ShowImgView';
-import { getDuration } from '../../../util/Tool';
+import { getDuration, notifyMusicForNewBug } from '../../../util/Tool';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
 var status_filter = [];///用于筛选状态的数据
@@ -49,7 +49,7 @@ export default class BugAboutMeViewNew extends Component {
     openPolling = () => {
         time = setInterval(() => {
             this.init();
-        }, 60000);////60秒轮询一次
+        }, BUGLOOPTIME);////x秒轮询一次
     }
     componentWillUnmount() {
         console.log('我的缺陷界面销毁')
@@ -82,6 +82,7 @@ export default class BugAboutMeViewNew extends Component {
             this.setState({
                 data: finallyData,
             })
+            notifyMusicForNewBug(this._audio, storage.getItem(NOTICEMUSICOPEN) === 'true', finallyData[0].id, MAXBUGIDMY);
         }
     }
     autoFixHandler = (list) => {
@@ -491,6 +492,7 @@ export default class BugAboutMeViewNew extends Component {
                     if (durationTime > record.duration_time && record.duration_time) { timeColor = 'red' }
                     return <div>
                         <Tag color={color}>{str}</Tag>
+                        <br />
                         {record.last_status_time && record.status !== 5 ? <Tag style={{ marginTop: 8 }} color={timeColor}>{getDuration(durationTime)}</Tag> : null}
                     </div>;
                 }
@@ -505,9 +507,8 @@ export default class BugAboutMeViewNew extends Component {
                     let fixable = majorHasFlag && (record.status < 2 || record.status === 6 || record.status === 7);
                     let engable = majorHasFlag && (record.status < 3 || record.status > 4);
                     let runable = record.status === 3;
-
                     return <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <Button size="small" type="default" onClick={() => { this.setState({ stepLogVisible: true, currentRecord: record }) }}>日志</Button>
+                        <Button size="small" type="default" onClick={() => { this.setState({ stepLogVisible: true, currentRecord: record }) }}>处理记录</Button>
                         {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('3') !== -1 ?
                             <>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
@@ -620,6 +621,9 @@ export default class BugAboutMeViewNew extends Component {
                     <img alt='' style={{ width: 400 }} src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} />
                     {/* <img alt='' style={{ width: 400 }} src={'http://ixiaomu.cn:3008/get_jpg?uuid=' + this.state.imguuid} /> */}
                 </Modal>
+                <div style={{ display: 'none' }}>
+                    <audio ref={(audio) => { this._audio = audio }} src={NOTIFY_MP3} controls="controls" ></audio>
+                </div>
             </Fragment >
         );
     }

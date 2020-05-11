@@ -1,10 +1,13 @@
 import React, { Component } from 'react'
-import { Row, Col, Table, Button, Divider, message, Popconfirm, Input } from 'antd'
+import { Row, Col, Table, Button, message, Popconfirm, Input, Tooltip } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import AddStaffView from './AddStaffView';
 import UpdateStaffView from './UpdateStaffView';
+import { permisstion } from '../../util/AppData'
 // import { send, emitter } from '../../socket/Socket'
-var level_filter = [];///用于筛选任务专业的数据 选项
+var level_filter = [];///用于筛选部门的数据 选项
+var major_filter = [];///用于筛选专业的数据 选项
+var permission_filter = [];///用于权限的数据 选项
 const { Search } = Input;
 
 class StaffView extends Component {
@@ -19,14 +22,32 @@ class StaffView extends Component {
     }
     async getUsersData() {
         level_filter.length = 0;
+        major_filter.length = 0;
+        permission_filter.length = 0;
         let levelData = await this.getLevelInfo();
         levelData.forEach((item) => { level_filter.push({ text: item.name, value: item.id }) })
+        let majorData = await this.getMajorInfo();
+        majorData.forEach((item) => { major_filter.push({ text: item.name, value: item.id }) })
+        permisstion.forEach((item) => { permission_filter.push({ text: item.name, value: item.value }) })
+
         var usersData = await this.getUserList()
         this.setState({
             users: usersData.map(user => {
                 user.key = user.id
                 return user
             }),
+        })
+    }
+    getMajorInfo = () => {
+        let sqlText = 'select id,name from majors where effective = 1'
+        return new Promise((resolve, reject) => {
+            HttpApi.obs({ sql: sqlText }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
         })
     }
     getLevelInfo = () => {
@@ -199,12 +220,25 @@ class StaffView extends Component {
             })
         })
     }
+    getPermissionLabByIdStr = (idStr) => {
+        if (idStr) {
+            let nameList = [];
+            idStr.split(',').forEach((id) => {
+                permisstion.forEach((item) => {
+                    if (String(item.value) === id) { nameList.push(item.name) }
+                })
+            })
+            return nameList.join(',')
+        }
+    }
 
     render() {
         const columns = [
             {
                 title: '登陆账户',
                 dataIndex: 'username',
+                width: 130,
+                align: 'center',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
@@ -212,6 +246,8 @@ class StaffView extends Component {
             {
                 title: '姓名',
                 dataIndex: 'name',
+                width: 80,
+                align: 'center',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
@@ -219,17 +255,11 @@ class StaffView extends Component {
             {
                 title: '部门',
                 dataIndex: 'level_id',
+                width: 120,
                 filters: level_filter,
+                align: 'center',
                 onFilter: (value, record) => record.level_id === value,
                 render: (text, record, index) => {
-                    // if (record.group_id === null) {
-                    //     return {
-                    //         children: <div>{record.level_name}</div>,
-                    //         props: {
-                    //             colSpan: 2,
-                    //         },
-                    //     }
-                    // }
                     return <div>{record.level_name}</div>;
                 }
             },
@@ -251,6 +281,8 @@ class StaffView extends Component {
             {
                 title: '密码',
                 dataIndex: 'password',
+                width: 120,
+                align: 'center',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
@@ -258,34 +290,74 @@ class StaffView extends Component {
             {
                 title: '联系方式',
                 dataIndex: 'phonenumber',
+                width: 130,
+                align: 'center',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
             },
-            // {
-            //     title: '专业',
-            //     dataIndex: 'major_name_all',
-            //     render: (text, record) => (
-            //         <div>{text || '/'}</div>
-            //     )
-            // },
+            {
+                title: '权限',
+                dataIndex: 'permission',
+                width: 120,
+                filters: permission_filter,
+                align: 'center',
+                onFilter: (value, record) => {
+                    if (record.permission) {
+                        return record.permission.split(',').indexOf(String(value)) !== -1
+                    } else {
+                        return false
+                    }
+                },
+                render: (text, record) => {
+                    let result = this.getPermissionLabByIdStr(text);
+                    return <div className='hideText lineClamp5'>
+                        <Tooltip title={result}>{result || '/'}
+                        </Tooltip>
+                    </div>
+                }
+            },
+            {
+                title: '专业',
+                dataIndex: 'major_id_all',
+                filters: major_filter,
+                align: 'center',
+                onFilter: (value, record) => {
+                    if (record.major_id_all) {
+                        return record.major_id_all.split(',').indexOf(String(value)) !== -1
+                    } else {
+                        return false
+                    }
+                },
+                render: (text, record) => (
+                    <div className='hideText lineClamp5'>
+                        <Tooltip title={record.major_name_all}>{record.major_name_all || '/'}</Tooltip>
+                    </div>
+                )
+            },
             {
                 title: '备注',
                 dataIndex: 'remark',
+                align: 'center',
                 render: (text, record) => (
-                    <div>{text}</div>
+                    <div className='hideText lineClamp5'>
+                        <Tooltip title={text}>
+                            <span>{text || '/'}</span>
+                        </Tooltip>
+                    </div>
                 )
             },
             {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 150,
+                width: 120,
+                align: 'center',
                 render: (text, record) => (
-                    <div style={{ textAlign: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <Popconfirm title="确定要删除该员工吗?" onConfirm={this.deleteStaffConfirm.bind(null, record)}>
                             <Button size="small" type="danger">删除</Button>
                         </Popconfirm>
-                        <Divider type="vertical" />
+                        <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                         <Button size="small" type="primary" onClick={this.updateStaff.bind(this, record)}>修改</Button></div>
                 )
             }

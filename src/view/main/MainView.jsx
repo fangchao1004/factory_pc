@@ -23,6 +23,8 @@ import UserMenuView from './userMenu/UserMenuView'
 import HttpApi from '../util/HttpApi';
 import Store from '../../redux/store/Store';
 // import Socket from '../socket/Socket'
+import { NOTICEINFO } from '../util/AppData'
+import { BrowserType } from '../util/Tool';
 
 var storage = window.localStorage;
 const { Header, Content, Sider } = Layout;
@@ -57,6 +59,7 @@ export default class MainView extends Component {
         // Socket();
     }
     init = async () => {
+        BrowserType();
         let bugResult = [];
         if (JSON.parse(localUserInfo).major_id_all) {
             bugResult = await this.getBugsInfo();
@@ -161,7 +164,7 @@ export default class MainView extends Component {
             <span >{result.time} {result.name}</span>
             <Button type="primary" size="small" onClick={() => { notification.close(key); close(); }}>确认</Button>
         </div>
-        const close = () => { storage['noticeinfo'] = JSON.stringify(result) }
+        const close = () => { storage[NOTICEINFO] = JSON.stringify(result) }
         const message = <div><Icon type="info-circle" style={{ color: '#108ee9' }} /><span style={{ marginLeft: 10 }}>最新通知</span></div>
         notification.open({
             message,

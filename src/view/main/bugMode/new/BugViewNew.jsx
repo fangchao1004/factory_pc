@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm, Tooltip, Alert, Modal, Input, Icon } from 'antd'
+import { Table, Tag, Button, message, Popconfirm, Tooltip, Alert, Modal, Input, Icon, Switch } from 'antd'
 import HttpApi, { Testuri } from '../../../util/HttpApi'
 import moment from 'moment'
 import Store from '../../../../redux/store/Store';
@@ -11,9 +11,9 @@ import FuncPanelForRepair from './FuncPanelForRepair';
 import StepLogView from './StepLogView';
 import FuncPanelForEngineer from './FuncPanelForEngineer';
 import FuncPanelForRunner from './FuncPanelForRunner';
-import { originStatus } from '../../../util/AppData'
+import { originStatus, NOTIFY_MP3, BUGLOOPTIME, MAXBUGIDALL, NOTICEMUSICOPEN, BROWERTYPE } from '../../../util/AppData'
 import ShowImgView from '../ShowImgView';
-import { getDuration } from '../../../util/Tool';
+import { getDuration, notifyMusicForNewBug } from '../../../util/Tool';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
 var bug_type_filter = [];///用于筛选类别的数据 选项
@@ -40,6 +40,7 @@ export default class BugViewNew extends Component {
             engineerVisible: false,
             runnerVisible: false,
             stepLogVisible: false,
+            openMusic: storage.getItem(NOTICEMUSICOPEN) === 'true'
         }
     }
     componentDidMount() {
@@ -50,7 +51,7 @@ export default class BugViewNew extends Component {
     openPolling = () => {
         time = setInterval(() => {
             this.init();
-        }, 60000);////60秒轮询一次
+        }, BUGLOOPTIME);////x秒轮询一次
     }
     componentWillUnmount() {
         console.log('所有缺陷界面销毁')
@@ -83,11 +84,11 @@ export default class BugViewNew extends Component {
         uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
         finallyData.forEach((item) => { item.key = item.id })
-        // console.log('finallyData:', finallyData);
         orignData = finallyData;
         this.setState({
             data: finallyData,
         })
+        notifyMusicForNewBug(this._audio, storage.getItem(NOTICEMUSICOPEN) === 'true', finallyData[0].id, MAXBUGIDALL);
     }
     /**
      * 查询上传者 去重
@@ -492,6 +493,7 @@ export default class BugViewNew extends Component {
                     if (durationTime > record.duration_time && record.duration_time) { timeColor = 'red' }
                     return <div>
                         <Tag color={color}>{str}</Tag>
+                        <br />
                         {record.last_status_time && record.status !== 5 ? <Tag style={{ marginTop: 8 }} color={timeColor}>{getDuration(durationTime)}</Tag> : null}
                     </div>;
                 }
@@ -508,7 +510,7 @@ export default class BugViewNew extends Component {
                     let runable = record.status === 3;
 
                     return <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <Button size="small" type="default" onClick={() => { this.setState({ stepLogVisible: true, currentRecord: record }) }}>日志</Button>
+                        <Button size="small" type="default" onClick={() => { this.setState({ stepLogVisible: true, currentRecord: record }) }}>处理记录</Button>
                         {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('3') !== -1 ?
                             <>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
@@ -537,10 +539,18 @@ export default class BugViewNew extends Component {
         ]
         return (
             < Fragment >
-                <Alert message="当个人专业与缺陷专业匹配且当前进度符合流程顺序, 权限操作按钮才可正常使用; 可点击日志按钮查看每个缺陷的处理流程记录" type="info" showIcon />
+                <Alert message="当个人专业与缺陷专业匹配且当前进度符合流程顺序, 权限操作按钮才可正常使用; 可点击处理记录按钮查看每个缺陷的处理流程记录" type="info" showIcon />
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
                     <Button type={'primary'} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
                     <div style={{ textAlign: 'right' }}>
+                        <Tooltip title='新缺陷提示音'>
+                            <Switch style={{ marginRight: 10 }} checkedChildren="提示音开" unCheckedChildren="提示音关" checked={this.state.openMusic} onChange={(v) => {
+                                if (storage[BROWERTYPE] === 'Safari') { message.warning('Safari 浏览器暂不支持提示音'); return }
+                                this.setState({ openMusic: v })
+                                storage[NOTICEMUSICOPEN] = v;
+                            }} />
+                        </Tooltip>
+
                         <Input.Search style={{ width: 340 }} allowClear placeholder="支持内容、巡检点和巡检范围的模糊查询"
                             onChange={(e) => { if (e.target.value === '') { this.init(); } }}
                             onPressEnter={(e) => { this.filterBySearch(e.target.value) }} onSearch={this.filterBySearch} enterButton />
@@ -630,6 +640,9 @@ export default class BugViewNew extends Component {
                     <img alt='' style={{ width: 400 }} src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} />
                     {/* <img alt='' style={{ width: 400 }} src={'http://ixiaomu.cn:3008/get_jpg?uuid=' + this.state.imguuid} /> */}
                 </Modal>
+                <div style={{ display: 'none' }}>
+                    <audio ref={(audio) => { this._audio = audio }} src={NOTIFY_MP3} controls="controls" ></audio>
+                </div>
             </Fragment >
         );
     }

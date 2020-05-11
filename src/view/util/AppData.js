@@ -17,9 +17,16 @@ export const tableCellOptionsData = [
     { "value": "10", "text": "测温组件" }, { "value": "11", "text": "测振组件" },
     { "value": "6", "text": "图片选择器" }, { "value": "2", "text": "数字输入框" },
     { "value": "13", "text": "副标题" }];
-
+export const NOTIFY_MP3 = 'http://60.174.196.158:12345/assets/notice.mp3'
+export const BUGLOOPTIME = 30000;///毫秒，缺陷模块每隔多少毫秒去刷新一次
+export const MAXBUGIDALL = 'MaxBugIdAll';
+export const MAXBUGIDMY = 'MaxBugIdMy';
+export const USERINFO = 'userinfo';
+export const NOTICEINFO = 'noticeinfo';
+export const NOTICEMUSICOPEN = 'noticeMusicOpen';
+export const BROWERTYPE = 'browerType';
 export const VersionlistData = [
-    { title: '版本号', description: 'V 1.4.8.1 test' },
+    { title: '版本号', description: 'V 1.4.8.2 test' },
     // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
     // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
     // { title: '更新', description: '1.0.9 添加巡检点信息修改功能' }
@@ -65,4 +72,5 @@ export const VersionlistData = [
     // { title: '更新', description: '1.4.6 是1.4.5 test版本的正式版' }
     // { title: '更新', description: '1.4.7 添加运行日志模块' }
     // { title: '更新', description: '1.4.7.3 test 缺陷流程重新处理' }
+    // { title: '更新', description: '1.4.8.2 test 员工模块支持权限和专业筛选UI调整' }
 ]

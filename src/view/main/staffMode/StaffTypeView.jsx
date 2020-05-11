@@ -62,7 +62,7 @@ class StaffTypeView extends Component {
     }
     deleteLevelConfirm = (record) => {
         HttpApi.obs({ sql: `update levels set effective = 0 where id = ${record.id} ` }, (data) => {
-        // HttpApi.removeUserLevel({ id: record.id }, data => {
+            // HttpApi.removeUserLevel({ id: record.id }, data => {
             if (data.data.code === 0) {
                 message.success('删除成功')
                 this.getUsersData()
@@ -83,6 +83,7 @@ class StaffTypeView extends Component {
             {
                 title: '职位名称',
                 dataIndex: 'name',
+                align: 'center',
                 render: (text) => (
                     <div>{text}</div>
                 )
@@ -91,6 +92,7 @@ class StaffTypeView extends Component {
                 title: '操作',
                 dataIndex: 'actions',
                 width: 150,
+                align: 'center',
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
                         <Popconfirm title="确定要删除该部门吗?" onConfirm={this.deleteLevelConfirm.bind(null, record)}>

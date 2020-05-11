@@ -4,6 +4,7 @@ import LoginFromClass from './LoginForm'
 import HttpApi from '../util/HttpApi'
 import Background from '../../assets/bg.jpg';
 import downloadUrl from '../../assets/downloadurl.png'
+import { USERINFO } from '../util/AppData'
 
 
 const LoginFrom = Form.create({ name: 'normal_login' })(LoginFromClass)
@@ -30,8 +31,8 @@ export default class LoginView extends React.Component {
         group by users.id`
         HttpApi.obs({ sql }, doc => {
           if (doc.data.code === 0 && doc.data.data.length > 0) {
-            storage.removeItem('userinfo');
-            storage['userinfo'] = JSON.stringify(doc.data.data[0]);
+            storage.removeItem(USERINFO);
+            storage[USERINFO] = JSON.stringify(doc.data.data[0]);
             this.props.history.push('/mainView')
           } else {
             message.error("用户名/密码错误")

@@ -67,7 +67,7 @@ class BugDurationView extends Component {
             <div>
                 <Alert message={
                     <div>此数据只用于判断当前时刻与缺陷的上一状态记录时刻的差值是否超出，<span style={{ color: '#1790FF' }}>如超出则标红于缺陷表单中</span>，如不设置则不会标红；
-                    <span style={{ color: '#1790FF' }}>缺陷日志中只判断运行验收用时</span>是否超出</div>
+                    <span style={{ color: '#1790FF' }}>缺陷处理记录中只判断运行验收用时</span>是否超出</div>
                 } type="info" showIcon />
                 <Table
                     style={{ marginTop: 20 }}

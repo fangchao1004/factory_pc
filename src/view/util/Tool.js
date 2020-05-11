@@ -1,7 +1,10 @@
 import React from "react";
-import { Icon } from 'antd'
+import { Icon, message } from 'antd'
 import HttpApi from './HttpApi'
 import moment from 'moment';
+import { BROWERTYPE, NOTICEMUSICOPEN } from "./AppData";
+
+var storage = window.localStorage;
 
 /**
  * Tool 工具类 
@@ -479,4 +482,69 @@ export function getDuration(my_time, resultType = 1) {
     } else {
         return { daysRound, hoursRound, minutesRound }
     }
+}
+/**
+ * 最新bug 通知 提示音
+ */
+export function notifyMusicForNewBug(auto = null, playMusic = false, maxId, localStorageIndex, noticeLab = '有最新缺陷,请注意查看!') {
+    if (!auto) { return }
+    if (!storage[localStorageIndex]) { storage[localStorageIndex] = String(maxId) }///记录下此次的bugid;
+    if (storage.getItem(localStorageIndex) && parseInt(storage.getItem(localStorageIndex)) < maxId) {
+        message.info(noticeLab, 5);
+        try {
+            if (storage.getItem(BROWERTYPE) !== 'Safari' && playMusic) auto.play();
+        } catch (error) {
+            console.error(error)
+        }
+        storage[localStorageIndex] = String(maxId);///记录下此次最大的bugid;
+    }
+}
+
+export function BrowserType() {
+    let userAgent = navigator.userAgent; //取得浏览器的userAgent字符串
+    let isOpera = userAgent.indexOf("Opera") > -1; //判断是否Opera浏览器
+    let isIE = userAgent.indexOf("compatible") > -1
+        && userAgent.indexOf("MSIE") > -1 && !isOpera; //判断是否IE浏览器
+    let isEdge = userAgent.indexOf("Edge") > -1; //判断是否IE的Edge浏览器
+    let isFF = userAgent.indexOf("Firefox") > -1; //判断是否Firefox浏览器
+    let isSafari = userAgent.indexOf("Safari") > -1
+        && userAgent.indexOf("Chrome") === -1; //判断是否Safari浏览器
+    let isChrome = userAgent.indexOf("Chrome") > -1
+        && userAgent.indexOf("Safari") > -1; //判断Chrome浏览器
+    let browertype = '';
+    if (isIE) {
+        let reIE = new RegExp("MSIE (\\d+\\.\\d+);");
+        reIE.test(userAgent);
+        let fIEVersion = parseFloat(RegExp["$1"]);
+        if (fIEVersion === 7) {
+            browertype = "IE7";
+        } else if (fIEVersion === 8) {
+            browertype = "IE8";
+        } else if (fIEVersion === 9) {
+            browertype = "IE9";
+        } else if (fIEVersion === 10) {
+            browertype = "IE10";
+        } else if (fIEVersion === 11) {
+            browertype = "IE11";
+        } else {
+            browertype = "IE版本过低";
+        }//IE版本过低
+    }
+    if (isOpera) {
+        browertype = "Opera";
+    }
+    if (isEdge) {
+        browertype = "Edge";
+    }
+    if (isFF) {
+        browertype = "FF";
+    }
+    if (isSafari) {
+        browertype = "Safari";
+        storage[NOTICEMUSICOPEN] = false;
+    }
+    if (isChrome) {
+        browertype = "Chrome";
+    }
+    storage[BROWERTYPE] = browertype
 }
