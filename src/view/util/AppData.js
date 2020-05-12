@@ -21,9 +21,11 @@ export const NOTIFY_MP3 = 'http://60.174.196.158:12345/assets/notice.mp3'
 export const BUGLOOPTIME = 30000;///毫秒，缺陷模块每隔多少毫秒去刷新一次
 export const MAXBUGIDALL = 'MaxBugIdAll';
 export const MAXBUGIDMY = 'MaxBugIdMy';
+export const OLDBUGLISTFORRUN = 'oldBugListForList';
 export const USERINFO = 'userinfo';
 export const NOTICEINFO = 'noticeinfo';
-export const NOTICEMUSICOPEN = 'noticeMusicOpen';
+export const NOTICEMUSICOPEN = 'noticeMusicOpen';///一般情况下，所有权限和个人专业相关的权限共用一个开启提醒的开关标志位
+export const NOTICEMUSICOPENFORRUN = 'noticeMusicOpenForRun';///针对运行情况，独立的一个开启提醒的开关标志位
 export const BROWERTYPE = 'browerType';
 export const VersionlistData = [
     { title: '版本号', description: 'V 1.4.8.2 test' },

@@ -484,19 +484,58 @@ export function getDuration(my_time, resultType = 1) {
     }
 }
 /**
- * 最新bug 通知 提示音
+ *
+ *最新bug 通知 提示音
+ * @export
+ * @param {*} [auto=null] audo对象
+ * @param {boolean} [playMusic=false] 是否播放提示音
+ * @param {number} maxBug 最新缺陷id
+ * @param {string} localStorageIndex 要存储的localstorage的key
+ * @param {string} [noticeLab='有最新缺陷,请注意查看!'] message 文本
  */
-export function notifyMusicForNewBug(auto = null, playMusic = false, maxId, localStorageIndex, noticeLab = '有最新缺陷,请注意查看!') {
-    if (!auto) { return }
-    if (!storage[localStorageIndex]) { storage[localStorageIndex] = String(maxId) }///记录下此次的bugid;
+export function notifyMusicForNewBug(auto = null, playMusic = false, maxBug, localStorageIndex, noticeLab = '有最新缺陷,请注意查看!') {
+    if (!auto || !maxBug) { return }
+    let maxId = maxBug.id;
+    if (!storage.getItem(localStorageIndex) || !playMusic) { storage[localStorageIndex] = String(maxId) }///记录下此次的bugid;
     if (storage.getItem(localStorageIndex) && parseInt(storage.getItem(localStorageIndex)) < maxId) {
-        message.info(noticeLab, 5);
-        try {
-            if (storage.getItem(BROWERTYPE) !== 'Safari' && playMusic) auto.play();
-        } catch (error) {
-            console.error(error)
+        if (storage.getItem(BROWERTYPE) !== 'Safari' && playMusic) {
+            message.info(noticeLab, 5);
+            auto.play();
+            storage[localStorageIndex] = String(maxId)
         }
-        storage[localStorageIndex] = String(maxId);///记录下此次最大的bugid;
+    }
+}
+/**
+ *等待运行处理的缺陷列表中有新的出现
+ * @export
+ * @param {*} [auto=null] audo对象
+ * @param {boolean} [playMusic=false] 是否播放提示音
+ * @param {number[]} newlist 缺陷的id数组
+ * @param {string} localStorageIndex 要存储的localstorage的key
+ * @param {string} [noticeLab='有新缺陷等待运行验收,请注意查看!'] message 文本
+ */
+export function noticeForRunCheckList(auto = null, playMusic = false, newlist, localStorageIndex, noticeLab = '有新缺陷等待运行验收,请注意查看!') {
+    if (!auto || newlist.length === 0) { return }
+    newlist = newlist.map((item) => item.id)
+    // console.log('缓存中的数组:', storage.getItem(localStorageIndex))
+    // console.log('newlist:', JSON.stringify(newlist))
+    if (!storage.getItem(localStorageIndex) || !playMusic) { storage[localStorageIndex] = JSON.stringify(newlist) }///记录下此次的 缺陷的id数组
+    if (storage.getItem(localStorageIndex)) {
+        let oldlist = JSON.parse(storage.getItem(localStorageIndex));
+        let newExist = false; ///说明有最新的id存在于新的数组中。
+        newlist.forEach((newid) => {
+            if (oldlist.indexOf(newid) === -1) {
+                newExist = true
+            }
+        })
+        if (newExist) { ///说明有最新的id存在于新的数组中。
+            console.log('说明有最新的id不存在于老的数组中');
+            if (storage.getItem(BROWERTYPE) !== 'Safari' && playMusic) {
+                message.info(noticeLab, 5);
+                auto.play();
+                storage[localStorageIndex] = JSON.stringify(newlist)
+            }
+        }
     }
 }
 

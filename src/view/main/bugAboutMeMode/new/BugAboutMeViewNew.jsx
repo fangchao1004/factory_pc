@@ -57,6 +57,7 @@ export default class BugAboutMeViewNew extends Component {
     }
 
     init = async () => {
+        console.log('init BugAboutMeViewNew')
         currentTime = moment().toDate().getTime();
         status_filter.length = 0;
         major_filter.length = 0;
@@ -82,7 +83,8 @@ export default class BugAboutMeViewNew extends Component {
             this.setState({
                 data: finallyData,
             })
-            notifyMusicForNewBug(this._audio, storage.getItem(NOTICEMUSICOPEN) === 'true', finallyData[0].id, MAXBUGIDMY);
+            this.updateDataByRedux();
+            notifyMusicForNewBug(this._audio, storage.getItem(NOTICEMUSICOPEN) === 'true', finallyData[0], MAXBUGIDMY);
         }
     }
     autoFixHandler = (list) => {
@@ -318,6 +320,7 @@ export default class BugAboutMeViewNew extends Component {
                 dataIndex: 'id',
                 title: '编号',
                 align: 'center',
+                width: 100,
                 render: (text, record) => {
                     return <div>{text}</div>
                 }

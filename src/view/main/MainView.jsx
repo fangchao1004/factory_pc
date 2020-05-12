@@ -11,6 +11,7 @@ import TableModeRoot from './tableMode/TableModeRoot';
 import TaskModeRoot from './taskMode/TaskModeRoot'
 import BugModeRoot from './bugMode/BugModeRoot';
 import BugAboutMeModeRoot from './bugAboutMeMode/BugAboutMeModeRoot';
+import BugRunChecModekRoot from './bugRunCheckMode/BugRunChecModekRoot';
 import SettingViewRoot from './settingMode/SettingViewRoot';
 import TransactionModeRoot from './transactionMode/TransactionModeRoot';
 import CarModeRoot from './carMode/CarModeRoot'
@@ -44,6 +45,7 @@ export default class MainView extends Component {
             isAdmin: localUserInfo && JSON.parse(localUserInfo).isadmin === 1,
             aboutMeBugNum: 0,
             aboutMeTaskNum: 0,
+            runBugNum: 0,
         }
         tempNoticeStr = noticeinfo ? noticeinfo : ''///获取曾提醒过的最新内容。作为临时数据。
     }
@@ -52,7 +54,7 @@ export default class MainView extends Component {
         this.init();
         unsubscribe = Store.subscribe(() => {
             // console.log("获取store中的state:", Store.getState())
-            ////监听到 其他类中 利用redux派发的事件了
+            console.log('main init')
             this.init();
         });
         this.openPolling();///开启轮询---定时去获取缺陷了任务数据
@@ -60,60 +62,52 @@ export default class MainView extends Component {
     }
     init = async () => {
         BrowserType();
-        let bugResult = [];
-        if (JSON.parse(localUserInfo).major_id_all) {
-            bugResult = await this.getBugsInfo();
-        }
-        let taskResult = await this.getTaskInfo();
+        let bugLength = 0;
+        if (JSON.parse(localUserInfo).major_id_all) { bugLength = await this.getBugsLength(); }
+        let taskLength = await this.getTaskLength();
+        let runBugLength = await this.getRunBugLength();
         ///初始化的时候，就先获取所需数据，展示在导航栏处
         ////如果有变化 才刷新
-        if (this.state.aboutMeBugNum !== bugResult.length || this.state.aboutMeTaskNum !== taskResult.length) {
+        if (this.state.aboutMeBugNum !== bugLength || this.state.aboutMeTaskNum !== taskLength || this.state.runBugNum !== runBugLength) {
             console.log('有关我的-缺陷和任务数量有变化-刷新');
             setTimeout(() => {
                 this.setState({
-                    aboutMeBugNum: bugResult.length,
-                    aboutMeTaskNum: taskResult.length
+                    aboutMeBugNum: bugLength,
+                    aboutMeTaskNum: taskLength,
+                    runBugNum: runBugLength,
                 })
             }, 500);
         }
     }
-    getBugsInfo = () => {
+    getBugsLength = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,
-            area_1.name as area1_name,area_1.id as area1_id,
-            area_2.name as area2_name,area_2.id as area3_id,
-            area_3.name as area3_name,area_3.id as area3_id,
-            concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
-            tmp_freeze_table.freeze_id as bug_freeze_id,
-            tmp_freeze_table.freeze_des as bug_freeze_des
-            from bugs
-            left join (select * from devices where effective = 1) des on bugs.device_id = des.id
-            left join (select * from users where effective = 1) urs on bugs.user_id = urs.id
-            left join (select * from majors where effective = 1) mjs on bugs.major_id = mjs.id
-            left join (select * from area_3 where effective = 1) area_3 on des.area_id = area_3.id
-            left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
-            left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
-            left join (select t2.*,bug_tag_status.des as tag_des,bug_freeze_status.des as freeze_des 
-                       from (select bug_id,max(id) as max_id from bug_step_log where effective = 1 group by bug_id) t1
-                        left join (select * from bug_step_log where effective = 1) t2 on t2.id = t1.max_id
-                        left join (select * from bug_tag_status where effective = 1) bug_tag_status on bug_tag_status.id = t2.tag_id
-                        left join (select * from bug_freeze_status where effective = 1) bug_freeze_status on bug_freeze_status.id = t2.freeze_id
-                        ) tmp_freeze_table on tmp_freeze_table.bug_id = bugs.id
-            where bugs.status != 4 and bugs.major_id in (${ JSON.parse(localUserInfo).major_id_all}) and bugs.effective = 1 order by bugs.id desc`
+            let sql = `select count(*) count from bugs where bugs.status != 4 and bugs.major_id in (${JSON.parse(localUserInfo).major_id_all}) and bugs.effective = 1 `
             HttpApi.obs({ sql }, (res) => {
-                let result = [];
+                let result = 0;
                 if (res.data.code === 0) {
-                    result = res.data.data
+                    result = res.data.data[0].count
                 }
                 resolve(result);
             })
         })
     }
-    getTaskInfo() {
+    getRunBugLength = () => {
+        return new Promise((resolve, reject) => {
+            let sql = `select count(*) count from bugs where bugs.status = 3 and bugs.effective = 1 `
+            HttpApi.obs({ sql }, (res) => {
+                let result = 0;
+                if (res.data.code === 0) {
+                    result = res.data.data[0].count
+                }
+                resolve(result);
+            })
+        })
+    }
+    getTaskLength = () => {
         return new Promise((resolve, reject) => {
             HttpApi.getTaskInfo({ to: { $like: `%,${JSON.parse(localUserInfo).id},%` }, status: 0, effective: 1 }, data => {
                 if (data.data.code === 0) {
-                    resolve(data.data.data)
+                    resolve(data.data.data.length)
                 }
             })
         })
@@ -229,17 +223,23 @@ export default class MainView extends Component {
                             <span>
                                 <Icon type="reconciliation" />
                                 <span>缺陷</span>
-                                <Badge dot={this.state.aboutMeBugNum > 0} style={{ marginLeft: 30 }}>
-                                </Badge>
+                                <Badge dot={this.state.aboutMeBugNum > 0} style={{ marginLeft: 30 }} />
                             </span>
                         }>
                             <Menu.Item key="/mainView/bugAboutMe">
                                 <Icon type="hdd" />
-                                <span>与我相关</span>
-                                <Badge count={this.state.aboutMeBugNum} overflowCount={99} style={{ marginLeft: 35 }} >
-                                </Badge>
+                                <span>专业相关</span>
+                                <Badge count={this.state.aboutMeBugNum} overflowCount={99} style={{ marginLeft: 35 }} />
                                 <Link to={`${this.props.match.url}/bugAboutMe`} />
                             </Menu.Item>
+                            {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('1') !== -1 ?
+                                <Menu.Item key="/mainView/bugRunCheck">
+                                    <Icon type="hdd" />
+                                    <span>运行验收</span>
+                                    <Badge count={this.state.runBugNum} overflowCount={99} style={{ marginLeft: 35 }} />
+                                    <Link to={`${this.props.match.url}/bugRunCheck`} />
+                                </Menu.Item>
+                                : null}
                             <Menu.Item key="/mainView/bug">
                                 <Icon type="hdd" />
                                 <span>所有缺陷</span>
@@ -379,6 +379,11 @@ class ContentView extends Component {
                     exact
                     path={`${this.props.match.path}/bugAboutMe`}
                     component={() => (storage.getItem('userinfo') ? <BugAboutMeModeRoot /> : <Redirect to='/' />)}
+                />
+                <Route
+                    exact
+                    path={`${this.props.match.path}/bugRunCheck`}
+                    component={() => (storage.getItem('userinfo') ? <BugRunChecModekRoot /> : <Redirect to='/' />)}
                 />
                 <Route
                     path={`${this.props.match.path}/usersetting`}
