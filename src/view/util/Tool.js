@@ -459,28 +459,32 @@ export function substringBrackets(originStr) {
  * 获取时间区间
  * 毫秒--->天时分
  */
-export function getDuration(my_time, resultType = 1) {
+export function getDuration(my_time, resultType = 1, showSecond = true) {
     let days = my_time / (1000 * 60 * 60 * 24);
     let daysRound = Math.floor(days);
     let hours = my_time / 1000 / 60 / 60 - (24 * daysRound);
     let hoursRound = Math.floor(hours);
     let minutes = my_time / 1000 / 60 - (24 * 60 * daysRound) - (60 * hoursRound);
     let minutesRound = Math.floor(minutes);
-    // var seconds = my_time / 1000 - (24 * 60 * 60 * daysRound) - (60 * 60 * hoursRound) - (60 * minutesRound);
+    let seconds = my_time / 1000 - (24 * 60 * 60 * daysRound) - (60 * 60 * hoursRound) - (60 * minutesRound);
     // console.log('转换时间:', daysRound + '天', hoursRound + '时', minutesRound + '分', seconds + '秒');
-    let time;
+    // console.log('seconds:', parseInt(seconds))
+    let tempS = showSecond ? parseInt(seconds) + '秒' : ''
+    let tempM = minutesRound > 0 ? minutesRound + '分钟' : ''
+    let time = '/';
     if (daysRound > 0) {
         time = daysRound + '天' + hoursRound + '小时' + minutesRound + '分钟'
     } else if (hoursRound > 0) {
-        let temp = minutesRound > 0 ? minutesRound + '分钟' : ''
-        time = hoursRound + '小时' + temp
-    } else {
-        time = minutesRound + '分钟'
+        time = hoursRound + '小时' + tempM + tempS
+    } else if (hoursRound === 0 && minutesRound > 0) {
+        time = tempM + tempS
+    } else if (minutesRound === 0 && seconds > 0) {
+        time = tempS
     }
     if (resultType === 1) {
         return time;
     } else {
-        return { daysRound, hoursRound, minutesRound }
+        return { daysRound, hoursRound, minutesRound, seconds }
     }
 }
 /**

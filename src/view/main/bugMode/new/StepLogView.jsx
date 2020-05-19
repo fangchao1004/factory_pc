@@ -17,12 +17,18 @@ export default class StepLogView extends Component {
             record: {},
         }
     }
-    init = async (bugId) => {
-        let result = await this.getStepData(bugId);
-        let newList = [...this.state.stepList, ...result]; ///合并
+    init = async (param) => {
         this.setState({
-            stepList: newList
+            visible: param.visible,
         })
+        if (param.visible) {
+            let result = await this.getStepData(param.record.id);
+            let newList = [...param.firstStep, ...result]; ///合并
+            // console.log('newList:', newList)
+            this.setState({
+                stepList: newList
+            })
+        }
     }
     getStepData = (bugId) => {
         return new Promise((resolve, reject) => {
@@ -60,16 +66,9 @@ export default class StepLogView extends Component {
         })
     }
     componentWillReceiveProps(nextProps) {
-        this.setState({
-            record: nextProps.record,
-            visible: nextProps.visible,
-            stepList: [{ createdAt: nextProps.record.checkedAt, user_name: nextProps.record.user_name, tag_des: '上报缺陷' }] ///添加上上报缺陷的信息
-        }, () => {
-            if (nextProps.record.id && nextProps.visible) {
-                this.init(nextProps.record.id)
-            }
-        })
-
+        let firstStep = [{ createdAt: nextProps.record.checkedAt, user_name: nextProps.record.user_name, tag_des: '上报缺陷' }];
+        let param = { visible: nextProps.visible, record: nextProps.record, firstStep }
+        this.init(param);
     }
     changeNumToStr = (num) => {
         let str = '';
@@ -101,25 +100,32 @@ export default class StepLogView extends Component {
         this.state.stepList.forEach((item, index) => {
             let createdAtTime = moment(item.createdAt).toDate().getTime();
             let preCreatedAtTime = index > 0 ? moment(this.state.stepList[index - 1].createdAt).toDate().getTime() : 0
-            let duration = index > 0 ? this.state.stepList[index - 1].bug_next_status_duration : 0 ///设定时间
-            let color = 'green'
-            if (index > 0 && (createdAtTime - preCreatedAtTime) > duration) {
-                color = 'red'
-            }
+            // let duration = index > 0 ? this.state.stepList[index - 1].bug_next_status_duration : 0 ///设定时间
+            // let color = 'green'
+            // if (index > 0 && (createdAtTime - preCreatedAtTime) > duration) {
+            //     color = 'red'
+            // }
             resultList.push(<Timeline.Item key={index}>
-                <Tag color={'#1690FF'}>{item.createdAt}</Tag>
-                <Tag color={'#FF9900'} >{item.user_name}</Tag>
-                {item.tag_des ? <Tag color={'blue'}>{item.tag_des} {item.freeze_des ? '- ' + item.freeze_des : (item.major_name ? '- ' + item.major_name : '')}</Tag> : null}
-                {index > 0 && this.state.stepList[index - 1].bug_next_status === 3 ? <Tag color={color} >{"用时:" + getDuration(createdAtTime - preCreatedAtTime)}</Tag> : null}
-                <div>{item.imgs ? item.imgs.split(',').map((img, i) =>
-                    <img alt='' style={{ width: 50, height: 50, marginTop: 10, marginRight: 10 }} key={img} src={Testuri + 'get_jpg?uuid=' + img}
-                        onClick={() => {
-                            this.setState({ imguuid: img })
-                        }}
-                    />
-                )
-                    : ''}</div>
-                {item.remark ? <div style={{ color: '#FF9900', marginTop: item.imgs ? 5 : 10 }}>{'备注: ' + item.remark}</div> : ''}
+                <div style={{ backgroundColor: '' }}>
+                    <div>
+                        {index > 0 ? <Tag style={{ marginBottom: 8 }} color={'#d3adf7'}>{"耗时:" + getDuration(createdAtTime - preCreatedAtTime)}</Tag> : null}
+                    </div>
+                    <div>
+                        <Tag color={'#1690FF'}>{item.createdAt}</Tag>
+                        <Tag color={'#ff7a45'} >{item.user_name}</Tag>
+                        {item.tag_des ? <Tag color={'blue'}>{item.tag_des} {item.freeze_des ? '- ' + item.freeze_des : (item.major_name ? '- ' + item.major_name : '')}</Tag> : null}
+                    </div>
+                    {/* {index > 0 && this.state.stepList[index - 1].bug_next_status === 3 ? <Tag color={color} >{"用时:" + getDuration(createdAtTime - preCreatedAtTime)}</Tag> : null} */}
+                    <div>{item.imgs ? item.imgs.split(',').map((img, i) =>
+                        <img alt='' style={{ width: 50, height: 50, marginTop: 10, marginRight: 10 }} key={img} src={Testuri + 'get_jpg?uuid=' + img}
+                            onClick={() => {
+                                this.setState({ imguuid: img })
+                            }}
+                        />
+                    )
+                        : ''}</div>
+                    {item.remark ? <div style={{ color: '#FF9900', marginTop: item.imgs ? 5 : 10 }}>{'备注: ' + item.remark}</div> : ''}
+                </div>
             </Timeline.Item>)
         })
         return resultList;

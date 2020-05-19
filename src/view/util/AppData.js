@@ -18,7 +18,8 @@ export const tableCellOptionsData = [
     { "value": "6", "text": "图片选择器" }, { "value": "2", "text": "数字输入框" },
     { "value": "13", "text": "副标题" }];
 export const NOTIFY_MP3 = 'http://60.174.196.158:12345/assets/notice.mp3'
-export const BUGLOOPTIME = 30000;///毫秒，缺陷模块每隔多少毫秒去刷新一次
+export const BUGLOOPTIME = 1000;///毫秒，缺陷模块每隔1秒去刷新时间 不请求数据
+export const BUGDATAUPDATETIME = 10000;///毫秒，缺陷模块的数据和main模块中的徽标数每隔10秒去更新一次 请求数据
 export const MAXBUGIDALL = 'MaxBugIdAll';
 export const MAXBUGIDMY = 'MaxBugIdMy';
 export const OLDBUGLISTFORRUN = 'oldBugListForList';

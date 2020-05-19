@@ -8,7 +8,7 @@ import FuncPanelForRepair from '../../bugMode/new/FuncPanelForRepair';
 import StepLogView from '../../bugMode/new/StepLogView';
 import FuncPanelForEngineer from '../../bugMode/new/FuncPanelForEngineer';
 import FuncPanelForRunner from '../../bugMode/new/FuncPanelForRunner';
-import { originStatus, NOTIFY_MP3, BUGLOOPTIME, MAXBUGIDMY, NOTICEMUSICOPEN } from '../../../util/AppData'
+import { originStatus, NOTIFY_MP3, BUGLOOPTIME, MAXBUGIDMY, NOTICEMUSICOPEN, BUGDATAUPDATETIME } from '../../../util/AppData'
 import ShowImgView from '../../bugMode/ShowImgView';
 import { getDuration, notifyMusicForNewBug } from '../../../util/Tool';
 
@@ -22,7 +22,7 @@ var localUserInfo = '';
 var orignData = [];
 var time;
 var currentTime;
-
+var time2;
 export default class BugAboutMeViewNew extends Component {
     constructor(props) {
         super(props);
@@ -41,24 +41,31 @@ export default class BugAboutMeViewNew extends Component {
         }
     }
     componentDidMount() {
+        currentTime = moment().toDate().getTime();
         localUserInfo = storage.getItem('userinfo');
         this.init();
-        console.log('个人所有专业:', JSON.parse(localUserInfo).major_id_all)
+        this.initFilter();
+        // console.log('个人所有专业:', JSON.parse(localUserInfo).major_id_all)
         this.openPolling();
+        this.openPollingForData();
+    }
+    openPollingForData = () => {
+        time2 = setInterval(() => {
+            this.init();
+        }, BUGDATAUPDATETIME);////x秒轮询一次
     }
     openPolling = () => {
         time = setInterval(() => {
-            this.init();
+            currentTime = moment().toDate().getTime();
+            this.forceUpdate();
         }, BUGLOOPTIME);////x秒轮询一次
     }
     componentWillUnmount() {
         console.log('我的缺陷界面销毁')
         clearInterval(time);
+        clearInterval(time2);
     }
-
-    init = async () => {
-        console.log('init BugAboutMeViewNew')
-        currentTime = moment().toDate().getTime();
+    initFilter = async () => {
         status_filter.length = 0;
         major_filter.length = 0;
         uploader_filter.length = 0;
@@ -75,6 +82,9 @@ export default class BugAboutMeViewNew extends Component {
         })
         let uploaderData = await this.getUploaderInfo();
         uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
+    }
+    init = async () => {
+        console.log('init BugAboutMeViewNew')
         if (JSON.parse(localUserInfo).major_id_all) {
             let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
             finallyData.forEach((item) => { item.key = item.id })
@@ -87,6 +97,9 @@ export default class BugAboutMeViewNew extends Component {
             notifyMusicForNewBug(this._audio, storage.getItem(NOTICEMUSICOPEN) === 'true', finallyData[0], MAXBUGIDMY);
         }
     }
+    /**
+     * 自动维修-个人专业的缺陷
+     */
     autoFixHandler = (list) => {
         let user_id = JSON.parse(localUserInfo).id;
         let user_major_id = JSON.parse(localUserInfo).major_id_all;
@@ -487,9 +500,11 @@ export default class BugAboutMeViewNew extends Component {
                     }
                     let durationTime;
                     if (record.status === 0) {
-                        durationTime = currentTime - moment(record.createdAt).toDate().getTime()
+                        let temp1 = currentTime - moment(record.createdAt).toDate().getTime();
+                        durationTime = temp1 > 0 ? temp1 : 0
                     } else if (record.last_status_time) {
-                        durationTime = currentTime - moment(record.last_status_time).toDate().getTime()
+                        let temp2 = currentTime - moment(record.last_status_time).toDate().getTime();
+                        durationTime = temp2 > 0 ? temp2 : 0
                     }
                     let timeColor = 'green'
                     if (durationTime > record.duration_time && record.duration_time) { timeColor = 'red' }

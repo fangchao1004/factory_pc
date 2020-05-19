@@ -119,7 +119,7 @@ class AddBugView extends Component {
                             if (res.data.code === 0 && res.data.data.length > 0) {
                                 let useridList = res.data.data.map((item) => { return item.user_id })
                                 console.log('待推送useridList:', useridList)
-                                HttpApi.pushnotice({ user_id: useridList, title: '缺陷通知', text: '您有最新的相关缺陷,请注意查看' })
+                                // HttpApi.pushnotice({ user_id: useridList, title: '缺陷通知', text: '您有最新的相关缺陷,请注意查看' })
                             }
                         })
                     }

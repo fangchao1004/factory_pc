@@ -49,7 +49,7 @@ class BugDurationView extends Component {
             render: (text, record) => {
                 let result = '/'
                 if (text) {
-                    result = getDuration(text)
+                    result = getDuration(text, 1, false);
                 }
                 return <div>{result}</div>
             }

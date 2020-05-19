@@ -11,7 +11,7 @@ import FuncPanelForRepair from './FuncPanelForRepair';
 import StepLogView from './StepLogView';
 import FuncPanelForEngineer from './FuncPanelForEngineer';
 import FuncPanelForRunner from './FuncPanelForRunner';
-import { originStatus, NOTIFY_MP3, BUGLOOPTIME, MAXBUGIDALL, NOTICEMUSICOPEN, BROWERTYPE } from '../../../util/AppData'
+import { originStatus, NOTIFY_MP3, BUGLOOPTIME, MAXBUGIDALL, NOTICEMUSICOPEN, BROWERTYPE, BUGDATAUPDATETIME } from '../../../util/AppData'
 import ShowImgView from '../ShowImgView';
 import { getDuration, notifyMusicForNewBug } from '../../../util/Tool';
 
@@ -26,6 +26,7 @@ var localUserInfo = '';
 var orignData = [];
 var time;
 var currentTime;
+var time2;
 export default class BugViewNew extends Component {
     constructor(props) {
         super(props);
@@ -44,23 +45,31 @@ export default class BugViewNew extends Component {
         }
     }
     componentDidMount() {
-        this.init();
         localUserInfo = storage.getItem('userinfo');
+        currentTime = moment().toDate().getTime();
+        this.init();
+        this.initFilter();
         this.openPolling();
+        this.openPollingForData();
+    }
+    openPollingForData = () => {
+        time2 = setInterval(() => {
+            this.init();
+        }, BUGDATAUPDATETIME);////x秒轮询一次
     }
     openPolling = () => {
         time = setInterval(() => {
-            this.init();
+            // this.init();
+            currentTime = moment().toDate().getTime(); ///由于数据插入有时间差--为了防止出现当前时间戳比数据库的插入时间还早的情况--加5秒
+            this.forceUpdate();
         }, BUGLOOPTIME);////x秒轮询一次
     }
     componentWillUnmount() {
         console.log('所有缺陷界面销毁')
         clearInterval(time);
+        clearInterval(time2);
     }
-
-    init = async () => {
-        console.log('init BugViewNew')
-        currentTime = moment().add('second', 10).toDate().getTime(); ///由于数据插入有时间差--为了防止出现当前时间戳比数据库的插入时间还早的情况--加10秒
+    initFilter = async () => {
         status_filter.length = 0;
         major_filter.length = 0;
         uploader_filter.length = 0;
@@ -83,6 +92,10 @@ export default class BugViewNew extends Component {
         })
         let uploaderData = await this.getUploaderInfo();
         uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
+    }
+
+    init = async () => {
+        console.log('init BugViewNew')
         this.updateDataByRedux();
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
         finallyData.forEach((item) => { item.key = item.id })
@@ -90,7 +103,7 @@ export default class BugViewNew extends Component {
         this.setState({
             data: finallyData,
         })
-        notifyMusicForNewBug(this._audio, storage.getItem(NOTICEMUSICOPEN) === 'true', finallyData[0].id, MAXBUGIDALL);
+        notifyMusicForNewBug(this._audio, storage.getItem(NOTICEMUSICOPEN) === 'true', finallyData[0], MAXBUGIDALL);
     }
     /**
      * 查询上传者 去重
@@ -276,7 +289,6 @@ export default class BugViewNew extends Component {
             }
         })
     }
-
     deleteBugsHandler = (record) => {
         HttpApi.obs({ sql: `update bugs set effective = 0 where id = ${record.id} ` }, (res) => {
             if (res.data.code === 0) {
@@ -455,6 +467,7 @@ export default class BugViewNew extends Component {
                 width: 120,
                 onFilter: (value, record) => record.status === value || record.status + '-' + record.bug_freeze_id === value,
                 render: (text, record) => {
+                    // console.log('renderrenderrenderrenderrenderrender')
                     let str = '';
                     let color = '#AAAAAA'
                     switch (text) {
@@ -487,16 +500,18 @@ export default class BugViewNew extends Component {
                     }
                     let durationTime;
                     if (record.status === 0) {
-                        durationTime = currentTime - moment(record.createdAt).toDate().getTime()
+                        let temp1 = currentTime - moment(record.createdAt).toDate().getTime();
+                        durationTime = temp1 > 0 ? temp1 : 0
                     } else if (record.last_status_time) {
-                        durationTime = currentTime - moment(record.last_status_time).toDate().getTime()
+                        let temp2 = currentTime - moment(record.last_status_time).toDate().getTime();
+                        durationTime = temp2 > 0 ? temp2 : 0
                     }
                     let timeColor = 'green'
                     if (durationTime > record.duration_time && record.duration_time) { timeColor = 'red' }
                     return <div>
                         <Tag color={color}>{str}</Tag>
                         <br />
-                        {record.last_status_time && record.status !== 5 ? <Tag style={{ marginTop: 8 }} color={timeColor}>{getDuration(durationTime)}</Tag> : null}
+                        {record.last_status_time && record.status !== 5 ? <Tag style={{ marginTop: 8 }} color={timeColor}>{getDuration(durationTime, 1, true)}</Tag> : null}
                     </div>;
                 }
             },

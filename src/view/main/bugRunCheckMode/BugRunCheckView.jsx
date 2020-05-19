@@ -8,7 +8,7 @@ import FuncPanelForRepair from '../bugMode/new/FuncPanelForRepair';
 import StepLogView from '../bugMode/new/StepLogView';
 import FuncPanelForEngineer from '../bugMode/new/FuncPanelForEngineer';
 import FuncPanelForRunner from '../bugMode/new/FuncPanelForRunner';
-import { originStatus, NOTIFY_MP3, BUGLOOPTIME, BROWERTYPE, NOTICEMUSICOPENFORRUN, OLDBUGLISTFORRUN } from '../../util/AppData'
+import { originStatus, NOTIFY_MP3, BUGLOOPTIME, BROWERTYPE, NOTICEMUSICOPENFORRUN, OLDBUGLISTFORRUN, BUGDATAUPDATETIME } from '../../util/AppData'
 import { getDuration, noticeForRunCheckList } from '../../util/Tool';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
@@ -22,6 +22,7 @@ var localUserInfo = '';
 var orignData = [];
 var time;
 var currentTime;
+var time2;
 export default class BugRunCheckView extends Component {
     constructor(props) {
         super(props);
@@ -40,23 +41,30 @@ export default class BugRunCheckView extends Component {
         }
     }
     componentDidMount() {
-        this.init();
         localUserInfo = storage.getItem('userinfo');
+        currentTime = moment().toDate().getTime();
+        this.init();
+        this.initFilter();
         this.openPolling();
+        this.openPollingForData();
+    }
+    openPollingForData = () => {
+        time2 = setInterval(() => {
+            this.init();
+        }, BUGDATAUPDATETIME);////x秒轮询一次
     }
     openPolling = () => {
         time = setInterval(() => {
-            this.init();
+            currentTime = moment().toDate().getTime();
+            this.forceUpdate();
         }, BUGLOOPTIME);////x秒轮询一次
     }
     componentWillUnmount() {
-        console.log('所有缺陷界面销毁')
+        console.log('运行处理缺陷界面销毁')
         clearInterval(time);
+        clearInterval(time2);
     }
-
-    init = async () => {
-        console.log('init BugRunCheckView')
-        currentTime = moment().add('second', 10).toDate().getTime(); ///由于数据插入有时间差--为了防止出现当前时间戳比数据库的插入时间还早的情况--加10秒
+    initFilter = async () => {
         status_filter.length = 0;
         major_filter.length = 0;
         uploader_filter.length = 0;
@@ -79,6 +87,10 @@ export default class BugRunCheckView extends Component {
         })
         let uploaderData = await this.getUploaderInfo();
         uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
+    }
+
+    init = async () => {
+        console.log('init BugRunCheckView')
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
         this.updateDataByRedux();
         finallyData.forEach((item) => { item.key = item.id })

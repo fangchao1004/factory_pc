@@ -24,7 +24,7 @@ import UserMenuView from './userMenu/UserMenuView'
 import HttpApi from '../util/HttpApi';
 import Store from '../../redux/store/Store';
 // import Socket from '../socket/Socket'
-import { NOTICEINFO, BUGLOOPTIME } from '../util/AppData'
+import { NOTICEINFO, BUGDATAUPDATETIME } from '../util/AppData'
 import { BrowserType } from '../util/Tool';
 
 var storage = window.localStorage;
@@ -146,7 +146,7 @@ export default class MainView extends Component {
             // console.log('Polling');
             this.init();
             this.getLastNotice();
-        }, BUGLOOPTIME);////x秒轮询一次
+        }, BUGDATAUPDATETIME);////x秒轮询一次
     }
     componentWillUnmount() {
         clearInterval(time);
