@@ -55,14 +55,14 @@ export default class BugViewNew extends Component {
     openPollingForData = () => {
         time2 = setInterval(() => {
             this.init();
-        }, BUGDATAUPDATETIME);////x秒轮询一次
+        }, BUGDATAUPDATETIME);////10秒轮询一次
     }
     openPolling = () => {
         time = setInterval(() => {
             // this.init();
             currentTime = moment().toDate().getTime(); ///由于数据插入有时间差--为了防止出现当前时间戳比数据库的插入时间还早的情况--加5秒
             this.forceUpdate();
-        }, BUGLOOPTIME);////x秒轮询一次
+        }, BUGLOOPTIME);////1秒轮询一次
     }
     componentWillUnmount() {
         console.log('所有缺陷界面销毁')
@@ -470,7 +470,7 @@ export default class BugViewNew extends Component {
                 onFilter: (value, record) => record.status === value || record.status + '-' + record.bug_freeze_id === value,
                 render: (text, record) => {
                     let str = '';
-                    let color = '#AAAAAA'
+                    let color = record.status === 5 ? '#9254de' : 'blue'
                     switch (text) {
                         case 0:
                             str = '待维修'

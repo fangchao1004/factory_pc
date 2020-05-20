@@ -223,7 +223,7 @@ export default class MainView extends Component {
                             <span>
                                 <Icon type="reconciliation" />
                                 <span>缺陷</span>
-                                <Badge dot={this.state.aboutMeBugNum > 0} style={{ marginLeft: 30 }} />
+                                <Badge dot={this.state.aboutMeBugNum + this.state.runBugNum > 0} style={{ marginLeft: 30 }} />
                             </span>
                         }>
                             <Menu.Item key="/mainView/bugAboutMe">

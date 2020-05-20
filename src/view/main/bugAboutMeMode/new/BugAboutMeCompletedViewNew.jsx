@@ -292,7 +292,7 @@ export default class BugAboutMeCompletedViewNew extends Component {
                 width: 120,
                 render: (text, record) => {
                     let str = '完毕';
-                    let color = '#888888'
+                    let color = '#1890ff'
                     return <Tag color={color}>{str}</Tag>;
                 }
             },

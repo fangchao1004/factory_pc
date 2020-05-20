@@ -52,13 +52,13 @@ export default class BugAboutMeViewNew extends Component {
     openPollingForData = () => {
         time2 = setInterval(() => {
             this.init();
-        }, BUGDATAUPDATETIME);////x秒轮询一次
+        }, BUGDATAUPDATETIME);////10秒轮询一次
     }
     openPolling = () => {
         time = setInterval(() => {
             currentTime = moment().toDate().getTime();
             this.forceUpdate();
-        }, BUGLOOPTIME);////x秒轮询一次
+        }, BUGLOOPTIME);////1秒轮询一次
     }
     componentWillUnmount() {
         console.log('我的缺陷界面销毁')
@@ -471,7 +471,7 @@ export default class BugAboutMeViewNew extends Component {
                 onFilter: (value, record) => record.status === value || record.status + '-' + record.bug_freeze_id === value,
                 render: (text, record) => {
                     let str = '';
-                    let color = '#888888'
+                    let color = record.status === 5 ? '#9254de' : 'blue'
                     switch (text) {
                         case 0:
                             str = '待维修'
