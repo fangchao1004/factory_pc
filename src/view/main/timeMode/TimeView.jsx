@@ -303,11 +303,10 @@ class TimeView extends Component {
         ]
         return (
             <div>
-                <Alert type='info' message='拥有管理员权限可以编辑巡检点数量, 待检数: 经过方案筛选后的巡检点数量统计 ' />
+                <Alert style={{ marginBottom: 10 }} type='info' message='拥有管理员权限可以编辑巡检点数量, 待检数: 经过方案筛选后的巡检点数量统计 ' />
                 {this.state.isAdmin ?
-                    <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showAddModal: true }) }}>添加时间段</Button> : null}
+                    <Button type={'primary'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showAddModal: true }) }}>添加时间段</Button> : null}
                 <Table
-                    style={{ marginTop: 20 }}
                     loading={this.state.loading}
                     bordered
                     columns={columns}
