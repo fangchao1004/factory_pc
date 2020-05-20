@@ -1,6 +1,7 @@
 /**
  * 固定数据统一存放类
  */
+export const originOverTime = [{ text: '超时', value: 0 }, { text: '正常', value: 1 }];
 export const originStatus = [{ text: '待维修', value: 0 }, { text: '维修中', value: 1 },
 { text: '专工验收中', value: 2 }, { text: '运行验收中', value: 3 }, { text: '完毕', value: 4 }, { text: '申请转专业中', value: 6 }, { text: '申请挂起中', value: 7 }]///固定状态
 export const permisstion = [{ name: '专工权限', value: 0 }, { name: '运行权限', value: 1 }, { name: '消费审批权限', value: 2 }, { name: '维修权限', value: 3 }]

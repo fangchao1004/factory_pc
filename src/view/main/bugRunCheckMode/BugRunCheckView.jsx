@@ -8,8 +8,8 @@ import FuncPanelForRepair from '../bugMode/new/FuncPanelForRepair';
 import StepLogView from '../bugMode/new/StepLogView';
 import FuncPanelForEngineer from '../bugMode/new/FuncPanelForEngineer';
 import FuncPanelForRunner from '../bugMode/new/FuncPanelForRunner';
-import { originStatus, NOTIFY_MP3, BUGLOOPTIME, BROWERTYPE, NOTICEMUSICOPENFORRUN, OLDBUGLISTFORRUN, BUGDATAUPDATETIME } from '../../util/AppData'
-import { getDuration, noticeForRunCheckList } from '../../util/Tool';
+import { originStatus, NOTIFY_MP3, BUGLOOPTIME, BROWERTYPE, NOTICEMUSICOPENFORRUN, OLDBUGLISTFORRUN, BUGDATAUPDATETIME, originOverTime } from '../../util/AppData'
+import { getDuration, noticeForRunCheckList, checkOverTime } from '../../util/Tool';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
 var bug_type_filter = [];///用于筛选类别的数据 选项
@@ -308,7 +308,7 @@ export default class BugRunCheckView extends Component {
                 dataIndex: 'id',
                 title: '编号',
                 align: 'center',
-                width: 100,
+                width: 70,
                 render: (text, record) => {
                     return <div>{text}</div>
                 }
@@ -459,10 +459,8 @@ export default class BugRunCheckView extends Component {
             {
                 title: '缺陷状态',
                 dataIndex: 'status',
-                // filters: status_filter,
                 align: 'center',
-                width: 120,
-                // onFilter: (value, record) => record.status === value || record.status + '-' + record.bug_freeze_id === value,
+                width: 90,
                 render: (text, record) => {
                     let str = '';
                     let color = record.status === 5 ? '#9254de' : 'blue'
@@ -494,23 +492,39 @@ export default class BugRunCheckView extends Component {
                         default:
                             break;
                     }
-                    let durationTime;
-                    if (record.status === 0) {
-                        durationTime = currentTime - moment(record.createdAt).toDate().getTime()
-                    } else if (record.last_status_time) {
-                        durationTime = currentTime - moment(record.last_status_time).toDate().getTime()
+                    let result = checkOverTime(record, currentTime)
+                    let isOver = result.isOver;
+                    let durationTime = result.durationTime;
+                    let timeColor = isOver ? 'red' : 'green'
+                    return {
+                        children: <div>
+                            <Tag color={color}>{str}</Tag>
+                            <br />
+                            {record.last_status_time && record.status !== 5 ? <Tag style={{ marginTop: 8 }} color={timeColor}>{getDuration(durationTime, 1, true)}</Tag> : null}
+                        </div>,
+                        props: {
+                            colSpan: 2,
+                        }
                     }
-                    let timeColor = 'green'
-                    if (record.status < 2) { ///如果缺陷的状态处在2之前，即专工处理之前，那么就根据缺陷的等级来判断时间区间大小
-                        if (record.bld_duration_time && durationTime > record.bld_duration_time) { timeColor = 'red' }
-                    } else {
-                        if (record.bsd_duration_time && durationTime > record.bsd_duration_time) { timeColor = 'red' }
+                }
+            },
+            {
+                title: '用时',
+                dataIndex: 'over',
+                filters: originOverTime,
+                align: 'center',
+                width: 40,
+                onFilter: (value, record) => {
+                    let isOver = checkOverTime(record, currentTime).isOver
+                    let overValue = isOver ? 0 : 1;
+                    return overValue === value
+                },
+                render: () => {
+                    return {
+                        props: {
+                            colSpan: 0,
+                        }
                     }
-                    return <div>
-                        <Tag color={color}>{str}</Tag>
-                        <br />
-                        {record.last_status_time && record.status !== 5 ? <Tag style={{ marginTop: 8 }} color={timeColor}>{getDuration(durationTime)}</Tag> : null}
-                    </div>;
                 }
             },
             {
@@ -523,7 +537,6 @@ export default class BugRunCheckView extends Component {
                     // let fixable = majorHasFlag && (record.status < 2 || record.status === 6 || record.status === 7);
                     // let engable = majorHasFlag && (record.status < 3 || record.status > 4);
                     let runable = record.status === 3;
-
                     return <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <Button size="small" type="default" onClick={() => { this.setState({ stepLogVisible: true, currentRecord: record }) }}>处理记录</Button>
                         {/* {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('3') !== -1 ?

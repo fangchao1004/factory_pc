@@ -141,7 +141,7 @@ export default class BugAboutMeCompletedViewNew extends Component {
                 dataIndex: 'id',
                 title: '编号',
                 align: 'center',
-                width: 100,
+                width: 70,
                 render: (text, record) => {
                     return <div>{text}</div>
                 }

@@ -656,3 +656,21 @@ export function filterDevicesByDateScheme(deviceList, momentTarget) {
     }
     return resultList;
 }
+
+export function checkOverTime(record, currentTime) {
+    let durationTime;
+    if (record.status === 0) {
+        let temp1 = currentTime - moment(record.createdAt).toDate().getTime();
+        durationTime = temp1 > 0 ? temp1 : 0
+    } else if (record.last_status_time) {
+        let temp2 = currentTime - moment(record.last_status_time).toDate().getTime();
+        durationTime = temp2 > 0 ? temp2 : 0
+    }
+    let isOver = false
+    if (record.status < 2) { ///如果缺陷的状态处在2之前，即专工处理之前，那么就根据缺陷的等级来判断时间区间大小
+        if (record.bld_duration_time && durationTime > record.bld_duration_time) { isOver = true }
+    } else {
+        if (record.bsd_duration_time && durationTime > record.bsd_duration_time) { isOver = true }
+    }
+    return { isOver, durationTime };
+}
