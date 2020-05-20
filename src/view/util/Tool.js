@@ -3,9 +3,7 @@ import { Icon, message } from 'antd'
 import HttpApi from './HttpApi'
 import moment from 'moment';
 import { BROWERTYPE, NOTICEMUSICOPEN } from "./AppData";
-
 var storage = window.localStorage;
-
 /**
  * Tool 工具类 
  * 将可以重复利用的函数，或是代码量很大的函数进行封装
@@ -27,7 +25,6 @@ export function omitTextLength(text, targetlength) {
     }
     return result
 }
-
 /**
  *将数据库查询的 数据进行 三层结构转换
  *123级
@@ -94,7 +91,6 @@ export function transfromDataTo3level(area123result, all3 = true) {
     })
     return rootList;
 }
-
 /**
  *将数据库查询的 数据进行 二层结构转换
  *12级
@@ -134,7 +130,6 @@ export function transfromDataTo2level(area12result) {
     }
     return jsonList;
 }
-
 /**
  * 将三级区间结构数+巡检点信息之间进行绑定
  * 形成了4级结构
@@ -179,7 +174,6 @@ export function combinAreaAndDevice(level3List, devicesList) {
     })
     return level3List
 }
-
 /**
  *将多级数据+巡检点信息 形成的新的4级结构数据
  *渲染成对应的 4级树节点
@@ -211,7 +205,6 @@ export function renderTreeNodeListByData(dataList, TargetNode) {
     })
     return nodeList
 }
-
 function renderDevice(area3Item, TargetNode) {
     return area3Item.children.length > 0 ?
         area3Item.children.map(deviceItem => {
@@ -227,7 +220,6 @@ function renderDevice(area3Item, TargetNode) {
         })
         : null
 }
-
 /**
  *将recordlist的数据结构--转换成-采集数据的数组
  *
@@ -268,8 +260,6 @@ export function transfromDataToCollectionList(recordList) {
     }
     return tempList;
 }
-
-
 export function transfromDataToRunerAndGroupLeader(runnerList) {
     // console.log('runnerList:', runnerList);
     let groupLeaderList = [];///队长组
@@ -306,8 +296,6 @@ export function transfromDataToRunerAndGroupLeader(runnerList) {
     }]
     return treeData;
 }
-
-///
 export async function getAllowTime() {
     ///首先获取最新的 allow_time 表。因为要根据它来，指定分组的sql语句
     return new Promise((resolve, reject) => {
@@ -344,7 +332,6 @@ export async function getAllowTime() {
         })
     })
 }
-
 /**
  * 根据某个时间段去数据库查询-当前时间区间的巡检统计情况
  */
@@ -429,7 +416,6 @@ export function getTodayIsOdd(paramDate = moment().startOf('day').toDate()) {
     // console.log('天数：', duringDate)
     return isOdd;
 }
-
 /**
  * 截去括号里面的内容(或（
  */
@@ -542,7 +528,10 @@ export function noticeForRunCheckList(auto = null, playMusic = false, newlist, l
         }
     }
 }
-
+/**
+ *浏览器类型判断
+ * @export
+ */
 export function BrowserType() {
     let userAgent = navigator.userAgent; //取得浏览器的userAgent字符串
     let isOpera = userAgent.indexOf("Opera") > -1; //判断是否Opera浏览器
@@ -590,4 +579,80 @@ export function BrowserType() {
         browertype = "Chrome";
     }
     storage[BROWERTYPE] = browertype
+}
+/**
+ *根据开始和结束时间，和设备id
+ *对record巡检记录进行查询
+ * @export
+ */
+export function getRecordInfoByStartEndTimeAndDevices(record) {
+    let sql = `select records.*,users.name as user_name,devices.name as device_name,
+    concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name
+    from records
+    left join (select * from users where effective = 1) users on users.id = records.user_id
+    left join (select * from devices where effective = 1) devices on devices.id = records.device_id
+    left join (select * from area_3 where effective = 1) area_3 on area_3.id = devices.area_id
+    left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
+    left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
+    where checkedAt>'${record.bt}' and checkedAt<'${record.et}' and records.effective = 1
+    and device_id in (${record.select_map_device})
+    order by records.checkedAt desc
+    `;
+    return new Promise((resolve, reject) => {
+        HttpApi.obs({ sql }, (res) => {
+            let result = [];
+            if (res.data.code === 0) {
+                result = res.data.data
+            }
+            resolve(result);
+        })
+    })
+}
+/**
+ *根据设备id
+ *获取设备信息
+ * @export
+ */
+export function getDevicesInfoByIdListStr(record) {
+    return new Promise((resolve, reject) => {
+        let sql = `select devices.*,group_concat(distinct date_value) as date_value_list,group_concat(distinct title) as scheme_title,group_concat(distinct scheme_of_cycleDate.id) as sche_cyc_id,group_concat(distinct scheme_of_cycleDate.cycleDate_id) as cycleDate_id from devices
+        left join (select * from sche_cyc_map_device where effective = 1) sche_cyc_map_device on sche_cyc_map_device.device_id = devices.id
+        left join (select * from scheme_of_cycleDate where effective = 1) scheme_of_cycleDate on scheme_of_cycleDate.id = sche_cyc_map_device.scheme_id
+        left join (select * from sche_cyc_map_date where effective = 1) sche_cyc_map_date on sche_cyc_map_date.scheme_id = sche_cyc_map_device.scheme_id
+        where devices.effective = 1 and devices.id in (${record.select_map_device})
+        group by devices.id`
+        let result = []
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                result = res.data.data;
+            }
+            resolve(result);
+        })
+    })
+}
+/**
+ *根据方案筛选设备点
+ * @export
+ * @param {*} deviceList
+ * @param {*} momentTarget
+ * @returns
+ */
+export function filterDevicesByDateScheme(deviceList, momentTarget) {
+    let todayDateNum = momentTarget.toDate().getDate();///多少号
+    let todayDayNum = momentTarget.toDate().getDay() === 0 ? 7 : momentTarget.toDate().getDay();///周几
+    // console.log('todayDateNum:', todayDateNum, 'todayDayNum:', todayDayNum)
+    let resultList = [];
+    if (deviceList) {
+        deviceList.forEach((item) => {
+            if (item.date_value_list && item.sche_cyc_id && item.cycleDate_id) {
+                if ((String(item.cycleDate_id) === "1" && item.date_value_list.split(',').indexOf(String(todayDayNum)) !== -1)
+                    || (String(item.cycleDate_id) === "2" && item.date_value_list.split(',').indexOf(String(todayDateNum)) !== -1)) { ///当
+                    resultList.push(item);
+                }
+            } else {
+                resultList.push(item);
+            }
+        })
+    }
+    return resultList;
 }

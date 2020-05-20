@@ -3,6 +3,7 @@ import { Drawer, Table, Button, Tag, message } from 'antd'
 import HttpApi from '../../util/HttpApi';
 import OneDeviceRecordListView from './OneDeviceRecordListView';
 import ChangeDeviceBindDateScheme from './ChangeDeviceBindDateScheme';
+import { getDevicesInfoByIdListStr, getRecordInfoByStartEndTimeAndDevices } from '../../util/Tool';
 
 /**
  * 某个时间段内所有的巡检记录界面
@@ -75,9 +76,8 @@ class RecordDetailByTime extends Component {
         }
     }
     getInfoHandler = async (data) => {
-        let devicesResult = await this.getDevicesInfo(data.select_map_device);
-        // console.log('data.select_map_device:', data.select_map_device)
-        let recordsResult = await this.getRecordInfo(data);
+        let devicesResult = await getDevicesInfoByIdListStr(data);
+        let recordsResult = await getRecordInfoByStartEndTimeAndDevices(data);
         devicesResult.forEach((deviceItem) => {
             deviceItem.recordList = [];
             recordsResult.forEach((recordItem) => {
@@ -86,7 +86,6 @@ class RecordDetailByTime extends Component {
                 }
             })
         })
-        // console.log('devicesResult:', devicesResult)
         this.setState({
             devicesList: devicesResult.map((item, index) => { item.key = index + ''; return item })
         })
@@ -121,50 +120,6 @@ class RecordDetailByTime extends Component {
             else { message.error('解除方案失败'); }
         })
     }
-    getRecordInfo = (record) => {
-        let sql = `select records.*,users.name as user_name,devices.name as device_name,
-        concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name
-        from records
-        left join (select * from users where effective = 1) users on users.id = records.user_id
-        left join (select * from devices where effective = 1) devices on devices.id = records.device_id
-        left join (select * from area_3 where effective = 1) area_3 on area_3.id = devices.area_id
-        left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
-        left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
-        where checkedAt>'${record.bt}' and checkedAt<'${record.et}' and records.effective = 1
-        and device_id in (${record.select_map_device})
-        order by records.checkedAt desc
-        `;
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
-    getDevicesInfo = (devicesIdListStr) => {
-        return new Promise((resolve, reject) => {
-            // let sql = `select devices.* from devices
-            // where devices.effective = 1 and devices.id in (${devicesIdListStr})
-            // `
-            let sql = `select devices.*,group_concat(distinct date_value) as date_value_list,group_concat(distinct title) as scheme_title,group_concat(distinct scheme_of_cycleDate.id) as sche_cyc_id,group_concat(distinct scheme_of_cycleDate.cycleDate_id) as cycleDate_id from devices
-            left join (select * from sche_cyc_map_device where effective = 1) sche_cyc_map_device on sche_cyc_map_device.device_id = devices.id
-            left join (select * from scheme_of_cycleDate where effective = 1) scheme_of_cycleDate on scheme_of_cycleDate.id = sche_cyc_map_device.scheme_id
-            left join (select * from sche_cyc_map_date where effective = 1) sche_cyc_map_date on sche_cyc_map_date.scheme_id = sche_cyc_map_device.scheme_id
-            where devices.effective = 1 and devices.id in (${devicesIdListStr})
-            group by devices.id`
-            let result = []
-            HttpApi.obs({ sql }, (res) => {
-                if (res.data.code === 0) {
-                    result = res.data.data;
-                }
-                resolve(result);
-            })
-        })
-    }
-
     render() {
         return (
             <Drawer

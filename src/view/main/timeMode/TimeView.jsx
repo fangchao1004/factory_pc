@@ -1,9 +1,9 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Button, TreeSelect, message, DatePicker, Popconfirm, Tag } from 'antd';
+import { Table, Button, TreeSelect, message, DatePicker, Popconfirm, Tag, Alert } from 'antd';
 import moment from 'moment';
 import HttpApi from '../../util/HttpApi';
 import RecordDetailByTime from './RecordDetailByTime';
-import { transfromDataTo3level, combinAreaAndDevice, renderTreeNodeListByData, getTodayIsOdd } from '../../util/Tool'
+import { transfromDataTo3level, combinAreaAndDevice, renderTreeNodeListByData, getDevicesInfoByIdListStr, filterDevicesByDateScheme } from '../../util/Tool'
 import UpdateTimeView from './UpdateTimeView';
 import AddTimeView from './AddTimeView';
 const { TreeNode } = TreeSelect;
@@ -19,6 +19,7 @@ class TimeView extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            loading: false,
             dataSource: [],
             showDrawer: false,
             showUpdateModal: false,
@@ -30,17 +31,9 @@ class TimeView extends Component {
         }
     }
     componentDidMount() {
-        let isOdd = getTodayIsOdd();
-        ///如果是奇数天，这选项卡中就显示和操作 allow_time 表，偶数天就显示和操作 allow_time2 表
-        this.exchangeSearhTarget(isOdd);
-        this.init();
-    }
-    exchangeSearhTarget = (isOdd) => {
-        // allow_time_name = isOdd ? 'allow_time' : 'allow_time2'
-        // allowTime_map_device_name = isOdd ? 'allowTime_map_device' : 'allowTime_map_device2'
         allow_time_name = "allow_time"
         allowTime_map_device_name = "allowTime_map_device"
-        // console.log('当前：', allow_time_name, allowTime_map_device_name)
+        this.init();
     }
     closeHandler = () => {
         this.setState({
@@ -48,6 +41,7 @@ class TimeView extends Component {
         })
     }
     init = async () => {
+        this.setState({ loading: true })
         let result = await this.getAllowTimeInfo();
         this.getInfoAndChangeData(result);
         let resultArea123 = await this.getArea123Info();
@@ -112,11 +106,17 @@ class TimeView extends Component {
             element.bt = beginTime;
             element.et = endTime;
             let result = await this.getCountInfoFromDB(element);
+            // console.log('result:', result)
             element.actually = result[0] ? result[0].actu_count : '/';
             element.checkMan = result[0] ? result[0].users_name : '/'
+
+            let devicesResult = await getDevicesInfoByIdListStr(element);
+            let listAfterFilter = filterDevicesByDateScheme(devicesResult, this.state.selectTime);
+            element.afterFilter = listAfterFilter.length;
         }
         this.setState({
-            dataSource: resultList.map((item, index) => { item.key = index + ''; return item })
+            loading: false,
+            dataSource: resultList.map((item, index) => { item.key = index; return item })
         })
     }
 
@@ -219,8 +219,6 @@ class TimeView extends Component {
                 title: <div><span style={{ marginRight: 10 }}>日期选择</span> <DatePicker disabledDate={this.disabledDate} value={this.state.selectTime} onChange={(v) => {
                     if (v) {
                         this.setState({ selectTime: v }, () => {
-                            let isOdd = getTodayIsOdd(v.startOf('day').toDate());
-                            this.exchangeSearhTarget(isOdd);
                             this.init()
                         })
                     } else { message.warn('请选择日期'); }
@@ -233,8 +231,9 @@ class TimeView extends Component {
                 }
             },
             {
-                title: `应检测巡检点数量${this.state.isAdmin === 1 ? '(可编辑)' : ''}`,
+                title: `巡检点数量${this.state.isAdmin === 1 ? '(可编辑)' : ''}`,
                 dataIndex: 'select_map_device',
+                align: 'center',
                 render: (text, record) => {
                     return <div style={{ display: 'flex', flexDirction: 'row', justifyContent: 'space-around' }}>
                         <TreeSelect
@@ -253,20 +252,32 @@ class TimeView extends Component {
                         >
                             {this.state.treeNodeList}
                         </TreeSelect>
-                        <Tag color='blue' style={{ alignSelf: "center" }}>{record.need_count}</Tag>
+                        <Tag color='blue' style={{ alignSelf: "center", marginLeft: 15 }}>共{record.need_count}</Tag>
                     </div>;
                 }
             },
             {
-                title: '实际有效巡检数',
+                title: '待检数',
+                dataIndex: 'afterFilter',
+                width: 80,
+                align: 'center'
+            },
+            {
+                title: '实检数',
                 dataIndex: 'actually',
+                width: 80,
+                align: 'center'
             },
             {
                 title: '巡检人员',
                 dataIndex: 'checkMan',
+                width: 120,
+                align: 'center'
             }, {
                 title: '操作',
                 dataIndex: 'actions',
+                width: 100,
+                align: 'center',
                 render: (text, record) => (
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <Button size="small" type="primary" onClick={() => {
@@ -292,9 +303,12 @@ class TimeView extends Component {
         ]
         return (
             <div>
+                <Alert type='info' message='拥有管理员权限可以编辑巡检点数量, 待检数: 经过方案筛选后的巡检点数量统计 ' />
                 {this.state.isAdmin ?
                     <Button type={'primary'} style={{ marginBottom: 20 }} onClick={() => { this.setState({ showAddModal: true }) }}>添加时间段</Button> : null}
                 <Table
+                    style={{ marginTop: 20 }}
+                    loading={this.state.loading}
                     bordered
                     columns={columns}
                     dataSource={dataSource}
