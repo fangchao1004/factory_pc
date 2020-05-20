@@ -173,14 +173,14 @@ export default class MainView extends Component {
     render() {
         return (
             <Layout style={{ minHeight: '100vh' }}>
-                <Sider collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse} trigger={null} width={255}>
+                <Sider collapsible collapsed={this.state.collapsed} trigger={null} width={255} style={{ overflow: 'auto', height: '100vh', position: 'fixed', left: 0 }}>
                     <div style={{ height: 64, background: 'rgba(8,32,61,1)', padding: '16 24', position: 'relative' }}>
                         <img src={logopng} alt="" width="32" height="32" style={{ position: 'absolute', left: 24, top: 16 }} />
                         {this.state.collapsed ? null :
                             <span style={{ position: 'absolute', top: 18, left: 60, width: 180, color: '#fff', fontSize: 17, marginLeft: 20 }}>信息综合管理平台</span>
                         }
                     </div>
-                    <Menu theme="dark" mode="inline" selectedKeys={[this.props.location.pathname]}>
+                    <Menu theme="dark" mode="inline" selectedKeys={[this.props.location.pathname]} >
                         <Menu.Item key="/mainView">
                             <Icon type="home" />
                             <span>首页</span>
@@ -303,19 +303,16 @@ export default class MainView extends Component {
                         </SubMenu>
                     </Menu>
                 </Sider>
-                <Layout>
-                    <Header style={{ background: '#fff', padding: 0, borderBottomStyle: 'solid', borderBottomWidth: 1, borderBottomColor: '#e8e8e8' }}>
+                <Layout style={{ marginLeft: this.state.collapsed ? 80 : 255 }}>
+                    <Header style={{ position: 'fixed', zIndex: 1, width: `calc(100% - ${this.state.collapsed ? 80 : 255}px)`, background: '#fff', padding: 0, borderBottomStyle: 'solid', borderBottomWidth: 1, borderBottomColor: '#e8e8e8' }}>
                         <Row>
                             <Col span={2}>
                                 <Icon className="trigger" style={{ fontSize: 24, marginLeft: 30 }} type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'} onClick={this.toggle} />
                             </Col>
                             <Col span={22} style={{ textAlign: 'right', paddingRight: 24 }}>
                                 <Popover width={200} placement="bottomRight" trigger="click"
-                                    title={storage.getItem('userinfo') ? "用户名: " + JSON.parse(storage.getItem('userinfo')).username + "(" + JSON.parse(storage.getItem('userinfo')).name + ")" :
-                                        "不存在"}
-                                    content={
-                                        <UserMenuView />
-                                    }>
+                                    title={localUserInfo ? "用户名: " + JSON.parse(localUserInfo).username + "(" + JSON.parse(localUserInfo).name + ")" : "不存在"}
+                                    content={<UserMenuView />}>
                                     <Icon type="user" style={{ fontSize: 24 }} />
                                 </Popover>
                             </Col>
@@ -333,7 +330,7 @@ class ContentView extends Component {
         return false ///目的是让 MainView中重新渲染时，ContentView 始终不会被重复渲染
     }
     render() {
-        return <Content style={{ background: '#fff', minHeight: 280, height: '100%' }}>
+        return <Content style={{ background: '#fff', minHeight: 280, marginTop: 64 }}>
             <section>
                 <Route
                     exact
