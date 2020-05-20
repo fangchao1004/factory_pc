@@ -14,8 +14,23 @@ class BugDurationView extends Component {
     }
     init = async () => {
         let result = await this.getBugStatusDuration();
+        let result2 = await this.getBugLevelDuration();
         this.setState({
-            dataSource: result.map((item, index) => { item.key = index; return item })
+            dataSource: [...result2, ...result].map((item, index) => {
+                item.key = index;
+                item.lab = item.level_name || item.status_name
+                return item
+            })
+        })
+    }
+    getBugLevelDuration = () => {
+        let sql = `select * from bug_level_duration where effective = 1`
+        return new Promise((resolve, reject) => {
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) { result = res.data.data }
+                resolve(result);
+            })
         })
     }
     getBugStatusDuration = () => {
@@ -29,10 +44,10 @@ class BugDurationView extends Component {
         })
     }
     okHandler = (value) => {
-        // console.log('okHandler:', value)
+        let table_name = this.state.currentRecord.status_name ? 'bug_status_duration' : 'bug_level_duration'
         let ms = (value.day * 24 * 60 * 60 + value.hour * 60 * 60 + value.minute * 60) * 1000
         let param = ms > 0 ? ms : null;
-        let sql = `update bug_status_duration set duration_time = ${param} where id = ${this.state.currentRecord.id}`
+        let sql = `update ${table_name} set duration_time = ${param} where id = ${this.state.currentRecord.id}`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) { message.success('修改时间区间成功'); this.init() } else { message.warn('修改时间区间失败') }
         })
@@ -41,8 +56,8 @@ class BugDurationView extends Component {
 
     render() {
         const columns = [{
-            title: '名称',
-            dataIndex: 'status_name'
+            title: '对应缺陷等级或状态',
+            dataIndex: 'lab',
         }, {
             title: '时间区间',
             dataIndex: 'duration_time',
@@ -55,8 +70,9 @@ class BugDurationView extends Component {
             }
         }, {
             title: '操作',
-            width: 80,
+            width: 100,
             dataIndex: 'actions',
+            align: 'center',
             render: (text, record) => {
                 return <Button size='small' type='primary' onClick={() => {
                     this.setState({ currentRecord: record, updateVisible: true })
@@ -66,8 +82,7 @@ class BugDurationView extends Component {
         return (
             <div>
                 <Alert message={
-                    <div>此数据只用于判断当前时刻与缺陷的上一状态记录时刻的差值是否超出，<span style={{ color: '#1790FF' }}>如超出则标红于缺陷表单中</span>，如不设置则不会标红；
-                    <span style={{ color: '#1790FF' }}>缺陷处理记录中只判断运行验收用时</span>是否超出</div>
+                    <div>此数据只用于判断当前时刻与缺陷的上一状态记录时刻的差值是否超出, <span style={{ color: '#1790FF' }}>如超出则标红于缺陷表单中</span></div>
                 } type="info" showIcon />
                 <Table
                     style={{ marginTop: 20 }}

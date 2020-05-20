@@ -189,8 +189,10 @@ export default class BugRunCheckView extends Component {
             tmp_freeze_table.freeze_des as bug_freeze_des,
             tmp_freeze_table.major_id as bug_step_major_id,
             tmp_freeze_table.tag_id as bug_step_tag_id,
-            bsd.duration_time
+            bsd.duration_time as bsd_duration_time,
+            bld.duration_time as bld_duration_time
             from bugs
+            left join (select * from bug_level_duration where effective = 1) bld on bld.level_value = bugs.buglevel
             left join (select * from bug_status_duration where effective = 1) bsd on bsd.status = bugs.status
             left join (select * from devices where effective = 1) des on bugs.device_id = des.id
             left join (select * from users where effective = 1) urs on bugs.user_id = urs.id
@@ -499,7 +501,11 @@ export default class BugRunCheckView extends Component {
                         durationTime = currentTime - moment(record.last_status_time).toDate().getTime()
                     }
                     let timeColor = 'green'
-                    if (durationTime > record.duration_time && record.duration_time) { timeColor = 'red' }
+                    if (record.status < 2) { ///如果缺陷的状态处在2之前，即专工处理之前，那么就根据缺陷的等级来判断时间区间大小
+                        if (record.bld_duration_time && durationTime > record.bld_duration_time) { timeColor = 'red' }
+                    } else {
+                        if (record.bsd_duration_time && durationTime > record.bsd_duration_time) { timeColor = 'red' }
+                    }
                     return <div>
                         <Tag color={color}>{str}</Tag>
                         <br />
