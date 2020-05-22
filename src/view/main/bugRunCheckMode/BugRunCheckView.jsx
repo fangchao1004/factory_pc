@@ -8,7 +8,7 @@ import FuncPanelForRepair from '../bugMode/new/FuncPanelForRepair';
 import StepLogView from '../bugMode/new/StepLogView';
 import FuncPanelForEngineer from '../bugMode/new/FuncPanelForEngineer';
 import FuncPanelForRunner from '../bugMode/new/FuncPanelForRunner';
-import { originStatus, NOTIFY_MP3, BUGLOOPTIME, BROWERTYPE, NOTICEMUSICOPENFORRUN, OLDBUGLISTFORRUN, BUGDATAUPDATETIME, originOverTime } from '../../util/AppData'
+import { originStatus, NOTIFY_MP3, BUGLOOPTIME, BROWERTYPE, NOTICEMUSICOPENFORRUN, OLDRUNBUGIDLIST, BUGDATAUPDATETIME, originOverTime } from '../../util/AppData'
 import { getDuration, noticeForRunCheckList, checkOverTime } from '../../util/Tool';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
@@ -98,7 +98,7 @@ export default class BugRunCheckView extends Component {
         this.setState({
             data: finallyData,
         })
-        noticeForRunCheckList(this._audio, storage.getItem(NOTICEMUSICOPENFORRUN) === 'true', finallyData, OLDBUGLISTFORRUN);
+        noticeForRunCheckList(this._audio, storage.getItem(NOTICEMUSICOPENFORRUN) === 'true', finallyData, OLDRUNBUGIDLIST);
     }
     /**
      * 查询上传者 去重

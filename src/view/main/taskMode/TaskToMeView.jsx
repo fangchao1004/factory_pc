@@ -6,6 +6,7 @@ import moment from 'moment'
 import Store from '../../../redux/store/Store';
 import { showTaskNum } from '../../../redux/actions/TaskAction';
 import { getDuration } from '../../util/Tool';
+import { MAXTASKIDMY } from '../../util/AppData';
 
 var storage = window.localStorage;
 var userinfo;
@@ -36,7 +37,7 @@ class TaskToMeView extends Component {
         let finallyTasksData = tasksData.map(user => {
             user.key = user.id
             return user
-        }).reverse();
+        });
         if (this.state.updateTaskVisible) {///如果当前更新界面已经显示
             let newRecordAfterUpdateStepRemak = tasksData[this.state.lastTimeSelectIndex];
             this.setState({ updateTaskData: newRecordAfterUpdateStepRemak });
@@ -45,10 +46,11 @@ class TaskToMeView extends Component {
             tasks: finallyTasksData,
             users: usersData
         })
+        storage[MAXTASKIDMY] = tasksData[0].id || 0 ///更新缓存中的最大任务id
     }
     getTaskInfo() {
         return new Promise((resolve, reject) => {
-            let sql = `select * from tasks where tasks.to like '%,${userinfo.id},%' and effective = 1 order by id desc`;
+            let sql = `select * from tasks where tasks.to like '%,${userinfo.id},%' and effective = 1 order by id DESC`;
             HttpApi.obs({ sql }, (data) => {
                 let result = [];
                 if (data.data.code === 0) {

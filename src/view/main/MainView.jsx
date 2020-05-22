@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, Menu, Icon, Row, Col, Popover, Button, Badge, notification } from 'antd'
+import { Layout, Menu, Icon, Row, Col, Popover, Button, Badge, notification, Avatar } from 'antd'
 import { Route, Link, Redirect } from 'react-router-dom'
 import logopng from '../../assets/logo.png'
 import HomePageRoot from './homePageMode/HomePageRoot';
@@ -25,7 +25,8 @@ import HttpApi from '../util/HttpApi';
 import Store from '../../redux/store/Store';
 // import Socket from '../socket/Socket'
 import { NOTICEINFO, BUGDATAUPDATETIME } from '../util/AppData'
-import { BrowserType } from '../util/Tool';
+import { BrowserType, checkBugTaskDataIsNew } from '../util/Tool';
+import NoticeMenu from './noticeMenu/NoticeMenu';
 
 var storage = window.localStorage;
 const { Header, Content, Sider } = Layout;
@@ -46,6 +47,8 @@ export default class MainView extends Component {
             aboutMeBugNum: 0,
             aboutMeTaskNum: 0,
             runBugNum: 0,
+            noticeMenuData: [],
+            dotCount: 0,
         }
         tempNoticeStr = noticeinfo ? noticeinfo : ''///获取曾提醒过的最新内容。作为临时数据。
     }
@@ -62,53 +65,71 @@ export default class MainView extends Component {
     }
     init = async () => {
         BrowserType();
-        let bugLength = 0;
-        if (JSON.parse(localUserInfo).major_id_all) { bugLength = await this.getBugsLength(); }
-        let taskLength = await this.getTaskLength();
-        let runBugLength = await this.getRunBugLength();
+        let myBugLength = 0;
+        let myMaxBugId = 0;
+        let runBugLength = 0;
+        let RunBugIdList = [];
+
+        let taskList = await this.getTaskInfo();
+        let maxTaskId = taskList.length > 0 ? taskList[taskList.length - 1].id : 0;
+        let taskLength = taskList.length;
+
+        if (JSON.parse(localUserInfo).major_id_all) {
+            let myBugList = await this.getMyBugsInfo();
+            myMaxBugId = myBugList.length > 0 ? myBugList[myBugList.length - 1].id : 0;
+            myBugLength = myBugList.length;
+        }
+        if (JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('1') !== -1) {
+            let runBugList = await this.getRunBugsInfo();
+            RunBugIdList = runBugList.length > 0 ? runBugList.map((item) => item.id) : [];
+            runBugLength = runBugList.length;
+        }
+        let taskRunMajorBugResult = checkBugTaskDataIsNew({ maxTaskId, myMaxBugId, RunBugIdList });
+        // console.log('taskRunMajorBugResult:', taskRunMajorBugResult)
+        this.setState({ noticeMenuData: taskRunMajorBugResult.detail, dotCount: taskRunMajorBugResult.count })
         ///初始化的时候，就先获取所需数据，展示在导航栏处
         ////如果有变化 才刷新
-        if (this.state.aboutMeBugNum !== bugLength || this.state.aboutMeTaskNum !== taskLength || this.state.runBugNum !== runBugLength) {
+        if (this.state.aboutMeBugNum !== myBugLength || this.state.aboutMeTaskNum !== taskLength || this.state.runBugNum !== runBugLength) {
             console.log('有关我的-缺陷和任务数量有变化-刷新');
             setTimeout(() => {
                 this.setState({
-                    aboutMeBugNum: bugLength,
+                    aboutMeBugNum: myBugLength,
                     aboutMeTaskNum: taskLength,
                     runBugNum: runBugLength,
                 })
             }, 500);
         }
     }
-    getBugsLength = () => {
+    getMyBugsInfo = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select count(*) count from bugs where bugs.status != 4 and bugs.major_id in (${JSON.parse(localUserInfo).major_id_all}) and bugs.effective = 1 `
+            let sql = `select * from bugs where bugs.status != 4 and bugs.major_id in (${JSON.parse(localUserInfo).major_id_all}) and bugs.effective = 1 `
             HttpApi.obs({ sql }, (res) => {
-                let result = 0;
+                let result = [];
                 if (res.data.code === 0) {
-                    result = res.data.data[0].count
+                    result = res.data.data
                 }
                 resolve(result);
             })
         })
     }
-    getRunBugLength = () => {
+    getRunBugsInfo = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select count(*) count from bugs where bugs.status = 3 and bugs.effective = 1 `
+            let sql = `select * from bugs where bugs.status = 3 and bugs.effective = 1 `
             HttpApi.obs({ sql }, (res) => {
-                let result = 0;
+                let result = [];
                 if (res.data.code === 0) {
-                    result = res.data.data[0].count
+                    result = res.data.data
                 }
                 resolve(result);
             })
         })
     }
-    getTaskLength = () => {
+    getTaskInfo = () => {
         return new Promise((resolve, reject) => {
-            HttpApi.getTaskInfo({ to: { $like: `%,${JSON.parse(localUserInfo).id},%` }, status: 0, effective: 1 }, data => {
-                if (data.data.code === 0) {
-                    resolve(data.data.data.length)
-                }
+            HttpApi.getTaskInfo({ to: { $like: `%,${JSON.parse(localUserInfo).id},%` }, status: 0, effective: 1 }, res => {
+                let result = [];
+                if (res.data.code === 0) { result = res.data.data }
+                resolve(result)
             })
         })
     }
@@ -146,7 +167,7 @@ export default class MainView extends Component {
             // console.log('Polling');
             this.init();
             this.getLastNotice();
-        }, BUGDATAUPDATETIME);////x秒轮询一次
+        }, BUGDATAUPDATETIME);////10秒轮询一次
     }
     componentWillUnmount() {
         clearInterval(time);
@@ -310,10 +331,17 @@ export default class MainView extends Component {
                                 <Icon className="trigger" style={{ fontSize: 24, marginLeft: 30 }} type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'} onClick={this.toggle} />
                             </Col>
                             <Col span={22} style={{ textAlign: 'right', paddingRight: 24 }}>
-                                <Popover width={200} placement="bottomRight" trigger="click"
-                                    title={localUserInfo ? "用户名: " + JSON.parse(localUserInfo).username + "(" + JSON.parse(localUserInfo).name + ")" : "不存在"}
-                                    content={<UserMenuView />}>
-                                    <Icon type="user" style={{ fontSize: 24 }} />
+                                <span style={{ marginRight: 24 }}>
+                                    <Popover width={200} placement="bottomRight" content={<NoticeMenu {...this.props} data={this.state.noticeMenuData} />}>
+                                        <Badge count={this.state.dotCount}>
+                                            <Icon type="bell" style={{ fontSize: 24, color: '#597ef7', cursor: "pointer" }} />
+                                        </Badge>
+                                    </Popover>
+                                </span>
+                                <Popover width={200} placement="bottomRight" content={<UserMenuView />}>
+                                    <Avatar style={{ backgroundColor: '#597ef7', verticalAlign: 'middle', cursor: "pointer" }} size="large">
+                                        {JSON.parse(localUserInfo).name}
+                                    </Avatar>
                                 </Popover>
                             </Col>
                         </Row>

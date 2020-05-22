@@ -2,7 +2,6 @@ import React from 'react';
 import MainView from './view/main/MainView';
 import LoginView from './view/login/LoginView'
 import { HashRouter, Route } from 'react-router-dom'
-
 function App() {
   return (
     <HashRouter>

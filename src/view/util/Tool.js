@@ -2,7 +2,7 @@ import React from "react";
 import { Icon, message } from 'antd'
 import HttpApi from './HttpApi'
 import moment from 'moment';
-import { BROWERTYPE, NOTICEMUSICOPEN } from "./AppData";
+import { BROWERTYPE, NOTICEMUSICOPEN, MAXBUGIDMY, MAXTASKIDMY, OLDRUNBUGIDLIST } from "./AppData";
 var storage = window.localStorage;
 /**
  * Tool 工具类 
@@ -512,12 +512,7 @@ export function noticeForRunCheckList(auto = null, playMusic = false, newlist, l
     if (!storage.getItem(localStorageIndex) || !playMusic) { storage[localStorageIndex] = JSON.stringify(newlist) }///记录下此次的 缺陷的id数组
     if (storage.getItem(localStorageIndex)) {
         let oldlist = JSON.parse(storage.getItem(localStorageIndex));
-        let newExist = false; ///说明有最新的id存在于新的数组中。
-        newlist.forEach((newid) => {
-            if (oldlist.indexOf(newid) === -1) {
-                newExist = true
-            }
-        })
+        let newExist = checkNewListIsMoreThanOldList(newlist, oldlist);
         if (newExist) { ///说明有最新的id存在于新的数组中。
             console.log('说明有最新的id不存在于老的数组中');
             if (storage.getItem(BROWERTYPE) !== 'Safari' && playMusic) {
@@ -527,6 +522,44 @@ export function noticeForRunCheckList(auto = null, playMusic = false, newlist, l
             }
         }
     }
+}
+export function checkNewListIsMoreThanOldList(newlist, oldlist) {
+    let newExist = false; ///说明有最新的id存在于新的数组中。
+    if (newlist && oldlist) {
+        newlist.forEach((newid) => {
+            if (oldlist.indexOf(newid) === -1) {
+                newExist = true
+            }
+        })
+    }
+    return newExist;
+}
+
+export function checkBugTaskDataIsNew(data) {
+    const { maxTaskId, myMaxBugId, RunBugIdList } = data;
+    console.log('maxTaskId:', maxTaskId, 'myMaxBugId:', myMaxBugId, 'RunBugIdList:', RunBugIdList)
+    let result = [{ title: '有相关的新缺陷注意查看', route: 'bugAboutMe', hasNew: false },
+    { title: '有待运行验收的新缺陷注意查看', route: 'bugRunCheck', hasNew: false },
+    { title: '有新任务注意查看', route: 'task', hasNew: false }]
+    let flag = false;
+    let count = 0;
+    if (parseInt(storage.getItem(MAXBUGIDMY)) < myMaxBugId) {
+        result[0].hasNew = true;
+        flag = true;
+        count = count + 1;
+    }
+    if (parseInt(storage.getItem(MAXTASKIDMY)) < maxTaskId) {
+        result[2].hasNew = true;
+        flag = true
+        count = count + 1;
+    }
+    if (checkNewListIsMoreThanOldList(RunBugIdList, JSON.parse(storage.getItem(OLDRUNBUGIDLIST)))) {
+        result[1].hasNew = true;
+        flag = true;
+        count = count + 1;
+    }
+    // console.log('{ detail: result, needFresh: flag }:', { detail: result, needFresh: flag })
+    return { detail: result, needFresh: flag, count }
 }
 /**
  *浏览器类型判断

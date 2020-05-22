@@ -67,6 +67,9 @@ export default class PieView extends React.Component {
           scale={cols}
           padding={[0, 0, 0, 0]}
           forceFit
+          onPlotClick={ev => {
+            console.log(ev);
+          }}
         >
           <Coord type={"theta"} radius={0.75} innerRadius={0.6} />
           <Tooltip
