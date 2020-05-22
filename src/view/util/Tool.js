@@ -543,17 +543,17 @@ export function checkBugTaskDataIsNew(data) {
     { title: '有新任务注意查看', route: 'task', hasNew: false }]
     let flag = false;
     let count = 0;
-    if (parseInt(storage.getItem(MAXBUGIDMY)) < myMaxBugId) {
+    if (!storage.getItem(MAXBUGIDMY) || parseInt(storage.getItem(MAXBUGIDMY)) < myMaxBugId) {
         result[0].hasNew = true;
         flag = true;
         count = count + 1;
     }
-    if (parseInt(storage.getItem(MAXTASKIDMY)) < maxTaskId) {
+    if (!storage.getItem(MAXTASKIDMY) || parseInt(storage.getItem(MAXTASKIDMY)) < maxTaskId) {
         result[2].hasNew = true;
         flag = true
         count = count + 1;
     }
-    if (checkNewListIsMoreThanOldList(RunBugIdList, JSON.parse(storage.getItem(OLDRUNBUGIDLIST)))) {
+    if (!storage.getItem(OLDRUNBUGIDLIST) || checkNewListIsMoreThanOldList(RunBugIdList, JSON.parse(storage.getItem(OLDRUNBUGIDLIST)))) {
         result[1].hasNew = true;
         flag = true;
         count = count + 1;
