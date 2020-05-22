@@ -32,7 +32,7 @@ export default class PieView extends React.Component {
       let stautsTxt = '待检'
       if (ele.device_status === 1) { stautsTxt = '正常' }
       else if (ele.device_status === 2) { stautsTxt = '故障' }
-      newArr.push({ item: stautsTxt, count: ele.status_count });
+      newArr.push({ item: stautsTxt, count: ele.status_count, begin: data.begin, end: data.end, date: data.date });
       // }
     })
     // console.log('处理后的数据：', newArr);
@@ -67,8 +67,8 @@ export default class PieView extends React.Component {
           scale={cols}
           padding={[0, 0, 0, 0]}
           forceFit
-          onPlotClick={ev => {
-            console.log(ev);
+          onPlotClick={e => {
+            if (e.data) { console.log(e.data.point) }
           }}
         >
           <Coord type={"theta"} radius={0.75} innerRadius={0.6} />

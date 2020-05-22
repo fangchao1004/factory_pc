@@ -537,7 +537,7 @@ export function checkNewListIsMoreThanOldList(newlist, oldlist) {
 
 export function checkBugTaskDataIsNew(data) {
     const { maxTaskId, myMaxBugId, RunBugIdList } = data;
-    console.log('maxTaskId:', maxTaskId, 'myMaxBugId:', myMaxBugId, 'RunBugIdList:', RunBugIdList)
+    // console.log('maxTaskId:', maxTaskId, 'myMaxBugId:', myMaxBugId, 'RunBugIdList:', RunBugIdList)
     let result = [{ title: '有相关的新缺陷注意查看', route: 'bugAboutMe', hasNew: false },
     { title: '有待运行验收的新缺陷注意查看', route: 'bugRunCheck', hasNew: false },
     { title: '有新任务注意查看', route: 'task', hasNew: false }]

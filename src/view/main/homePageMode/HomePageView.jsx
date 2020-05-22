@@ -40,7 +40,6 @@ class HomePageView extends Component {
         // }
         // let result = this.changeDataConstruct(b);////进行数据结构的改变统计
         let result = await this.testHandler();
-        // console.log('asdasdas:', result)
         let linkAll = [{ label: '所有巡检点', count_data: allDeviceStatusCount }, ...result]
         // console.log('linkAll:', linkAll);////如果后期看不懂，要看这里的数据结构
         this.setState({
@@ -58,14 +57,14 @@ class HomePageView extends Component {
                 let status_1_count = 0;
                 let status_2_count = 0;
                 data.status_arr.split(',').forEach(element => {
-                    if (element + "" === "1") { status_1_count++ } else { status_2_count++ }
+                    if (String(element) === "1") { status_1_count++ } else { status_2_count++ }
                 });
                 // data['status_1_count'] = status_1_count;
                 // data['status_2_count'] = status_2_count;
                 // data['正常'] = status_1_count;
                 // data['故障'] = status_2_count;
                 // data['待检'] = data.need_count - data.actu_count
-                delete data['status_arr']
+                // delete data['status_arr']
                 data['label'] = data.date === -1 ? '昨天 ' + data.begin + '~' + data.end : '今天 ' + data.begin + '~' + data.end
                 data['count_data'] = [{ device_status: 1, status_count: status_1_count },
                 { device_status: 2, status_count: status_2_count }, { device_status: 3, status_count: data.need_count - data.actu_count }]
@@ -127,7 +126,7 @@ class HomePageView extends Component {
         // console.log('copy_data:', copy_data)
         copy_data.forEach((item, index) => {
             // console.log(item);
-            let dataObj = { datasource: item.count_data, title: item.label, checkMan: item.users_name }
+            let dataObj = { datasource: item.count_data, title: item.label, checkMan: item.users_name, begin: item.begin, end: item.end, date: item.date }
             // console.log('dataObj:',dataObj);
             cellsArr.push(
                 <Col span={8} key={index}>
