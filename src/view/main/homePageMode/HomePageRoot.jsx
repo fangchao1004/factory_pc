@@ -11,21 +11,23 @@ const tabListNoTitle = [{
     tab: '缺陷统计',
 }];
 
-const contentListNoTitle = {
-    HomePageView: <HomePageView />,
-    BugsPageView: <BugsPageView />
-};
+var contentListNoTitle
 
 class HomePageRoot extends Component {
-    state = {
-        key: 'HomePageView',
-        noTitleKey: 'HomePageView',
+    constructor(props) {
+        super(props);
+        this.state = {
+            key: 'HomePageView',
+            noTitleKey: 'HomePageView',
+        }
+        contentListNoTitle = {
+            HomePageView: <HomePageView {...props} />,
+            BugsPageView: <BugsPageView />
+        };
     }
-
     onTabChange = (key) => {
         this.setState({ noTitleKey: key });
     }
-
     render() {
         return (
             <Card

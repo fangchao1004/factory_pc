@@ -363,7 +363,7 @@ class ContentView extends Component {
                 <Route
                     exact
                     path={`${this.props.match.path}`}
-                    component={() => (storage.getItem('userinfo') ? <HomePageRoot /> : <Redirect to='/' />)}
+                    component={(props) => (storage.getItem('userinfo') ? <HomePageRoot {...props} /> : <Redirect to='/' />)}
                 />
                 <Route
                     exact

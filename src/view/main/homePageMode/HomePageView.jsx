@@ -4,12 +4,15 @@ import LineChartView from './LineChartView'
 import { Row, Col } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import { getAllowTime, findCountInfoByTime } from '../../util/Tool'
+import DeivceRecordAndStatusView from './drawer/DeivceRecordAndStatusVIew';
 
 class HomePageView extends Component {
     constructor(props) {
         super(props);
         this.state = {
             groupData: [], ////根据巡检点类型分组后的数据
+            drawerVisible: false,
+            onePieData: null,
         }
     }
     componentDidMount() {
@@ -53,6 +56,7 @@ class HomePageView extends Component {
             const element = allowTimeList[index];
             let result = await findCountInfoByTime(element);
             const data = result[0];
+            // console.log('data:', data)
             if (data) {
                 let status_1_count = 0;
                 let status_2_count = 0;
@@ -126,15 +130,21 @@ class HomePageView extends Component {
         // console.log('copy_data:', copy_data)
         copy_data.forEach((item, index) => {
             // console.log(item);
-            let dataObj = { datasource: item.count_data, title: item.label, checkMan: item.users_name, begin: item.begin, end: item.end, date: item.date }
+            let dataObj = { datasource: item.count_data, title: item.label, checkMan: item.users_name, begin: item.begin, end: item.end, date: item.date, deviceIdStr: item.actu_concat, statusStr: item.status_arr }
             // console.log('dataObj:',dataObj);
             cellsArr.push(
                 <Col span={8} key={index}>
-                    <PieView data={dataObj} />
+                    <PieView data={dataObj} openDrawer={this.openDrawerHandler} />
                 </Col>
             )
         })
         return cellsArr
+    }
+    openDrawerHandler = (data) => {
+        this.setState({ drawerVisible: true, onePieData: data })
+    }
+    closeDrawerHandler = () => {
+        this.setState({ drawerVisible: false })
     }
 
     render() {
@@ -150,6 +160,7 @@ class HomePageView extends Component {
                         </div>
                     </Col>
                 </Row>
+                <DeivceRecordAndStatusView {...this.props} visible={this.state.drawerVisible} data={this.state.onePieData} close={this.closeDrawerHandler} />
             </div>
         );
     }

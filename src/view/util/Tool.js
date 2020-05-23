@@ -337,7 +337,7 @@ export async function getAllowTime() {
  */
 export async function findCountInfoByTime(oneTime) {
     // console.log('oneTime:', oneTime)
-    let sql = `select a_t.id,a_t.begin,a_t.end,a_t.name,count(distinct a_m_d.device_id) actu_count,temp_table.need_count, group_concat(distinct user_name) users_name,group_concat(actully_device_List.device_status) status_arr from allow_time a_t
+    let sql = `select a_t.id,a_t.begin,a_t.end,a_t.name,group_concat(distinct a_m_d.device_id) actu_concat,count(distinct a_m_d.device_id) actu_count,temp_table.need_count, group_concat(distinct user_name) users_name,group_concat(actully_device_List.device_status) status_arr from allow_time a_t
     left join (select * from allowTime_map_device where effective = 1) a_m_d on a_t.id = a_m_d.allow_time_id
     inner join (select distinct device_id,user_name,device_status from records 
                 left join (select users.id,users.name as user_name from users where effective = 1) users 

@@ -29,7 +29,7 @@ export default class NoticeMenu extends Component {
                             <List.Item.Meta
                                 title={item.title}
                                 onClick={() => {
-                                    this.props.history.replace(`/mainView/${item.route}`)
+                                    this.props.history.push(`/mainView/${item.route}`)
                                 }}
                             />
                             <Icon type='right' style={{ fontSize: 10, color: '#ccc' }} />
