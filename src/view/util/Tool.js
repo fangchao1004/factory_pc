@@ -689,7 +689,6 @@ export function filterDevicesByDateScheme(deviceList, momentTarget) {
     }
     return resultList;
 }
-
 export function checkOverTime(record, currentTime) {
     let durationTime;
     if (record.status === 0) {
@@ -706,4 +705,11 @@ export function checkOverTime(record, currentTime) {
         if (record.bsd_duration_time && durationTime > record.bsd_duration_time) { isOver = true }
     }
     return { isOver, durationTime };
+}
+export function checkOverTimeForList(list) {
+    let currentTime = moment().toDate().getTime();
+    list.forEach(element => {
+        element.isOver = checkOverTime(element, currentTime).isOver
+    });
+    return list;
 }

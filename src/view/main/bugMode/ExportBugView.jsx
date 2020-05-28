@@ -4,7 +4,7 @@ import HttpApi from '../../util/HttpApi'
 import ExportJsonExcel from 'js-export-excel'
 import moment from 'moment';
 import { VersionlistData } from '../../util/AppData'
-import { omitTextLength } from '../../util/Tool'
+import { omitTextLength, checkOverTimeForList } from '../../util/Tool'
 
 var storage = window.localStorage;
 var localUserInfo = '';
@@ -12,7 +12,7 @@ const { RangePicker } = DatePicker;
 const CheckboxGroup = Checkbox.Group;
 const majorPlainOptions = [];
 const completeStatusPlainOptions = [{ label: '已完成', value: 4 }, { label: '未完成', value: 0 }];
-
+const overTimePlainOptions = [{ label: '已超时', value: true }, { label: '正常', value: false }];
 /**
  * 导出缺陷的界面
  */
@@ -22,11 +22,13 @@ class ExportBugView extends Component {
         this.state = {
             showModal: false,
             ///导出Excel部分
-            completeStatusCheckList: [],/// 完成状态 [0,4]
             timeStampCheckList: [moment().startOf('day').format('YYYY-MM-DD HH:ss:mm'), moment().endOf('day').format('YYYY-MM-DD HH:ss:mm')],/// 时间段区间默认是今日 ['2019-01-01 00:00:00','2019-01-01 23:59:59']
+            completeStatusCheckList: [],/// 完成状态 [0,4]
+            completeStatusCheckAll: false,
             majorCheckList: [],///['A','B',...] 专业A,B,...
             majorCheckAll: false,
-            completeStatusCheckAll: false,
+            overTimeList: [],///['已超时','正常']
+            overTimeCheckAll: false,
             exporting: false,
         }
     }
@@ -193,20 +195,26 @@ class ExportBugView extends Component {
         let mjl = this.state.majorCheckList;
         let csl = this.state.completeStatusCheckList;
         let tsl = this.state.timeStampCheckList;
+        let otl = this.state.overTimeList
         let mca = this.state.majorCheckAll;
-        if (mjl.length === 0 || csl.length === 0) { message.error('请完善选项'); return }
+        let tca = this.state.overTimeCheckAll;
+        if (mjl.length === 0 || csl.length === 0 || otl.length === 0) { message.error('请完善选项'); return }
         ///开始整合生成sql语句
         let sql1 = '';///条件语句1
         if (csl.length === 1) {
             if (csl[0] === 4) {
-                sql1 = `and status = 4`
-            } else { sql1 = `and status != 4` }
+                sql1 = `and bugs.status = 4`
+            } else { sql1 = `and bugs.status != 4` }
         }
         let sql2 = '';///条件语句2
-        if (!mca) { sql2 = 'and (' + (mjl.map((item) => { item = 'major_id = ' + item; return item })).join(' or ') + ')'; }
+        if (!mca) { sql2 = 'and bugs.major_id in (' + mjl.join(',') + ')'; }
         let sql3 = '';///条件语句3
-        sql3 = `and checkedAt > '${tsl[0]}' and checkedAt < '${tsl[1]}'`
-        let sqlText = `select * from bugs where effective = 1 ${sql3} ${sql1} ${sql2}`
+        sql3 = `and bugs.checkedAt > '${tsl[0]}' and bugs.checkedAt < '${tsl[1]}'`
+        let sqlText = `select bugs.*,bsd.duration_time as bsd_duration_time,
+        bld.duration_time as bld_duration_time from bugs 
+        left join (select * from bug_level_duration where effective = 1) bld on bld.level_value = bugs.buglevel
+        left join (select * from bug_status_duration where effective = 1) bsd on bsd.status = bugs.status
+        where bugs.effective = 1 ${sql3} ${sql1} ${sql2}`
         let finallySql = `select t1.*,des.name device_name,
         concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
         majors.name major_name,users.name user_name,
@@ -229,8 +237,12 @@ class ExportBugView extends Component {
         `;
         let result = await this.getBugsInfo(finallySql);///获取符合条件的缺陷数据
         if (result.length === 0) { message.warn('没有查询到符合条件的缺陷数据-请修改查询条件'); return }
+        let newResult = checkOverTimeForList(result);
+        if (!tca) { ///如果超时选项不是选了所有，那么就要进行过滤
+            newResult = newResult.filter((item) => { return item.isOver === otl[0] })
+        }
         this.setState({ exporting: true })
-        let data = this.transConstract(result);///数据结构进行转换
+        let data = this.transConstract(newResult);///数据结构进行转换
         let option = {};
         option.fileName = moment().format('YYYY-MM-DD-HH-mm-ss') + '-缺陷统计列表'
         option.datas = data;
@@ -321,6 +333,35 @@ class ExportBugView extends Component {
                                 this.setState({
                                     completeStatusCheckList: e.target.checked ? completeStatusPlainOptions.map((item) => (item.value)) : [],
                                     completeStatusCheckAll: e.target.checked,
+                                });
+                            }}
+                        >
+                            全选
+                    </Checkbox>
+                    </Col>
+                </Row>
+
+                <Row gutter={16} style={{ marginTop: 20 }}>
+                    <Col span={5}>
+                        <span>超时选择:</span>
+                    </Col>
+                    <Col span={19}>
+                        <CheckboxGroup
+                            options={overTimePlainOptions}
+                            value={this.state.overTimeList}
+                            onChange={(overTimeList) => {
+                                this.setState({
+                                    overTimeList,
+                                    overTimeCheckAll: overTimeList.length === overTimePlainOptions.length,
+                                });
+                            }}
+                        />
+                        <Checkbox
+                            checked={this.state.overTimeCheckAll}
+                            onChange={(e) => {
+                                this.setState({
+                                    overTimeList: e.target.checked ? overTimePlainOptions.map((item) => (item.value)) : [],
+                                    overTimeCheckAll: e.target.checked,
                                 });
                             }}
                         >
