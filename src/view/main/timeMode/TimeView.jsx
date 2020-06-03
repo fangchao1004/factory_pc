@@ -239,22 +239,23 @@ class TimeView extends Component {
                 align: 'center',
                 render: (text, record) => {
                     return <div style={{ display: 'flex', flexDirction: 'row', justifyContent: 'space-around' }}>
-                        <TreeSelect
-                            maxTagCount={5}
-                            maxTagTextLength={8}
-                            disabled={this.state.isAdmin !== 1}
-                            showSearch
-                            treeNodeFilterProp="title"
-                            style={{ width: '85%' }}
-                            value={text ? text.split(',') : []}
-                            dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-                            placeholder="请选择需要查看的巡检点"
-                            allowClear
-                            multiple
-                            onChange={(value, label, extra) => { this.onChange(extra, record) }}
-                        >
-                            {this.state.treeNodeList}
-                        </TreeSelect>
+                        {this.state.isAdmin === 1 ?
+                            <TreeSelect
+                                maxTagCount={5}
+                                maxTagTextLength={8}
+                                disabled={this.state.isAdmin !== 1}
+                                showSearch
+                                treeNodeFilterProp="title"
+                                style={{ width: '85%' }}
+                                value={text ? text.split(',') : []}
+                                dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                                placeholder="请选择需要查看的巡检点"
+                                allowClear
+                                multiple
+                                onChange={(value, label, extra) => { this.onChange(extra, record) }}
+                            >
+                                {this.state.treeNodeList}
+                            </TreeSelect> : null}
                         <Tag color='blue' style={{ alignSelf: "center", marginLeft: 15 }}>共{record.need_count}</Tag>
                     </div>;
                 }
