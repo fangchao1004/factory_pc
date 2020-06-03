@@ -14,6 +14,7 @@ var device_switch_filter = [{ text: '运行', value: 1 }, { text: '停运', valu
 class EquipmentView extends Component {
     constructor(props) {
         super(props)
+        console.log('EquipmentView:', props)
         this.state = {
             dataSource: [],
             drawerVisible1: false,
@@ -63,7 +64,7 @@ class EquipmentView extends Component {
     // }
     getDevicesTypeInfo = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select * from device_types where effective = 1`;
+            let sql = `select * from device_types where effective = 1 and area0_id = ${this.props.id}`;
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -86,7 +87,7 @@ class EquipmentView extends Component {
             left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id 
             left join nfcs on nfcs.id = des.nfc_id
             left join (select rds.device_id,max(rds.checkedAt) newCheckTime from records rds group by rds.device_id) tmp on tmp.device_id = des.id
-            where des.effective = 1`
+            where des.effective = 1 and des.area0_id = ${this.props.id}`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -96,21 +97,6 @@ class EquipmentView extends Component {
             })
         })
     }
-    getBugsInfo = (bug_id_arr) => {
-        return new Promise((resolve, reject) => {
-            let sql = `select bugs.*,mjs.name as major_name from bugs 
-            left join (select * from majors where effective = 1) mjs on mjs.id = bugs.major_id 
-            where bugs.id in (${bug_id_arr.join(',')}) and bugs.effective = 1`;
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
-
     addEquipment = (newValues) => {
         this.setState({ addEquipmentVisible: true })
     }
@@ -118,6 +104,7 @@ class EquipmentView extends Component {
         let area3_id = newValues.area_id.split('-')[2];
         newValues.status = 3 // 默认设置巡检点为 1正常 3待检 状态
         newValues.area_id = area3_id;
+        newValues.area0_id = this.props.id
         // console.log(newValues)
         // return;
         HttpApi.addDeviceInfo(newValues, data => {
@@ -337,8 +324,8 @@ class EquipmentView extends Component {
                 >
                     <OneRecordDetialView renderData={this.state.oneRecordData} />
                 </Drawer>
-                <AddEquipmentView visible={this.state.addEquipmentVisible} onOk={this.addEquipmentOk} onCancel={this.addEquipmentCancel} />
-                <UpdateEquipmentView visible={this.state.updateEquipmentVisible} device={this.state.oneDeviceInfo} onOk={this.updateEquipmentOk} onCancel={this.updateEquipmentCancel} />
+                <AddEquipmentView visible={this.state.addEquipmentVisible} onOk={this.addEquipmentOk} onCancel={this.addEquipmentCancel} {...this.props} />
+                <UpdateEquipmentView visible={this.state.updateEquipmentVisible} device={this.state.oneDeviceInfo} onOk={this.updateEquipmentOk} onCancel={this.updateEquipmentCancel} {...this.props} />
             </div>
         );
     }

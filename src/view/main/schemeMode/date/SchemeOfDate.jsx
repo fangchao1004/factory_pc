@@ -13,6 +13,7 @@ import AddDateSchemeView from './AddDateSchemeView';
 class SchemeOfDate extends Component {
     constructor(props) {
         super(props);
+        console.log('SchemeOfDate', props)
         this.state = {
             data: [],
             addVisible: false,
@@ -36,7 +37,7 @@ class SchemeOfDate extends Component {
             let sql = `select scheme_of_cycleDate.*,cycle_date.name as cycleDate_name,group_concat(date_value) date_list from scheme_of_cycleDate
             left join (select * from cycle_date where effective = 1)cycle_date on cycle_date.id = scheme_of_cycleDate.cycleDate_id
             left join (select * from sche_cyc_map_date where effective = 1)sche_cyc_map_date on sche_cyc_map_date.scheme_id = scheme_of_cycleDate.id
-            where scheme_of_cycleDate.effective = 1
+            where scheme_of_cycleDate.effective = 1 and scheme_of_cycleDate.area0_id = ${this.props.id}
             group by scheme_of_cycleDate.id`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -75,7 +76,7 @@ class SchemeOfDate extends Component {
      * 批量插入 sche_cyc_map_date
      */
     insertIntoDB = (value) => {
-        let sql = `insert into scheme_of_cycleDate (title,cycleDate_id) value ('${value.title}',${value.cycleDate_id});`
+        let sql = `insert into scheme_of_cycleDate (title,cycleDate_id,area0_id) value ('${value.title}',${value.cycleDate_id},${this.props.id});`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
                 let sql = `select max(id) as max_id from scheme_of_cycleDate`

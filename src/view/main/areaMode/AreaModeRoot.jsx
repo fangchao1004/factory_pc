@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Card } from 'antd';
+import EquipmentArea0View from './area0/EquipmentArea0View'
 import EquipmentArea1View from './area1/EquipmentArea1View'
 import EquipmentArea2View from './area2/EquipmentArea2View'
 import EquipmentArea3View from './area3/EquipmentArea3View'
@@ -11,6 +12,9 @@ const tabListNoTitle = [{
 }];
 
 const tabListNoTitle2 = [{
+    key: 'EquipmentArea0View',
+    tab: '厂区',
+}, {
     key: 'EquipmentArea1View',
     tab: '一级巡检区域',
 }, {
@@ -23,6 +27,7 @@ const tabListNoTitle2 = [{
 
 const contentListNoTitle = {
     TreeView: <TreeView />,
+    EquipmentArea0View: <EquipmentArea0View />,
     EquipmentArea1View: <EquipmentArea1View />,
     EquipmentArea2View: <EquipmentArea2View />,
     EquipmentArea3View: <EquipmentArea3View />,
@@ -34,20 +39,16 @@ class AreaModeRoot extends Component {
         noTitleKey: 'TreeView',
         isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin
     }
-
     onTabChange = (key) => {
         this.setState({ noTitleKey: key });
     }
-
     render() {
-
         var tabs
         if (this.state.isAdmin) {
             tabs = tabListNoTitle.concat(tabListNoTitle2)
         } else {
             tabs = tabListNoTitle
         }
-
         return (
             <Card
                 bodyStyle={{ padding: 20 }}

@@ -28,7 +28,7 @@ export default class UpdateAtmSchemeView extends Component {
     }
     getCycleDateInfo = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select * from allow_time where effective = 1`
+            let sql = `select * from allow_time where effective = 1 and area0_id = ${this.props.id}`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) { result = res.data.data }

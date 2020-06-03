@@ -29,7 +29,7 @@ class EquipmentArea3View extends Component {
     addArea3ok = async (value) => {
         // console.log('确定添加：', value);
         let tempData = {};
-        tempData.area2_id = value.area12_id.split('-')[1];
+        tempData.area2_id = parseInt(value.area012_id.split('-')[2]);
         tempData.area3_name = value.area3_name;
         let result = await this.insertArea3Info(tempData);
         if (result === 0) { message.success('添加成功'); }
@@ -43,11 +43,10 @@ class EquipmentArea3View extends Component {
     }
     getArea3Info = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select area_3.id as area3_id,area_3.name as area3_name,area_2.id as area2_id,area_2.name as area2_name,area_1.id as area1_id,area_1.name as area1_name from area_3
-            left join (select * from area_2 where effective = 1) area_2
-            on area_2.id = area_3.area2_id
-            left join (select * from area_1 where effective = 1) area_1
-            on area_1.id = area_2.area1_id
+            let sql = `select area_3.id as area3_id,area_3.name as area3_name,area_2.id as area2_id,area_2.name as area2_name,area_1.id as area1_id,area_1.name as area1_name,area_0.id as area0_id,area_0.name as area0_name from area_3
+            left join (select * from area_2 where effective = 1) area_2 on area_2.id = area_3.area2_id
+            left join (select * from area_1 where effective = 1) area_1 on area_1.id = area_2.area1_id
+            left join (select * from area_0 where effective = 1) area_0 on area_0.id = area_1.area0_id
             where area_3.effective = 1`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -83,9 +82,8 @@ class EquipmentArea3View extends Component {
         })
     }
     updateArea3ok = async (value) => {
-        console.log('更新：', value);
         let tempData = {};
-        tempData.area2_id = value.area12_id.split('-')[1];
+        tempData.area2_id = parseInt(value.area012_id.split('-')[2]);
         tempData.area3_name = value.area3_name;
         let result = await this.updateArea3Info(tempData);
         if (result === 0) { message.success('修改成功'); }
@@ -109,6 +107,10 @@ class EquipmentArea3View extends Component {
 
     render() {
         const columns = [
+            {
+                title: '所属厂区',
+                dataIndex: 'area0_name'
+            },
             {
                 title: '所属一级区域',
                 dataIndex: 'area1_name'

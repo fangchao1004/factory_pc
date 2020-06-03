@@ -1,11 +1,8 @@
 import React, { Component } from 'react';
 import { Modal, Form, Input, TreeSelect } from 'antd';
 import HttpApi from '../../../util/HttpApi';
-import { transfromDataTo2level } from '../../../util/Tool'
-
-
+import { translate } from '../../../util/Tool'
 var treeData = [];
-
 /**
  * 添加area3的界面
  */
@@ -25,18 +22,16 @@ export default class AddArea3View extends Component {
         this.init();
     }
     init = async () => {
-        let area12result = await this.getArea12options();
-        // console.log('area12result:', area12result);
-        let jsonList = transfromDataTo2level(area12result);
-        treeData = jsonList
-        this.forceUpdate();
+        let area012result = await this.getArea012options();
+        treeData = translate(['area0_id', 'area1_id', 'area2_id'], area012result, 3);
     }
-    getArea12options = () => {
+    getArea012options = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select area_1.id as area1_id , area_1.name as area1_name, area_2.id as area2_id ,area_2.name as area2_name from area_1
+            let sql = `select area_0.id as area0_id,area_0.name as area0_name,area_1.id as area1_id,area_1.name as area1_name,area_2.id as area2_id,area_2.name as area2_name
+            from area_0
+            left join (select * from area_1 where effective = 1)area_1 on area_0.id = area_1.area0_id
             left join (select * from area_2 where effective = 1)area_2 on area_1.id = area_2.area1_id
-            where area_1.effective = 1
-            order by area_1.id`
+            where area_0.effective = 1`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -66,7 +61,7 @@ export default class AddArea3View extends Component {
                 onCancel={this.onCancelHandler}
                 onOk={this.onOkHandler}
             >
-                <Area3Form ref={'area3FormRef'} />
+                <Area3Form ref={'area3FormRef'} treeData={treeData} />
             </Modal>
         );
     }
@@ -78,13 +73,13 @@ function AddArea3From(props) {
     const { getFieldDecorator } = props.form
     return <Form>
         <Form.Item label="所属上级位置:" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
-            {getFieldDecorator('area12_id', {
+            {getFieldDecorator('area012_id', {
                 rules: [{ required: true, message: '请选择所属的上级(精确到第二级)' }]
             })(<TreeSelect
                 treeNodeFilterProp="title"
                 showSearch
                 dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-                treeData={treeData}
+                treeData={props.treeData}
                 placeholder="请选择所属的上级(精确到第二级)"
             />)}
         </Form.Item>

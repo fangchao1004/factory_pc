@@ -10,22 +10,21 @@ const tabListNoTitle = [{
     key: 'SchemeOfAllowTime',
     tab: '时间段方案',
 }];
-
-const contentListNoTitle = {
-    SchemeOfDate: <SchemeOfDate />,
-    SchemeOfAllowTime: <SchemeOfAllowTime />,
-};
-
 class SchemeModeRoot extends Component {
-    state = {
-        key: 'SchemeOfDate',
-        noTitleKey: 'SchemeOfDate',
+    constructor(props) {
+        super(props);
+        this.state = {
+            key: 'SchemeOfDate',
+            noTitleKey: 'SchemeOfDate',
+        }
+        this.contentListNoTitle = {
+            SchemeOfDate: <SchemeOfDate {...props} />,
+            SchemeOfAllowTime: <SchemeOfAllowTime  {...props} />,
+        };
     }
-
     onTabChange = (key) => {
         this.setState({ noTitleKey: key });
     }
-
     render() {
         return (
             <Card
@@ -36,10 +35,9 @@ class SchemeModeRoot extends Component {
                 activeTabKey={this.state.noTitleKey}
                 onTabChange={(key) => { this.onTabChange(key); }}
             >
-                {contentListNoTitle[this.state.noTitleKey]}
+                {this.contentListNoTitle[this.state.noTitleKey]}
             </Card>
         );
     }
 }
-
 export default SchemeModeRoot;

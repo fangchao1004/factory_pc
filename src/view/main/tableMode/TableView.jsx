@@ -15,6 +15,7 @@ var dataSourceCopy = [];
 class TableView extends Component {
     constructor(props) {
         super(props);
+        console.log('TableView:', props)
         this.state = {
             dataSource: [],
             modalvisible: false,
@@ -37,7 +38,7 @@ class TableView extends Component {
     }
     getSampleWithSchemeInfo = () => {
         return new Promise((resolve, reject) => {
-            HttpApi.getSampleWithSchemeInfo({}, (res) => {
+            HttpApi.getSampleWithSchemeInfo({ area0_id: this.props.id }, (res) => {
                 if (res.data.code === 0) {
                     resolve(res.data.data)
                 }
@@ -172,7 +173,7 @@ class TableView extends Component {
                 >
                     {this.state.sampleView}
                 </Modal>
-                <ChangeTableView data={this.state.currentTable} visible={this.state.drawerVisible} onClose={() => { this.setState({ drawerVisible: false }) }} onOk={() => { this.setState({ drawerVisible: false }); this.init(); message.success('刷新数据') }} />
+                <ChangeTableView {...this.props} data={this.state.currentTable} visible={this.state.drawerVisible} onClose={() => { this.setState({ drawerVisible: false }) }} onOk={() => { this.setState({ drawerVisible: false }); this.init(); message.success('刷新数据') }} />
             </div>
         );
     }

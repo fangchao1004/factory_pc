@@ -25,6 +25,41 @@ export function omitTextLength(text, targetlength) {
     }
     return result
 }
+
+/**
+ * 转换一维数组为树形数组
+ * @param  {Array} keys  树形结构的参照key
+ * @param  {Array} data  数据
+ * @param  {Number} selectLevel  可选层级
+ * @return {String} pValue    转换后的数组
+ * @api    private
+ */
+export function translate(keys, data, selectLevel = null, pValue = '') {
+    // console.log('pValue:', pValue)
+    let [key, ...nextKeys] = keys
+    let hasNextKey = nextKeys && nextKeys.length
+    let map = {}
+    data.forEach(item => {
+        let k = item[key] ///k 为 areaX_id的值 key 为 areaX_id字段
+        if (k && !map[k]) {
+            // 获取源数组中所有命中的`item`认为这些`item`为子项
+            let childList = data.filter(item => item[key] === k).map(item => delete item[key] && item)
+            let value = pValue ? pValue + '-' + String(k) : String(k);
+            let selectable = false;
+            // console.log('啊哈哈', value.split('-').length)
+            if (selectLevel && selectLevel === value.split('-').length) { selectable = true }
+            else if (!selectLevel) { selectable = true; }
+            map[k] = {
+                title: item[String(key).substring(0, key.length - 2) + 'name'],
+                value,
+                key: value,
+                selectable,
+                children: hasNextKey ? translate(nextKeys, childList, selectLevel, value) : []  // 如果还有用来分组的key，继续执行，否则返回数组
+            }
+        }
+    })
+    return Object.values(map)
+}
 /**
  *将数据库查询的 数据进行 三层结构转换
  *123级
@@ -130,49 +165,89 @@ export function transfromDataTo2level(area12result) {
     }
     return jsonList;
 }
+
+/**
+ * 递归---不需要统计故障状态
+ */
+export function combinAreaAndDeviceTest(LevelList, deviceList, targetLevel = 2, levelCount = 1) {
+    LevelList.forEach((levelItem) => {
+        if (levelItem && levelItem.children) {
+            let nextLevelList = levelItem.children;
+            if (levelCount < targetLevel && nextLevelList) { combinAreaAndDeviceTest(nextLevelList, deviceList, targetLevel, levelCount + 1) }
+            else if (levelCount === targetLevel && nextLevelList) {
+                nextLevelList.forEach((nextlevelItem) => {
+                    nextlevelItem.status2_count = 0;
+                    nextlevelItem.children = []
+                    deviceList.forEach((deviceItem) => {
+                        if (nextlevelItem.value.split('-')[2] === String(deviceItem.area_id)) {
+                            nextlevelItem.children.push({
+                                key: String(deviceItem.id),
+                                value: String(deviceItem.id),
+                                title: omitTextLength(deviceItem.name, 25),
+                                type_id: deviceItem.type_id,
+                                status: deviceItem.status,
+                                area_id: deviceItem.area_id,
+                            })
+                        }
+                    })
+                })
+            }
+        }
+    })
+    return LevelList;
+}
+
 /**
  * 将三级区间结构数+巡检点信息之间进行绑定
  * 形成了4级结构
+ * 因为要统计每一层的status2_count 所以无法用递归算法
  * @export
  * @param {*} level3List
  * @param {*} devicesList
  * @returns
  */
-export function combinAreaAndDevice(level3List, devicesList) {
-    level3List.forEach((area1Item) => {
-        area1Item.status2_count = 0;
-        if (area1Item.children.length > 0) {
-            let area2ItemList = area1Item.children;
-            area2ItemList.forEach((area2Item) => {
-                area2Item.status2_count = 0;
-                if (area2Item.children.length > 0) {
-                    let area3ItemList = area2Item.children;
-                    area3ItemList.forEach((area3Item) => {
-                        area3Item.children = []
-                        area3Item.status2_count = 0;
-                        devicesList.forEach((deviceItem) => {
-                            if (area3Item.value.split('-')[2] === deviceItem.area_id + '') {
-                                if (deviceItem.status === 2) {
-                                    area3Item.status2_count = area3Item.status2_count + 1;
-                                    area2Item.status2_count = area2Item.status2_count + 1;
-                                    area1Item.status2_count = area1Item.status2_count + 1;
-                                }
-                                area3Item.children.push({
-                                    key: deviceItem.id + '',
-                                    value: deviceItem.id + '',
-                                    title: omitTextLength(deviceItem.name, 25),
-                                    type_id: deviceItem.type_id,
-                                    status: deviceItem.status,
-                                    area_id: deviceItem.area_id,
+export function combinAreaAndDevice(level4List, devicesList) {
+    level4List.forEach((area0Item) => {
+        area0Item.status2_count = 0;
+        if (area0Item && area0Item.children.length > 0) {
+            let area1ItemList = area0Item.children;
+            area1ItemList.forEach((area1Item) => {
+                area1Item.status2_count = 0;
+                if (area1Item && area1Item.children.length > 0) {
+                    let area2ItemList = area1Item.children;
+                    area2ItemList.forEach((area2Item) => {
+                        area2Item.status2_count = 0;
+                        if (area2Item && area2Item.children.length > 0) {
+                            let area3ItemList = area2Item.children;
+                            area3ItemList.forEach((area3Item) => {
+                                area3Item.children = []
+                                area3Item.status2_count = 0;
+                                devicesList.forEach((deviceItem) => {
+                                    if (area3Item.value.split('-')[3] === deviceItem.area_id + '') {
+                                        if (deviceItem.status === 2) {
+                                            area3Item.status2_count = area3Item.status2_count + 1;
+                                            area2Item.status2_count = area2Item.status2_count + 1;
+                                            area1Item.status2_count = area1Item.status2_count + 1;
+                                            area0Item.status2_count = area0Item.status2_count + 1;
+                                        }
+                                        area3Item.children.push({
+                                            key: deviceItem.id + '',
+                                            value: deviceItem.id + '',
+                                            title: omitTextLength(deviceItem.name, 25),
+                                            type_id: deviceItem.type_id,
+                                            status: deviceItem.status,
+                                            area_id: deviceItem.area_id,
+                                        })
+                                    }
                                 })
-                            }
-                        })
+                            })
+                        }
                     })
                 }
             })
         }
     })
-    return level3List
+    return level4List
 }
 /**
  *将多级数据+巡检点信息 形成的新的4级结构数据
@@ -185,27 +260,45 @@ export function combinAreaAndDevice(level3List, devicesList) {
  * @returns
  */
 export function renderTreeNodeListByData(dataList, TargetNode) {
-    let nodeList = dataList.map((area1Item, index) => {
-        return <TargetNode title={<span>{omitTextLength(area1Item.title, 25)}<span style={{ marginLeft: 5, color: 'red' }}>{area1Item.status2_count || null}</span></span>} key={area1Item.key} value={area1Item.value} selectable={false} icon={<span><Icon type="environment" />
-        </span>}>
-            {area1Item.children.length > 0 ?
-                area1Item.children.map(area2Item => {
-                    return <TargetNode title={<span>{omitTextLength(area2Item.title, 25)}<span style={{ marginLeft: 5, color: 'red' }}>{area2Item.status2_count || null}</span></span>} key={area2Item.key} value={area2Item.value} selectable={false} icon={<Icon type="environment" />}>
-                        {area2Item.children.length > 0 ?
-                            area2Item.children.map(area3Item => {
-                                return <TargetNode title={<span>{omitTextLength(area3Item.title, 25)}<span style={{ marginLeft: 5, color: 'red' }}>{area3Item.status2_count || null}</span></span>} key={area3Item.key} value={area3Item.value} selectable={false} icon={<Icon type="environment" />}>
-                                    {renderDevice(area3Item, TargetNode)}
+    let nodeList = dataList.map((area0Item) => {
+        return <TargetNode title={<span>{omitTextLength(area0Item.title, 25)}<span style={{ marginLeft: 5, color: 'red' }}>{area0Item.status2_count || null}</span></span>} key={area0Item.key} value={area0Item.value} selectable={false} icon={<span><Icon type="environment" /></span>}>
+            {area0Item.children.length > 0 ?
+                area0Item.children.map(area1Item => {
+                    return <TargetNode title={<span>{omitTextLength(area1Item.title, 25)}<span style={{ marginLeft: 5, color: 'red' }}>{area1Item.status2_count || null}</span></span>} key={area1Item.key} value={area1Item.value} selectable={false} icon={<span><Icon type="environment" /></span>}>
+                        {area1Item.children.length > 0 ?
+                            area1Item.children.map(area2Item => {
+                                return <TargetNode title={<span>{omitTextLength(area2Item.title, 25)}<span style={{ marginLeft: 5, color: 'red' }}>{area2Item.status2_count || null}</span></span>} key={area2Item.key} value={area2Item.value} selectable={false} icon={<Icon type="environment" />}>
+                                    {area2Item.children.length > 0 ?
+                                        area2Item.children.map(area3Item => {
+                                            return <TargetNode title={<span>{omitTextLength(area3Item.title, 25)}<span style={{ marginLeft: 5, color: 'red' }}>{area3Item.status2_count || null}</span></span>} key={area3Item.key} value={area3Item.value} selectable={false} icon={<Icon type="environment" />}>
+                                                {renderDevice(area3Item, TargetNode)}
+                                            </TargetNode>
+                                        }) : null}
                                 </TargetNode>
-                            })
-                            : null}
+                            }) : null}
                     </TargetNode>
-                })
-                : null}
+                }) : null}
         </TargetNode>
     })
     return nodeList
 }
+/**
+ * 递归---不渲染 缺陷数量
+ */
+export function renderTreeNodeListByDataTest(dataList, TargetNode, targetLevel = 3, levelCount = 1) {
+    let nodeList = dataList.map((listItem) => {
+        return <TargetNode title={omitTextLength(listItem.title, 25)} key={listItem.key} value={listItem.value} selectable={false} icon={<span><Icon type="environment" /></span>}>
+            {targetLevel > levelCount ?
+                (listItem.children && listItem.children.length > 0 ? renderTreeNodeListByDataTest(listItem.children, TargetNode, targetLevel, levelCount + 1) : null)
+                :
+                (listItem.children && listItem.children.length > 0 ? renderDevice(listItem, TargetNode) : null)}
+        </TargetNode>
+    })
+    return nodeList
+}
+
 function renderDevice(area3Item, TargetNode) {
+    // console.log('area3Item:', area3Item)
     return area3Item.children.length > 0 ?
         area3Item.children.map(deviceItem => {
             let color = '#33CC66' /// 绿色 正常

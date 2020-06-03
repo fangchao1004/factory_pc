@@ -14,6 +14,7 @@ var haveExistSampleIDs = [];
 export default class EditableTable extends Component {
   constructor(props) {
     super(props);
+    console.log('EditableTable:', props)
     this.state = {
       uploadLoading: false,
       dataSource: [],
@@ -22,7 +23,6 @@ export default class EditableTable extends Component {
       sampleView: null,
     };
   }
-
   componentDidMount() {
     this.init();
   }
@@ -41,9 +41,8 @@ export default class EditableTable extends Component {
       }]
     })
   }
-
   getTitleData = () => {
-    HttpApi.getDeviceTypeInfo({ effective: 1 }, (res) => {
+    HttpApi.getDeviceTypeInfo({ effective: 1, area0_id: this.props.id }, (res) => {
       if (res.data.code === 0) {
         let copyArrData = JSON.parse(JSON.stringify(res.data.data))
         let titleDataArr = [];
@@ -57,7 +56,6 @@ export default class EditableTable extends Component {
       }
     })
   }
-
   getSampleData = () => {
     return new Promise((resolve, reject) => {
       HttpApi.getSampleInfo({ effective: 1 }, (res) => {
@@ -73,7 +71,6 @@ export default class EditableTable extends Component {
       })
     })
   }
-
   getDateSchemeData = () => {
     let sql = `select * from scheme_of_cycleDate where effective = 1`
     HttpApi.obs({ sql }, (res) => {
@@ -98,8 +95,6 @@ export default class EditableTable extends Component {
       }
     })
   }
-
-
   render() {
     const { dataSource } = this.state;
     const columns = [
@@ -239,12 +234,10 @@ export default class EditableTable extends Component {
       </div>
     );
   }
-
   handleDelete = (key) => {
     const dataSource = [...this.state.dataSource];
     this.setState({ dataSource: dataSource.filter(item => item.key !== key) });
   }
-
   handleAdd = () => {
     const { count, dataSource } = this.state;
     const newData = {
@@ -261,7 +254,6 @@ export default class EditableTable extends Component {
       count: parseInt(count) + 1 + "",
     });
   }
-
   onChangeHandler = (record, val, targetField, extraData) => {
     let copyData = JSON.parse(JSON.stringify(this.state.dataSource))
     copyData.forEach(element => {
@@ -281,7 +273,6 @@ export default class EditableTable extends Component {
       dataSource: copyData
     })
   }
-
   readyHandler = () => {
     // console.log('数据：', this.state.dataSource);
     this.setState({
@@ -292,13 +283,11 @@ export default class EditableTable extends Component {
       sampleView: sample
     })
   }
-
   onConfirmHandler = () => {
     console.log('确定上传');
     console.log('this.state.dataSource:', this.state.dataSource)
     this.checkDataConstruct()
   }
-
   checkDataConstruct = () => {
     let isCompleteFlag = true;
     this.state.dataSource.forEach(element => {
@@ -355,10 +344,10 @@ export default class EditableTable extends Component {
     sample_data.device_type_id = device_type_id;
     sample_data.table_name = table_name;
     sample_data.content = JSON.stringify(contentArr);
-
+    sample_data.area0_id = this.props.id;
     // console.log("模版数据L：", sample_data);
     // console.log('schemeList:', schemeList)
-
+    // return;
     HttpApi.uploadSample(sample_data, (res) => {
       // console.log(res);
       if (res.data.code === 0) {
@@ -405,13 +394,11 @@ export default class EditableTable extends Component {
     }
     return string
   }
-
   handleOk = () => {
     this.setState({
       modalvisible: false
     })
   }
-
   handleCancel = () => {
     this.setState({
       modalvisible: false

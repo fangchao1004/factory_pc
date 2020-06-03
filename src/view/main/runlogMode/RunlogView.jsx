@@ -9,6 +9,7 @@ import UpdateRunlogView from './UpdateRunlogView';
 class RunlogView extends Component {
     constructor(props) {
         super(props);
+        console.log('RunlogView', props)
         this.state = {
             datasource: [],
             isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin === 1,
@@ -31,7 +32,7 @@ class RunlogView extends Component {
         return new Promise((resolve, reject) => {
             let sql = `select runlog.*,users.name as upname from runlog
             left join (select * from users where effective = 1) users on users.id = runlog.upid
-             where runlog.effective = 1
+             where runlog.effective = 1 and runlog.area0_id = ${this.props.id}
              order by runlog.time desc`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -58,7 +59,7 @@ class RunlogView extends Component {
     }
     insertRunlog = (value) => {
         return new Promise((resolve, reject) => {
-            let sql = `INSERT INTO runlog (time,content,upid) VALUES ('${value.time}','${value.content}',${this.state.myId})`
+            let sql = `INSERT INTO runlog (time,content,upid,area0_id) VALUES ('${value.time}','${value.content}',${this.state.myId},${this.props.id})`
             HttpApi.obs({ sql }, (res) => {
                 resolve(res.data.code)
             })

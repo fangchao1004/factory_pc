@@ -7,6 +7,7 @@ import UpdateAtmSchemeView from './UpdateAtmSchemeView';
 class SchemeOfAllowTime extends Component {
     constructor(props) {
         super(props);
+        console.log('SchemeOfAllowTime', props)
         this.state = {
             data: [],
             addVisible: false,
@@ -30,7 +31,7 @@ class SchemeOfAllowTime extends Component {
             from scheme_of_allowTime
             left join (select * from sche_atm_map_time where effective = 1) sche_atm_map_time on sche_atm_map_time.scheme_id = scheme_of_allowTime.id
             left join (select * from allow_time where effective = 1) allow_time on allow_time.id = sche_atm_map_time.allowTime_id
-            where scheme_of_allowTime.effective = 1
+            where scheme_of_allowTime.effective = 1 and scheme_of_allowTime.area0_id = ${this.props.id}
             group by scheme_of_allowTime.id
             `
             HttpApi.obs({ sql }, (res) => {
@@ -63,7 +64,7 @@ class SchemeOfAllowTime extends Component {
      * 批量插入 sche_cyc_map_date
      */
     insertIntoDB = (value) => {
-        let sql = `insert into scheme_of_allowTime (title) value ('${value.title}');`
+        let sql = `insert into scheme_of_allowTime (title,area0_id) value ('${value.title}',${this.props.id});`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
                 let sql = `select max(id) as max_id from scheme_of_allowTime`
@@ -170,8 +171,8 @@ class SchemeOfAllowTime extends Component {
             <div>
                 <Button type='primary' onClick={() => { this.setState({ addVisible: true }) }}>添加时间段方案</Button>
                 <Table style={{ marginTop: 20 }} bordered columns={columns} dataSource={this.state.data} pagination={false} />
-                <AddAtmSchemeView visible={this.state.addVisible} onOk={this.addSchemeOk} onCancel={this.addSchemeCancel} />
-                <UpdateAtmSchemeView visible={this.state.updateVisible} onOk={this.updateSchemeOk} onCancel={this.updateSchemeCancel} record={this.state.record} />
+                <AddAtmSchemeView visible={this.state.addVisible} onOk={this.addSchemeOk} onCancel={this.addSchemeCancel} {...this.props} />
+                <UpdateAtmSchemeView visible={this.state.updateVisible} onOk={this.updateSchemeOk} onCancel={this.updateSchemeCancel} record={this.state.record} {...this.props} />
             </div>
         );
     }

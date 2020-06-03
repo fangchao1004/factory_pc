@@ -11,6 +11,7 @@ import { getDevicesInfoByIdListStr, getRecordInfoByStartEndTimeAndDevices } from
 class RecordDetailByTime extends Component {
     constructor(props) {
         super(props);
+        // console.log('RecordDetailByTime:', props)
         this.state = {
             isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin,
             visible: false,
@@ -142,7 +143,7 @@ class RecordDetailByTime extends Component {
                     onClose={() => { this.setState({ showRecordListDrawer: false }) }}
                     showDrawer={this.state.showRecordListDrawer}
                     record={this.state.selectDeviceRecord} />
-                <ChangeDeviceBindDateScheme visible={this.state.updateVisible} onOk={this.updateSchemeBindOk} onCancel={this.updateSchemeBindCancel} record={this.state.selectDeviceRecord} removeBindScheme={this.removeBindScheme} />
+                <ChangeDeviceBindDateScheme  visible={this.state.updateVisible} onOk={this.updateSchemeBindOk} onCancel={this.updateSchemeBindCancel} record={this.state.selectDeviceRecord} removeBindScheme={this.removeBindScheme} id={this.props.id}/>
             </Drawer>
         );
     }

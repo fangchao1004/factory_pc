@@ -64,13 +64,14 @@ export default class ChangeTableView extends Component {
             visible={this.props.visible}
             onClose={this.props.onClose}
         >
-            <EditTable data={this.props.data} onOk={this.props.onOk} />
+            <EditTable {...this.props} data={this.props.data} onOk={this.props.onOk} />
         </Drawer >
     }
 }
 class EditTable extends Component {
     constructor(props) {
         super(props);
+        // console.log('props:',props)
         this.state = {
             dataSource: [],
             loading: false,
@@ -110,7 +111,7 @@ class EditTable extends Component {
     }
     getDateSchemeData = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select * from scheme_of_cycleDate where effective = 1`
+            let sql = `select * from scheme_of_cycleDate where effective = 1 and area0_id = ${this.props.id}`
             HttpApi.obs({ sql }, (res) => {
                 if (res.data.code === 0) {
                     // console.log('getDateSchemeData:', res.data.data);
@@ -125,7 +126,7 @@ class EditTable extends Component {
     }
     getAllowTimeSchemeData = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select * from scheme_of_allowTime where effective = 1`
+            let sql = `select * from scheme_of_allowTime where effective = 1 and area0_id = ${this.props.id}`
             HttpApi.obs({ sql }, (res) => {
                 if (res.data.code === 0) {
                     // console.log('getAllowTimeSchemeData:', res.data.data);

@@ -3,7 +3,7 @@ import { Table, Button, TreeSelect, message, DatePicker, Popconfirm, Tag, Alert 
 import moment from 'moment';
 import HttpApi from '../../util/HttpApi';
 import RecordDetailByTime from './RecordDetailByTime';
-import { transfromDataTo3level, combinAreaAndDevice, renderTreeNodeListByData, getDevicesInfoByIdListStr, filterDevicesByDateScheme } from '../../util/Tool'
+import { translate, getDevicesInfoByIdListStr, filterDevicesByDateScheme, combinAreaAndDeviceTest, renderTreeNodeListByDataTest } from '../../util/Tool'
 import UpdateTimeView from './UpdateTimeView';
 import AddTimeView from './AddTimeView';
 const { TreeNode } = TreeSelect;
@@ -13,11 +13,11 @@ var allow_time_name;
 /**
  * 时间区间 模块界面
  * 这个选项卡中，如果是奇数天 就显示 allow_time
- * 偶数天 就显示 allow_time2
  */
 class TimeView extends Component {
     constructor(props) {
         super(props);
+        console.log('TimeView:', props)
         this.state = {
             loading: false,
             dataSource: [],
@@ -42,13 +42,13 @@ class TimeView extends Component {
     }
     init = async () => {
         this.setState({ loading: true })
-        let result = await this.getAllowTimeInfo();
-        this.getInfoAndChangeData(result);
-        let resultArea123 = await this.getArea123Info();
+        let resultTime = await this.getAllowTimeInfo();
+        this.getInfoAndChangeData(resultTime);
+        let resultArea0123 = await this.getArea0123InfoByArea0Id();
         let deviceInfo = await this.getDeviceInfo();
-        let tempData = transfromDataTo3level(resultArea123);
-        let tempData2 = combinAreaAndDevice(tempData, deviceInfo);
-        let treeNodeList = renderTreeNodeListByData(tempData2, TreeNode);
+        let result = translate(['area1_id', 'area2_id', 'area3_id'], resultArea0123)
+        let tempData2 = combinAreaAndDeviceTest(result, deviceInfo, 2);
+        let treeNodeList = renderTreeNodeListByDataTest(tempData2, TreeNode, 3);
         this.setState({
             treeNodeList
         })
@@ -64,13 +64,15 @@ class TimeView extends Component {
             })
         })
     }
-    getArea123Info = () => {
+    getArea0123InfoByArea0Id = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select area_1.id as area1_id , area_1.name as area1_name, area_2.id as area2_id ,area_2.name as area2_name,area_3.id as area3_id,area_3.name as area3_name from area_1
+            let sql = `select area_0.id as area0_id , area_0.name as area0_name, area_1.id as area1_id , area_1.name as area1_name, area_2.id as area2_id ,area_2.name as area2_name,area_3.id as area3_id,area_3.name as area3_name 
+            from area_0
+            left join (select * from area_1 where effective = 1)area_1 on area_0.id = area_1.area0_id
             left join (select * from area_2 where effective = 1)area_2 on area_1.id = area_2.area1_id
             left join (select * from area_3 where effective = 1)area_3 on area_2.id = area_3.area2_id
-            where area_1.effective = 1
-            order by area_1.id`;
+            where area_0.effective = 1 and area_0.id = ${this.props.id}
+            order by area_0.id,area_1.id`;
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -83,10 +85,11 @@ class TimeView extends Component {
     getAllowTimeInfo = () => {
         return new Promise((resolve, reject) => {
             // let sql = `select * from allow_time where effective = 1`;
-            let sql = `select a_t.id,a_t.begin,a_t.end,a_t.isCross,a_t.name,GROUP_CONCAT(distinct a_m_d.device_id) as select_map_device,count(distinct a_m_d.device_id) need_count from ${allow_time_name} a_t
+            let sql = `select a_t.id,a_t.begin,a_t.end,a_t.isCross,a_t.name,GROUP_CONCAT(distinct a_m_d.device_id) as select_map_device,count(distinct a_m_d.device_id) need_count 
+            from ${allow_time_name} a_t
             left join (select * from ${allowTime_map_device_name} where effective = 1) a_m_d
             on a_t.id = a_m_d.allow_time_id
-            where a_t.effective = 1
+            where a_t.effective = 1 and a_t.area0_id = ${this.props.id}
             group by a_t.id`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -178,7 +181,7 @@ class TimeView extends Component {
         return current > moment().endOf('day');
     }
     AddTimeOk = (data) => {
-        let sql = `INSERT INTO ${allow_time_name} SET begin='${data.begin.format('HH:mm:ss')}', end='${data.end.format('HH:mm:ss')}', isCross=${data.isCross ? 1 : 0}, name='${data.name}'`
+        let sql = `INSERT INTO ${allow_time_name} SET area0_id = ${this.props.id}, begin='${data.begin.format('HH:mm:ss')}', end='${data.end.format('HH:mm:ss')}', isCross=${data.isCross ? 1 : 0}, name='${data.name}'`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
                 message.success('添加成功');
@@ -191,7 +194,7 @@ class TimeView extends Component {
     }
     UpdateTimeOk = (data) => {
         let sql = `UPDATE ${allow_time_name} SET begin='${data.begin.format('HH:mm:ss')}', end='${data.end.format('HH:mm:ss')}', isCross=${data.isCross ? 1 : 0}, name='${data.name}'
-        where id = ${this.state.oneRecord.id}`
+        where id = ${this.state.oneRecord.id} and area0_id = ${this.props.id}`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
                 message.success('更新成功');
@@ -204,7 +207,7 @@ class TimeView extends Component {
     }
     deleteTimeHandler = (recordValue) => {
         let sql = `UPDATE ${allow_time_name} SET effective = 0
-        where id = ${recordValue.id}`
+        where id = ${recordValue.id} and area0_id = ${this.props.id},`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
                 message.success('删除成功');
@@ -313,7 +316,7 @@ class TimeView extends Component {
                     dataSource={dataSource}
                     pagination={false}
                 />
-                <RecordDetailByTime visible={this.state.showDrawer} record={this.state.oneRecord} close={this.closeHandler} />
+                <RecordDetailByTime visible={this.state.showDrawer} record={this.state.oneRecord} close={this.closeHandler} {...this.props} />
                 <UpdateTimeView visible={this.state.showUpdateModal} record={this.state.oneRecord} onOk={this.UpdateTimeOk} onCancel={() => { this.setState({ showUpdateModal: false }) }} />
                 <AddTimeView visible={this.state.showAddModal} onOk={this.AddTimeOk} onCancel={() => { this.setState({ showAddModal: false }) }} />
             </div>

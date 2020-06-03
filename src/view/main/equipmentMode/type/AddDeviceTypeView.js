@@ -9,11 +9,6 @@ function AddDeviceTypeFrom(props) {
                 rules: [{ required: true, message: '请输入巡检点类型名称' }]
             })(<Input></Input>)}
         </Form.Item>
-        {/* <Form.Item label="巡检点类型表单名称" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('sample_name', {
-                rules: [{ required: true, message: '请输入巡检点类型表单名称' }]
-            })(<Input></Input>)}
-        </Form.Item> */}
     </Form>
 }
 

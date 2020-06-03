@@ -10,22 +10,22 @@ const tabListNoTitle = [{
     key: 'EditableTable',
     tab: '创建表单'
 }];
-
-const contentListNoTitle = {
-    TableView: <TableView />,
-    EditableTable: <EditableTable />
-};
-
 class TableModeRoot extends Component {
-    state = {
-        key: 'TableView',
-        noTitleKey: 'TableView',
+    constructor(props) {
+        super(props);
+        console.log('TableModeRoot:', props)
+        this.state = {
+            key: 'TableView',
+            noTitleKey: 'TableView',
+        }
+        this.contentListNoTitle = {
+            TableView: <TableView {...props} />,
+            EditableTable: <EditableTable {...props} />
+        };
     }
-
     onTabChange = (key) => {
         this.setState({ noTitleKey: key });
     }
-
     render() {
         return (
             <Card
@@ -36,7 +36,7 @@ class TableModeRoot extends Component {
                 activeTabKey={this.state.noTitleKey}
                 onTabChange={(key) => { this.onTabChange(key); }}
             >
-                {contentListNoTitle[this.state.noTitleKey]}
+                {this.contentListNoTitle[this.state.noTitleKey]}
             </Card>
         );
     }

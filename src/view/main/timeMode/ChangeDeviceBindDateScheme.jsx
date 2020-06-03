@@ -6,6 +6,7 @@ var options1 = [];
 export default class ChangeDeviceBindDateScheme extends Component {
     constructor(props) {
         super(props);
+        // console.log('ChangeDeviceBindDateScheme:', props)
         this.state = {
             visible: false,
             result: [],
@@ -27,7 +28,7 @@ export default class ChangeDeviceBindDateScheme extends Component {
     }
     getCycleDateInfo = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select * from scheme_of_cycleDate where effective = 1`
+            let sql = `select * from scheme_of_cycleDate where effective = 1 and area0_id = ${this.props.id}`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) { result = res.data.data }

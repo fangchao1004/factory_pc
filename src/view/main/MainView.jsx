@@ -49,6 +49,7 @@ export default class MainView extends Component {
             runBugNum: 0,
             noticeMenuData: [],
             dotCount: 0,
+            area0List: []
         }
         tempNoticeStr = noticeinfo ? noticeinfo : ''///获取曾提醒过的最新内容。作为临时数据。
     }
@@ -85,8 +86,14 @@ export default class MainView extends Component {
             runBugLength = runBugList.length;
         }
         let taskRunMajorBugResult = checkBugTaskDataIsNew({ maxTaskId, myMaxBugId, RunBugIdList });
-        // console.log('taskRunMajorBugResult:', taskRunMajorBugResult)
-        this.setState({ noticeMenuData: taskRunMajorBugResult.detail, dotCount: taskRunMajorBugResult.count })
+        let area0List = await this.getArea0List();
+        this.setState({
+            noticeMenuData: taskRunMajorBugResult.detail,
+            dotCount: taskRunMajorBugResult.count,
+            area0List: area0List.map((item) => {
+                return { id: item.id, name: item.name }
+            })
+        })
         ///初始化的时候，就先获取所需数据，展示在导航栏处
         ////如果有变化 才刷新
         if (this.state.aboutMeBugNum !== myBugLength || this.state.aboutMeTaskNum !== taskLength || this.state.runBugNum !== runBugLength) {
@@ -99,6 +106,18 @@ export default class MainView extends Component {
                 })
             }, 500);
         }
+    }
+    getArea0List = () => {
+        return new Promise((resolve, reject) => {
+            let sql = `select * from area_0 where effective = 1 `
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
     }
     getMyBugsInfo = () => {
         return new Promise((resolve, reject) => {
@@ -190,7 +209,37 @@ export default class MainView extends Component {
             onClose: close,
         });
     };
-
+    ///动态生成左边菜单栏
+    renderByArea0 = (area0List) => {
+        const getList = (item) => <SubMenu key={item.name} title={<span><Icon type="scan" /><span>{item.name}</span></span>}>
+            <Menu.Item key={`/mainView/time_${item.id}`}>
+                <Icon type="clock-circle" />
+                <span>巡检时间段</span>
+                <Link to={`${this.props.match.url}/time_${item.id}`} />
+            </Menu.Item>
+            <Menu.Item key={`/mainView/equipment_${item.id}`}>
+                <Icon type="switcher" />
+                <span>巡检点</span>
+                <Link to={`${this.props.match.url}/equipment_${item.id}`} />
+            </Menu.Item>
+            {this.state.isAdmin ? <Menu.Item key={`/mainView/table_${item.id}`}>
+                <Icon type="file" />
+                <span>巡检表单</span>
+                <Link to={`${this.props.match.url}/table_${item.id}`} />
+            </Menu.Item> : null}
+            {this.state.isAdmin ? <Menu.Item key={`/mainView/scheme_${item.id}`}>
+                <Icon type="edit" />
+                <span>巡检方案</span>
+                <Link to={`${this.props.match.url}/scheme_${item.id}`} />
+            </Menu.Item> : null}
+            <Menu.Item key={`/mainView/runlog_${item.id}`} >
+                <Icon type="unordered-list" />
+                <span>运行日志</span>
+                <Link to={`${this.props.match.url}/runlog_${item.id}`} />
+            </Menu.Item>
+        </SubMenu>
+        return area0List.map((item) => { return getList(item) })
+    }
     render() {
         return (
             <Layout style={{ minHeight: '100vh' }}>
@@ -207,38 +256,13 @@ export default class MainView extends Component {
                             <span>首页</span>
                             <Link to={`${this.props.match.url}`} />
                         </Menu.Item>
+                        <Menu.Item key="/mainView/area">
+                            <Icon type="environment" />
+                            <span>区域</span>
+                            <Link to={`${this.props.match.url}/area`} />
+                        </Menu.Item>
                         <SubMenu key="巡检点" title={<span><Icon type="scan" /><span>巡检</span></span>}>
-                            <Menu.Item key="/mainView/equipment">
-                                <Icon type="switcher" />
-                                <span>巡检点</span>
-                                <Link to={`${this.props.match.url}/equipment`} />
-                            </Menu.Item>
-                            {this.state.isAdmin ?
-                                <Menu.Item key="/mainView/table">
-                                    <Icon type="file" />
-                                    <span>巡检表单</span>
-                                    <Link to={`${this.props.match.url}/table`} />
-                                </Menu.Item> : null}
-                            <Menu.Item key="/mainView/area">
-                                <Icon type="environment" />
-                                <span>巡检区域</span>
-                                <Link to={`${this.props.match.url}/area`} />
-                            </Menu.Item>
-                            <Menu.Item key="/mainView/time">
-                                <Icon type="clock-circle" />
-                                <span>巡检时间段</span>
-                                <Link to={`${this.props.match.url}/time`} />
-                            </Menu.Item>
-                            {this.state.isAdmin ? <Menu.Item key="/mainView/scheme">
-                                <Icon type="edit" />
-                                <span>巡检方案</span>
-                                <Link to={`${this.props.match.url}/scheme`} />
-                            </Menu.Item> : null}
-                            <Menu.Item key="/mainView/runlog">
-                                <Icon type="unordered-list" />
-                                <span>运行日志</span>
-                                <Link to={`${this.props.match.url}/runlog`} />
-                            </Menu.Item>
+                            {this.renderByArea0(this.state.area0List)}
                         </SubMenu>
                         <SubMenu key="缺陷" title={
                             <span>
@@ -346,7 +370,7 @@ export default class MainView extends Component {
                             </Col>
                         </Row>
                     </Header>
-                    <ContentView {...this.props} />
+                    <ContentView {...this.props} data={this.state.area0List} />
                 </Layout>
             </Layout >
         );
@@ -354,8 +378,47 @@ export default class MainView extends Component {
 }
 
 class ContentView extends Component {
-    shouldComponentUpdate() {
-        return false ///目的是让 MainView中重新渲染时，ContentView 始终不会被重复渲染
+    shouldComponentUpdate(nextProps) {
+        return JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data) ///目的是让 MainView中重新渲染时，ContentView 始终不会被重复渲染
+    }
+    ///动态生成路由--有几个厂区就要复制几份
+    renderRouterByArea0 = () => {
+        const area0List = this.props.data;
+        const getRoute = (item) => [<Route
+            key={`1_${item.id}`}
+            exact
+            path={`${this.props.match.path}/equipment_${item.id}`}
+            component={() => (storage.getItem('userinfo') ? <EquipmentModeRoot {...item} /> : <Redirect to='/' />)}
+        />,
+        <Route
+            key={`2_${item.id}`}
+            exact
+            path={`${this.props.match.path}/time_${item.id}`}
+            component={() => (storage.getItem('userinfo') ? <TimeModeRoot {...item} /> : <Redirect to='/' />)}
+        />,
+        <Route
+            key={`3_${item.id}`}
+            exact
+            path={`${this.props.match.path}/runlog_${item.id}`}
+            component={() => (storage.getItem('userinfo') ? <RunlogModeRoot {...item} /> : <Redirect to='/' />)}
+        />,
+        <Route
+            key={`4_${item.id}`}
+            exact
+            path={`${this.props.match.path}/table_${item.id}`}
+            component={() => (storage.getItem('userinfo') ? <TableModeRoot {...item} /> : <Redirect to='/' />)}
+        />,
+        <Route
+            key={`5_${item.id}`}
+            exact
+            path={`${this.props.match.path}/scheme_${item.id}`}
+            component={() => (storage.getItem('userinfo') ? <SchemeModeRoot {...item} /> : <Redirect to='/' />)}
+        />]
+        let tempRouteList = [];
+        area0List.forEach((area0Item) => {
+            tempRouteList.push(...getRoute(area0Item))
+        })
+        return tempRouteList
     }
     render() {
         return <Content style={{ background: '#fff', minHeight: 280, marginTop: 64 }}>
@@ -367,34 +430,15 @@ class ContentView extends Component {
                 />
                 <Route
                     exact
-                    path={`${this.props.match.path}/equipment`}
-                    component={() => (storage.getItem('userinfo') ? <EquipmentModeRoot /> : <Redirect to='/' />)}
-                />
-                <Route
-                    exact
                     path={`${this.props.match.path}/area`}
                     component={() => (storage.getItem('userinfo') ? <AreaModeRoot /> : <Redirect to='/' />)}
                 />
-                <Route
-                    exact
-                    path={`${this.props.match.path}/time`}
-                    component={() => (storage.getItem('userinfo') ? <TimeModeRoot /> : <Redirect to='/' />)}
-                />
-                <Route
-                    exact
-                    path={`${this.props.match.path}/runlog`}
-                    component={() => (storage.getItem('userinfo') ? <RunlogModeRoot /> : <Redirect to='/' />)}
-                />
+                {this.renderRouterByArea0()}
                 <Route
                     exact
                     path={`${this.props.match.path}/staff`}
                     component={() => (storage.getItem('userinfo') ? <StaffModeRoot /> : <Redirect to='/' />)}
-                />
-                <Route
-                    exact
-                    path={`${this.props.match.path}/table`}
-                    component={() => (storage.getItem('userinfo') ? <TableModeRoot /> : <Redirect to='/' />)}
-                />
+                />,
                 <Route
                     exact
                     path={`${this.props.match.path}/bug`}
@@ -443,11 +487,6 @@ class ContentView extends Component {
                     exact
                     path={`${this.props.match.path}/schedule`}
                     component={() => (storage.getItem('userinfo') ? <ScheduleRoot /> : <Redirect to='/' />)}
-                />
-                <Route
-                    exact
-                    path={`${this.props.match.path}/scheme`}
-                    component={() => (storage.getItem('userinfo') ? <SchemeModeRoot /> : <Redirect to='/' />)}
                 />
             </section>
         </Content>

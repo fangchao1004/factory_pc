@@ -26,7 +26,10 @@ class EquipmentArea2View extends Component {
         })
     }
     addArea2ok = async (value) => {
-        let result = await this.insertArea2Info(value);
+        let tempData = {};
+        tempData.area1_id = parseInt(value.area01_id.split('-')[1]);
+        tempData.area2_name = value.area2_name;
+        let result = await this.insertArea2Info(tempData);
         if (result === 0) { message.success('添加成功'); }
         this.setState({
             addVisible: false
@@ -37,7 +40,10 @@ class EquipmentArea2View extends Component {
         this.setState({ addVisible: false })
     }
     updateArea2ok = async (value) => {
-        let result = await this.updateArea2Info(value);
+        let tempData = {};
+        tempData.area1_id = value.area01_id.split('-')[1];
+        tempData.area2_name = value.area2_name;
+        let result = await this.updateArea2Info(tempData);
         if (result === 0) { message.success('修改成功'); }
         this.setState({
             updateVisible: false
@@ -59,9 +65,9 @@ class EquipmentArea2View extends Component {
     }
     getArea2Info = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select area_2.id as area2_id,area_2.name as area2_name,area_1.id as area1_id,area_1.name as area1_name from area_2
-            left join (select * from area_1)area_1
-            on area_1.id = area_2.area1_id
+            let sql = `select area_2.id as area2_id,area_2.name as area2_name,area_1.id as area1_id,area_1.name as area1_name,area_0.id as area0_id,area_0.name as area0_name from area_2
+            left join (select * from area_1)area_1 on area_1.id = area_2.area1_id
+            left join (select * from area_0)area_0 on area_0.id = area_1.area0_id
             where area_2.effective = 1`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -108,6 +114,10 @@ class EquipmentArea2View extends Component {
     }
     render() {
         const columns = [
+            {
+                title: '所属厂区',
+                dataIndex: 'area0_name'
+            },
             {
                 title: '所属一级区域',
                 dataIndex: 'area1_name'

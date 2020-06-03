@@ -6,6 +6,7 @@ import UpdateDeviceTypeView from './UpdateDeviceTypeView';
 
 class EquipmentTypeView extends Component {
     constructor(props) {
+        console.log('EquipmentTypeView:', props)
         super(props)
         this.state = {
             dataSource: [],
@@ -16,7 +17,7 @@ class EquipmentTypeView extends Component {
         this.getDeviceTypeData();
     }
     getDeviceTypeData = () => {
-        HttpApi.getDeviceTypeInfo({ effective: 1 }, (res) => {
+        HttpApi.getDeviceTypeInfo({ effective: 1, area0_id: this.props.id }, (res) => {
             if (res.data.code === 0) {
                 res.data.data.map((item) => (
                     item.key = item.id + ""
@@ -31,6 +32,7 @@ class EquipmentTypeView extends Component {
         this.setState({ addStaffVisible: true })
     }
     addStaffOnOk = (newValues) => {
+        newValues.area0_id = this.props.id
         HttpApi.addDeviceTypeInfo(newValues, data => {
             if (data.data.code === 0) {
                 this.setState({ addStaffVisible: false })
@@ -134,9 +136,9 @@ class EquipmentTypeView extends Component {
                         pageSizeOptions: ['10', '20', '50', '80', '100'],
                     }}
                 />
-                <AddDeviceTypeView onOk={this.addStaffOnOk} onCancel={this.addStaffOnCancel} visible={this.state.addStaffVisible} />
+                <AddDeviceTypeView onOk={this.addStaffOnOk} onCancel={this.addStaffOnCancel} visible={this.state.addStaffVisible} {...this.props} />
                 <UpdateDeviceTypeView staff={this.state.updateStaffData} onOk={this.updateStaffOnOk}
-                    onCancel={this.updateStaffOnCancel} visible={this.state.updateStaffVisible} />
+                    onCancel={this.updateStaffOnCancel} visible={this.state.updateStaffVisible} {...this.props} />
             </div>
         );
     }

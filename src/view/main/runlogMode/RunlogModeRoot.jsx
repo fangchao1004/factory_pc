@@ -6,20 +6,20 @@ var tabListNoTitle = [{
     key: 'RunlogView',
     tab: '运行日志',
 }]
-
-const contentListNoTitle = {
-    RunlogView: <RunlogView />,
-};
-
 class RunlogModeRoot extends Component {
-    state = {
-        key: 'RunlogView',
-        noTitleKey: 'RunlogView',
+    constructor(props) {
+        super(props);
+        this.state = {
+            key: 'RunlogView',
+            noTitleKey: 'RunlogView',
+        }
+        this.contentListNoTitle = {
+            RunlogView: <RunlogView {...props} />,
+        };
     }
     onTabChange = (key) => {
         this.setState({ noTitleKey: key });
     }
-
     render() {
         return (
             <Card
@@ -30,7 +30,7 @@ class RunlogModeRoot extends Component {
                 activeTabKey={this.state.noTitleKey}
                 onTabChange={(key) => { this.onTabChange(key); }}
             >
-                {contentListNoTitle[this.state.noTitleKey]}
+                {this.contentListNoTitle[this.state.noTitleKey]}
             </Card>
         );
     }

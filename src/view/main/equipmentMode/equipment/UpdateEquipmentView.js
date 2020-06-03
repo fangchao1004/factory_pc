@@ -34,13 +34,13 @@ function UpdateEquipmentForm(props) {
             {getFieldDecorator('type_id', {
                 initialValue: props.device.type_id,
                 rules: [{ required: true, message: '请选择巡检点类型' }]
-            })(<Select showSearch={true} filterOption={(inputValue, option)=>{return option.props.children.indexOf(inputValue)!==-1}}>{typeOptions}</Select>)}
+            })(<Select showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{typeOptions}</Select>)}
         </Form.Item>
         <Form.Item label="NFC" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             {getFieldDecorator('nfc_id', {
                 initialValue: props.device.nfc_id,
                 rules: [{ required: true, message: '请选择巡检点NFC' }]
-            })(<Select showSearch={true} filterOption={(inputValue, option)=>{return option.props.children.indexOf(inputValue)!==-1}}>{nfcOptions}</Select>)}
+            })(<Select showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{nfcOptions}</Select>)}
         </Form.Item>
         <Form.Item label="巡检点名称" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             {getFieldDecorator('name', {
@@ -96,14 +96,14 @@ export default class UpdateEquipmentView extends Component {
     init = async () => {
         let typeResult = await this.getTypeInfo();
         let nfcResult = await this.getNfcInfo();
-        let result = await HttpApi.getArea123Info();
+        let result = await HttpApi.getArea123Info(this.props.id);
         let resultList = transfromDataTo3level(result, false);
         // console.log('resultList', resultList);
         this.setState({ areas: resultList, types: typeResult, nfcs: nfcResult })
     }
     getTypeInfo = () => {
         return new Promise((resolve, reject) => {
-            HttpApi.getDeviceTypeInfo({ effective: 1 }, res => {
+            HttpApi.getDeviceTypeInfo({ effective: 1, area0_id: this.props.id }, res => {
                 let result = [];
                 if (res.data.code === 0) {
                     result = res.data.data;

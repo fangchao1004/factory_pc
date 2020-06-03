@@ -15,7 +15,6 @@ class EquipmentArea1View extends Component {
             areaRecord: {},
         }
     }
-
     componentDidMount() {
         this.init();
     }
@@ -26,7 +25,7 @@ class EquipmentArea1View extends Component {
     }
     addArea1ok = async (value) => {
         // console.log('确认添加某个一级区域：', value);
-        let result = await this.insertArea1Info(value.area1_name);
+        let result = await this.insertArea1Info(value);
         if (result === 0) { message.success('添加成功'); }
         this.setState({
             addVisible: false
@@ -41,7 +40,7 @@ class EquipmentArea1View extends Component {
         let result1 = await this.deleteArea1Info(record.area1_id);
         if (result1 === 0) {
             let area2idList = await this.getArea2ByArea1id(record.area1_id);
-            console.log('旗下包含的2级有这些：', area2idList);///这些二级都下被删除的一级下面
+            // console.log('旗下包含的2级有这些：', area2idList);///这些二级都下被删除的一级下面
             let result2 = await this.deleteArea2Info(record.area1_id);
             if (result2 === 0) {
                 let result3 = await this.deleteArea3Info(area2idList)///根据对应的二级id数组 去删除他们旗下的三级
@@ -54,7 +53,8 @@ class EquipmentArea1View extends Component {
     }
     updateArea1ok = async (value) => {
         // console.log('确认修改某个一级区域', value);
-        let result = await this.updateArea1Info(value.area1_name);
+        // return;
+        let result = await this.updateArea1Info(value);
         if (result === 0) { message.success('修改成功'); }
         this.setState({
             updateVisible: false
@@ -66,7 +66,9 @@ class EquipmentArea1View extends Component {
     }
     getArea1Info = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select area_1.id as area1_id , area_1.name as area1_name from area_1 where effective = 1`
+            let sql = `select area_1.id as area1_id,area_1.name as area1_name,area0_id,area_0.name as area0_name from area_1
+            left join (select * from area_0 where effective = 1) area_0 on area_0.id = area_1.area0_id
+            where area_1.effective = 1`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -76,17 +78,17 @@ class EquipmentArea1View extends Component {
             })
         })
     }
-    insertArea1Info = (newAreaName) => {
+    insertArea1Info = (value) => {
         return new Promise((resolve, reject) => {
-            let sql = `INSERT INTO area_1 (name,createdAt) VALUES ('${newAreaName}','${moment().utcOffset(0).format('YYYY-MM-DD HH:mm:ss')}')`
+            let sql = `INSERT INTO area_1 (name,area0_id,createdAt) VALUES ('${value.area1_name}',${value.area0_id},'${moment().utcOffset(0).format('YYYY-MM-DD HH:mm:ss')}')`
             HttpApi.obs({ sql }, (res) => {
                 resolve(res.data.code)
             })
         })
     }
-    updateArea1Info = (newAreaName) => {
+    updateArea1Info = (value) => {
         return new Promise((resolve, reject) => {
-            let sql = `UPDATE area_1 SET name = '${newAreaName}',updatedAt = '${moment().utcOffset(0).format('YYYY-MM-DD HH:mm:ss')}' WHERE id = ${this.state.areaRecord.area1_id}`
+            let sql = `UPDATE area_1 SET name = '${value.area1_name}',area0_id = ${value.area0_id},updatedAt = '${moment().utcOffset(0).format('YYYY-MM-DD HH:mm:ss')}' WHERE id = ${this.state.areaRecord.area1_id}`
             HttpApi.obs({ sql }, (res) => {
                 resolve(res.data.code)
             })
@@ -133,12 +135,20 @@ class EquipmentArea1View extends Component {
     render() {
         const columns = [
             {
+                title: '所属厂区',
+                dataIndex: 'area0_name',
+                render: (text, record) => (
+                    <div>{text}</div>
+                )
+            },
+            {
                 title: '名称',
                 dataIndex: 'area1_name',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
-            }, {
+            },
+            {
                 title: '操作',
                 dataIndex: 'actions',
                 width: 150,

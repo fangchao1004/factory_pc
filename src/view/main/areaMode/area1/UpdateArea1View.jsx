@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import { Modal, Form, Input } from 'antd';
-
+import { Modal, Form, Input, Select } from 'antd';
+import HttpApi from '../../../util/HttpApi';
+const { Option } = Select;
+var options = [];
 export default class UpdateArea1View extends Component {
     constructor(props) {
         super(props);
@@ -11,6 +13,25 @@ export default class UpdateArea1View extends Component {
     componentWillReceiveProps(nextProps) {
         this.setState({
             visible: nextProps.visible
+        })
+    }
+    componentDidMount() {
+        this.init();
+    }
+    init = async () => {
+        let area0result = await this.getArea0options();
+        options = area0result.map((item, index) => { return <Option value={item.area0_id} key={index}>{item.area0_name}</Option> })
+    }
+    getArea0options = () => {
+        return new Promise((resolve, reject) => {
+            let sql = `select area_0.id as area0_id , area_0.name as area0_name from area_0 where effective = 1`
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result)
+            })
         })
     }
     onCancelHandler = () => {
@@ -33,15 +54,25 @@ export default class UpdateArea1View extends Component {
                 onCancel={this.onCancelHandler}
                 onOk={this.onOkHandler}
             >
-                <Area1Form ref={'area1FormRef'} area={this.props.area} />
+                <Area1Form ref={'area1FormRef'} area={this.props.area} options={options} />
             </Modal>
         );
     }
 }
-
 function updateArea1From(props) {
     const { getFieldDecorator } = props.form
     return <Form>
+        <Form.Item label="所属厂区:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
+            {getFieldDecorator('area0_id', {
+                initialValue: props.area.area0_id,
+                rules: [{ required: true, message: '请选择所属的厂区' }]
+            })(<Select
+                showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}
+                placeholder='请选择所属的厂区'
+            >
+                {props.options}
+            </Select>)}
+        </Form.Item>
         <Form.Item label="一级巡检区域:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('area1_name', {
                 initialValue: props.area.area1_name,
