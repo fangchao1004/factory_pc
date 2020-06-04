@@ -23,7 +23,6 @@ export default class TreeView extends Component {
     init = async () => {
         let resultArea0123 = await this.getArea0123Info();
         let deviceInfo = await this.getDeviceInfo();
-        // console.log('deviceInfo:', deviceInfo)
         let result = translate(['area0_id', 'area1_id', 'area2_id', 'area3_id'], resultArea0123)
         let tempData2 = combinAreaAndDevice(result, deviceInfo);
         this.setState({

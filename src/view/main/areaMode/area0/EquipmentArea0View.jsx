@@ -68,7 +68,7 @@ class EquipmentArea0View extends Component {
     }
     getArea0Info = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select area_0.id as area0_id,area_0.name as area0_name from area_0 where effective = 1`
+            let sql = `select area_0.id as area0_id,area_0.name as area0_name,deletable from area_0 where effective = 1`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -165,20 +165,21 @@ class EquipmentArea0View extends Component {
                 title: '操作',
                 dataIndex: 'actions',
                 width: 150,
-                render: (text, record) => (
-                    <div style={{ textAlign: 'center' }}>
-                        <Popconfirm title={<div>确定要删除该厂区吗?<br />其下所包含的一二三级区域都会统一删除</div>} onConfirm={() => { this.deleteArea0Confirm(record) }}>
-                            <Button size="small" type="danger">删除</Button>
-                        </Popconfirm>
-                        <Divider type="vertical" />
+                align: 'center',
+                render: (text, record) => {
+                    return <div style={{ textAlign: 'center' }}>
+                        {record.deletable === 1 ?
+                            <><Popconfirm title={<div>确定要删除该厂区吗?<br />如果当前厂区已经正常使用切勿删除</div>} onConfirm={() => { this.deleteArea0Confirm(record) }} okText='确定删除' >
+                                <Button size="small" type="danger">删除</Button>
+                            </Popconfirm><Divider type="vertical" /></> : null}
                         <Button size="small" type="primary" onClick={() => { this.setState({ updateVisible: true, areaRecord: record }) }}>修改</Button>
                     </div>
-                )
+                }
             }
         ]
         return (
             <div>
-                <Alert message={'因左侧菜单栏会根据厂区数据动态生成, 所以当厂区数据发生变动时, 会触发页面刷新; 且请勿随意变动厂区数据'} />
+                <Alert message={'因左侧菜单栏会根据厂区数据动态生成, 所以当厂区数据发生变动时, 会触发页面刷新; 且请勿随意变动厂区数据; 因为数据安全问题默认不可删除, 如果要删除测试数据请联系管理员'} />
                 <Row>
                     <Col span={6}>
                         <Button onClick={() => { this.setState({ addVisible: true }) }} type="primary" style={{ marginBottom: 16, marginTop: 16 }}>

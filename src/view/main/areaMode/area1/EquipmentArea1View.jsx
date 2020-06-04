@@ -152,6 +152,7 @@ class EquipmentArea1View extends Component {
                 title: '操作',
                 dataIndex: 'actions',
                 width: 150,
+                align: 'center',
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
                         <Popconfirm title={<div>确定要删除该一级巡检区域吗?<br />其下所包含的二三级区域都会统一删除</div>} onConfirm={() => { this.deleteArea1Confirm(record) }}>

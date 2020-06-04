@@ -125,6 +125,7 @@ class EquipmentArea3View extends Component {
                 title: '操作',
                 dataIndex: 'actions',
                 width: 150,
+                align: 'center',
                 render: (text, record) => {
                     return <div style={{ textAlign: 'center' }}>
                         <Popconfirm title={<div>确定要删除该第三级巡检点范围吗？</div>} onConfirm={() => { this.deleteArea3Confirm(record) }}>
