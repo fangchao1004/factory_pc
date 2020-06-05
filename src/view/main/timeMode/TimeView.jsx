@@ -109,13 +109,22 @@ class TimeView extends Component {
             element.bt = beginTime;
             element.et = endTime;
             let result = await this.getCountInfoFromDB(element);
-            // console.log('result:', result)
             element.actually = result[0] ? result[0].actu_count : '/';
             element.checkMan = result[0] ? result[0].users_name : '/'
-
+            element.actu_des_list = result[0] ? result[0].actu_des_list : '/'
             let devicesResult = await getDevicesInfoByIdListStr(element);
-            let listAfterFilter = filterDevicesByDateScheme(devicesResult, this.state.selectTime);
+            let listAfterFilter = filterDevicesByDateScheme(devicesResult, this.state.selectTime);///每个时间区间内的设备-进过方案筛选后还剩哪些设备需要巡检
             element.afterFilter = listAfterFilter.length;
+            // element.afterFilter_list = listAfterFilter;///经过方案过滤后，剩余应该巡检的设备列表
+            let lostList = []
+            if (listAfterFilter) {
+                listAfterFilter.forEach((deviceItem) => {
+                    if (result[0] && result[0].actu_des_list.split(',').indexOf(String(deviceItem.id)) === -1) {
+                        lostList.push(deviceItem);
+                    }
+                })
+            }
+            element.lostList = lostList;
         }
         this.setState({
             loading: false,
@@ -130,7 +139,7 @@ class TimeView extends Component {
         // console.log('element:', element);
         // let sql = `select count(distinct(device_id)) as count from records
         // where checkedAt>'${element.bt}' and checkedAt<'${element.et}' and effective = 1`;
-        let sql = `select a_t.id,a_t.begin,a_t.end,count(distinct a_m_d.device_id) actu_count,temp_table.need_count, group_concat(distinct user_name) users_name from ${allow_time_name} a_t
+        let sql = `select a_t.id,a_t.begin,a_t.end,count(distinct a_m_d.device_id) actu_count,group_concat(distinct a_m_d.device_id) actu_des_list,temp_table.need_count, group_concat(distinct user_name) users_name from ${allow_time_name} a_t
         left join (select * from ${allowTime_map_device_name} where effective = 1) a_m_d on a_t.id = a_m_d.allow_time_id
         inner join (select distinct device_id,user_name from records 
                     left join (select users.id,users.name as user_name from users where effective = 1) users 
