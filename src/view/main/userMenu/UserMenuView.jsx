@@ -3,7 +3,7 @@ import { Button, Modal, Row, Col, Input, message, Card, Tooltip, Tag } from 'ant
 import HttpApi, { environmentIsTest } from '../../util/HttpApi'
 import moment from 'moment'
 import { permisstionWithDes, adminPermission } from '../../util/AppData'
-
+import { omitTextLength } from '../../util/Tool'
 
 var storage = window.localStorage;
 var userinfo = null;
@@ -93,8 +93,10 @@ export default class UserMenuView extends Component {
     }
     render() {
         return (
-            <div style={{ minWidth: 220 }}>
-                {this.state.majorName ? <Tag color={'#FF9900'} style={{ marginBottom: 10 }}>{'所属专业: ' + this.state.majorName}</Tag> : ''}
+            <div style={{ minWidth: 200 }}>
+                {this.state.majorName ? <Tooltip title={this.state.majorName}>
+                    <Tag color={'#FF9900'} style={{ marginBottom: 10 }}>{'所属专业: ' + omitTextLength(this.state.majorName, 12)}</Tag>
+                </Tooltip> : null}
                 {this.state.permissionList.length > 0 || this.state.isadmin ? <Card size="small" title="所有权限">{this.renderHandler()}</Card> : null}
                 {this.state.isadmin ? <Button type='primary' style={{ width: "100%", marginTop: 10 }} onClick={() => { this.setState({ showModal1: true }) }}>发布通知</Button> : null}
                 < Button type='danger' style={{ width: "100%", marginTop: 10 }}

@@ -108,7 +108,7 @@ class EquipmentArea3View extends Component {
     render() {
         const columns = [
             {
-                title: '所属厂区',
+                title: '所属片区',
                 dataIndex: 'area0_name'
             },
             {

@@ -147,7 +147,7 @@ export default class InspectCountByTime extends Component {
         const { dataSource } = this.state;
         const columns = [
             {
-                title: <div>日期</div>,
+                title: '日期',
                 dataIndex: 'date',
                 width: 150,
                 align: 'center',
@@ -156,9 +156,10 @@ export default class InspectCountByTime extends Component {
                 }
             },
             {
-                title: <div>时间段</div>,
+                title: '时间段',
                 dataIndex: '/',
                 align: 'center',
+                width: 300,
                 render: (text, record) => {
                     return <div>{record.begin} ~ {record.end} （{record.name}）{record.isCross ? '跨天' : ''}</div>
                 }
@@ -209,6 +210,7 @@ export default class InspectCountByTime extends Component {
                     pagination={{
                         showSizeChanger: true,
                         pageSizeOptions: ['10', '20', '50', '100'],
+                        defaultPageSize: 100
                     }}
                 />
             </div>

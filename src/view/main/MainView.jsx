@@ -270,13 +270,13 @@ export default class MainView extends Component {
                                 <span>缺陷</span>
                                 <Badge dot={JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('1') !== -1 ? (this.state.aboutMeBugNum + this.state.runBugNum) > 0 : this.state.aboutMeBugNum > 0} style={{ marginLeft: 30 }} />
                             </span>
-                        }>
+                        }>{JSON.parse(localUserInfo).major_id_all ?
                             <Menu.Item key="/mainView/bugAboutMe">
                                 <Icon type="hdd" />
                                 <span>专业相关</span>
                                 <Badge count={this.state.aboutMeBugNum} overflowCount={99} style={{ marginLeft: 35 }} />
                                 <Link to={`${this.props.match.url}/bugAboutMe`} />
-                            </Menu.Item>
+                            </Menu.Item> : null}
                             {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('1') !== -1 ?
                                 <Menu.Item key="/mainView/bugRunCheck">
                                     <Icon type="hdd" />
@@ -381,7 +381,7 @@ class ContentView extends Component {
     shouldComponentUpdate(nextProps) {
         return JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data) ///目的是让 MainView中重新渲染时，ContentView 始终不会被重复渲染
     }
-    ///动态生成路由--有几个厂区就要复制几份
+    ///动态生成路由--有几个片区就要复制几份
     renderRouterByArea0 = () => {
         const area0List = this.props.data;
         const getRoute = (item) => [<Route

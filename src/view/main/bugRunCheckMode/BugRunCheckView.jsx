@@ -98,7 +98,7 @@ export default class BugRunCheckView extends Component {
         this.setState({
             data: finallyData,
         })
-        noticeForRunCheckList(this._audio, storage.getItem(NOTICEMUSICOPENFORRUN) === 'true', finallyData, OLDRUNBUGIDLIST);
+        // noticeForRunCheckList(this._audio, storage.getItem(NOTICEMUSICOPENFORRUN) === 'true', finallyData, OLDRUNBUGIDLIST);
     }
     /**
      * 查询上传者 去重
@@ -346,7 +346,7 @@ export default class BugRunCheckView extends Component {
                 onFilter: (value, record) => record.user_id === value,
             },
             {
-                key: 'area_remark', dataIndex: 'area_remark', title: '具体巡检点范围',
+                key: 'area_remark', dataIndex: 'area_remark', title: '巡检点范围',
                 width: 100,
                 align: 'center',
                 render: (text, record) => {
@@ -567,19 +567,19 @@ export default class BugRunCheckView extends Component {
         ]
         return (
             < Fragment >
-                <Alert message="当用户拥有运行权限时, 该模块才会显示; 定时刷新待运行验收的缺陷数据; 自行决定当有新缺陷等待运行处理时是否会有提示音" type="info" showIcon />
+                <Alert message="当用户拥有运行权限时, 该模块才会显示; 定时刷新待运行验收的缺陷数据" type="info" showIcon />
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'row-reverse', marginTop: 10, alignItems: 'center' }}>
                     <Input.Search style={{ width: 340 }} allowClear placeholder="支持内容、巡检点和巡检范围的模糊查询"
                         onChange={(e) => { if (e.target.value === '') { this.init(); } }}
                         onPressEnter={(e) => { this.filterBySearch(e.target.value) }} onSearch={this.filterBySearch} enterButton
                     />
-                    <Tooltip title='新缺陷提示音'>
+                    {/* <Tooltip title='新缺陷提示音'>
                         <Switch style={{ marginRight: 10 }} checkedChildren="提示音开" unCheckedChildren="提示音关" checked={this.state.openMusic} onChange={(v) => {
                             if (storage[BROWERTYPE] === 'Safari') { message.warning('Safari 浏览器暂不支持提示音'); return }
                             this.setState({ openMusic: v })
                             storage[NOTICEMUSICOPENFORRUN] = v;
                         }} />
-                    </Tooltip>
+                    </Tooltip> */}
                 </div>
                 <Table
                     style={{ marginTop: 10 }}
@@ -656,9 +656,9 @@ export default class BugRunCheckView extends Component {
                     <img alt='' style={{ width: 400 }} src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} />
                     {/* <img alt='' style={{ width: 400 }} src={'http://ixiaomu.cn:3008/get_jpg?uuid=' + this.state.imguuid} /> */}
                 </Modal>
-                <div style={{ display: 'none' }}>
+                {/* <div style={{ display: 'none' }}>
                     <audio ref={(audio) => { this._audio = audio }} src={NOTIFY_MP3} controls="controls" ></audio>
-                </div>
+                </div> */}
             </Fragment >
         );
     }

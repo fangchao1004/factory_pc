@@ -175,14 +175,14 @@ export default class BugViewNewComplete extends Component {
             },
             {
                 key: 'user_name', dataIndex: 'user_name', title: '发现人',
-                width: 100,
+                width: 120,
                 align: 'center',
                 filters: uploader_filter,
                 onFilter: (value, record) => record.user_id === value,
             },
             {
-                key: 'area_remark', dataIndex: 'area_remark', title: '具体巡检点范围',
-                width: 100,
+                key: 'area_remark', dataIndex: 'area_remark', title: '巡检点范围',
+                width: 140,
                 align: 'center',
                 render: (text, record) => {
                     let result = '/'
@@ -260,7 +260,7 @@ export default class BugViewNewComplete extends Component {
             },
             {
                 key: 'buglevel', dataIndex: 'buglevel', title: '缺陷类型',
-                width: 80,
+                width: 120,
                 align: 'center',
                 filters: bug_level_filter,
                 onFilter: (value, record) => record.buglevel === value,

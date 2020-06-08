@@ -171,15 +171,17 @@ class EquipmentView extends Component {
                 sorter: (a, b) => {
                     return a.name.charCodeAt(0) - b.name.charCodeAt(0)
                 },
+                align: 'center',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
             },
             {
-                title: '具体巡检点范围',
+                title: '巡检点范围',
                 dataIndex: 'area_name',
                 // filters: area_data_filter,
                 onFilter: (value, record) => record.area_id === value,
+                align: 'center',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
@@ -189,6 +191,7 @@ class EquipmentView extends Component {
                 dataIndex: 'device_type_name',
                 filters: device_type_data_filter,
                 onFilter: (value, record) => record.type_id === value,
+                align: 'center',
                 render: (text, record) => (
                     <div>{text}</div>
                 )
@@ -199,6 +202,7 @@ class EquipmentView extends Component {
                 filters: device_status_filter,
                 align: 'center',
                 onFilter: (value, record) => record.status === value,
+                width: 120,
                 render: (text, record) => {
                     let str = '';
                     let strColor = '#555555'
@@ -230,13 +234,16 @@ class EquipmentView extends Component {
                     return new Date(a.newCheckTime).getTime() - new Date(b.newCheckTime).getTime()
                 },
                 defaultSortOrder: 'descend',
+                align: 'center',
                 render: (text, record) => {
                     return <div>{text || '/'}</div>
                 }
             },
             {
-                title: '记录查询',
+                title: '操作',
                 dataIndex: 'actions',
+                align: 'center',
+                width: 100,
                 render: (text, record) => (
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <Button size="small" type='primary' onClick={() => this.openModalHandler(record)} >查看</Button>

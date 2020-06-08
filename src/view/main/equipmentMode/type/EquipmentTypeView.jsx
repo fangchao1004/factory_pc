@@ -105,6 +105,7 @@ class EquipmentTypeView extends Component {
                 title: '操作',
                 dataIndex: 'actions',
                 width: 150,
+                align: 'center',
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
                         <Popconfirm title="确定要删除该巡检点类型吗?" onConfirm={this.deleteStaffConfirm.bind(null, record)}>

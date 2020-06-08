@@ -146,11 +146,11 @@ export default class FuncPanelForEngineer extends Component {
                             <Radio.Button value={3}>恢复维修流程</Radio.Button>
                             <Radio.Button value={6}>无需处理</Radio.Button>
                             <Radio.Button disabled={
-                                this.state.record.status === 5 ||
+                                // this.state.record.status === 5 ||
                                 this.state.record.status === 7
                             } value={4}>验收通过</Radio.Button>
                             <Radio.Button disabled={
-                                this.state.record.status === 5 ||
+                                // this.state.record.status === 5 ||
                                 this.state.record.status === 7
                             } value={5}>验收不通过</Radio.Button>
                         </Radio.Group>

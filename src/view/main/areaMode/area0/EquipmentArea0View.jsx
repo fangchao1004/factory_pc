@@ -34,7 +34,7 @@ class EquipmentArea0View extends Component {
         this.setState({ addVisible: false })
     }
     deleteArea0Confirm = async (record) => {
-        // console.log('确认删除某个厂区', record);
+        // console.log('确认删除某个片区', record);
         let result0 = await this.deleteArea0Info(record.area0_id);
         if (result0 === 0) {
             let area1idList = await this.getArea1ByArea0id(record.area0_id);
@@ -55,7 +55,7 @@ class EquipmentArea0View extends Component {
         this.init();
     }
     updateArea0ok = async (value) => {
-        // console.log('确认修改某个厂区', value);
+        // console.log('确认修改某个片区', value);
         let result = await this.updateArea0Info(value.area0_name);
         if (result === 0) { message.success('修改成功'); }
         this.setState({
@@ -169,7 +169,7 @@ class EquipmentArea0View extends Component {
                 render: (text, record) => {
                     return <div style={{ textAlign: 'center' }}>
                         {record.deletable === 1 ?
-                            <><Popconfirm title={<div>确定要删除该厂区吗?<br />如果当前厂区已经正常使用切勿删除</div>} onConfirm={() => { this.deleteArea0Confirm(record) }} okText='确定删除' >
+                            <><Popconfirm title={<div>确定要删除该片区吗?<br />如果当前片区已经正常使用切勿删除</div>} onConfirm={() => { this.deleteArea0Confirm(record) }} okText='确定删除' >
                                 <Button size="small" type="danger">删除</Button>
                             </Popconfirm><Divider type="vertical" /></> : null}
                         <Button size="small" type="primary" onClick={() => { this.setState({ updateVisible: true, areaRecord: record }) }}>修改</Button>
@@ -179,11 +179,11 @@ class EquipmentArea0View extends Component {
         ]
         return (
             <div>
-                <Alert message={'因左侧菜单栏会根据厂区数据动态生成, 所以当厂区数据发生变动时, 会触发页面刷新; 且请勿随意变动厂区数据; 因为数据安全问题默认不可删除, 如果要删除测试数据请联系管理员'} />
+                <Alert message={'因左侧菜单栏会根据片区数据动态生成, 所以当片区数据发生变动时, 会触发页面刷新; 且请勿随意变动片区数据; 因为数据安全问题默认不可删除, 如果要删除测试数据请联系管理员'} />
                 <Row>
                     <Col span={6}>
                         <Button onClick={() => { this.setState({ addVisible: true }) }} type="primary" style={{ marginBottom: 16, marginTop: 16 }}>
-                            添加厂区
+                            添加片区
                          </Button>
                     </Col>
                 </Row>

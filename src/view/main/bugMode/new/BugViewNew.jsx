@@ -103,7 +103,7 @@ export default class BugViewNew extends Component {
         this.setState({
             data: finallyData,
         })
-        notifyMusicForNewBug(this._audio, storage.getItem(NOTICEMUSICOPEN) === 'true', finallyData[0], MAXBUGIDALL);
+        // notifyMusicForNewBug(this._audio, storage.getItem(NOTICEMUSICOPEN) === 'true', finallyData[0], MAXBUGIDALL);
     }
     /**
      * 查询上传者 去重
@@ -345,14 +345,14 @@ export default class BugViewNew extends Component {
             },
             {
                 key: 'user_name', dataIndex: 'user_name', title: '发现人',
-                width: 100,
+                width: 120,
                 align: 'center',
                 filters: uploader_filter,
                 onFilter: (value, record) => record.user_id === value,
             },
             {
-                key: 'area_remark', dataIndex: 'area_remark', title: '具体巡检点范围',
-                width: 100,
+                key: 'area_remark', dataIndex: 'area_remark', title: '巡检点范围',
+                width: 140,
                 align: 'center',
                 render: (text, record) => {
                     let result = '/'
@@ -430,7 +430,7 @@ export default class BugViewNew extends Component {
             },
             {
                 key: 'buglevel', dataIndex: 'buglevel', title: '缺陷类型',
-                width: 80,
+                width: 120,
                 align: 'center',
                 filters: bug_level_filter,
                 onFilter: (value, record) => record.buglevel === value,
@@ -466,7 +466,7 @@ export default class BugViewNew extends Component {
                 dataIndex: 'status',
                 filters: status_filter,
                 align: 'center',
-                width: 90,
+                width: 120,
                 onFilter: (value, record) => record.status === value || record.status + '-' + record.bug_freeze_id === value,
                 render: (text, record) => {
                     let str = '';
@@ -520,7 +520,7 @@ export default class BugViewNew extends Component {
                 dataIndex: 'over',
                 filters: originOverTime,
                 align: 'center',
-                width: 40,
+                width: 80,
                 onFilter: (value, record) => {
                     let isOver = checkOverTime(record, currentTime).isOver
                     let overValue = isOver ? 0 : 1;
@@ -575,17 +575,17 @@ export default class BugViewNew extends Component {
         ]
         return (
             < Fragment >
-                <Alert message="当个人与缺陷专业匹配且当前进度符合流程顺序操作按钮才可使用; 可点击处理记录按钮查看记录; 自行决定当有新缺陷出现时是否会有提示音" type="info" showIcon />
+                <Alert message="当个人与缺陷专业匹配且当前进度符合流程顺序操作按钮才可使用; 可点击处理记录按钮查看记录; " type="info" showIcon />
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
                     <Button type={'primary'} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
                     <div style={{ textAlign: 'right' }}>
-                        <Tooltip title='新缺陷提示音'>
+                        {/* <Tooltip title='新缺陷提示音'>
                             <Switch style={{ marginRight: 10 }} checkedChildren="提示音开" unCheckedChildren="提示音关" checked={this.state.openMusic} onChange={(v) => {
                                 if (storage[BROWERTYPE] === 'Safari') { message.warning('Safari 浏览器暂不支持提示音'); return }
                                 this.setState({ openMusic: v })
                                 storage[NOTICEMUSICOPEN] = v;
                             }} />
-                        </Tooltip>
+                        </Tooltip> */}
 
                         <Input.Search style={{ width: 340 }} allowClear placeholder="支持内容、巡检点和巡检范围的模糊查询"
                             onChange={(e) => { if (e.target.value === '') { this.init(); } }}
@@ -676,9 +676,9 @@ export default class BugViewNew extends Component {
                     <img alt='' style={{ width: 400 }} src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} />
                     {/* <img alt='' style={{ width: 400 }} src={'http://ixiaomu.cn:3008/get_jpg?uuid=' + this.state.imguuid} /> */}
                 </Modal>
-                <div style={{ display: 'none' }}>
+                {/* <div style={{ display: 'none' }}>
                     <audio ref={(audio) => { this._audio = audio }} src={NOTIFY_MP3} controls="controls" ></audio>
-                </div>
+                </div> */}
             </Fragment >
         );
     }

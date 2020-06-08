@@ -46,23 +46,29 @@ export default class LoginView extends React.Component {
     return (
       <div
         style={{
+          // width: '100%',
+          // height: '100vh',
+          // display: 'flex',
+          // flex: 1,
+          // // flexDirection: 'row',
+          // alignItems: 'center',
+          // backgroundColor: '#0099FF'
           width: '100%',
           height: '100%',
           display: 'flex',
-          flex: 1,
-          flexDirection: 'row',
+          justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: '#0099FF'
+          backgroundColor: '#4A72FE'
         }}
       >
-        <div style={{ width: '100%', height: 600 }}>
+        <div style={{ width: '100%', height: 600, backgroundColor: 'rgba(255,255,255,0.2)' }}>
           <div style={{ height: 100, fontSize: 30, padding: 40, paddingLeft: 150, color: '#FFFFFF', fontWeight: 800 }}>中节能（合肥）信息综合管理平台</div>
           <div style={{
             width: '100%', height: 400, backgroundImage: `url(${Background})`,
             display: 'flex', flexDirection: 'row-reverse', alignItems: 'center'
           }}>
             <Card title={<div style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
-              <span>登录</span>
+              <span style={{ color: '#888' }}>登录</span>
               {/* <img src={downloadUrl} alt="" width="30" height="30" style={{ cursor: 'pointer' }}
                 onClick={() => { this.setState({ modalvisible: true }) }}
               /> */}
@@ -70,7 +76,7 @@ export default class LoginView extends React.Component {
               style={{ width: 300, height: 280, marginRight: 120 }}>
               <LoginFrom ref="form" onLoginOk={this.onLoginOk} />
             </Card>
-            <Modal
+            {/* <Modal
               // confirmLoading={this.state.modalvisible}
               width={350}
               hight={500}
@@ -80,8 +86,21 @@ export default class LoginView extends React.Component {
               footer={null}
             >
               <img src={downloadUrl} alt="" width="300" height="300" />
-            </Modal>
+            </Modal> */}
           </div>
+        </div>
+        <div style={{ position: 'fixed', bottom: 15, textAlign: 'center' }}>
+          <img style={{ cursor: 'pointer' }} src='https://hefeixiaomu.oss-cn-hangzhou.aliyuncs.com/xiaomu/xiaomu_logo_64.png' alt="" width="20" height="20" onClick={() => {
+            window.open("https://www.ixiaomu.cn")
+          }} />
+          &nbsp;
+        <span style={{ color: '#DDD', fontSize: 12, cursor: 'pointer' }} onClick={() => {
+            window.open("https://www.ixiaomu.cn")
+          }}>小木软件提供服务</span>
+          &nbsp;&nbsp;&nbsp;
+        <span style={{ color: '#DDD', fontSize: 12, cursor: 'pointer' }} onClick={() => {
+            window.open("http://www.beian.miit.gov.cn")
+          }}>皖ICP备17017819号</span>
         </div>
       </div>
     )

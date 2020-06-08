@@ -236,7 +236,7 @@ class TimeView extends Component {
                     } else { message.warn('请选择日期'); }
                 }} /></div>,
                 dataIndex: '/',
-                width: 280,
+                width: 300,
                 align: 'center',
                 render: (text, record) => {
                     return <div>{record.begin} ~ {record.end} （{record.name}）{record.isCross ? '跨天' : ''}</div>

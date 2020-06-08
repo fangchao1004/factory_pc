@@ -31,7 +31,7 @@ export default class AddArea0View extends Component {
     render() {
         return (
             <Modal
-                title='添加厂区'
+                title='添加片区'
                 visible={this.state.visible}
                 onCancel={this.onCancelHandler}
                 onOk={this.onOkHandler}
@@ -45,10 +45,10 @@ export default class AddArea0View extends Component {
 function AddArea0From(props) {
     const { getFieldDecorator } = props.form
     return <Form>
-        <Form.Item label="厂区:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
+        <Form.Item label="片区:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('area0_name', {
-                rules: [{ required: true, message: '请输入厂区名称' }]
-            })(<Input placeholder='请输入厂区名称'></Input>)}
+                rules: [{ required: true, message: '请输入片区名称' }]
+            })(<Input placeholder='请输入片区名称'></Input>)}
         </Form.Item>
     </Form>
 }

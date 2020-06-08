@@ -13,7 +13,7 @@ const tabListNoTitle = [{
 
 const tabListNoTitle2 = [{
     key: 'EquipmentArea0View',
-    tab: '厂区',
+    tab: '片区',
 }, {
     key: 'EquipmentArea1View',
     tab: '一级巡检区域',

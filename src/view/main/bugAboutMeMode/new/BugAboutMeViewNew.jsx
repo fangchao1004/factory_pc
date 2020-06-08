@@ -94,7 +94,7 @@ export default class BugAboutMeViewNew extends Component {
                 data: finallyData,
             })
             this.updateDataByRedux();
-            notifyMusicForNewBug(this._audio, storage.getItem(NOTICEMUSICOPEN) === 'true', finallyData[0], MAXBUGIDMY);
+            // notifyMusicForNewBug(this._audio, storage.getItem(NOTICEMUSICOPEN) === 'true', finallyData[0], MAXBUGIDMY);
         }
     }
     /**
@@ -367,14 +367,14 @@ export default class BugAboutMeViewNew extends Component {
             },
             {
                 key: 'user_name', dataIndex: 'user_name', title: '发现人',
-                width: 100,
+                width: 120,
                 align: 'center',
                 filters: uploader_filter,
                 onFilter: (value, record) => record.user_id === value,
             },
             {
-                key: 'area_remark', dataIndex: 'area_remark', title: '具体巡检点范围',
-                width: 100,
+                key: 'area_remark', dataIndex: 'area_remark', title: '巡检点范围',
+                width: 140,
                 align: 'center',
                 render: (text, record) => {
                     let result = '/'
@@ -435,7 +435,7 @@ export default class BugAboutMeViewNew extends Component {
             },
             {
                 key: 'buglevel', dataIndex: 'buglevel', title: '缺陷类型',
-                width: 80,
+                width: 120,
                 align: 'center',
                 filters: bug_level_filter,
                 onFilter: (value, record) => record.buglevel === value,
@@ -467,7 +467,7 @@ export default class BugAboutMeViewNew extends Component {
                 dataIndex: 'status',
                 filters: status_filter,
                 align: 'center',
-                width: 90,
+                width: 120,
                 onFilter: (value, record) => record.status === value || record.status + '-' + record.bug_freeze_id === value,
                 render: (text, record) => {
                     let str = '';
@@ -521,7 +521,7 @@ export default class BugAboutMeViewNew extends Component {
                 dataIndex: 'over',
                 filters: originOverTime,
                 align: 'center',
-                width: 40,
+                width: 80,
                 onFilter: (value, record) => {
                     let isOver = checkOverTime(record, currentTime).isOver
                     let overValue = isOver ? 0 : 1;
@@ -659,9 +659,9 @@ export default class BugAboutMeViewNew extends Component {
                     <img alt='' style={{ width: 400 }} src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} />
                     {/* <img alt='' style={{ width: 400 }} src={'http://ixiaomu.cn:3008/get_jpg?uuid=' + this.state.imguuid} /> */}
                 </Modal>
-                <div style={{ display: 'none' }}>
+                {/* <div style={{ display: 'none' }}>
                     <audio ref={(audio) => { this._audio = audio }} src={NOTIFY_MP3} controls="controls" ></audio>
-                </div>
+                </div> */}
             </Fragment >
         );
     }

@@ -66,12 +66,12 @@ export default class AddArea1View extends Component {
 function AddArea1From(props) {
     const { getFieldDecorator } = props.form
     return <Form>
-        <Form.Item label="所属厂区:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
+        <Form.Item label="所属片区:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('area0_id', {
-                rules: [{ required: true, message: '请选择所属的厂区' }]
+                rules: [{ required: true, message: '请选择所属的片区' }]
             })(<Select
                 showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}
-                placeholder='请选择所属的厂区'
+                placeholder='请选择所属的片区'
             >
                 {props.options}
             </Select>)}
