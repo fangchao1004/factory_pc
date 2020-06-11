@@ -17,6 +17,7 @@ var storage = window.localStorage;
  * @returns
  */
 export function omitTextLength(text, targetlength) {
+    if (!text) { return text }
     let result = ''
     if (text.length > targetlength) {
         result = text.substring(0, targetlength) + '...'

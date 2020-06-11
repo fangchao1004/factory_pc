@@ -225,7 +225,8 @@ class EditTable extends Component {
         }];
 
     onChangeHandler = (record, val, targetField, extraData) => {
-        let copyDataSource = JSON.parse(JSON.stringify(this.state.dataSource));
+        let copyDataSource = JSON.parse(JSON.stringify(this.state.dataSource.map((item, index) => { item.key = String(index + 1); return item })));
+        console.log('onChangeHandler copyDataSource:', copyDataSource)
         copyDataSource.forEach(element => {
             if (element.key === record.key) {
                 element[targetField] = val
@@ -367,9 +368,7 @@ class EditTable extends Component {
         return <div>
             <Row>
                 <Col span={6}>
-                    <Button onClick={this.handleAdd} type="primary" style={{ marginBottom: 16 }}>
-                        添加表单项目
-          </Button>
+                    <Button onClick={this.handleAdd} type="primary" style={{ marginBottom: 16 }}>添加表单项目</Button>
                 </Col>
                 <Col span={18}>
                     <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>

@@ -47,13 +47,13 @@ export default class BugAboutMeViewNew extends Component {
         this.initFilter();
         // console.log('个人所有专业:', JSON.parse(localUserInfo).major_id_all)
         this.openPolling();
-        this.openPollingForData();
+        // this.openPollingForData();
     }
-    openPollingForData = () => {
-        time2 = setInterval(() => {
-            this.init();
-        }, BUGDATAUPDATETIME);////10秒轮询一次
-    }
+    // openPollingForData = () => {
+    //     time2 = setInterval(() => {
+    //         this.init();
+    //     }, BUGDATAUPDATETIME);////10秒轮询一次
+    // }
     openPolling = () => {
         time = setInterval(() => {
             currentTime = moment().toDate().getTime();
@@ -360,7 +360,8 @@ export default class BugAboutMeViewNew extends Component {
                     else { result = record.area_remark; iconType = 'environment' }
                     return <div className='hideText lineClamp5'>
                         <Tooltip title={result}>
-                            <Icon type={iconType} style={{ marginRight: 4 }} /><span>{result}</span>
+                            <Icon type={iconType} style={{ marginRight: 4 }} />
+                            <div dangerouslySetInnerHTML={{ __html: result }} />
                         </Tooltip>
                     </div>
                 }
@@ -383,7 +384,8 @@ export default class BugAboutMeViewNew extends Component {
                     else { result = record.area_name }
                     return <div className='hideText lineClamp5'>
                         <Tooltip title={result}>
-                            <Icon type={iconType} style={{ marginRight: 4 }} /><span>{result}</span>
+                            <Icon type={iconType} style={{ marginRight: 4 }} />
+                            <div dangerouslySetInnerHTML={{ __html: result }} />
                         </Tooltip>
                     </div>
                 }
@@ -425,7 +427,7 @@ export default class BugAboutMeViewNew extends Component {
                         {record.title_name ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
                         <div className={record.title_name ? 'hideText lineClamp2' : 'hideText lineClamp5'}>
                             <Tooltip title={obj.text}>
-                                <span>{obj.text}</span>
+                                <div dangerouslySetInnerHTML={{ __html: obj.text }} />
                             </Tooltip>
                         </div>
                         {imgs_arr && imgs_arr.length > 0 ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
@@ -459,7 +461,7 @@ export default class BugAboutMeViewNew extends Component {
                 filters: major_filter,
                 onFilter: (value, record) => record.major_id === value,
                 render: (text, record) => {
-                    return <div>{record.major_name}</div>
+                    return <div dangerouslySetInnerHTML={{ __html: record.major_name }} />
                 }
             },
             {
@@ -666,16 +668,17 @@ export default class BugAboutMeViewNew extends Component {
         );
     }
     filterBySearch = (v) => {
+        if (v === '0') { message.error('请输入详细信息'); return }
         let data = JSON.parse(JSON.stringify(orignData));
         data.forEach((item) => {
             if (item.area_remark && item.area_remark.indexOf(v) !== -1) { item.exist = true }
             if (item.content && JSON.parse(item.content).text && JSON.parse(item.content).text.indexOf(v) !== -1) { item.exist = true }
             if (item.device_name && item.device_name.indexOf(v) !== -1) { item.exist = true }
         })
-        let newResult = data.filter((item) => {
-            return item.exist === true
-        })
-        this.setState({ data: newResult })
+        let newResult = data.filter((item) => { return item.exist === true })
+        let subStr = new RegExp(v, 'ig');//创建正则表达式对象
+        let result = JSON.stringify(newResult).replace(subStr, `<span style='background-color:#ff0'>${v}</span>`);//把'is'替换为空字符串
+        this.setState({ data: JSON.parse(result) })
     }
     repairHandler = (record) => {
         this.setState({ repairVisible: true, currentRecord: record })

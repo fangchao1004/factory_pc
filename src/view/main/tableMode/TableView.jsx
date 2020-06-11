@@ -59,8 +59,8 @@ class TableView extends Component {
                         bordered={true}
                         style={{ marginTop: 16, height: 170, borderRadius: 5 }}>
                         <div>
-                            <Tag color={TagColor[index % TagColor.length]} style={{ height: 25 }}>
-                                <span style={{ fontSize: 15 }}>{omitTextLength(element.device_type_name, 18)}</span>
+                            <Tag color={element.device_type_name ? TagColor[index % TagColor.length] : '#f00'} style={{ height: 25 }}>
+                                <span style={{ fontSize: 15 }}>{element.device_type_name ? omitTextLength(element.device_type_name, 18) : '该设备类型可能被删除；请删除该表单'}</span>
                             </Tag>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'space-between', width: '102%', marginTop: 20 }}>
