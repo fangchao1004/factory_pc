@@ -18,7 +18,7 @@ export default class EditableTable extends Component {
     this.state = {
       uploadLoading: false,
       dataSource: [],
-      count: "1",
+      // count: "1",
       modalvisible: false,
       sampleView: null,
     };
@@ -236,13 +236,13 @@ export default class EditableTable extends Component {
   }
   handleDelete = (key) => {
     const dataSource = [...this.state.dataSource];
-    this.setState({ dataSource: dataSource.filter(item => item.key !== key) });
+    this.setState({ dataSource: (dataSource.filter(item => item.key !== key)).map((item, index) => { item.key = String(index); return item }) });
   }
   handleAdd = () => {
-    const { count, dataSource } = this.state;
+    const { dataSource } = this.state;
     const newData = {
-      key: count,
-      title_name: `标题${parseInt(count)}`,
+      key: String(this.state.dataSource.length),
+      title_name: `标题${parseInt(this.state.dataSource.length)}`,
       type_id: "12", ///默认添加的是 id=12 的 通用组件（无需默认值）
       default_values: '',
       title_remark: '',///标题备注
@@ -251,7 +251,7 @@ export default class EditableTable extends Component {
     };
     this.setState({
       dataSource: [...dataSource, newData],
-      count: parseInt(count) + 1 + "",
+      // count: parseInt(count) + 1 + "",
     });
   }
   onChangeHandler = (record, val, targetField, extraData) => {
@@ -368,12 +368,13 @@ export default class EditableTable extends Component {
               // console.log('sql:', sql)
               HttpApi.obs({ sql }, (res) => {
                 if (res.data.code === 0) {
-                  message.success('添加表单以及方案成功');
+                  message.success('添加表单以及方案成功', 5);
                   this.init();
-                } else { message.error('添加表单以及方案失败'); }
+                } else { message.error('添加表单以及方案失败', 5); }
               })
             } else {
-              message.success('添加表单成功');
+              message.success('添加表单成功', 5);
+              this.init();
               console.log('不需要添加日期方案和时间段方案 与 模版直接的映射关系了')
             }
           }
