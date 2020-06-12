@@ -31,6 +31,7 @@ export default class BugViewNew extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            searchKey: '',
             data: [],
             showModal1: false,///img显示框
             showLoading: true,///现实loading图片
@@ -50,16 +51,15 @@ export default class BugViewNew extends Component {
         this.init();
         this.initFilter();
         this.openPolling();
-        // this.openPollingForData();
+        this.openPollingForData();
     }
-    // openPollingForData = () => {
-    //     time2 = setInterval(() => {
-    //         this.init();
-    //     }, BUGDATAUPDATETIME);////10秒轮询一次
-    // }
+    openPollingForData = () => {
+        time2 = setInterval(() => {
+            if (this.state.searchKey === '') { this.init() }
+        }, BUGDATAUPDATETIME);////10秒轮询一次
+    }
     openPolling = () => {
         time = setInterval(() => {
-            // this.init();
             currentTime = moment().toDate().getTime(); ///由于数据插入有时间差--为了防止出现当前时间戳比数据库的插入时间还早的情况--加5秒
             this.forceUpdate();
         }, BUGLOOPTIME);////1秒轮询一次
@@ -574,7 +574,7 @@ export default class BugViewNew extends Component {
                         </Tooltip> */}
 
                         <Input.Search style={{ width: 340 }} allowClear placeholder="支持内容、巡检点和巡检范围的模糊查询"
-                            onChange={(e) => { if (e.target.value === '') { this.init(); } }}
+                            onChange={(e) => { this.setState({ searchKey: e.target.value }); if (e.target.value === '') { this.init(); } }}
                             onPressEnter={(e) => { this.filterBySearch(e.target.value) }} onSearch={this.filterBySearch} enterButton />
                         <Button style={{ marginLeft: 10 }} type={'primary'} onClick={() => { this.setState({ showModal8: true }) }}>导出缺陷</Button>
                     </div>

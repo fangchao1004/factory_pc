@@ -27,6 +27,7 @@ export default class BugAboutMeViewNew extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            searchKey: '',
             data: [],
             showModal1: false,///img显示框
             showLoading: true,///现实loading图片
@@ -47,13 +48,13 @@ export default class BugAboutMeViewNew extends Component {
         this.initFilter();
         // console.log('个人所有专业:', JSON.parse(localUserInfo).major_id_all)
         this.openPolling();
-        // this.openPollingForData();
+        this.openPollingForData();
     }
-    // openPollingForData = () => {
-    //     time2 = setInterval(() => {
-    //         this.init();
-    //     }, BUGDATAUPDATETIME);////10秒轮询一次
-    // }
+    openPollingForData = () => {
+        time2 = setInterval(() => {
+            if (this.state.searchKey === '') { this.init() }
+        }, BUGDATAUPDATETIME);////10秒轮询一次
+    }
     openPolling = () => {
         time = setInterval(() => {
             currentTime = moment().toDate().getTime();
@@ -581,7 +582,7 @@ export default class BugAboutMeViewNew extends Component {
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
                     <div style={{ textAlign: 'right', width: '100%' }}>
                         <Input.Search style={{ width: 340 }} allowClear placeholder="支持内容、巡检点和巡检范围的模糊查询"
-                            onChange={(e) => { if (e.target.value === '') { this.init(); } }}
+                            onChange={(e) => { this.setState({ searchKey: e.target.value }); if (e.target.value === '') { this.init(); } }}
                             onPressEnter={(e) => { this.filterBySearch(e.target.value) }} onSearch={this.filterBySearch} enterButton />
                     </div>
                 </div>

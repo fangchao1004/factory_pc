@@ -27,6 +27,7 @@ export default class BugRunCheckView extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            searchKey: '',
             data: [],
             showModal1: false,///img显示框
             showLoading: true,///现实loading图片
@@ -46,13 +47,13 @@ export default class BugRunCheckView extends Component {
         this.init();
         this.initFilter();
         this.openPolling();
-        // this.openPollingForData();
+        this.openPollingForData();
     }
-    // openPollingForData = () => {
-    //     time2 = setInterval(() => {
-    //         this.init();
-    //     }, BUGDATAUPDATETIME);////10秒轮询一次
-    // }
+    openPollingForData = () => {
+        time2 = setInterval(() => {
+            if (this.state.searchKey === '') { this.init() }
+        }, BUGDATAUPDATETIME);////10秒轮询一次
+    }
     openPolling = () => {
         time = setInterval(() => {
             currentTime = moment().toDate().getTime();
@@ -572,7 +573,7 @@ export default class BugRunCheckView extends Component {
                 <Alert message="当用户拥有运行权限时, 该模块才会显示; 定时刷新待运行验收的缺陷数据" type="info" showIcon />
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'row-reverse', marginTop: 10, alignItems: 'center' }}>
                     <Input.Search style={{ width: 340 }} allowClear placeholder="支持内容、巡检点和巡检范围的模糊查询"
-                        onChange={(e) => { if (e.target.value === '') { this.init(); } }}
+                        onChange={(e) => { this.setState({ searchKey: e.target.value }); if (e.target.value === '') { this.init(); } }}
                         onPressEnter={(e) => { this.filterBySearch(e.target.value) }} onSearch={this.filterBySearch} enterButton
                     />
                     {/* <Tooltip title='新缺陷提示音'>
