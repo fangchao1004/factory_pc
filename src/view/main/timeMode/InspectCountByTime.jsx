@@ -3,6 +3,7 @@ import { Table, Progress, DatePicker, Alert } from 'antd';
 import moment from 'moment';
 import HttpApi from '../../util/HttpApi';
 import { getDevicesInfoByIdListStr, filterDevicesByDateScheme } from '../../util/Tool'
+import { originGroup } from '../../util/AppData';
 
 var allowTime_map_device_name;
 var allow_time_name;
@@ -29,6 +30,7 @@ export default class InspectCountByTime extends Component {
     }
     init = async () => {
         this.setState({ loading: true })
+        let schedulesResult = await this.getSchedulesResult();///获取某个时间段-的排班表
         let resultTime = await this.getAllowTimeInfo();
         let day = moment(this.state.timeStampCheckList[1]).diff(moment(this.state.timeStampCheckList[0]), 'day');
         let allCountInfo = [];
@@ -40,8 +42,28 @@ export default class InspectCountByTime extends Component {
                 this.setState({ progressValue: parseInt((parseFloat(index / day) * 100).toFixed(0)) })
             }
         }
+        allCountInfo.forEach((item) => {
+            schedulesResult.forEach((element) => {
+                if (item.date === element.time) {
+                    let groupInfo = this.getGroupInfoByTimeAndSchedule(item.name, element);
+                    item.group = groupInfo;
+                }
+            })
+        })
         // console.log('allCountInfo:', allCountInfo)
         this.setState({ loading: false, dataSource: allCountInfo.map((item, index) => { item.key = index; return item }) })
+    }
+    getSchedulesResult = () => {
+        return new Promise((resolve, reject) => {
+            let sql = `select * from schedules where time>='${this.state.timeStampCheckList[0]}' and time<='${this.state.timeStampCheckList[1]}'`
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
     }
     getAllowTimeInfo = () => {
         return new Promise((resolve, reject) => {
@@ -143,6 +165,36 @@ export default class InspectCountByTime extends Component {
     disabledDate = (current) => {
         return current > moment().endOf('day');
     }
+    getGroupInfoByTimeAndSchedule = (time, schedule) => {
+        let temp = '';
+        if (schedule) {
+            for (const key in schedule) {
+                if (schedule.hasOwnProperty(key)) {
+                    let element = schedule[key];
+                    if (element === '早班') { element = '白班' }
+                    if (time.indexOf(element) !== -1) { temp = key }
+                }
+            }
+        }
+        let group = '';
+        switch (temp) {
+            case 'group_1_lab':
+                group = '甲组'
+                break;
+            case 'group_2_lab':
+                group = '乙组'
+                break;
+            case 'group_3_lab':
+                group = '丙组'
+                break;
+            case 'group_4_lab':
+                group = '丁组'
+                break;
+            default:
+                break;
+        }
+        return group
+    }
     render() {
         const { dataSource } = this.state;
         const columns = [
@@ -174,6 +226,19 @@ export default class InspectCountByTime extends Component {
                 dataIndex: 'checkMan',
                 width: 150,
                 align: 'center'
+            },
+            {
+                title: '班组',
+                dataIndex: 'group',
+                width: 150,
+                align: 'center',
+                filters: originGroup,
+                onFilter: (value, record) => {
+                    return value === record.group
+                },
+                render: (text, _) => {
+                    return <div>{text || '/'}</div>
+                }
             }
         ]
         return (

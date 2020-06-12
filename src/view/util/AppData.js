@@ -1,6 +1,7 @@
 /**
  * 固定数据统一存放类
  */
+export const originGroup = [{ text: '甲组', value: '甲组' }, { text: '乙组', value: '乙组' }, { text: '丙组', value: '丙组' }, { text: '丁组', value: '丁组' }];
 export const originOverTime = [{ text: '超时', value: 0 }, { text: '正常', value: 1 }];
 export const originStatus = [{ text: '待维修', value: 0 }, { text: '维修中', value: 1 },
 { text: '专工验收中', value: 2 }, { text: '运行验收中', value: 3 }, { text: '完毕', value: 4 }, { text: '申请转专业中', value: 6 }, { text: '申请挂起中', value: 7 }]///固定状态
