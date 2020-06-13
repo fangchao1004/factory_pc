@@ -8,6 +8,7 @@ var OptionsOfDateScheme = [];
 var OptionsOfAllowTimeScheme = [];
 var OptionsOfTitle = [];
 var haveExistSampleIDs = [];
+var stopIsFilterOptions = [<Option key={0} value={'0'}>否</Option>, <Option key={1} value={'1'}>是</Option>];
 /**
  * 表格创建区---只用于创建模版
  */
@@ -102,6 +103,7 @@ export default class EditableTable extends Component {
         title: '标签',
         dataIndex: 'title_name',
         // width: '15%',
+        align: 'center',
         render: (text, record) => {
           return (
             <Input disabled={record.type_id === '7' && record.key === '0'}
@@ -111,6 +113,7 @@ export default class EditableTable extends Component {
       }, {
         title: '说明',
         dataIndex: 'title_remark',
+        align: 'center',
         render: (text, record) => {
           if (record.key === '0') {
             return <Select showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }} style={{ width: "100%" }}
@@ -127,6 +130,7 @@ export default class EditableTable extends Component {
       }, {
         title: '元素类型',
         dataIndex: 'type_id',
+        align: 'center',
         render: (text, record) => {
           let Options = [];
           tableCellOptionsData.forEach((item) => {
@@ -145,10 +149,20 @@ export default class EditableTable extends Component {
             </Select>
           )
         }
-      },
-      {
+      }, {
+        title: '停运过滤',
+        dataIndex: 'stopIsFilter',
+        align: 'center',
+        render: (text, record) => {
+          if (record.type_id === '7') { return null }
+          return <div style={{ display: 'flex', justifyContent: 'space-between' }}><Select style={{ width: "100%" }} value={text}
+            onChange={(value, option) => this.onChangeHandler(record, value, "stopIsFilter")}
+          >{stopIsFilterOptions}</Select></div>
+        }
+      }, {
         title: '日期方案',
         dataIndex: 'cyc_scheme_id',
+        align: 'center',
         render: (text, record) => {
           if (record.type_id === '7') { return null }
           return <div style={{ display: 'flex', justifyContent: 'space-between' }}><Select style={{ width: "100%" }} value={text}
@@ -160,6 +174,7 @@ export default class EditableTable extends Component {
       }, {
         title: '时间段方案',
         dataIndex: 'atm_scheme_id',
+        align: 'center',
         render: (text, record) => {
           if (record.type_id === '7') { return null }
           return <div style={{ display: 'flex', justifyContent: 'space-between' }}><Select style={{ width: "100%" }} value={text}
@@ -168,8 +183,7 @@ export default class EditableTable extends Component {
             onClick={() => { this.onChangeHandler(record, null, "atm_scheme_id") }}
             /></div>
         }
-      },
-      {
+      }, {
         title: '操作',
         dataIndex: 'operation',
         width: 100,
@@ -248,6 +262,7 @@ export default class EditableTable extends Component {
       title_remark: '',///标题备注
       cyc_scheme_id: null,
       atm_scheme_id: null,
+      stopIsFilter: '0',///停运时-被过滤‘1’ 不过滤‘0’
     };
     this.setState({
       dataSource: [...dataSource, newData],

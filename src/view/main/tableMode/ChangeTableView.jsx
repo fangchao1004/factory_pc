@@ -9,6 +9,7 @@ let dragingIndex = -1;
 const Option = Select.Option;
 var OptionsOfDateScheme = [];
 var OptionsOfAllowTimeScheme = [];
+var stopIsFilterOptions = [<Option key={0} value={'0'}>否</Option>, <Option key={1} value={'1'}>是</Option>];
 const rowSource = {
     beginDrag(props) {
         dragingIndex = props.index;
@@ -60,7 +61,7 @@ export default class ChangeTableView extends Component {
             destroyOnClose
             title='修改表单'
             placement="left"
-            width={1200}
+            width={1300}
             visible={this.props.visible}
             onClose={this.props.onClose}
         >
@@ -143,6 +144,7 @@ class EditTable extends Component {
         {
             title: '标签',
             dataIndex: 'title_name',
+            align: 'center',
             render: (text, record) => {
                 return (
                     <Input disabled={record.type_id === '7' && record.key === '0'}
@@ -152,6 +154,7 @@ class EditTable extends Component {
         }, {
             title: '说明',
             dataIndex: 'title_remark',
+            align: 'center',
             render: (text, record) => {
                 return (
                     <Input disabled={record.type_id !== '12' && record.type_id !== '2'}
@@ -162,6 +165,7 @@ class EditTable extends Component {
         }, {
             title: '元素类型',
             dataIndex: 'type_id',
+            align: 'center',
             render: (text, record) => {
                 // console.log(record);
                 let Options = [];
@@ -181,10 +185,20 @@ class EditTable extends Component {
                     </Select>
                 )
             }
-        },
-        {
+        }, {
+            title: '停运过滤',
+            dataIndex: 'stopIsFilter',
+            align: 'center',
+            render: (text, record) => {
+                if (record.type_id === '7') { return null }
+                return <div style={{ display: 'flex', justifyContent: 'space-between' }}><Select placeholder='空' style={{ width: "100%" }} value={text}
+                    onChange={(value, option) => this.onChangeHandler(record, value, "stopIsFilter")}
+                >{stopIsFilterOptions}</Select></div>
+            }
+        }, {
             title: '日期方案',
             dataIndex: 'cyc_scheme_id',
+            align: 'center',
             render: (text, record) => {
                 if (record.type_id === '7') { return null }
                 return <div style={{ display: 'flex', justifyContent: 'space-between' }}><Select style={{ width: "100%" }} value={text}
@@ -196,6 +210,7 @@ class EditTable extends Component {
         }, {
             title: '时间段方案',
             dataIndex: 'atm_scheme_id',
+            align: 'center',
             render: (text, record) => {
                 if (record.type_id === '7') { return null }
                 return <div style={{ display: 'flex', justifyContent: 'space-between' }}><Select style={{ width: "100%" }} value={text}
@@ -208,7 +223,8 @@ class EditTable extends Component {
         {
             title: '操作',
             dataIndex: 'operation',
-            width: 150,
+            width: 100,
+            align: 'center',
             render: (text, record) => {
                 if (this.state.dataSource.length >= 1) {
                     if ((record.type_id === '7' && record.key === '0') || (record.type_id === '3' && record.key === '1')) {

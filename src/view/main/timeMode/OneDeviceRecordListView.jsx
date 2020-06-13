@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Drawer, Table, Button, message } from 'antd';
 import HttpApi from '../../util/HttpApi';
 import OneRecordDetialView from '../equipmentMode/equipment/OneRecordDetialView';
-
+var device_switch_filter = [{ text: '运行', value: 1 }, { text: '停运', value: 0 }];///用于筛选巡检点开停运状态的数据 选项
 /**
  * 某个巡检点的所有records
  */
@@ -48,7 +48,19 @@ class OneDeviceRecordListView extends Component {
                     if (text === 1) { str = '正常'; strColor = '#66CC00' }
                     else if (text === 2) { str = '故障'; strColor = '#FF3333' }
                     else { str = '待检' }
+                    console.log('record:', record)
                     return <div style={{ color: strColor }}>{str}</div>
+                }
+            },
+            {
+                title: '运/停',
+                dataIndex: 'switch',
+                width: 80,
+                filters: device_switch_filter,
+                align: 'center',
+                onFilter: (value, record) => record.switch === value,
+                render: (text, record) => {
+                    return <div>{text === 0 ? '停运' : '运行'}</div>
                 }
             },
             {
