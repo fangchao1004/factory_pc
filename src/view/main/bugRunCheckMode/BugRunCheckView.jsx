@@ -333,7 +333,7 @@ export default class BugRunCheckView extends Component {
                     if (text && text !== '') { result = text }
                     else { result = record.area_remark; iconType = 'environment' }
                     return <div className='hideText lineClamp5'>
-                        <Tooltip title={result}>
+                        <Tooltip title={<div dangerouslySetInnerHTML={{ __html: result }} />}>
                             <Icon type={iconType} style={{ marginRight: 4 }} />
                             <div dangerouslySetInnerHTML={{ __html: result }} />
                         </Tooltip>
@@ -357,7 +357,7 @@ export default class BugRunCheckView extends Component {
                     if (text) { result = text }
                     else { result = record.area_name }
                     return <div className='hideText lineClamp5'>
-                        <Tooltip title={result}>
+                        <Tooltip title={<div dangerouslySetInnerHTML={{ __html: result }} />}>
                             <Icon type={iconType} style={{ marginRight: 4 }} />
                             <div dangerouslySetInnerHTML={{ __html: result }} />
                         </Tooltip>
@@ -380,23 +380,6 @@ export default class BugRunCheckView extends Component {
                     let comArr = [];
                     result_arr.forEach((item, index) => {
                         comArr.push(
-                            // <span key={item.uuid} style={{ color: 'red', fontWeight: 500, marginRight: 10, cursor: "pointer" }}
-                            //     onClick={e => {
-                            //         if (this.state.preImguuid !== item.uuid) {
-                            //             this.setState({
-                            //                 showLoading: true,
-                            //             })
-                            //         } else {
-                            //             this.setState({
-                            //                 showLoading: false,
-                            //             })
-                            //         }
-                            //         this.setState({
-                            //             imguuid: item.uuid,
-                            //             showModal1: true,
-                            //             preImguuid: item.uuid,
-                            //         })
-                            //     }}>{item.name}</span>
                             <img alt='' style={{ width: 50, height: 50, marginRight: 10 }} key={index} src={Testuri + 'get_jpg?uuid=' + item.uuid}
                                 onClick={() => {
                                     this.setState({ imguuid: item.uuid })
@@ -417,7 +400,7 @@ export default class BugRunCheckView extends Component {
                         </div>
                         {record.title_name ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
                         <div className={record.title_name ? 'hideText lineClamp2' : 'hideText lineClamp5'}>
-                            <Tooltip title={obj.text}>
+                            <Tooltip title={<div dangerouslySetInnerHTML={{ __html: obj.text }} />}>
                                 <div dangerouslySetInnerHTML={{ __html: obj.text }} />
                             </Tooltip>
                         </div>
@@ -669,14 +652,31 @@ export default class BugRunCheckView extends Component {
         if (v === '0') { message.error('请输入详细信息'); return }
         let data = JSON.parse(JSON.stringify(orignData));
         data.forEach((item) => {
-            if (item.area_remark && item.area_remark.indexOf(v) !== -1) { item.exist = true }
-            if (item.content && JSON.parse(item.content).text && JSON.parse(item.content).text.indexOf(v) !== -1) { item.exist = true }
-            if (item.device_name && item.device_name.indexOf(v) !== -1) { item.exist = true }
+            if (item.area_remark && item.area_remark.indexOf(v) !== -1) {
+                let coptAreaRemark = item.area_remark;
+                let subStr = new RegExp(v);//创建正则表达式对象
+                let afterReplace = coptAreaRemark.replace(subStr, `<span style='background-color:#ff7a45'>${v}</span>`);
+                item.area_remark = afterReplace
+                item.exist = true
+            }
+            if (item.content && JSON.parse(item.content).text && JSON.parse(item.content).text.indexOf(v) !== -1) {
+                let coptItemContent = JSON.parse(item.content);
+                let subStr = new RegExp(v);//创建正则表达式对象
+                let afterReplace = coptItemContent.text.replace(subStr, `<span style='background-color:#ff7a45'>${v}</span>`);
+                coptItemContent.text = afterReplace
+                item.content = JSON.stringify(coptItemContent)
+                item.exist = true
+            }
+            if (item.device_name && item.device_name.indexOf(v) !== -1) {
+                let coptDeviceName = item.device_name;
+                let subStr = new RegExp(v);//创建正则表达式对象
+                let afterReplace = coptDeviceName.replace(subStr, `<span style='background-color:#ff7a45'>${v}</span>`);
+                item.device_name = afterReplace
+                item.exist = true
+            }
         })
         let newResult = data.filter((item) => { return item.exist === true })
-        let subStr = new RegExp(v, 'ig');//创建正则表达式对象
-        let result = JSON.stringify(newResult).replace(subStr, `<span style='background-color:#ff0'>${v}</span>`);//把'is'替换为空字符串
-        this.setState({ data: JSON.parse(result) })
+        this.setState({ data: newResult })
     }
     repairHandler = (record) => {
         this.setState({ repairVisible: true, currentRecord: record })
