@@ -48,33 +48,41 @@ export default class FuncPanelForEngineer extends Component {
         })
     }
     componentWillReceiveProps(nextProps) {
-        // console.log('nextProps.record:', nextProps.record)
-        let selectValue = nextProps.record.bug_step_tag_id === 16 ? 6 : 4
-        let selectMajorId = null;
-        let selectFreezeId = null;
-        switch (nextProps.record.status) {
-            case 6:
-                selectValue = 1; ///转专业
-                selectMajorId = nextProps.record.bug_step_major_id
-                break;
-            case 7:
-                selectValue = 2; ///挂起
-                selectFreezeId = nextProps.record.bug_freeze_id
-                break;
-            case 5:
-                selectValue = 3; ///解除挂起
-                break;
-            default:
-                break;
+        if (JSON.stringify(nextProps) !== JSON.stringify(this.props)) {
+            // console.log('不同时再刷新')
+            let selectValue = nextProps.record.bug_step_tag_id === 16 ? 6 : 4
+            let selectMajorId = null;
+            let selectFreezeId = null;
+            switch (nextProps.record.status) {
+                case 6:
+                    selectValue = 1; ///转专业
+                    selectMajorId = nextProps.record.bug_step_major_id
+                    break;
+                case 7:
+                    selectValue = 2; ///挂起
+                    selectFreezeId = nextProps.record.bug_freeze_id
+                    break;
+                case 5:
+                    selectValue = 3; ///解除挂起
+                    break;
+                default:
+                    break;
+            }
+            this.setState({
+                selectValue,
+                selectMajorId,
+                selectFreezeId,
+                visible: nextProps.visible,
+                record: nextProps.record || {}
+            })
         }
-        this.setState({
-            selectValue,
-            selectMajorId,
-            selectFreezeId,
-            visible: nextProps.visible,
-            record: nextProps.record || {}
-        })
-
+    }
+    shouldComponentUpdate(nextProps, nextState) {
+        let condition1 = JSON.stringify(nextProps) !== JSON.stringify(this.props);
+        let condition2 = false;
+        if (condition1 === false) { condition2 = JSON.stringify(nextState) !== JSON.stringify(this.state); }
+        // console.log('condition1 || condition2:', condition1 || condition2)
+        return condition1 || condition2
     }
     reset = () => {
         this.setState({
@@ -98,6 +106,7 @@ export default class FuncPanelForEngineer extends Component {
         this.reset();
     }
     renderPanelViewBySelectValue = (v) => {
+        console.log('v:', v)
         let node = null;
         switch (v) {
             case 1:
@@ -138,6 +147,7 @@ export default class FuncPanelForEngineer extends Component {
                     <Col span={3}>功能:</Col>
                     <Col span={21}>
                         <Radio.Group size='small' value={this.state.selectValue} buttonStyle="solid" onChange={(e) => {
+                            console.log('e.target.value:', e.target.value)
                             this.setState({ selectValue: e.target.value })
                             if (e.target.value >= 3) { this.setState({ selectMajorId: null, selectFreezeId: null }) }
                         }}>
