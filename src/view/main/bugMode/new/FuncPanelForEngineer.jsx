@@ -146,7 +146,6 @@ export default class FuncPanelForEngineer extends Component {
                     <Col span={3}>功能:</Col>
                     <Col span={21}>
                         <Radio.Group size='small' value={this.state.selectValue} buttonStyle="solid" onChange={(e) => {
-                            console.log('e.target.value:', e.target.value)
                             this.setState({ selectValue: e.target.value })
                             if (e.target.value >= 3) { this.setState({ selectMajorId: null, selectFreezeId: null }) }
                         }}>
