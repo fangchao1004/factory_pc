@@ -106,7 +106,6 @@ export default class FuncPanelForEngineer extends Component {
         this.reset();
     }
     renderPanelViewBySelectValue = (v) => {
-        console.log('v:', v)
         let node = null;
         switch (v) {
             case 1:
