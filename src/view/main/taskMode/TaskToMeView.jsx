@@ -46,7 +46,7 @@ class TaskToMeView extends Component {
             tasks: finallyTasksData,
             users: usersData
         })
-        storage[MAXTASKIDMY] = tasksData[0].id || 0 ///更新缓存中的最大任务id
+        // storage[MAXTASKIDMY] = tasksData[0].id || 0 ///更新缓存中的最大任务id
     }
     getTaskInfo() {
         return new Promise((resolve, reject) => {

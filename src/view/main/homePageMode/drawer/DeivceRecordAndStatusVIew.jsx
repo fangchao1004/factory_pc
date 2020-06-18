@@ -151,7 +151,9 @@ class DeivceRecordAndStatusView extends Component {
                 visible={this.state.visible}
                 destroyOnClose
                 onClose={() => { this.props.close(); this.setState({ list: [] }) }}>
-                <Alert type={this.state.alertType} message={<span>{`更多信息请在${this.state.situation === 1 ? '巡检点' : '巡检时间段'}模块中查看`}<Button type='link' onClick={() => { this.props.history.push(`/mainView/${this.state.situation === 1 ? 'equipment' : 'time'}`) }}>前往</Button></span>} />
+                <Alert type={this.state.alertType} message={<span>{`更多信息请在${this.state.situation === 1 ? '巡检点' : '巡检时间段'}模块中查看`}
+                    {/* <Button type='link' onClick={() => { this.props.history.push(`/mainView/${this.state.situation === 1 ? 'equipment' : 'time'}`) }}>前往</Button> */}
+                </span>} />
                 <Table
                     style={{ marginTop: 10 }}
                     bordered

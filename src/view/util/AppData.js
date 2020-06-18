@@ -21,7 +21,7 @@ export const tableCellOptionsData = [
     { "value": "13", "text": "副标题" }];
 export const NOTIFY_MP3 = 'http://60.174.196.158:12345/assets/notice.mp3'
 export const BUGLOOPTIME = 1000;///毫秒，缺陷模块每隔1秒去刷新时间 不请求数据
-export const BUGDATAUPDATETIME = 10000;///毫秒，缺陷模块的数据和main模块中的徽标数每隔10秒去更新一次 请求数据
+export const BUGDATAUPDATETIME = 5000;///毫秒，缺陷模块的数据和main模块中的徽标数每隔10秒去更新一次 请求数据
 export const MAXBUGIDALL = 'MaxBugIdAll';///最大的bugid
 export const MAXBUGIDMY = 'MaxBugIdMy';///与我相关最大的bugid
 export const MAXTASKIDMY = 'MaxTaskIdMy';///与我相关最大的taskid
@@ -31,8 +31,9 @@ export const NOTICEINFO = 'noticeinfo';
 export const NOTICEMUSICOPEN = 'noticeMusicOpen';///一般情况下，所有权限和个人专业相关的权限共用一个开启提醒的开关标志位
 export const NOTICEMUSICOPENFORRUN = 'noticeMusicOpenForRun';///针对运行情况，独立的一个开启提醒的开关标志位
 export const BROWERTYPE = 'browerType';
+// const a = <a href="https://www.jb51.net" title="脚本之家" target="_blank">Welcome</a>
 export const VersionlistData = [
-    { title: '版本号', description: 'V 1.5.0 test' },
+    { title: '版本号', description: `V 1.5.0 test` },
     // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
     // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
     // { title: '更新', description: '1.0.9 添加巡检点信息修改功能' }

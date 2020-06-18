@@ -537,6 +537,49 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
+
+    static getArea0123Info() {
+        return new Promise((resolve, reject) => {
+            let sql = `select area_0.id as area0_id , area_0.name as area0_name, area_1.id as area1_id , area_1.name as area1_name, area_2.id as area2_id ,area_2.name as area2_name,area_3.id as area3_id,area_3.name as area3_name 
+            from area_0
+            left join (select * from area_1 where effective = 1)area_1 on area_0.id = area_1.area0_id
+            left join (select * from area_2 where effective = 1)area_2 on area_1.id = area_2.area1_id
+            left join (select * from area_3 where effective = 1)area_3 on area_2.id = area_3.area2_id
+            where area_0.effective = 1
+            order by area_0.id,area_1.id`;
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result)
+            })
+        })
+    }
+
+
+    static getUnreadBugByMajorAndBugStatus(params, f1, f2) {
+        return new Promise((resolve, reject) => {
+            let sql = `select bugs.*,users.name as user_name,temp.des as tag_des from bugs
+            left join (select * from users where effective = 1) users on users.id = bugs.user_id 
+            left join (
+                select bug_step_log.bug_id,bug_tag_status.des from bug_step_log 
+                left join bug_tag_status on bug_tag_status.id = bug_step_log.tag_id
+                where bug_step_log.id in
+                (select max(bug_step_log.id)  from bug_step_log
+                group by bug_step_log.bug_id)
+            ) temp on temp.bug_id = bugs.id
+            where bugs.effective = 1 and bugs.status in (${params.status_all}) and bugs.isread = 0 and bugs.major_id in (${params.major_all})
+            order by bugs.id desc`
+            let result = [];
+            HttpApi.obs({ sql }, (res) => {
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
 }
 
 export default HttpApi

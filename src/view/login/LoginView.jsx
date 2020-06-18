@@ -33,7 +33,7 @@ export default class LoginView extends React.Component {
           if (doc.data.code === 0 && doc.data.data.length > 0) {
             storage.removeItem(USERINFO);
             storage[USERINFO] = JSON.stringify(doc.data.data[0]);
-            this.props.history.push('/mainView')
+            this.props.history.push('/mainView/home')
           } else {
             message.error("用户名/密码错误")
           }

@@ -103,7 +103,6 @@ export default class BugViewNew extends Component {
         this.setState({
             data: finallyData,
         })
-        // notifyMusicForNewBug(this._audio, storage.getItem(NOTICEMUSICOPEN) === 'true', finallyData[0], MAXBUGIDALL);
     }
     /**
      * 查询上传者 去重
@@ -304,7 +303,7 @@ export default class BugViewNew extends Component {
         })
     }
     updateDataByRedux = () => {
-        Store.dispatch(showBugNum(null))
+        // Store.dispatch(showBugNum(null))
     }
     render() {
         const columns = [
@@ -564,14 +563,6 @@ export default class BugViewNew extends Component {
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
                     <Button type={'primary'} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
                     <div style={{ textAlign: 'right' }}>
-                        {/* <Tooltip title='新缺陷提示音'>
-                            <Switch style={{ marginRight: 10 }} checkedChildren="提示音开" unCheckedChildren="提示音关" checked={this.state.openMusic} onChange={(v) => {
-                                if (storage[BROWERTYPE] === 'Safari') { message.warning('Safari 浏览器暂不支持提示音'); return }
-                                this.setState({ openMusic: v })
-                                storage[NOTICEMUSICOPEN] = v;
-                            }} />
-                        </Tooltip> */}
-
                         <Input.Search style={{ width: 340 }} allowClear placeholder="支持内容、巡检点和巡检范围的模糊查询"
                             onChange={(e) => { this.setState({ searchKey: e.target.value }); if (e.target.value === '') { this.init(); } }}
                             onPressEnter={(e) => { this.filterBySearch(e.target.value) }} onSearch={this.filterBySearch} enterButton />
@@ -715,7 +706,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,major_id,user_id,remark,createdAt) VALUES (${bug_id},1,${major_id},${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 6,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                let sql = `update bugs set isread = 0,status = 6,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('申请转专业成功'); this.init(); } else { message.error('申请转专业失败') }
                 })
@@ -730,7 +721,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (freeze_id,bug_id,tag_id,user_id,remark,createdAt) VALUES (${freeze_id},${bug_id},2,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 7,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                let sql = `update bugs set isread = 0,status = 7,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('申请挂起成功'); this.init(); } else { message.error('申请挂起失败') }
                 })
@@ -744,7 +735,8 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},4,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                let sql = `update bugs set isread = 0,status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('完成维修'); this.init(); } else { message.error('维修失败') }
                 })
@@ -758,7 +750,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},16,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                let sql = `update bugs set isread = 0,status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('维修人员认为无需维修'); this.init(); } else { message.error('维修人员认为无需维修操作失败') }
                 })
@@ -773,7 +765,7 @@ export default class BugViewNew extends Component {
         let major_id = v.selectMajorId;
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,major_id,user_id,remark,createdAt) VALUES (${bug_id},3,${major_id},${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
-            let sql = `update bugs set major_id = ${major_id},status = 0,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+            let sql = `update bugs set isread = 0,major_id = ${major_id},status = 0,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
             HttpApi.obs({ sql }, (res) => {
                 if (res.data.code === 0) { message.success('转专业成功'); this.init(); } else { message.error('转专业失败') }
             })
@@ -787,7 +779,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (freeze_id,bug_id,tag_id,user_id,remark,createdAt) VALUES (${freeze_id},${bug_id},15,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 5,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                let sql = `update bugs set isread = 0,status = 5,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('挂起成功'); this.init(); } else { message.error('挂起失败') }
                 })
@@ -801,7 +793,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},9,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 0,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                let sql = `update bugs set isread = 0,status = 0,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('恢复维修流程成功'); this.init(); } else { message.error('恢复维修流程失败') }
                 })
@@ -815,7 +807,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},5,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 3,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                let sql = `update bugs set isread = 0,status = 3,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('专工完成验收'); this.init(); } else { message.error('专工验收操作失败') }
                 })
@@ -829,7 +821,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},7,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 1,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                let sql = `update bugs set isread = 0,status = 1,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('专工打回操作成功'); this.init(); } else { message.error('专工打回操作失败') }
                 })
@@ -843,7 +835,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},17,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 3,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                let sql = `update bugs set isread = 0,status = 3,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('专工确认无需维修'); this.init(); } else { message.error('专工确认无需维修操作失败') }
                 })
@@ -872,7 +864,7 @@ export default class BugViewNew extends Component {
         let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},8,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                let sql = `update bugs set status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                let sql = `update bugs set isread = 0,status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
                 HttpApi.obs({ sql }, (res) => {
                     if (res.data.code === 0) { message.success('运行打回操作成功'); this.init(); } else { message.error('运行打回操作失败') }
                 })

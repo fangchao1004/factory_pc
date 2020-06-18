@@ -1,42 +1,43 @@
 import React, { Component } from 'react';
-import { List, Icon } from 'antd';
+import { Tabs } from 'antd';
+import TaskNoticeList from './TaskNoticeList'
+import BugNoticeList from './BugNoticeList'
+const { TabPane } = Tabs;
+
+const tabListNoTitle = [{
+    key: 'BugNoticeList',
+    tab: '缺陷',
+},
+{
+    key: 'TaskNoticeList',
+    tab: '任务',
+}
+];
 export default class NoticeMenu extends Component {
     constructor(props) {
         super(props);
-        this.state = { data: [] }
+        this.state = {
+            key: 'BugNoticeList',
+            noTitleKey: 'BugNoticeList',
+        }
+        this.contentListNoTitle = {
+            BugNoticeList: <BugNoticeList  {...props} />,
+            TaskNoticeList: <TaskNoticeList {...props} />,
+        };
     }
-    componentDidMount() {
-        // console.log('通知菜单 componentDidMount', this.props.data)
-        this.setState({ data: this.props.data.filter((item) => item.hasNew) })
-    }
-    componentWillReceiveProps(nextProps) {
-        // console.log('通知菜单 componentWillReceiveProps:', nextProps.data)
-        setTimeout(() => {
-            this.setState({ data: this.props.data.filter((item) => item.hasNew) })
-        }, 100);
+    onTabChange = (key) => {
+        this.setState({ noTitleKey: key });
     }
     render() {
         return (
-            <div style={{ width: 300 }}>
-                <List
-                    itemLayout="horizontal"
-                    dataSource={this.state.data}
-                    locale={{
-                        emptyText: "所有消息已经查看",
-                    }}
-                    renderItem={item => (
-                        <List.Item style={{ width: 300, cursor: "pointer" }}>
-                            <List.Item.Meta
-                                title={item.title}
-                                onClick={() => {
-                                    this.props.history.push(`/mainView/${item.route}`)
-                                }}
-                            />
-                            <Icon type='right' style={{ fontSize: 10, color: '#ccc' }} />
-                        </List.Item>
-                    )}
-                />
-            </div>
+            <Tabs defaultActiveKey="1" size={'small'} style={{ width: 350 }} >
+                <TabPane tab="缺陷" key="1">
+                    <BugNoticeList {...this.props} />
+                </TabPane>
+                {/* <TabPane tab="Tab2" key="2">
+                    <TaskNoticeList />
+                </TabPane> */}
+            </Tabs>
         );
     }
 }

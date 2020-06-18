@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, Menu, Icon, Row, Col, Popover, Button, Badge, notification, Avatar } from 'antd'
+import { Layout, Menu, Icon, Row, Col, Popover, Button, Badge, notification, Avatar, Descriptions, Modal, Tooltip, Tag } from 'antd'
 import { Route, Link, Redirect } from 'react-router-dom'
 import logopng from '../../assets/logo.png'
 import HomePageRoot from './homePageMode/HomePageRoot';
@@ -24,9 +24,10 @@ import UserMenuView from './userMenu/UserMenuView'
 import HttpApi from '../util/HttpApi';
 import Store from '../../redux/store/Store';
 // import Socket from '../socket/Socket'
-import { NOTICEINFO, BUGDATAUPDATETIME } from '../util/AppData'
-import { BrowserType, checkBugTaskDataIsNew } from '../util/Tool';
+import { NOTICEINFO, BUGDATAUPDATETIME, NOTIFY_MP3 } from '../util/AppData'
+import { BrowserType, checkBugTaskDataIsNew, omitTextLength, notifyMusicForNewBug } from '../util/Tool';
 import NoticeMenu from './noticeMenu/NoticeMenu';
+import DetailModal from './noticeMenu/DetailModal';
 
 var storage = window.localStorage;
 const { Header, Content, Sider } = Layout;
@@ -44,65 +45,60 @@ export default class MainView extends Component {
         this.state = {
             collapsed: false,
             isAdmin: localUserInfo && JSON.parse(localUserInfo).isadmin === 1,
+            permissionManager: JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('0') !== -1,
+            permissionRun: JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('1') !== -1,
+            permissionFix: JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('3') !== -1,
+            major_id_all: JSON.parse(localUserInfo).major_id_all,
+            noticePopVisible: false,
+            modalVisible: false,
+            selectItem: null,
             aboutMeBugNum: 0,
             aboutMeTaskNum: 0,
             runBugNum: 0,
             noticeMenuData: [],
             dotCount: 0,
-            area0List: []
+            area0List: [],
+            unreadBugs: [],
         }
         tempNoticeStr = noticeinfo ? noticeinfo : ''///获取曾提醒过的最新内容。作为临时数据。
     }
     componentDidMount() {
         localUserInfo = storage.getItem('userinfo');
         this.init();
-        unsubscribe = Store.subscribe(() => {
-            // console.log("获取store中的state:", Store.getState())
-            console.log('main init')
-            this.init();
-        });
+        // unsubscribe = Store.subscribe(() => {
+        // });
         this.openPolling();///开启轮询---定时去获取缺陷了任务数据
         // Socket();
     }
     init = async () => {
-        BrowserType();
-        let myBugLength = 0;
-        let myMaxBugId = 0;
-        let runBugLength = 0;
-        let RunBugIdList = [];
-
-        let taskList = await this.getTaskInfo();
-        let maxTaskId = taskList.length > 0 ? taskList[taskList.length - 1].id : 0;
-        let taskLength = taskList.length;
-
-        if (JSON.parse(localUserInfo).major_id_all) {
-            let myBugList = await this.getMyBugsInfo();
-            myMaxBugId = myBugList.length > 0 ? myBugList[myBugList.length - 1].id : 0;
-            myBugLength = myBugList.length;
-        }
-        if (JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('1') !== -1) {
-            let runBugList = await this.getRunBugsInfo();
-            RunBugIdList = runBugList.length > 0 ? runBugList.map((item) => item.id) : [];
-            runBugLength = runBugList.length;
-        }
-        let taskRunMajorBugResult = checkBugTaskDataIsNew({ maxTaskId, myMaxBugId, RunBugIdList });
+        // BrowserType();
+        var taskList = await this.getTaskInfo();
         let area0List = await this.getArea0List();
         this.setState({
-            noticeMenuData: taskRunMajorBugResult.detail,
-            dotCount: taskRunMajorBugResult.count,
-            area0List: area0List.map((item) => {
-                return { id: item.id, name: item.name }
-            })
+            area0List: area0List.map((item) => { return { id: item.id, name: item.name } })
         })
-        ///初始化的时候，就先获取所需数据，展示在导航栏处
-        ////如果有变化 才刷新
-        if (this.state.aboutMeBugNum !== myBugLength || this.state.aboutMeTaskNum !== taskLength || this.state.runBugNum !== runBugLength) {
+        ///根据个人所有的权限，整合需要获取哪些状态的bugs
+        let bug_status_list = [];
+        if (this.state.permissionFix) { bug_status_list.push(0); bug_status_list.push(1) }
+        if (this.state.permissionManager) { bug_status_list.push(0); bug_status_list.push(2); bug_status_list.push(6); bug_status_list.push(7) }
+        if (this.state.permissionRun) { bug_status_list.push(3) }
+        // console.log('bug_status_list:', bug_status_list.join(','))
+        ///有专业 且 至少有一个权限
+        if (this.state.major_id_all && (this.state.permissionFix || this.state.permissionManager || this.state.permissionRun)) {
+            let unreadBugs = await HttpApi.getUnreadBugByMajorAndBugStatus({ status_all: bug_status_list.join(','), major_all: this.state.major_id_all })
+            console.log('未读的bug:', unreadBugs)
+            this.setState({ unreadBugs })
+            var myBugList = await this.getMyBugsInfo();
+            var runBugList = await this.getRunBugsInfo();
+
+        }
+        if (this.state.aboutMeBugNum !== myBugList.length || this.state.aboutMeTaskNum !== taskList.length || this.state.runBugNum !== runBugList.length) {
             console.log('有关我的-缺陷和任务数量有变化-刷新');
             setTimeout(() => {
                 this.setState({
-                    aboutMeBugNum: myBugLength,
-                    aboutMeTaskNum: taskLength,
-                    runBugNum: runBugLength,
+                    aboutMeBugNum: myBugList.length,
+                    aboutMeTaskNum: taskList.length,
+                    runBugNum: runBugList.length,
                 })
             }, 500);
         }
@@ -190,7 +186,7 @@ export default class MainView extends Component {
     }
     componentWillUnmount() {
         clearInterval(time);
-        unsubscribe();
+        // unsubscribe();
     }
     openNotification = (result) => {
         const key = `open${Date.now()}`;
@@ -251,10 +247,10 @@ export default class MainView extends Component {
                         }
                     </div>
                     <Menu theme="dark" mode="inline" selectedKeys={[this.props.location.pathname]} >
-                        <Menu.Item key="/mainView">
+                        <Menu.Item key="/mainView/home">
                             <Icon type="home" />
                             <span>首页</span>
-                            <Link to={`${this.props.match.url}`} />
+                            <Link to={`${this.props.match.url}/home`} />
                         </Menu.Item>
                         <Menu.Item key="/mainView/area">
                             <Icon type="environment" />
@@ -356,13 +352,16 @@ export default class MainView extends Component {
                             </Col>
                             <Col span={22} style={{ textAlign: 'right', paddingRight: 24 }}>
                                 <span style={{ marginRight: 24 }}>
-                                    <Popover width={200} placement="bottomRight" content={<NoticeMenu {...this.props} data={this.state.noticeMenuData} />}>
-                                        <Badge count={this.state.dotCount}>
+                                    <Popover visible={this.state.noticePopVisible} onVisibleChange={(visible) => { this.setState({ noticePopVisible: visible }) }} trigger="click" destroyTooltipOnHide placement="bottomRight" content={<NoticeMenu {...this.props} data={this.state.unreadBugs}
+                                        closePop={() => { this.setState({ noticePopVisible: false }) }}
+                                        closePopAndOpenModal={(item) => { this.setState({ noticePopVisible: false, modalVisible: true, selectItem: item }) }} />}>
+                                        <Badge count={this.state.unreadBugs.length}>
                                             <Icon type="bell" style={{ fontSize: 24, color: '#597ef7', cursor: "pointer" }} />
                                         </Badge>
                                     </Popover>
+                                    <DetailModal visible={this.state.modalVisible} item={this.state.selectItem} onCancel={() => { this.setState({ modalVisible: false }) }} />
                                 </span>
-                                <Popover width={200} placement="bottomRight" content={<UserMenuView />}>
+                                <Popover trigger="click" width={200} placement="bottomRight" content={<UserMenuView />}>
                                     <Avatar style={{ backgroundColor: '#597ef7', verticalAlign: 'middle', cursor: "pointer" }} size="large">
                                         {JSON.parse(localUserInfo).name}
                                     </Avatar>
@@ -425,7 +424,7 @@ class ContentView extends Component {
             <section>
                 <Route
                     exact
-                    path={`${this.props.match.path}`}
+                    path={`${this.props.match.path}/home`}
                     component={(props) => (storage.getItem('userinfo') ? <HomePageRoot {...props} /> : <Redirect to='/' />)}
                 />
                 <Route
@@ -438,7 +437,7 @@ class ContentView extends Component {
                     exact
                     path={`${this.props.match.path}/staff`}
                     component={() => (storage.getItem('userinfo') ? <StaffModeRoot /> : <Redirect to='/' />)}
-                />,
+                />
                 <Route
                     exact
                     path={`${this.props.match.path}/bug`}

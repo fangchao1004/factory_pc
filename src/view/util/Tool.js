@@ -48,7 +48,7 @@ export function translate(keys, data, selectLevel = null, pValue = '') {
             let value = pValue ? pValue + '-' + String(k) : String(k);
             let selectable = false;
             // console.log('啊哈哈', value.split('-').length)
-            if (selectLevel && selectLevel === value.split('-').length) { selectable = true }
+            if (selectLevel && selectLevel <= value.split('-').length) { selectable = true }
             else if (!selectLevel) { selectable = true; }
             map[k] = {
                 title: item[String(key).substring(0, key.length - 2) + 'name'],
@@ -577,16 +577,10 @@ export function getDuration(my_time, resultType = 1, showSecond = true) {
  * @param {string} localStorageIndex 要存储的localstorage的key
  * @param {string} [noticeLab='有最新缺陷,请注意查看!'] message 文本
  */
-export function notifyMusicForNewBug(auto = null, playMusic = false, maxBug, localStorageIndex, noticeLab = '有最新缺陷,请注意查看!') {
-    if (!auto || !maxBug) { return }
-    let maxId = maxBug.id;
-    if (!storage.getItem(localStorageIndex) || !playMusic) { storage[localStorageIndex] = String(maxId) }///记录下此次的bugid;
-    if (storage.getItem(localStorageIndex) && parseInt(storage.getItem(localStorageIndex)) < maxId) {
-        if (storage.getItem(BROWERTYPE) !== 'Safari' && playMusic) {
-            message.info(noticeLab, 5);
-            auto.play();
-            storage[localStorageIndex] = String(maxId)
-        }
+export function notifyMusicForNewBug(auto = null) {
+    if (!auto) { return }
+    if (storage.getItem(BROWERTYPE) !== 'Safari') {
+        auto.play();
     }
 }
 /**

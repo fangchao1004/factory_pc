@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Select, TreeSelect, Input, message, Modal, Form, Tooltip } from 'antd'
 import HttpApi from '../../util/HttpApi'
-import { transfromDataTo3level } from '../../util/Tool'
+import { translate } from '../../util/Tool'
 import moment from 'moment'
 
 const { TextArea } = Input;
@@ -10,33 +10,39 @@ var localUserInfo = '';
 const bug_level_Options = [{ id: 1, name: '一级' }, { id: 2, name: '二级' }, { id: 3, name: '三级' }].map(bug_level => <Select.Option value={bug_level.id} key={bug_level.id}>{bug_level.name}</Select.Option>)
 var major_Options = [];///专业选项
 // var bugType_Options = [];///缺陷类型
-var area123_List = [];///三级区域选项 (树形结构 利用TreeSelect组件 直接提供对应的json数据结构)
-
-const valueMap = {};
-
-function loops(list, parent) {
-    return (list || []).map(({ children, value, title }) => {
-        const node = (valueMap[value] = {
-            parent,
-            value,
-            title
-        });
-        node.children = loops(children, node);
-        return node;
-    });
+var area0123_List = [];///三级区域选项 (树形结构 利用TreeSelect组件 直接提供对应的json数据结构)
+var fullPath = [];/// [1,1-2,1-2-5]
+var fullPathName = [];
+/**
+ * 输入 [1-2-5] fullPath [1,1-2,1-2-5]
+ * value X-Y-Z-..
+ */
+function getPath(value) {
+    fullPath.unshift(value)
+    let tempList = value.split('-')
+    let newList = tempList.slice(0, tempList.length - 1)
+    if (newList.length > 0) { getPath(newList.join('-')) }
 }
-
-function getPathAndTitle(value) {
-    const pathAndTitle = [];
-    let current = valueMap[value];
-    while (current) {
-        pathAndTitle.unshift({
-            value: current.value,
-            name: current.title
-        });
-        current = current.parent;
-    }
-    return pathAndTitle;
+function getPathhandler(value) {
+    fullPath.length = 0;
+    getPath(value)
+}
+function getPathNamehandler(pathList, tree) {
+    fullPathName.length = 0
+    getPathName(pathList, tree)
+}
+function getPathName(pathList, tree) {
+    tree.forEach(node => {
+        let exist = pathList.find((path) => {
+            return path === node.value
+        })
+        if (exist) {
+            fullPathName.push(node.title);
+            if (node.children && node.children.length > 0) {
+                getPathName(pathList, node.children);
+            }
+        }
+    });
 }
 
 /**
@@ -64,9 +70,8 @@ class AddBugView extends Component {
         })
     }
     init = async () => {
-        let result = await HttpApi.getArea123Info();
-        area123_List = transfromDataTo3level(result);/// 获取三级区域数据后，给添加的区域的对话框中，选择区域的树形组件添加数据源
-        loops(area123_List);
+        let resultArea0123 = await HttpApi.getArea0123Info();
+        area0123_List = translate(['area0_id', 'area1_id', 'area2_id', 'area3_id'], resultArea0123, 2)
         let marjorData = await this.getMajorInfo();
         major_Options = marjorData.map((major, index) => <Select.Option value={major.id} key={major.id}><Tooltip key={index} title={major.name}>{major.name}</Tooltip></Select.Option>)
         this.forceUpdate();
@@ -97,8 +102,11 @@ class AddBugView extends Component {
     }
     onOkHandler = () => {
         this.refs.bugFormRef.validateFields((error, values) => {
+            getPathhandler(values.area_remark.value)
+            getPathNamehandler(fullPath, area0123_List)
+            let pathNameStr = fullPathName.slice(1, fullPathName.length).join('/')///截去厂区的信息
             if (!error) {
-                values.area_remark = getPathAndTitle(values.area_remark).map((item) => item.name).join('/')
+                values.area_remark = pathNameStr
                 let valueObj = {
                     user_id: JSON.parse(localUserInfo).id,
                     major_id: values.major_id,
@@ -160,9 +168,9 @@ function AddBugFrom(props) {
         </Form.Item>
         <Form.Item label="所在范围:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('area_remark', {
-                rules: [{ required: true, message: '请选择在范围' }]
+                rules: [{ required: true, message: '请选择所在范围（请精确到一级以下）' }]
             })(
-                <TreeSelect style={{ width: '100%' }} treeNodeFilterProp="title" showSearch dropdownStyle={{ maxHeight: 400, overflow: 'auto' }} treeData={area123_List} placeholder="请选择在范围" />
+                <TreeSelect style={{ width: '100%' }} labelInValue={true} treeNodeFilterProp="title" showSearch dropdownStyle={{ maxHeight: 400, overflow: 'auto' }} treeData={area0123_List} placeholder="请选择所在范围（请精确到一级以下）" />
             )}
         </Form.Item>
         {/* <Form.Item label="描述类别:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
