@@ -7,6 +7,10 @@ import { originGroup } from '../../util/AppData';
 
 var allowTime_map_device_name;
 var allow_time_name;
+var jia_count = 0;
+var yi_count = 0;
+var bing_count = 0;
+var ding_count = 0;
 /**
  * 时间区间 模块界面
  * 这个选项卡中，如果是奇数天 就显示 allow_time
@@ -21,6 +25,10 @@ export default class InspectCountByTime extends Component {
             progressValue: 0,
             isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin,
             timeStampCheckList: [moment().add('day', -1).format('YYYY-MM-DD'), moment().add('day', -1).format('YYYY-MM-DD')],/// 时间段区间默认是今日 ['2019-01-01 00:00:00','2019-01-01 23:59:59']
+            jia_count: 0,
+            yi_count: 0,
+            bing_count: 0,
+            ding_count: 0,
         }
     }
     componentDidMount() {
@@ -29,6 +37,10 @@ export default class InspectCountByTime extends Component {
         this.init();
     }
     init = async () => {
+        jia_count = 0;
+        yi_count = 0;
+        bing_count = 0;
+        ding_count = 0;
         this.setState({ loading: true })
         let schedulesResult = await this.getSchedulesResult();///获取某个时间段-的排班表
         let resultTime = await this.getAllowTimeInfo();
@@ -50,8 +62,26 @@ export default class InspectCountByTime extends Component {
                 }
             })
         })
-        // console.log('allCountInfo:', allCountInfo)
-        this.setState({ loading: false, dataSource: allCountInfo.map((item, index) => { item.key = index; return item }) })
+
+        allCountInfo.forEach((item) => {
+            switch (item.group) {
+                case '甲组':
+                    jia_count++;
+                    break;
+                case '乙组':
+                    yi_count++;
+                    break;
+                case '丙组':
+                    bing_count++;
+                    break;
+                case '丁组':
+                    ding_count++;
+                    break;
+                default:
+                    break;
+            }
+        })
+        this.setState({ loading: false, dataSource: allCountInfo.map((item, index) => { item.key = index; return item }), jia_count, yi_count, bing_count, ding_count })
     }
     getSchedulesResult = () => {
         return new Promise((resolve, reject) => {
@@ -266,7 +296,12 @@ export default class InspectCountByTime extends Component {
                             }
                         }} />
                 </>
-                <Alert style={{ marginBottom: 10 }} type="info" showIcon message={<span>共有<span style={{ color: '#1790FF', marginLeft: 5, marginRight: 5, fontWeight: 800, fontSize: 16 }}>{this.state.dataSource.length}</span>个巡检点漏检</span>} />
+                <Alert style={{ marginBottom: 10 }} type="info" showIcon message={<span>共有<span style={{ color: '#1790FF', marginLeft: 5, marginRight: 5, fontWeight: 800, fontSize: 16 }}>{this.state.dataSource.length}</span>个巡检点漏检
+                    [甲组<span style={{ color: '#1790FF', marginLeft: 5, marginRight: 5, fontWeight: 800, fontSize: 16 }}>{this.state.jia_count}</span>
+                    ,乙组<span style={{ color: '#1790FF', marginLeft: 5, marginRight: 5, fontWeight: 800, fontSize: 16 }}>{this.state.yi_count}</span>
+                    ,丙组<span style={{ color: '#1790FF', marginLeft: 5, marginRight: 5, fontWeight: 800, fontSize: 16 }}>{this.state.bing_count}</span>
+                    ,丁组<span style={{ color: '#1790FF', marginLeft: 5, marginRight: 5, fontWeight: 800, fontSize: 16 }}>{this.state.ding_count}</span>]
+                </span>} />
                 <Table
                     loading={this.state.loading}
                     bordered

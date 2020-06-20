@@ -559,6 +559,10 @@ class HttpApi {
 
 
     static getUnreadBugByMajorAndBugStatus(params, f1, f2) {
+        let temp = '';
+        if (params.major_all) {
+            temp = `and bugs.major_id in (${params.major_all})`
+        }
         return new Promise((resolve, reject) => {
             let sql = `select bugs.*,users.name as user_name,temp.des as tag_des from bugs
             left join (select * from users where effective = 1) users on users.id = bugs.user_id 
@@ -569,7 +573,7 @@ class HttpApi {
                 (select max(bug_step_log.id)  from bug_step_log
                 group by bug_step_log.bug_id)
             ) temp on temp.bug_id = bugs.id
-            where bugs.effective = 1 and bugs.status in (${params.status_all}) and bugs.isread = 0 and bugs.major_id in (${params.major_all})
+            where bugs.effective = 1 and bugs.status in (${params.status_all}) and bugs.isread = 0 ${temp}
             order by bugs.id desc`
             let result = [];
             HttpApi.obs({ sql }, (res) => {

@@ -19,28 +19,28 @@ class BugNoticeList extends Component {
             item.key = index;
             switch (item.status) {
                 case 0:
-                    item.stauts_people = '给维修';
+                    item.stauts_people = '维修';
                     item.avatar_color = '#13c2c2';
                     item.tag_des = '待维修'
                     break;
                 case 1:
-                    item.stauts_people = '给维修';
+                    item.stauts_people = '维修';
                     item.avatar_color = '#13c2c2';
                     break;
                 case 2:
-                    item.stauts_people = '给专工';
+                    item.stauts_people = '专工';
                     item.avatar_color = '#eb2f96';
                     break;
                 case 3:
-                    item.stauts_people = '给运行';
+                    item.stauts_people = '运行';
                     item.avatar_color = '#fa541c';
                     break;
                 case 6:
-                    item.stauts_people = '给专工';
+                    item.stauts_people = '专工';
                     item.avatar_color = '#eb2f96';
                     break;
                 case 7:
-                    item.stauts_people = '给专工';
+                    item.stauts_people = '专工';
                     item.avatar_color = '#eb2f96';
                     break;
                 default:

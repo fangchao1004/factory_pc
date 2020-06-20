@@ -72,8 +72,11 @@ export default class MainView extends Component {
     }
     init = async () => {
         // BrowserType();
+        var myBugList = [];
+        var runBugList = [];
         var taskList = await this.getTaskInfo();
         let area0List = await this.getArea0List();
+        let unreadBugs = [];
         this.setState({
             area0List: area0List.map((item) => { return { id: item.id, name: item.name } })
         })
@@ -81,17 +84,25 @@ export default class MainView extends Component {
         let bug_status_list = [];
         if (this.state.permissionFix) { bug_status_list.push(0); bug_status_list.push(1) }
         if (this.state.permissionManager) { bug_status_list.push(0); bug_status_list.push(2); bug_status_list.push(6); bug_status_list.push(7) }
-        if (this.state.permissionRun) { bug_status_list.push(3) }
+        // if (this.state.permissionRun) { bug_status_list.push(3) }
         // console.log('bug_status_list:', bug_status_list.join(','))
-        ///有专业 且 至少有一个权限
-        if (this.state.major_id_all && (this.state.permissionFix || this.state.permissionManager || this.state.permissionRun)) {
-            let unreadBugs = await HttpApi.getUnreadBugByMajorAndBugStatus({ status_all: bug_status_list.join(','), major_all: this.state.major_id_all })
-            console.log('未读的bug:', unreadBugs)
-            this.setState({ unreadBugs })
-            var myBugList = await this.getMyBugsInfo();
-            var runBugList = await this.getRunBugsInfo();
+        ///有专业 且 至少有维修或者专工中的一个权限
+        if (this.state.major_id_all && (this.state.permissionFix || this.state.permissionManager)) {
+            let unreadBugs1 = await HttpApi.getUnreadBugByMajorAndBugStatus({ status_all: bug_status_list.join(','), major_all: this.state.major_id_all })
+            // console.log('维修或专工未读的bug:', unreadBugs1)
+            unreadBugs = unreadBugs.concat(unreadBugs1)
 
+            myBugList = await this.getMyBugsInfo();
         }
+        ///如果有的运行权限没有专业
+        if (this.state.permissionRun) {
+            let unreadBugs2 = await HttpApi.getUnreadBugByMajorAndBugStatus({ status_all: 3 })
+            // console.log('如果有的运行 未读的bug:', unreadBugs2)
+            unreadBugs = unreadBugs.concat(unreadBugs2)
+            runBugList = await this.getRunBugsInfo();
+        }
+        // console.log('unreadBugs:', unreadBugs)
+        this.setState({ unreadBugs })
         if (this.state.aboutMeBugNum !== myBugList.length || this.state.aboutMeTaskNum !== taskList.length || this.state.runBugNum !== runBugList.length) {
             console.log('有关我的-缺陷和任务数量有变化-刷新');
             setTimeout(() => {

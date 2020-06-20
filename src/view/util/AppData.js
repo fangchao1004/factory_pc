@@ -33,7 +33,7 @@ export const NOTICEMUSICOPENFORRUN = 'noticeMusicOpenForRun';///针对运行情�
 export const BROWERTYPE = 'browerType';
 // const a = <a href="https://www.jb51.net" title="脚本之家" target="_blank">Welcome</a>
 export const VersionlistData = [
-    { title: '版本号', description: `V 1.5.0 test` },
+    { title: '版本号', description: `V 1.5.0.1 test` },
     // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
     // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
     // { title: '更新', description: '1.0.9 添加巡检点信息修改功能' }
