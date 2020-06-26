@@ -284,7 +284,7 @@ class ExportBugView extends Component {
                         />
                     </Col>
                 </Row>
-                <Row gutter={16} style={{ marginTop: 20 }}>
+                <Row gutter={16} style={{ marginTop: 10 }}>
                     <Col span={5}>
                         <span>专业选择:</span>
                     </Col>
@@ -312,7 +312,7 @@ class ExportBugView extends Component {
                     </Checkbox>
                     </Col>
                 </Row>
-                <Row gutter={16} style={{ marginTop: 20 }}>
+                <Row gutter={16} style={{ marginTop: 10 }}>
                     <Col span={5}>
                         <span>状态选择:</span>
                     </Col>
@@ -341,7 +341,7 @@ class ExportBugView extends Component {
                     </Col>
                 </Row>
 
-                <Row gutter={16} style={{ marginTop: 20 }}>
+                <Row gutter={16} style={{ marginTop: 10 }}>
                     <Col span={5}>
                         <span>超时选择:</span>
                     </Col>

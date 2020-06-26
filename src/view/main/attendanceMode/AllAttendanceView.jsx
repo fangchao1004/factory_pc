@@ -221,7 +221,7 @@ class AttendanceView extends Component {
                     <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>个人考勤记录</h2>
                 }
                 <Table
-                    style={{ marginTop: 20 }}
+                    style={{ marginTop: 10 }}
                     bordered
                     dataSource={this.state.users}
                     columns={columns}

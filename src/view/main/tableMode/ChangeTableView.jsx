@@ -384,7 +384,7 @@ class EditTable extends Component {
         return <div>
             <Row>
                 <Col span={6}>
-                    <Button onClick={this.handleAdd} type="primary" style={{ marginBottom: 16 }}>添加表单项目</Button>
+                    <Button onClick={this.handleAdd} type="primary" style={{ marginBottom: 10 }}>添加表单项目</Button>
                 </Col>
                 <Col span={18}>
                     <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>

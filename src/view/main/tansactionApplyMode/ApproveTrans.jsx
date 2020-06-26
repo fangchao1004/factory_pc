@@ -327,7 +327,7 @@ class ApproveTrans extends Component {
                 </div>
                 <Table
                     loading={this.state.loading}
-                    style={{ marginTop: 20 }}
+                    style={{ marginTop: 10 }}
                     bordered
                     dataSource={this.state.data}
                     columns={columns}

@@ -206,13 +206,13 @@ export default class EditableTable extends Component {
       <div>
         <Row>
           <Col span={6}>
-            <Button onClick={this.handleAdd} type="primary" style={{ marginBottom: 16 }}>
+            <Button onClick={this.handleAdd} type="primary" style={{ marginBottom: 10 }}>
               添加表单项目
           </Button>
           </Col>
           <Col span={18} >
             <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
-              <Button onClick={this.readyHandler} type="primary" style={{ marginBottom: 16 }}>
+              <Button onClick={this.readyHandler} type="primary" style={{ marginBottom: 10 }}>
                 预览
               </Button>
             </div>

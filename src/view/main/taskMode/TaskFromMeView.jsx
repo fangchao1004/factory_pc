@@ -345,7 +345,7 @@ class TaskFromMeView extends Component {
             <div>
                 <Row>
                     <Col span={6}>
-                        <Button type="primary" style={{ marginBottom: 16 }} onClick={this.addTask.bind(this)}>
+                        <Button type="primary" style={{ marginBottom: 10 }} onClick={this.addTask.bind(this)}>
                             新建任务
                          </Button>
                     </Col>

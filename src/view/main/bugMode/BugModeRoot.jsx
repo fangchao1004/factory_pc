@@ -58,7 +58,7 @@ class BugModeRoot extends Component {
         }
         return (
             <Card
-                bodyStyle={{ padding: 20 }}
+                bodyStyle={{ padding: 10 }}
                 bordered={false}
                 style={{ width: '100%' }}
                 tabList={tabs}

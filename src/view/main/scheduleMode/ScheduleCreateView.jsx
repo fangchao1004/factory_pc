@@ -84,7 +84,7 @@ class ScheduleCreateView extends Component {
                         }}>两班倒</Button>
                     </Col>
                 </Row>
-                <Row style={{ marginTop: 20 }}>
+                <Row style={{ marginTop: 10 }}>
                     <Col span={6}>
                         <span>最小轮班周期:</span><br />
                         {this.state.loopTags.length > 0 ?
@@ -100,7 +100,7 @@ class ScheduleCreateView extends Component {
                         </div>
                     </Col>
                 </Row>
-                <Row style={{ marginTop: 20 }}>
+                <Row style={{ marginTop: 10 }}>
                     <Col span={6}>
                         <Tooltip placement="topLeft" title={'点击选项-自行编辑排班表-请严格按照排班规范-各班次数量对等-否则生成的排班数据会有冲突'}>
                             <span>班次添加:</span>
@@ -116,7 +116,7 @@ class ScheduleCreateView extends Component {
                         </Popover>
                     </Col>
                 </Row>
-                <Row style={{ marginTop: 20 }}>
+                <Row style={{ marginTop: 10 }}>
                     <Col span={6}>
                         <Tooltip placement="topLeft" title={'固定班组-不可编辑-如果是两班倒-则会无视丁组'}>
                             <span>初始固定班组:</span>
@@ -129,7 +129,7 @@ class ScheduleCreateView extends Component {
                         <Tag>丁组</Tag>
                     </Col>
                 </Row>
-                <Row style={{ marginTop: 20 }}>
+                <Row style={{ marginTop: 10 }}>
                     <Col span={6}>
                         <Tooltip placement="topLeft" title={<div>注意: 甲组今日班次--乙组前推 (最小周期/班组数量) 天-以此类推--形成不冲突的循环</div>}>
                             <span>甲组今日班次:</span>
@@ -316,11 +316,11 @@ class ScheduleCreateView extends Component {
             <div>
                 <Row>
                     <Col span={6}>
-                        <Button onClick={this.createTable} type="primary" style={{ marginBottom: 16 }}>创建新表单</Button>
+                        <Button onClick={this.createTable} type="primary" style={{ marginBottom: 10 }}>创建新表单</Button>
                     </Col>
                     <Col span={18}>
                         <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
-                            {this.state.listOfyear.length > 0 ? <Fragment> <Button onClick={() => { this.setState({ listOfyear: [] }) }} type="primary" style={{ marginBottom: 16, marginLeft: 30 }}>重置</Button>
+                            {this.state.listOfyear.length > 0 ? <Fragment> <Button onClick={() => { this.setState({ listOfyear: [] }) }} type="primary" style={{ marginBottom: 10, marginLeft: 30 }}>重置</Button>
                                 <Popconfirm
                                     placement="topRight"
                                     title={'确定要更新轮值表吗？原先的轮值表数据将会被替换'}
@@ -328,7 +328,7 @@ class ScheduleCreateView extends Component {
                                     okText="确定"
                                     cancelText="取消"
                                 >
-                                    <Button type="danger" style={{ marginBottom: 16 }}>确认无误-保存入库</Button>
+                                    <Button type="danger" style={{ marginBottom: 10 }}>确认无误-保存入库</Button>
                                     {/* onClick={this.comfrimToDB} */}
                                 </Popconfirm>
                             </Fragment> : null}

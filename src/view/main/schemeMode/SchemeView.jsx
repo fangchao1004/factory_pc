@@ -202,7 +202,7 @@ export default class SchemeView extends Component {
                     }}><Button type='danger' >确认修改</Button></Popconfirm>
                 </div> :
                     <Button type='primary' onClick={() => { this.setState({ isEditing: true }) }}>开始编辑</Button>}</div>
-            <Table style={{ marginTop: 20 }} bordered columns={schemeCloums} dataSource={this.state.schemeData} pagination={false} />
+            <Table style={{ marginTop: 10 }} bordered columns={schemeCloums} dataSource={this.state.schemeData} pagination={false} />
         </div >
     }
 

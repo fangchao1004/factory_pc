@@ -182,7 +182,7 @@ class EquipmentArea0View extends Component {
                 <Alert message={'因左侧菜单栏会根据片区数据动态生成, 所以当片区数据发生变动时, 会触发页面刷新; 且请勿随意变动片区数据; 因为数据安全问题默认不可删除, 如果要删除测试数据请联系管理员'} />
                 <Row>
                     <Col span={6}>
-                        <Button onClick={() => { this.setState({ addVisible: true }) }} type="primary" style={{ marginBottom: 16, marginTop: 16 }}>
+                        <Button onClick={() => { this.setState({ addVisible: true }) }} type="primary" style={{ marginBottom: 10, marginTop: 10 }}>
                             添加片区
                          </Button>
                     </Col>

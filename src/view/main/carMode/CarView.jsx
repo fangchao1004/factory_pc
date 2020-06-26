@@ -87,7 +87,7 @@ class CarView extends Component {
                     }} />
                 </div>
                 <Table
-                    style={{ marginTop: 20 }}
+                    style={{ marginTop: 10 }}
                     bordered
                     dataSource={this.state.data}
                     columns={columns}

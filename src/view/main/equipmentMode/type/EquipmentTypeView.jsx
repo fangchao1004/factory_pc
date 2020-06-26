@@ -122,7 +122,7 @@ class EquipmentTypeView extends Component {
             <div>
                 <Row>
                     <Col span={6}>
-                        <Button onClick={this.addStaff} type="primary" style={{ marginBottom: 16 }}>
+                        <Button onClick={this.addStaff} type="primary" style={{ marginBottom: 10 }}>
                             添加巡检点类型
                          </Button>
                     </Col>

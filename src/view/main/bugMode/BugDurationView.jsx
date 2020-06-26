@@ -85,7 +85,7 @@ class BugDurationView extends Component {
                     <div>此数据只用于判断当前时刻与缺陷的上一状态记录时刻的差值是否超出, <span style={{ color: '#1790FF' }}>如超出则标红于缺陷表单中</span></div>
                 } type="info" showIcon />
                 <Table
-                    style={{ marginTop: 20 }}
+                    style={{ marginTop: 10 }}
                     bordered
                     columns={columns}
                     dataSource={this.state.dataSource}

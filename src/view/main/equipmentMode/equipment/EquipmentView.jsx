@@ -267,7 +267,7 @@ class EquipmentView extends Component {
                 {
                     this.state.isAdmin ? (<Row>
                         <Col span={6}>
-                            <Button onClick={this.addEquipment} type="primary" style={{ marginBottom: 16 }}>
+                            <Button onClick={this.addEquipment} type="primary" style={{ marginBottom: 10 }}>
                                 添加巡检点
                              </Button>
                         </Col>

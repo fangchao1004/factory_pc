@@ -481,7 +481,7 @@ class OneAttendanceView extends Component {
                     <Icon type="info-circle" theme="twoTone" style={{ fontSize: 20, marginLeft: 20 }} />
                 </Tooltip>
                 <Table
-                    style={{ marginTop: 20 }}
+                    style={{ marginTop: 10 }}
                     bordered
                     dataSource={this.state.countData}
                     columns={columns2}

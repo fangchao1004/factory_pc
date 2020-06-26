@@ -57,13 +57,13 @@ class TableView extends Component {
                                 <div><Icon type="delete" theme="twoTone" style={{ fontSize: 20, cursor: "pointer" }} /></div>
                             </Popconfirm></div>)}
                         bordered={true}
-                        style={{ marginTop: 16, height: 170, borderRadius: 5 }}>
+                        style={{ marginTop: 10, height: 170, borderRadius: 5 }}>
                         <div>
                             <Tag color={element.device_type_name ? TagColor[index % TagColor.length] : '#f00'} style={{ height: 25 }}>
                                 <span style={{ fontSize: 15 }}>{element.device_type_name ? omitTextLength(element.device_type_name, 18) : '该设备类型可能被删除；请删除该表单'}</span>
                             </Tag>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'space-between', width: '102%', marginTop: 20 }}>
+                        <div style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'space-between', width: '102%', marginTop: 10 }}>
                             <div>
                                 <Button type='ghost' onClick={() => {
                                     HttpApi.getDeviceInfo({ effective: 1, type_id: element.device_type_id, status: 2 }, (res) => {

@@ -170,7 +170,7 @@ class SchemeOfAllowTime extends Component {
         return (
             <div>
                 <Button type='primary' onClick={() => { this.setState({ addVisible: true }) }}>添加时间段方案</Button>
-                <Table style={{ marginTop: 20 }} bordered columns={columns} dataSource={this.state.data} pagination={false} />
+                <Table style={{ marginTop: 10 }} bordered columns={columns} dataSource={this.state.data} pagination={false} />
                 <AddAtmSchemeView visible={this.state.addVisible} onOk={this.addSchemeOk} onCancel={this.addSchemeCancel} {...this.props} />
                 <UpdateAtmSchemeView visible={this.state.updateVisible} onOk={this.updateSchemeOk} onCancel={this.updateSchemeCancel} record={this.state.record} {...this.props} />
             </div>

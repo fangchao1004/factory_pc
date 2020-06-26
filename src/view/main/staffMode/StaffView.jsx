@@ -365,12 +365,12 @@ class StaffView extends Component {
 
         return (
             <div>
-                {/* <Button type="primary" style={{ marginBottom: 16 }} onClick={() => {
+                {/* <Button type="primary" style={{ marginBottom: 10 }} onClick={() => {
                     send({ name: 'tom' });
                 }}>aaa</Button> */}
                 <Row>
                     <Col span={6}>
-                        <Button type="primary" style={{ marginBottom: 16 }} onClick={this.addStaff.bind(this)}>
+                        <Button type="primary" style={{ marginBottom: 10 }} onClick={this.addStaff.bind(this)}>
                             添加员工
                          </Button>
                     </Col>

@@ -170,7 +170,7 @@ export default class SampleViewTool {
             });
         }
 
-        // viewArr.push(<Button key={"btn0"} type='primary' style={{ marginTop: 20 }}>确定上传</Button>)
+        // viewArr.push(<Button key={"btn0"} type='primary' style={{ marginTop: 10 }}>确定上传</Button>)
         return <div style={{ width: 400, alignItems: 'center' }}>{viewArr}</div>
     }
 
