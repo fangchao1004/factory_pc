@@ -20,7 +20,7 @@ class TableModeRoot extends Component {
         }
         this.contentListNoTitle = {
             TableView: <TableView {...props} />,
-            EditableTable: <EditableTable {...props} />
+            EditableTable: <EditableTable {...props} onTabChange={this.onTabChange} />
         };
     }
     onTabChange = (key) => {

@@ -385,11 +385,15 @@ export default class EditableTable extends Component {
                 if (res.data.code === 0) {
                   message.success('添加表单以及方案成功', 5);
                   this.init();
+                  ///跳转card
+                  this.props.onTabChange('TableView')
                 } else { message.error('添加表单以及方案失败', 5); }
               })
             } else {
               message.success('添加表单成功', 5);
               this.init();
+              ///跳转card
+              this.props.onTabChange('TableView')
               console.log('不需要添加日期方案和时间段方案 与 模版直接的映射关系了')
             }
           }

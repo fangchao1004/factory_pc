@@ -31,7 +31,7 @@ class TableView extends Component {
         sample_data.length = device_type_data.length = 0;
         sample_data = await this.getSampleWithSchemeInfo();
         this.setState({
-            dataSource: sample_data.map((item, index) => { item.key = index; return item })
+            dataSource: sample_data.map((item, index) => { item.key = index; return item }).reverse()
         }, () => {
             dataSourceCopy = JSON.parse(JSON.stringify(this.state.dataSource))
         })
