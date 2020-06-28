@@ -1,11 +1,13 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Button, Row, Col, Drawer, Icon, message, Popconfirm, Divider, Tag } from 'antd'
+import { Table, Button, Row, Col, Drawer, Icon, message, Popconfirm, Divider, Tag, Input } from 'antd'
 import HttpApi from '../../../util/HttpApi';
 import AddEquipmentView from './AddEquipmentView';
 import UpdateEquipmentView from './UpdateEquipmentView';
 import PieViewOfOneDeStus from './PieViewOfOneDeStus';
 import OneRecordDetialView from './OneRecordDetialView'
 import LineViewOfCollection from './LineViewOfCollection';
+const { Search } = Input;
+var dataSourceCopy = [];
 
 var device_status_filter = [{ text: '正常', value: 1 }, { text: '故障', value: 2 }, { text: '待检', value: 3 }];///用于筛选巡检点状态的数据 选项
 var device_type_data_filter = []; ///用于筛选巡检点类型的数据 选项
@@ -43,6 +45,8 @@ class EquipmentView extends Component {
         devicesInfo.map((item) => item.key = item.id + '')
         this.setState({
             dataSource: devicesInfo
+        }, () => {
+            dataSourceCopy = JSON.parse(JSON.stringify(this.state.dataSource))
         })
     }
     // getAreasInfo = () => {
@@ -264,16 +268,33 @@ class EquipmentView extends Component {
 
         return (
             <div>
-                {
-                    this.state.isAdmin ? (<Row>
-                        <Col span={6}>
-                            <Button onClick={this.addEquipment} type="primary" style={{ marginBottom: 10 }}>
-                                添加巡检点
+
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    {
+                        this.state.isAdmin ? (<Row>
+                            <Col span={6}>
+                                <Button onClick={this.addEquipment} type="primary">
+                                    添加巡检点
                              </Button>
-                        </Col>
-                    </Row>) : null
-                }
+                            </Col>
+                        </Row>) : <div></div>
+                    }
+                    <Search style={{ width: 400 }} placeholder="名称模糊查询" enterButton
+                        onChange={(e) => {
+                            if (e.target.value === '') { this.init(); }
+                        }}
+                        onSearch={(value) => {
+                            if (value.length > 0) {
+                                let searchResult = dataSourceCopy.filter((item) => {
+                                    return item.name.indexOf(value) !== -1
+                                })
+                                this.setState({ dataSource: searchResult })
+                            }
+                        }}
+                    />
+                </div>
                 <Table
+                    style={{ marginTop: 10 }}
                     bordered
                     dataSource={this.state.dataSource}
                     columns={columns}

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Card, Button, Tag, Icon, Popconfirm, Empty, Modal, message, Input } from 'antd'
+import { Row, Col, Card, Button, Tag, Icon, Popconfirm, Empty, Modal, message, Input, Anchor } from 'antd'
 import HttpApi from '../../util/HttpApi';
 import SampleViewTool from '../../util/SampleViewTool';
 import ChangeTableView from './ChangeTableView';
@@ -141,11 +141,8 @@ class TableView extends Component {
                         }}
                         onSearch={(value) => {
                             if (value.length > 0) {
-                                let searchResult = [];
-                                dataSourceCopy.forEach((item) => {
-                                    if (item.table_name.indexOf(value) !== -1) {
-                                        searchResult.push(item);
-                                    }
+                                let searchResult = dataSourceCopy.filter((item) => {
+                                    return item.table_name.indexOf(value) !== -1
                                 })
                                 this.setState({ dataSource: searchResult })
                             }
