@@ -31,6 +31,7 @@ export const NOTICEINFO = 'noticeinfo';
 export const NOTICEMUSICOPEN = 'noticeMusicOpen';///一般情况下，所有权限和个人专业相关的权限共用一个开启提醒的开关标志位
 export const NOTICEMUSICOPENFORRUN = 'noticeMusicOpenForRun';///针对运行情况，独立的一个开启提醒的开关标志位
 export const BROWERTYPE = 'browerType';
+export const BUGIDLIST = 'bugIdList'///和我相关的缺陷的id
 // const a = <a href="https://www.jb51.net" title="脚本之家" target="_blank">Welcome</a>
 export const VersionlistData = [
     { title: '版本号', description: `V 1.5.0.1 test` },

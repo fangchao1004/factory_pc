@@ -6,7 +6,6 @@ import moment from 'moment'
 import Store from '../../../redux/store/Store';
 import { showTaskNum } from '../../../redux/actions/TaskAction';
 import { getDuration } from '../../util/Tool';
-import { MAXTASKIDMY } from '../../util/AppData';
 
 var storage = window.localStorage;
 var userinfo;

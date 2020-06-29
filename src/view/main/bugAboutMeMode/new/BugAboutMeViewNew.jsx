@@ -1,16 +1,15 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm, Tooltip, Alert, Input, Modal, Icon } from 'antd'
+import { Table, Tag, Button, message, Tooltip, Alert, Input, Modal, Icon } from 'antd'
 import HttpApi, { Testuri } from '../../../util/HttpApi'
 import moment from 'moment'
 import Store from '../../../../redux/store/Store';
-import { showBugNum } from '../../../../redux/actions/BugAction';
 import FuncPanelForRepair from '../../bugMode/new/FuncPanelForRepair';
 import StepLogView from '../../bugMode/new/StepLogView';
 import FuncPanelForEngineer from '../../bugMode/new/FuncPanelForEngineer';
 import FuncPanelForRunner from '../../bugMode/new/FuncPanelForRunner';
-import { originStatus, NOTIFY_MP3, BUGLOOPTIME, MAXBUGIDMY, NOTICEMUSICOPEN, BUGDATAUPDATETIME, originOverTime } from '../../../util/AppData'
+import { originStatus, BUGLOOPTIME, BUGDATAUPDATETIME, originOverTime } from '../../../util/AppData'
 import ShowImgView from '../../bugMode/ShowImgView';
-import { getDuration, notifyMusicForNewBug, checkOverTime } from '../../../util/Tool';
+import { getDuration, checkOverTime } from '../../../util/Tool';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
 var status_filter = [];///用于筛选状态的数据
@@ -323,19 +322,18 @@ export default class BugAboutMeViewNew extends Component {
             }
         })
     }
-
-    deleteBugsHandler = (record) => {
-        HttpApi.obs({ sql: `update bugs set effective = 0 where id = ${record.id} ` }, (res) => {
-            if (res.data.code === 0) {
-                message.success('移除缺陷成功');
-                this.init();
-                ///要利用redux刷新 mainView处的徽标数
-                this.updateDataByRedux();
-                ///再创建一个新的record记录插入records表
-                this.changeRecordData(record.id, true);
-            }
-        })
-    }
+    // deleteBugsHandler = (record) => {
+    //     HttpApi.obs({ sql: `update bugs set effective = 0 where id = ${record.id} ` }, (res) => {
+    //         if (res.data.code === 0) {
+    //             message.success('移除缺陷成功');
+    //             this.init();
+    //             ///要利用redux刷新 mainView处的徽标数
+    //             this.updateDataByRedux();
+    //             ///再创建一个新的record记录插入records表
+    //             this.changeRecordData(record.id, true);
+    //         }
+    //     })
+    // }
     updateDataByRedux = () => {
         ///每次删除
         // Store.dispatch(showBugNum(null)) ///随便派发一个值，目的是让 mainView处监听到 执行init();
@@ -576,13 +574,13 @@ export default class BugAboutMeViewNew extends Component {
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                 <Button disabled={!runable} size="small" type="primary" onClick={() => { this.runnerHandler(record) }}>运行处理</Button>
                             </> : null}
-                        {JSON.parse(localUserInfo).isadmin === 1 ?
+                        {/* {JSON.parse(localUserInfo).isadmin === 1 ?
                             <>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                                <Popconfirm title="确定要删除该缺陷吗?" onConfirm={() => { this.deleteBugsHandler(record); }}>
+                                <Popconfirm title="确定要删除该缺陷吗?" onConfirm={() => { this.deleteBugsHandler(record); removeOneBugIdFromList(record.id) }}>
                                     <Button size="small" type="danger">删除</Button>
                                 </Popconfirm>
-                            </> : null}
+                            </> : null} */}
                     </div>
                 }
             }

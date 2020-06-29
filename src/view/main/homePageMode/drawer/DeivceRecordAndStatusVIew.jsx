@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Drawer, Table, Alert, Button } from 'antd';
+import { Drawer, Table, Alert } from 'antd';
 import HttpApi from '../../../util/HttpApi';
 
 /**

@@ -3,16 +3,6 @@ import { Tabs } from 'antd';
 import TaskNoticeList from './TaskNoticeList'
 import BugNoticeList from './BugNoticeList'
 const { TabPane } = Tabs;
-
-const tabListNoTitle = [{
-    key: 'BugNoticeList',
-    tab: '缺陷',
-},
-{
-    key: 'TaskNoticeList',
-    tab: '任务',
-}
-];
 export default class NoticeMenu extends Component {
     constructor(props) {
         super(props);

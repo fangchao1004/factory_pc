@@ -1,9 +1,8 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm, Tooltip, Alert, Modal, Input, Icon, Switch } from 'antd'
+import { Table, Tag, Button, message, Popconfirm, Tooltip, Alert, Modal, Input, Icon } from 'antd'
 import HttpApi, { Testuri } from '../../../util/HttpApi'
 import moment from 'moment'
-import Store from '../../../../redux/store/Store';
-import { showBugNum } from '../../../../redux/actions/BugAction';
+// import Store from '../../../../redux/store/Store';
 import AddBugView from '../AddBugView';
 import ExportBugView from '../ExportBugView';
 import '../BugViewCss.css'
@@ -11,9 +10,9 @@ import FuncPanelForRepair from './FuncPanelForRepair';
 import StepLogView from './StepLogView';
 import FuncPanelForEngineer from './FuncPanelForEngineer';
 import FuncPanelForRunner from './FuncPanelForRunner';
-import { originOverTime, originStatus, NOTIFY_MP3, BUGLOOPTIME, MAXBUGIDALL, NOTICEMUSICOPEN, BROWERTYPE, BUGDATAUPDATETIME } from '../../../util/AppData'
+import { originOverTime, originStatus, BUGLOOPTIME, NOTICEMUSICOPEN, BUGDATAUPDATETIME } from '../../../util/AppData'
 import ShowImgView from '../ShowImgView';
-import { getDuration, notifyMusicForNewBug, checkOverTime } from '../../../util/Tool';
+import { getDuration, checkOverTime, removeOneBugIdFromList } from '../../../util/Tool';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
 var bug_type_filter = [];///用于筛选类别的数据 选项
@@ -549,7 +548,7 @@ export default class BugViewNew extends Component {
                         {JSON.parse(localUserInfo).isadmin === 1 ?
                             <>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                                <Popconfirm title="确定要删除该缺陷吗?" onConfirm={() => { this.deleteBugsHandler(record); }}>
+                                <Popconfirm title="确定要删除该缺陷吗?" onConfirm={() => { this.deleteBugsHandler(record); removeOneBugIdFromList(record.id) }}>
                                     <Button size="small" type="danger">删除</Button>
                                 </Popconfirm>
                             </> : null}

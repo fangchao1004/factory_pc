@@ -1,15 +1,11 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Tooltip, Alert, Modal, Input, Icon, Switch } from 'antd'
+import { Table, Tag, Button, message, Tooltip, Alert, Modal, Input, Icon } from 'antd'
 import HttpApi, { Testuri } from '../../util/HttpApi'
 import moment from 'moment'
-import Store from '../../../redux/store/Store';
-import { showBugNum } from '../../../redux/actions/BugAction';
-import FuncPanelForRepair from '../bugMode/new/FuncPanelForRepair';
 import StepLogView from '../bugMode/new/StepLogView';
-import FuncPanelForEngineer from '../bugMode/new/FuncPanelForEngineer';
 import FuncPanelForRunner from '../bugMode/new/FuncPanelForRunner';
-import { originStatus, NOTIFY_MP3, BUGLOOPTIME, BROWERTYPE, NOTICEMUSICOPENFORRUN, OLDRUNBUGIDLIST, BUGDATAUPDATETIME, originOverTime } from '../../util/AppData'
-import { getDuration, noticeForRunCheckList, checkOverTime } from '../../util/Tool';
+import { originStatus, BUGLOOPTIME, NOTICEMUSICOPENFORRUN, BUGDATAUPDATETIME, originOverTime } from '../../util/AppData'
+import { getDuration, checkOverTime } from '../../util/Tool';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
 var bug_type_filter = [];///用于筛选类别的数据 选项

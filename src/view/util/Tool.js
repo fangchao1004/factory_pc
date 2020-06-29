@@ -2,7 +2,7 @@ import React from "react";
 import { Icon, message } from 'antd'
 import HttpApi from './HttpApi'
 import moment from 'moment';
-import { BROWERTYPE, NOTICEMUSICOPEN, MAXBUGIDMY, MAXTASKIDMY, OLDRUNBUGIDLIST } from "./AppData";
+import { BROWERTYPE, NOTICEMUSICOPEN, MAXBUGIDMY, MAXTASKIDMY, OLDRUNBUGIDLIST, BUGIDLIST } from "./AppData";
 var storage = window.localStorage;
 /**
  * Tool 工具类 
@@ -554,7 +554,7 @@ export function getDuration(my_time, resultType = 1, showSecond = true) {
     let time = '/';
     if (daysRound > 0) {
         // time = daysRound + '天' + hoursRound + '小时' + minutesRound + '分钟'
-        time = (24 * daysRound + hoursRound) + '小时' + minutesRound + '分钟'
+        time = (24 * daysRound + hoursRound) + '小时' + minutesRound + '分钟' + tempS
     } else if (hoursRound > 0) {
         time = hoursRound + '小时' + tempM + tempS
     } else if (hoursRound === 0 && minutesRound > 0) {
@@ -801,4 +801,50 @@ export function checkOverTimeForList(list) {
         element.isOver = checkOverTime(element, currentTime).isOver
     });
     return list;
+}
+
+export function checkLocalStorageBugIdList(lastBugList, auto = null) {
+    let isSafari = storage.getItem(BROWERTYPE) === 'Safari';
+    // console.log('isSafari:', isSafari)
+    if (lastBugList.length === 0) { return }
+    let lastBugIdList = lastBugList.map((item) => item.id)
+    // console.log('最新缺陷id数组：', lastBugIdList)
+    // console.log('缓存缺陷id数组：', JSON.parse(storage.getItem(BUGIDLIST)))
+    if (storage.getItem(BUGIDLIST)) {///如果缓存中有缺陷id数组存在 判断最新的缺陷id数组中，是否有id不存在于缓存中
+        if (hasNewBugIdExist(lastBugIdList, JSON.parse(storage.getItem(BUGIDLIST)))) {
+            ///播放一次提示音，并且将最新的缺陷id数组，替换到缓存中 （当用户点击查看某个缺陷后，要将数组中的对应的缺陷id剔除）
+            // console.log('111播放提示音')
+            if (!isSafari) {
+                if (auto) { auto.play() }
+            } else {
+                message.warning('因苹果安全政策，Safari浏览器不支持自动播报功能，请使用其他浏览器', 4)
+            }
+            storage[BUGIDLIST] = JSON.stringify(lastBugIdList);
+        } else {
+            // console.log('没有新增的缺陷id,不需要播放提示音')
+        }
+    } else {///如果缓存中为空，那么就确定要播放一次提示音，并且将最新的缺陷id数组，替换到缓存中（当用户点击查看某个缺陷后，要将数组中的对应的缺陷id剔除）
+        // console.log('222播放提示音')
+        if (!isSafari) {
+            if (auto) { auto.play() }
+        } else {
+            message.warning('因苹果安全政策，Safari浏览器不支持自动播报功能，请使用其他浏览器', 4)
+        }
+        storage[BUGIDLIST] = JSON.stringify(lastBugIdList);
+    }
+}
+function hasNewBugIdExist(bugidList, targetList) {
+    let flag = false;
+    bugidList.forEach((bugid) => {
+        if (targetList.indexOf(bugid) === -1) { flag = true }
+    })
+    return flag
+}
+
+export function removeOneBugIdFromList(bugid) {
+    let originList = JSON.parse(storage.getItem(BUGIDLIST)) || []
+    let newList = originList.filter((originId) => {
+        return originId !== bugid
+    })
+    storage[BUGIDLIST] = JSON.stringify(newList);
 }

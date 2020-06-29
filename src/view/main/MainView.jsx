@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, Menu, Icon, Row, Col, Popover, Button, Badge, notification, Avatar, Descriptions, Modal, Tooltip, Tag } from 'antd'
+import { Layout, Menu, Icon, Row, Col, Popover, Button, Badge, notification, Avatar } from 'antd'
 import { Route, Link, Redirect } from 'react-router-dom'
 import logopng from '../../assets/logo.png'
 import HomePageRoot from './homePageMode/HomePageRoot';
@@ -22,10 +22,10 @@ import SchemeModeRoot from './schemeMode/SchemeModeRoot'
 import RunlogModeRoot from './runlogMode/RunlogModeRoot'
 import UserMenuView from './userMenu/UserMenuView'
 import HttpApi from '../util/HttpApi';
-import Store from '../../redux/store/Store';
+// import Store from '../../redux/store/Store';
 // import Socket from '../socket/Socket'
 import { NOTICEINFO, BUGDATAUPDATETIME, NOTIFY_MP3 } from '../util/AppData'
-import { BrowserType, checkBugTaskDataIsNew, omitTextLength, notifyMusicForNewBug } from '../util/Tool';
+import { checkLocalStorageBugIdList, BrowserType } from '../util/Tool';
 import NoticeMenu from './noticeMenu/NoticeMenu';
 import DetailModal from './noticeMenu/DetailModal';
 
@@ -34,7 +34,7 @@ const { Header, Content, Sider } = Layout;
 const SubMenu = Menu.SubMenu
 var noticeinfo = null;
 var localUserInfo = '';
-let unsubscribe;
+// let unsubscribe;
 var time;
 var tempNoticeStr = '';
 export default class MainView extends Component {
@@ -61,6 +61,7 @@ export default class MainView extends Component {
             unreadBugs: [],
         }
         tempNoticeStr = noticeinfo ? noticeinfo : ''///获取曾提醒过的最新内容。作为临时数据。
+        BrowserType();
     }
     componentDidMount() {
         localUserInfo = storage.getItem('userinfo');
@@ -71,7 +72,7 @@ export default class MainView extends Component {
         // Socket();
     }
     init = async () => {
-        // BrowserType();
+
         var myBugList = [];
         var runBugList = [];
         var taskList = await this.getTaskInfo();
@@ -102,6 +103,7 @@ export default class MainView extends Component {
             runBugList = await this.getRunBugsInfo();
         }
         // console.log('unreadBugs:', unreadBugs)
+        checkLocalStorageBugIdList(unreadBugs, this._audio)
         this.setState({ unreadBugs })
         if (this.state.aboutMeBugNum !== myBugList.length || this.state.aboutMeTaskNum !== taskList.length || this.state.runBugNum !== runBugList.length) {
             console.log('有关我的-缺陷和任务数量有变化-刷新');
@@ -251,7 +253,7 @@ export default class MainView extends Component {
         return (
             <Layout style={{ minHeight: '100vh' }}>
                 <Sider collapsible collapsed={this.state.collapsed} trigger={null} width={255} style={{ overflow: 'auto', height: '100vh', position: 'fixed', left: 0 }}>
-                    <div style={{ height: 64, background: 'rgba(8,32,61,1)', padding: '16 24', position: 'relative' }}>
+                    <div style={{ height: 64, backgroundColor: '#011529', padding: '16 24', position: 'relative' }}>
                         <img src={logopng} alt="" width="32" height="32" style={{ position: 'absolute', left: 24, top: 16 }} />
                         {this.state.collapsed ? null :
                             <span style={{ position: 'absolute', top: 18, left: 60, width: 180, color: '#fff', fontSize: 17, marginLeft: 20 }}>信息综合管理平台</span>
@@ -356,7 +358,7 @@ export default class MainView extends Component {
                     </Menu>
                 </Sider>
                 <Layout style={{ marginLeft: this.state.collapsed ? 80 : 255 }}>
-                    <Header style={{ position: 'fixed', zIndex: 1, width: `calc(100% - ${this.state.collapsed ? 80 : 255}px)`, background: '#fff', padding: 0, borderBottomStyle: 'solid', borderBottomWidth: 1, borderBottomColor: '#e8e8e8' }}>
+                    <Header style={{ position: 'fixed', zIndex: 1, width: `calc(100% - ${this.state.collapsed ? 80 : 255}px)`, backgroundColor: '#fff', padding: 0, borderBottomStyle: 'solid', borderBottomWidth: 1, borderBottomColor: '#e8e8e8' }}>
                         <Row>
                             <Col span={2}>
                                 <Icon className="trigger" style={{ fontSize: 24, marginLeft: 30 }} type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'} onClick={this.toggle} />
@@ -370,6 +372,9 @@ export default class MainView extends Component {
                                             <Icon type="bell" style={{ fontSize: 24, color: '#597ef7', cursor: "pointer" }} />
                                         </Badge>
                                     </Popover>
+                                    <div style={{ display: 'none' }}>
+                                        <audio ref={(audio) => { this._audio = audio }} src={NOTIFY_MP3} controls="controls" ></audio>
+                                    </div>
                                     <DetailModal visible={this.state.modalVisible} item={this.state.selectItem} onCancel={() => { this.setState({ modalVisible: false }) }} />
                                 </span>
                                 <Popover trigger="click" width={200} placement="bottomRight" content={<UserMenuView />}>

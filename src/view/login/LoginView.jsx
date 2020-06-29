@@ -1,9 +1,9 @@
 import React from 'react'
-import { Form, Card, message, Modal } from 'antd'
+import { Form, Card, message } from 'antd'
 import LoginFromClass from './LoginForm'
 import HttpApi from '../util/HttpApi'
 import Background from '../../assets/bg.jpg';
-import downloadUrl from '../../assets/downloadurl.png'
+// import downloadUrl from '../../assets/downloadurl.png'
 import { USERINFO } from '../util/AppData'
 
 

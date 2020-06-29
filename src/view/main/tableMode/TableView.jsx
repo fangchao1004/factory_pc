@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Card, Button, Tag, Icon, Popconfirm, Empty, Modal, message, Input, Anchor } from 'antd'
+import { Row, Col, Card, Button, Tag, Icon, Popconfirm, Empty, Modal, message, Input } from 'antd'
 import HttpApi from '../../util/HttpApi';
 import SampleViewTool from '../../util/SampleViewTool';
 import ChangeTableView from './ChangeTableView';

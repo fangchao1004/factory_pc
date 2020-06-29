@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { List, Skeleton, Avatar, Tag } from 'antd';
-import { omitTextLength } from '../../util/Tool';
+import { List, Avatar, Tag } from 'antd';
+import { omitTextLength, removeOneBugIdFromList } from '../../util/Tool';
 import HttpApi from '../../util/HttpApi';
 import moment from 'moment'
 import Store from '../../../redux/store/Store';
@@ -69,7 +69,14 @@ class BugNoticeList extends Component {
                                 } else {
                                     this.props.closePopAndOpenModal(item)
                                 }
-                                HttpApi.obs({ sql: `update bugs set isread = 1 where id = ${item.id}` })
+                                HttpApi.obs({ sql: `update bugs set isread = 1 where id = ${item.id}` }, (res) => {
+                                    if (res.data.code === 0) {
+                                        ///将缓存中的对应缺陷id 剔除
+                                        // console.log('将缓存中的对应缺陷id 剔除')
+                                        removeOneBugIdFromList(item.id)
+                                    }
+                                })
+
                             }}>详情</a>]}
                         >
                             <List.Item.Meta
