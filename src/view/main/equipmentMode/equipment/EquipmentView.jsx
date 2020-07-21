@@ -1,11 +1,12 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Button, Row, Col, Drawer, Icon, message, Popconfirm, Divider, Tag, Input } from 'antd'
+import { Table, Button, Row, Col, Drawer, message, Popconfirm, Divider, Tag, Input } from 'antd'
 import HttpApi from '../../../util/HttpApi';
 import AddEquipmentView from './AddEquipmentView';
 import UpdateEquipmentView from './UpdateEquipmentView';
 import PieViewOfOneDeStus from './PieViewOfOneDeStus';
 import OneRecordDetialView from './OneRecordDetialView'
 import LineViewOfCollection from './LineViewOfCollection';
+import moment from 'moment'
 const { Search } = Input;
 var dataSourceCopy = [];
 
@@ -304,19 +305,12 @@ class EquipmentView extends Component {
                     }}
                 />
                 <Drawer
-                    title={(
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span>巡检点状态历史记录</span>
-                            <Icon type="close-circle" theme="twoTone" style={{ fontSize: 20 }}
-                                onClick={() => { this.setState({ drawerVisible1: false }) }}
-                            />
-                        </div>
-                    )}
+                    destroyOnClose
+                    title="巡检点状态历史记录"
                     placement="left"
-                    closable={false}
                     onClose={this.onCloseDrawer}
                     visible={this.state.drawerVisible1}
-                    width={document.documentElement.clientWidth / 2}
+                    width={650}
                 >
                     {this.renderDeviceRecordsView()}
                     <Divider orientation="left"></Divider>
@@ -325,11 +319,13 @@ class EquipmentView extends Component {
                     {this.renderCollectionLineView()}
                     <Drawer
                         title={<div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', }}>
-                            <span>当次巡检记录</span>
-                            <span>{this.state.oneRecordData.checkedAt}</span>
+                            <span>{this.state.oneRecordData.is_clean ? '消缺记录' : '当次巡检记录'}</span>
+                            <span>{this.state.oneRecordData.is_clean ?
+                                moment(this.state.oneRecordData.createdAt).format('YYYY-MM-DD HH:mm:ss')
+                                : this.state.oneRecordData.checkedAt}</span>
                         </div>}
                         placement="left"
-                        width={document.documentElement.clientWidth / 2}
+                        width={500}
                         closable={false}
                         destroyOnClose
                         onClose={this.closeDrawer2}
@@ -372,10 +368,10 @@ class EquipmentView extends Component {
             // let sql3 = ' left join device_types on device_types.id = rds.device_type_id where device_id = ' + device_id + ' and rds.effective = 1 order by id desc limit 1'
             // let sqlText = sql1 + sql2 + sql3;
             let sql = `select rds.*,users.name as user_name,devices.name as device_name,device_types.name as device_type_name from records rds
-            left join (select * from users where effective =1) users on users.id = rds.user_id left join devices on devices.id = rds.device_id
-            left join (select * from device_types where effective =1) device_types on device_types.id = rds.device_type_id 
+                left join (select * from users where effective =1) users on users.id = rds.user_id left join devices on devices.id = rds.device_id
+                left join (select * from device_types where effective =1) device_types on device_types.id = rds.device_type_id
             where device_id = "${device_id}" and rds.effective = 1 order by id desc limit 1
-            `
+                `
             let result = {};
             HttpApi.obs({ sql }, (res) => {
                 if (res.data.code === 0) {
@@ -435,9 +431,13 @@ class EquipmentView extends Component {
             {
                 title: '巡检时间',
                 dataIndex: 'checkedAt',
-                render: (text, record) => (
-                    <div>{text || '/'}</div>
-                )
+                width: 200,
+                render: (text, record) => {
+                    if (record.is_clean) {
+                        return <div>{moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss')}</div>
+                    }
+                    return <div>{text || '/'}</div>
+                }
             },
             {
                 title: '基本状态',
@@ -466,6 +466,11 @@ class EquipmentView extends Component {
                 title: '报告人',
                 dataIndex: 'user_name',
                 render: (text, record) => {
+                    if (record.is_clean) {
+                        return <div>{text}
+                            <Tag color='#51C41B' style={{ marginLeft: 15 }}>消缺</Tag>
+                        </div>
+                    }
                     return <div>{text}</div>
                 }
             },

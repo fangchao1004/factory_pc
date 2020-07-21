@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { List, Avatar, Tag } from 'antd';
+import { List, Avatar, Tag, Button } from 'antd';
 import { omitTextLength, removeOneBugIdFromList } from '../../util/Tool';
 import HttpApi from '../../util/HttpApi';
 import moment from 'moment'
@@ -59,25 +59,25 @@ class BugNoticeList extends Component {
                     dataSource={this.state.dataSource}
                     renderItem={item => (
                         <List.Item
-                            actions={[<a onClick={() => {
-                                if (this.state.permissionManager) { ///只要有专工权限，就直接跳转
-                                    this.props.closePop()
-                                    this.props.history.push('./bugAboutMe')
-                                    setTimeout(() => {
-                                        Store.dispatch(showBugNum(item.id))
-                                    }, 500);
-                                } else {
-                                    this.props.closePopAndOpenModal(item)
-                                }
-                                HttpApi.obs({ sql: `update bugs set isread = 1 where id = ${item.id}` }, (res) => {
-                                    if (res.data.code === 0) {
-                                        ///将缓存中的对应缺陷id 剔除
-                                        // console.log('将缓存中的对应缺陷id 剔除')
-                                        removeOneBugIdFromList(item.id)
+                            actions={[
+                                <Button type='link' size="small" style={{ padding: 0 }} onClick={() => {
+                                    if (this.state.permissionManager) { ///只要有专工权限，就直接跳转
+                                        this.props.closePop()
+                                        this.props.history.push('./bugAboutMe')
+                                        setTimeout(() => {
+                                            Store.dispatch(showBugNum(item.id))
+                                        }, 500);
+                                    } else {
+                                        this.props.closePopAndOpenModal(item)
                                     }
-                                })
-
-                            }}>详情</a>]}
+                                    HttpApi.obs({ sql: `update bugs set isread = 1 where id = ${item.id}` }, (res) => {
+                                        if (res.data.code === 0) {
+                                            ///将缓存中的对应缺陷id 剔除
+                                            // console.log('将缓存中的对应缺陷id 剔除')
+                                            removeOneBugIdFromList(item.id)
+                                        }
+                                    })
+                                }}>详情</Button>]}
                         >
                             <List.Item.Meta
                                 avatar={<Avatar style={{ backgroundColor: item.avatar_color, verticalAlign: 'middle' }} size="large">{item.stauts_people}</Avatar>}

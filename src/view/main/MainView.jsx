@@ -358,7 +358,7 @@ export default class MainView extends Component {
                     </Menu>
                 </Sider>
                 <Layout style={{ marginLeft: this.state.collapsed ? 80 : 255 }}>
-                    <Header style={{ position: 'fixed', zIndex: 1, width: `calc(100% - ${this.state.collapsed ? 80 : 255}px)`, backgroundColor: '#fff', padding: 0, borderBottomStyle: 'solid', borderBottomWidth: 1, borderBottomColor: '#e8e8e8' }}>
+                    <Header style={{ position: 'fixed', zIndex: 10, width: `calc(100% - ${this.state.collapsed ? 80 : 255}px)`, backgroundColor: '#fff', padding: 0, borderBottomStyle: 'solid', borderBottomWidth: 1, borderBottomColor: '#e8e8e8' }}>
                         <Row>
                             <Col span={2}>
                                 <Icon className="trigger" style={{ fontSize: 24, marginLeft: 30 }} type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'} onClick={this.toggle} />

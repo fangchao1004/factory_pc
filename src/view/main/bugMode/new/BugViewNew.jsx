@@ -272,6 +272,7 @@ export default class BugViewNew extends Component {
         delete oneRecordInfo.id;
         delete oneRecordInfo.createdAt;
         delete oneRecordInfo.updatedAt;
+        oneRecordInfo.is_clean = 1;///标注为 消缺时的record
         // console.log('待入库的最新record:', oneRecordInfo);
         HttpApi.insertRecordInfo(oneRecordInfo, (res) => {
             if (res.data.code === 0) {

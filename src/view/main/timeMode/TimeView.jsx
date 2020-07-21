@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Button, TreeSelect, message, DatePicker, Popconfirm, Tag, Alert } from 'antd';
+import { Table, Button, TreeSelect, message, DatePicker, Tag, Alert } from 'antd';
 import moment from 'moment';
 import HttpApi from '../../util/HttpApi';
 import RecordDetailByTime from './RecordDetailByTime';
@@ -144,7 +144,7 @@ class TimeView extends Component {
         inner join (select distinct device_id,user_name from records 
                     left join (select users.id,users.name as user_name from users where effective = 1) users 
                     on users.id = records.user_id  
-                    where checkedAt>'${element.bt}' and checkedAt<'${element.et}' and effective = 1) actully_device_List 
+                    where checkedAt>'${element.bt}' and checkedAt<'${element.et}' and effective = 1 and (is_clean = 0 || is_clean is NULL)) actully_device_List 
         on actully_device_List.device_id = a_m_d.device_id
         left join (select a_t.id,count(distinct a_m_d.device_id) need_count from ${allow_time_name} a_t
         left join (select * from ${allowTime_map_device_name} where effective = 1) a_m_d on a_t.id = a_m_d.allow_time_id
@@ -216,7 +216,7 @@ class TimeView extends Component {
     }
     deleteTimeHandler = (recordValue) => {
         let sql = `UPDATE ${allow_time_name} SET effective = 0
-        where id = ${recordValue.id} and area0_id = ${this.props.id},`
+        where id = ${recordValue.id} and area0_id = ${this.props.id}`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
                 message.success('删除成功');
@@ -303,10 +303,10 @@ class TimeView extends Component {
                             <Fragment>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                 <Button size="small" type='ghost' onClick={() => { this.setState({ oneRecord: record, showUpdateModal: true }) }}>修改</Button>
-                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                                {/* <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                 <Popconfirm title="确定要删除该时间端吗?" onConfirm={() => { this.deleteTimeHandler(record); }}>
                                     <Button size="small" type="danger">删除</Button>
-                                </Popconfirm>
+                                </Popconfirm> */}
                             </Fragment>
                             : null}
 

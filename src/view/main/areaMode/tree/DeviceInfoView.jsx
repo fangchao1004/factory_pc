@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Table, Button, Drawer } from 'antd';
+import { Table, Button, Drawer, Tag } from 'antd';
 import OneRecordDetialView from '../../equipmentMode/equipment/OneRecordDetialView';
 import HttpApi from '../../../util/HttpApi';
+import moment from 'moment'
 
 /**
  * 巡检点巡检记录表
@@ -57,9 +58,12 @@ class DeviceInfoView extends Component {
                 {
                     title: '时间',
                     dataIndex: 'checkedAt',
-                    render: (text, record) => (
-                        <div>{text || '/'}</div >
-                    )
+                    render: (text, record) => {
+                        if (record.is_clean) {
+                            return <div>{moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss')}</div>
+                        }
+                        return <div>{text || '/'}</div>
+                    }
                 },
                 {
                     title: '基本状态',
@@ -86,6 +90,11 @@ class DeviceInfoView extends Component {
                     title: '报告人',
                     dataIndex: 'user_name',
                     render: (text, record) => {
+                        if (record.is_clean) {
+                            return <div>{text}
+                                <Tag color='#51C41B' style={{ marginLeft: 15 }}>消缺</Tag>
+                            </div>
+                        }
                         return <div>{text}</div>
                     }
                 },
@@ -117,11 +126,11 @@ class DeviceInfoView extends Component {
                         />
                         <Drawer
                             title={<div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', }}>
-                                <span>当次巡检记录</span>
+                                <span>{this.state.oneRecordData.is_clean ? '消缺记录' : '当次巡检记录'}</span>
                                 <span>{this.state.oneRecordData.checkedAt}</span>
                             </div>}
                             placement="left"
-                            width={document.documentElement.clientWidth / 2}
+                            width={500}
                             destroyOnClose
                             closable={false}
                             onClose={() => { this.setState({ drawerVisible2: false }) }}

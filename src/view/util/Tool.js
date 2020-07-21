@@ -436,7 +436,7 @@ export async function findCountInfoByTime(oneTime) {
     inner join (select distinct device_id,user_name,device_status from records 
                 left join (select users.id,users.name as user_name from users where effective = 1) users 
                 on users.id = records.user_id  
-                where checkedAt>'${oneTime.begin}' and checkedAt<'${oneTime.end}' and effective = 1) actully_device_List 
+                where checkedAt>'${oneTime.begin}' and checkedAt<'${oneTime.end}' and effective = 1 and (is_clean = 0 || is_clean is NULL)) actully_device_List 
     on actully_device_List.device_id = a_m_d.device_id
     left join (select a_t.id,count(distinct a_m_d.device_id) need_count from allow_time a_t
     left join (select * from allowTime_map_device where effective = 1) a_m_d on a_t.id = a_m_d.allow_time_id

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Drawer, Table, Button, message } from 'antd';
+import { Drawer, Table, Button, message, Tag } from 'antd';
 import HttpApi from '../../util/HttpApi';
 import OneRecordDetialView from '../equipmentMode/equipment/OneRecordDetialView';
+import moment from 'moment'
 var device_switch_filter = [{ text: '运行', value: 1 }, { text: '停运', value: 0 }];///用于筛选巡检点开停运状态的数据 选项
 /**
  * 某个巡检点的所有records
@@ -24,7 +25,7 @@ class OneDeviceRecordListView extends Component {
         })
         if (nextProps.showDrawer) {
             this.setState({
-                recordList: nextProps.record.recordList.map((item, index) => { item.key = index + ''; return item }),
+                recordList: nextProps.record.recordList.map((item, index) => { item.key = index + ''; return item }).reverse(),
                 title: nextProps.record.name
             })
         }
@@ -35,13 +36,18 @@ class OneDeviceRecordListView extends Component {
             {
                 title: '巡检时间',
                 dataIndex: 'checkedAt',
-                render: (text, record) => (
-                    <div>{text || '/'}</div>
-                )
+                width: 200,
+                render: (text, record) => {
+                    if (record.is_clean) {
+                        return <div>{moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss')}</div>
+                    }
+                    return <div>{text || '/'}</div>
+                }
             },
             {
-                title: '基本状态',
+                title: '状态',
                 dataIndex: 'device_status',
+                width: 80,
                 render: (text, record) => {
                     let str = '';
                     let strColor = '#555555'
@@ -67,6 +73,11 @@ class OneDeviceRecordListView extends Component {
                 title: '报告人',
                 dataIndex: 'user_name',
                 render: (text, record) => {
+                    if (record.is_clean) {
+                        return <div>{text}
+                            <Tag color='#51C41B' style={{ marginLeft: 15 }}>消缺</Tag>
+                        </div>
+                    }
                     return <div>{text}</div>
                 }
             },
@@ -76,7 +87,7 @@ class OneDeviceRecordListView extends Component {
                 dataIndex: 'operation',
                 render: (text, record) => {
                     return (
-                        <Button style={{ marginLeft: 10 }} size="small" type='primary' onClick={() => this.openDrawer(record)} >详情</Button>
+                        <Button size="small" type='primary' onClick={() => this.openDrawer(record)} >详情</Button>
                     )
                 },
             }
@@ -115,8 +126,10 @@ class OneDeviceRecordListView extends Component {
         return (
             <Drawer
                 title={<div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', }}>
-                    <span>当次记录</span>
-                    <span>{this.state.selectRecord.checkedAt}</span>
+                    <span>{this.state.selectRecord.is_clean ? '消缺记录' : '当次巡检记录'}</span>
+                    <span>{this.state.selectRecord.is_clean ?
+                        moment(this.state.selectRecord.createdAt).format('YYYY-MM-DD HH:mm:ss')
+                        : this.state.selectRecord.checkedAt}</span>
                 </div>}
                 placement="left"
                 width={500}
@@ -133,9 +146,9 @@ class OneDeviceRecordListView extends Component {
     render() {
         return (
             <Drawer
-                title={'当前时间段内- ' + this.state.title + '的所有巡检记录'}
+                title={'当前时间段内 -- ' + this.state.title + '的所有巡检记录'}
                 placement='left'
-                width={600}
+                width={650}
                 visible={this.state.showDrawer}
                 onClose={() => { this.props.onClose() }}
             >
