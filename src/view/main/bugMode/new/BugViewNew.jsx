@@ -249,11 +249,11 @@ export default class BugViewNew extends Component {
         let bug_id_count = 0;
         ///先知道 有多少个 bug_id 不为null
         bug_content.forEach((oneSelect) => {
-            if (oneSelect.bug_id !== null) {
+            if (oneSelect.bug_id) {
                 bug_id_count++;
             }
         })
-        console.log('all 这个巡检点还有几个bug:', bug_id_count);
+        // console.log('all 这个巡检点还有几个bug:', bug_id_count);
         if (bug_id_count > 0) {
             ///如果找到对应的bug_id。将它至null,说明这个缺陷已经解决了。就不要再出现在record中了。同时bug_id_count减1
             bug_content.forEach((oneSelect) => {

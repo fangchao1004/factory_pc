@@ -282,11 +282,11 @@ export default class BugAboutMeViewNew extends Component {
         let bug_id_count = 0;
         ///先知道 有多少个 bug_id 不为null
         bug_content.forEach((oneSelect) => {
-            if (oneSelect.bug_id !== null) {
+            if (oneSelect.bug_id) {
                 bug_id_count++;
             }
         })
-        console.log('me 这个巡检点还有几个bug:', bug_id_count);
+        // console.log('me 这个巡检点还有几个bug:', bug_id_count);
         if (bug_id_count > 0) {
             ///如果找到对应的bug_id。将它至null,说明这个缺陷已经解决了。就不要再出现在record中了。同时bug_id_count减1
             bug_content.forEach((oneSelect) => {
@@ -296,7 +296,7 @@ export default class BugAboutMeViewNew extends Component {
                 }
             })
             // console.log('处理完一个bug后的content为:', bug_content);
-            console.log('me 这个巡检点还有几个bug:', bug_id_count);
+            // console.log('me 这个巡检点还有几个bug:', bug_id_count);
             oneRecordInfo.content = JSON.stringify(bug_content);
             if (bug_id_count === 0) {
                 oneRecordInfo.device_status = 1;
@@ -307,7 +307,7 @@ export default class BugAboutMeViewNew extends Component {
         delete oneRecordInfo.createdAt;
         delete oneRecordInfo.updatedAt;
         oneRecordInfo.is_clean = 1; ///标注为 消缺时的record
-        console.log('待入库的最新record:', oneRecordInfo);
+        // console.log('待入库的最新record:', oneRecordInfo);
         HttpApi.insertRecordInfo(oneRecordInfo, (res) => {
             if (res.data.code === 0) {
                 // console.log('关于我的 入库成功。');
