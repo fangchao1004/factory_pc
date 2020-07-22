@@ -247,7 +247,7 @@ export default class BugRunCheckView extends Component {
                 bug_id_count++;
             }
         })
-        // console.log('1 这个巡检点还有几个bug:', bug_id_count);
+        console.log('run 这个巡检点还有几个bug:', bug_id_count);
         if (bug_id_count > 0) {
             ///如果找到对应的bug_id。将它至null,说明这个缺陷已经解决了。就不要再出现在record中了。同时bug_id_count减1
             bug_content.forEach((oneSelect) => {
@@ -257,6 +257,7 @@ export default class BugRunCheckView extends Component {
                 }
             })
             // console.log('处理完一个bug后的content为:', bug_content);
+            console.log('run 这个巡检点还有几个bug:', bug_id_count);
             oneRecordInfo.content = JSON.stringify(bug_content);
             if (bug_id_count === 0) {
                 oneRecordInfo.device_status = 1;
@@ -266,7 +267,8 @@ export default class BugRunCheckView extends Component {
         delete oneRecordInfo.id;
         delete oneRecordInfo.createdAt;
         delete oneRecordInfo.updatedAt;
-        // console.log('待入库的最新record:', oneRecordInfo);
+        oneRecordInfo.is_clean = 1;///标注为 消缺时的record
+        console.log('待入库的最新record:', oneRecordInfo);
         HttpApi.insertRecordInfo(oneRecordInfo, (res) => {
             if (res.data.code === 0) {
                 // console.log('所有 入库成功。');
