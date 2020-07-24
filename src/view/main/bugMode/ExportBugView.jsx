@@ -118,7 +118,7 @@ class ExportBugView extends Component {
         })
     }
     getBugStepLogs = (bugIdList) => {
-        let sql = `select bug_step_log.*,users.name as user_name,bug_tag_status.des as tag_des from bug_step_log
+        let sql = `select bug_step_log.*,users.name as user_name,bug_tag_status.des as tag_des,bug_tag_status.bug_next_status as bug_next_status from bug_step_log
         left join (select * from users where effective = 1) users on users.id = bug_step_log.user_id
         left join (select * from bug_tag_status where effective = 1) bug_tag_status on bug_tag_status.id = bug_step_log.tag_id
         where bug_step_log.effective = 1 and bug_step_log.bug_id in (${bugIdList.join(',')})`
@@ -213,10 +213,19 @@ class ExportBugView extends Component {
     getIsOverStepFromStepList = (stepList) => {
         let isOverList = [];
         stepList.forEach((item) => {
-            if (item.isOver) {
-                isOverList.push(
-                    item.user_name + '(' + item.tag_des + '-用时:' + getDuration(item.spendTime) + ')操作超时'
-                )
+            if (item.isExtra) {
+                if (item.isOver) {
+                    isOverList.push(
+                        (item.user_name || '') + '(' + item.des + '-用时:' + getDuration(item.spendTime) + ')'
+                        // item.des + (item.user_name ? '-处理人:' + item.user_name : '') + '-已耗时:' + getDuration(item.spendTime)
+                    )
+                }
+            } else {
+                if (item.isOver) {
+                    isOverList.push(
+                        item.user_name + '(' + item.tag_des + '-用时:' + getDuration(item.spendTime) + ')'
+                    )
+                }
             }
         })
         return isOverList
@@ -282,7 +291,7 @@ class ExportBugView extends Component {
         let bugStepResult = await this.getBugStepLogs(tempBugIdList)
         result = calcStepSpendTime(result, bugStepResult)///计算每步的耗时
         let afterCalcResult = calcOverTimeByStepList(result)///计算每个缺陷是否超时，超时的step是哪一个
-        console.log('afterCalcResult:', afterCalcResult)
+        // console.log('afterCalcResult:', afterCalcResult)
         // return;
         let afterFilterByUserSelect = [];
         if (tca) {
@@ -294,9 +303,11 @@ class ExportBugView extends Component {
             })
         }
         if (afterFilterByUserSelect.length === 0) { message.warn('没有相关符合条件的数据', 3); return }
-        console.log('afterFilterByUserSelect:', afterFilterByUserSelect)
+        // console.log('afterFilterByUserSelect:', afterFilterByUserSelect)
+        // return;
         this.setState({ exporting: true })
         let data = this.transConstract(afterFilterByUserSelect);///数据结构进行转换
+        // console.log('data:', data)
         // return;
         let option = {};
         option.fileName = moment().format('YYYY-MM-DD-HH-mm-ss') + '-缺陷统计列表'

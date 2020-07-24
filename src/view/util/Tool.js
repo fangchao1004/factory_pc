@@ -888,16 +888,17 @@ export function calcOverTimeByStepList(bugList) {
         if (item.status === 2) { eng_duration_time = item.duration_time }
         else if (item.status === 3) { run_duration_time = item.duration_time }
     })
-    bugList.forEach((bugItem) => {
+    for (let i = 0; i < bugList.length; i++) {
+        const bugItem = bugList[i];
         bugItem.isOver = false;///整个bug中是否存在过超时的情况
         const rep_duration_time = bugList[0].bld_duration_time;///当前bug的等级下给维修工的维修时间区间 毫秒单位 每个缺陷的等级可能不同，所以对应的维修时间区间也不同。要在循环内部选取
-        const stepList = bugItem.step_list
+        var stepList = bugItem.step_list
         ///从后往前循环处理
-        for (let index = stepList.length - 1; index >= 0; index--) {
-            const stepItem = stepList[index];///当前索引所在的对象
+        for (let j = stepList.length - 1; j >= 0; j--) {
+            const stepItem = stepList[j];///当前索引所在的对象
             stepItem.isOver = false;
-            if (index > 0) {
-                const stepItemPre = stepList[index - 1];///前一位对象
+            if (j > 0) {
+                const stepItemPre = stepList[j - 1];///前一位对象
                 if ((stepItem.tag_id === 6 || stepItem.tag_id === 8) && (stepItemPre.tag_id === 5 || stepItemPre.tag_id === 17)) {
                     ///情况1 运行的处理选择 6验收通过 8验收不通过  此时前一位必然是 专工处理结果为 5通过 或 17确认无需维修  此时的用时 就是 运行的操作用时。要比对 对应的时间区间 判断用没有超时 (如果是其他情况不考虑计算是否超时)
                     stepItem.isOver = stepItem.spendTime > run_duration_time;
@@ -921,6 +922,26 @@ export function calcOverTimeByStepList(bugList) {
                 }
             }
         }
-    })
+        ///////////////////////////
+        let extraItem = { isExtra: true, des: null, isOver: false, user_name: null, spendTime: 0 };///补充一位对象,用于表示当前的状态
+        if (stepList.length > 0) {
+            /// 获取当前缺陷的操作日志列表中的最后一位   与 当前时刻 做对比
+            let lastStepItem = stepList[stepList.length - 1];
+            let lastItemSpendTimeFormNow = moment().toDate().getTime() - moment(lastStepItem.createdAt).toDate().getTime()
+            // console.log('lastItemSpendTimeFormNow:', lastItemSpendTimeFormNow)
+            ///根据 lastItem 的tag_id 判断这个操作是哪个职位的操作。再判断它是否超时
+            if (lastStepItem.tag_id === 10 || lastStepItem.tag_id === 7) {///最后一位是开始维修或专工验收不通过  则缺陷属于维修中的状态。属于维修工
+                extraItem.isOver = lastItemSpendTimeFormNow > rep_duration_time;
+                if (extraItem.isOver) { bugItem.isOver = true; extraItem.des = "维修工作"; extraItem.user_name = lastStepItem.user_name; extraItem.spendTime = lastItemSpendTimeFormNow }
+            } else if (lastStepItem.tag_id === 1 || lastStepItem.tag_id === 2 || lastStepItem.tag_id === 4 || lastStepItem.tag_id === 16 || lastStepItem.tag_id === 8) {///维修已经作出操作，或者 运行验收不通过 接下来就是专工的工作了
+                extraItem.isOver = lastItemSpendTimeFormNow > eng_duration_time;
+                if (extraItem.isOver) { bugItem.isOver = true; extraItem.des = "等待专工处理"; extraItem.spendTime = lastItemSpendTimeFormNow }
+            } else if (lastStepItem.tag_id === 5 || lastStepItem.tag_id === 17) {///专工已经作出操作，接下来就是运行的工作了
+                extraItem.isOver = lastItemSpendTimeFormNow > run_duration_time;
+                if (extraItem.isOver) { bugItem.isOver = true; extraItem.des = "等待运行处理"; extraItem.spendTime = lastItemSpendTimeFormNow }
+            }
+            stepList.push(extraItem);///在处理日志列表上最后再push一个对象表示当前的超时情况
+        }
+    }
     return bugList
 }
