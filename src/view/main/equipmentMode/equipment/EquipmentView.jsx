@@ -431,7 +431,8 @@ class EquipmentView extends Component {
             {
                 title: '巡检时间',
                 dataIndex: 'checkedAt',
-                width: 200,
+                width: 190,
+                align: 'center',
                 render: (text, record) => {
                     if (record.is_clean) {
                         return <div>{moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss')}</div>
@@ -440,8 +441,10 @@ class EquipmentView extends Component {
                 }
             },
             {
-                title: '基本状态',
+                title: '状态',
                 dataIndex: 'device_status',
+                width: 90,
+                align: 'center',
                 render: (text, record) => {
                     let str = '';
                     let strColor = '#555555'
@@ -454,7 +457,7 @@ class EquipmentView extends Component {
             {
                 title: '运/停',
                 dataIndex: 'switch',
-                width: 80,
+                width: 90,
                 filters: device_switch_filter,
                 align: 'center',
                 onFilter: (value, record) => record.switch === value,
@@ -465,6 +468,7 @@ class EquipmentView extends Component {
             {
                 title: '报告人',
                 dataIndex: 'user_name',
+                width: 150,
                 render: (text, record) => {
                     if (record.is_clean) {
                         return <div>{text}
@@ -476,8 +480,8 @@ class EquipmentView extends Component {
             },
             {
                 title: '操作',
-                width: 75,
                 dataIndex: 'operation',
+                align: 'center',
                 render: (text, record) => {
                     return (
                         <Button style={{ marginLeft: 10 }} size="small" type='primary' onClick={() => this.openDrawer(record, 2)} >详情</Button>
