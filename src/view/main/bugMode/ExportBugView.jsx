@@ -217,7 +217,6 @@ class ExportBugView extends Component {
                 if (item.isOver) {
                     isOverList.push(
                         (item.user_name || '') + '(' + item.des + '-用时:' + getDuration(item.spendTime) + ')'
-                        // item.des + (item.user_name ? '-处理人:' + item.user_name : '') + '-已耗时:' + getDuration(item.spendTime)
                     )
                 }
             } else {
