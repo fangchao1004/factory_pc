@@ -4,7 +4,7 @@ import HttpApi from '../../util/HttpApi'
 import ExportJsonExcel from 'js-export-excel'
 import moment from 'moment';
 import { VersionlistData } from '../../util/AppData'
-import { omitTextLength, checkOverTimeForList } from '../../util/Tool'
+import { omitTextLength, calcStepSpendTime, calcOverTimeByStepList, getDuration } from '../../util/Tool'
 
 var storage = window.localStorage;
 var localUserInfo = '';
@@ -117,6 +117,33 @@ class ExportBugView extends Component {
             })
         })
     }
+    getBugStepLogs = (bugIdList) => {
+        let sql = `select bug_step_log.*,users.name as user_name,bug_tag_status.des as tag_des from bug_step_log
+        left join (select * from users where effective = 1) users on users.id = bug_step_log.user_id
+        left join (select * from bug_tag_status where effective = 1) bug_tag_status on bug_tag_status.id = bug_step_log.tag_id
+        where bug_step_log.effective = 1 and bug_step_log.bug_id in (${bugIdList.join(',')})`
+        return new Promise((resolve, reject) => {
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
+    getBugStatusDuration = () => {
+        let sql = `select * from bug_status_duration  where effective = 1`
+        return new Promise((resolve, reject) => {
+            HttpApi.obs({ sql }, (res) => {
+                let result = [];
+                if (res.data.code === 0) {
+                    result = res.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
     bugStatusToStr = (item) => {
         let str = '/';
         switch (item.status) {
@@ -162,6 +189,7 @@ class ExportBugView extends Component {
             tempObj.content = item.title_name ? item.title_name + (item.title_remark || '') + '' + JSON.parse(item.content).select + '' + JSON.parse(item.content).text : JSON.parse(item.content).select + '' + JSON.parse(item.content).text;
             tempObj.major = item.major_name;
             tempObj.status = this.bugStatusToStr(item);
+            tempObj.over = item.isOver ? (item.step_list.length > 0 ? (this.getIsOverStepFromStepList(item.step_list)).join('/') : '') : ''
             if (tempList[item.major_name]) { tempList[item.major_name].push(tempObj) }
             else { tempList[item.major_name] = [tempObj] }
         });
@@ -174,13 +202,24 @@ class ExportBugView extends Component {
             excelOptionList.push({
                 sheetData: tempList[key],
                 sheetName: key.length > 31 ? omitTextLength(key, 28) : key,
-                sheetFilter: ['id', 'time', 'device', 'uploadman', 'area', 'content', 'level', 'major', 'status'],
-                sheetHeader: ['编号', '上报时间', '巡检点', '发现人', '位置', '内容', '等级', '专业', '当前状态'],
-                columnWidths: ['3', '8', '15', '5', '15', '20', '5', '10', '5'], // 列宽
+                sheetFilter: ['id', 'time', 'device', 'uploadman', 'area', 'content', 'level', 'major', 'status', 'over'],
+                sheetHeader: ['编号', '上报时间', '巡检点', '发现人', '位置', '内容', '等级', '专业', '当前状态', '超时记录'],
+                columnWidths: ['3', '8', '15', '5', '15', '20', '5', '10', '5', '30'], // 列宽
             })
         }
         // console.log('excelOptionList:', excelOptionList);
         return excelOptionList;
+    }
+    getIsOverStepFromStepList = (stepList) => {
+        let isOverList = [];
+        stepList.forEach((item) => {
+            if (item.isOver) {
+                isOverList.push(
+                    item.user_name + '(' + item.tag_des + '-用时:' + getDuration(item.spendTime) + ')操作超时'
+                )
+            }
+        })
+        return isOverList
     }
     getusernameById = (id) => {
         let result = '/'
@@ -237,12 +276,28 @@ class ExportBugView extends Component {
         `;
         let result = await this.getBugsInfo(finallySql);///获取符合条件的缺陷数据
         if (result.length === 0) { message.warn('没有查询到符合条件的缺陷数据-请修改查询条件'); return }
-        let newResult = checkOverTimeForList(result);
-        if (!tca) { ///如果超时选项不是选了所有，那么就要进行过滤
-            newResult = newResult.filter((item) => { return item.isOver === otl[0] })
+        let result_bsd = await this.getBugStatusDuration();
+        result.forEach((item) => { item.bsd_duration_list = result_bsd })
+        let tempBugIdList = result.map((item) => { return item.id }) ///查出来的待处理的缺陷的id数组。接下来查询所有这些bug_id 对应的bug_step_log
+        let bugStepResult = await this.getBugStepLogs(tempBugIdList)
+        result = calcStepSpendTime(result, bugStepResult)///计算每步的耗时
+        let afterCalcResult = calcOverTimeByStepList(result)///计算每个缺陷是否超时，超时的step是哪一个
+        console.log('afterCalcResult:', afterCalcResult)
+        // return;
+        let afterFilterByUserSelect = [];
+        if (tca) {
+            afterFilterByUserSelect = afterCalcResult;
+        } else {
+            ///如果超时选项不是选了所有，那么就要进行过滤
+            afterFilterByUserSelect = afterCalcResult.filter((item) => {
+                return item.isOver === otl[0]
+            })
         }
+        if (afterFilterByUserSelect.length === 0) { message.warn('没有相关符合条件的数据', 3); return }
+        console.log('afterFilterByUserSelect:', afterFilterByUserSelect)
         this.setState({ exporting: true })
-        let data = this.transConstract(newResult);///数据结构进行转换
+        let data = this.transConstract(afterFilterByUserSelect);///数据结构进行转换
+        // return;
         let option = {};
         option.fileName = moment().format('YYYY-MM-DD-HH-mm-ss') + '-缺陷统计列表'
         option.datas = data;

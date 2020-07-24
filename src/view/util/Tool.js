@@ -795,13 +795,6 @@ export function checkOverTime(record, currentTime) {
     }
     return { isOver, durationTime };
 }
-export function checkOverTimeForList(list) {
-    let currentTime = moment().toDate().getTime();
-    list.forEach(element => {
-        element.isOver = checkOverTime(element, currentTime).isOver
-    });
-    return list;
-}
 
 export function checkLocalStorageBugIdList(lastBugList, auto = null) {
     let isSafari = storage.getItem(BROWERTYPE) === 'Safari';
@@ -847,4 +840,87 @@ export function removeOneBugIdFromList(bugid) {
         return originId !== bugid
     })
     storage[BUGIDLIST] = JSON.stringify(newList);
+}
+/**
+ *计算steplist中的每一步耗时
+ *
+ * @export
+ * @param {*} bugResult
+ * @param {*} bugStepResult
+ * @returns
+ */
+export function calcStepSpendTime(bugResult, bugStepResult) {
+    bugResult.forEach((bugItem) => {
+        bugItem.step_list = [];
+        bugStepResult.forEach((stepItem) => {
+            if (stepItem.bug_id === bugItem.id) {
+                bugItem.step_list.push(stepItem)
+            }
+        })
+    })
+    bugResult.forEach((bugItem) => {
+        if (bugItem.step_list && bugItem.step_list.length > 0) {
+            for (let index = 0; index < bugItem.step_list.length; index++) {
+                const stepItem = bugItem.step_list[index];
+                if (index === 0) {
+                    stepItem.spendTime = moment(stepItem.createdAt).toDate().getTime() - moment(bugItem.checkedAt).toDate().getTime()
+                } else {
+                    stepItem.spendTime = moment(stepItem.createdAt).toDate().getTime() - moment(bugItem.step_list[index - 1].createdAt).toDate().getTime()
+                }
+            }
+        }
+    })
+    return bugResult
+}
+/**
+ *根据bug对象中的 step_list 操作日志结合对应的时间区间判断是否超时
+ *
+ * @export
+ * @param {*} bugList
+ */
+export function calcOverTimeByStepList(bugList) {
+    if (bugList.length === 0) { return }
+    ///所有缺陷用同一套 专工运行时间区间。选取第一位的时间区间数据。避免不必要的重复循环
+    const bsd_duration_list = bugList[0].bsd_duration_list///专工和运行处理时间区间列表 JSON
+    var eng_duration_time;///专工的工作时间区间
+    var run_duration_time;///运行的工作时间区间
+    bsd_duration_list.forEach((item) => {
+        if (item.status === 2) { eng_duration_time = item.duration_time }
+        else if (item.status === 3) { run_duration_time = item.duration_time }
+    })
+    bugList.forEach((bugItem) => {
+        bugItem.isOver = false;///整个bug中是否存在过超时的情况
+        const rep_duration_time = bugList[0].bld_duration_time;///当前bug的等级下给维修工的维修时间区间 毫秒单位 每个缺陷的等级可能不同，所以对应的维修时间区间也不同。要在循环内部选取
+        const stepList = bugItem.step_list
+        ///从后往前循环处理
+        for (let index = stepList.length - 1; index >= 0; index--) {
+            const stepItem = stepList[index];///当前索引所在的对象
+            stepItem.isOver = false;
+            if (index > 0) {
+                const stepItemPre = stepList[index - 1];///前一位对象
+                if ((stepItem.tag_id === 6 || stepItem.tag_id === 8) && (stepItemPre.tag_id === 5 || stepItemPre.tag_id === 17)) {
+                    ///情况1 运行的处理选择 6验收通过 8验收不通过  此时前一位必然是 专工处理结果为 5通过 或 17确认无需维修  此时的用时 就是 运行的操作用时。要比对 对应的时间区间 判断用没有超时 (如果是其他情况不考虑计算是否超时)
+                    stepItem.isOver = stepItem.spendTime > run_duration_time;
+                    if (stepItem.isOver) { bugItem.isOver = true }
+                } else if ((stepItem.tag_id === 5 || stepItem.tag_id === 7 || stepItem.tag_id === 17) && (stepItemPre.tag_id === 4 || stepItemPre.tag_id === 16)) {
+                    /// 情况2 专工处理选择 5验收通过 7验收不通过 17 确认无需处理 此时前一位如果是正常流程的话 应该是 维修的选择 4完成维修 16 认为无需维修 (如果是其他情况不考虑计算是否超时)
+                    stepItem.isOver = stepItem.spendTime > eng_duration_time;
+                    if (stepItem.isOver) { bugItem.isOver = true }
+                } else if (stepItem.tag_id === 15 && stepItemPre.tag_id === 2) {
+                    ///情况3 专工 选择 15挂起 此时前一位如果是正常流程的话 应该是 维修的选择 2申请挂起 (如果是其他情况不考虑计算是否超时)
+                    stepItem.isOver = stepItem.spendTime > eng_duration_time;
+                    if (stepItem.isOver) { bugItem.isOver = true }
+                } else if (stepItem.tag_id === 3 && stepItemPre.tag_id === 1) {
+                    ///情况4 专工 选择 3转专业 此时前一位如果是正常流程的话 应该是 维修的选择 1申请转专业 (如果是其他情况不考虑计算是否超时)
+                    stepItem.isOver = stepItem.spendTime > eng_duration_time;
+                    if (stepItem.isOver) { bugItem.isOver = true }
+                } else if ((stepItem.tag_id === 1 || stepItem.tag_id === 2 || stepItem.tag_id === 4 || stepItem.tag_id === 16) && stepItemPre.tag_id === 10) {
+                    ///情况5 维修 选择 1申请转专业 2申请挂起 4完成维修 16认为无需维修 此时前一位如果是正常流程的话 应该是 维修的选择 10开始维修 (如果是其他情况不考虑计算是否超时)
+                    stepItem.isOver = stepItem.spendTime > rep_duration_time;
+                    if (stepItem.isOver) { bugItem.isOver = true }
+                }
+            }
+        }
+    })
+    return bugList
 }
