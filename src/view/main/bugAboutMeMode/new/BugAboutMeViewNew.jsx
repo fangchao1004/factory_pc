@@ -55,13 +55,31 @@ export default class BugAboutMeViewNew extends Component {
                 console.log('高亮:', Store.getState().bug.bugNum)
                 this.setState({
                     heightLightNumber: Store.getState().bug.bugNum
+                }, () => {
+                    this.changeTargetItemTop();
                 })
             }
         });
     }
+    /**
+     *将要查看的某一个缺陷，的位置调整到数组的第一位
+     * @memberof BugAboutMeViewNew
+     */
+    changeTargetItemTop = () => {
+        let targetItem = {};
+        this.state.data.forEach((item) => {
+            if (item.id === this.state.heightLightNumber) { targetItem = item }
+        })
+        let filterList = this.state.data.filter((item) => { return item.id !== this.state.heightLightNumber })
+        // console.log('[targetItem, ...filterList]:', [targetItem, ...filterList])
+        this.setState({
+            data: [targetItem, ...filterList]
+        })
+    }
     openPollingForData = () => {
         time2 = setInterval(() => {
-            if (this.state.searchKey === '') { this.init() }
+            ///高亮和查询时，不再刷新数据
+            if (this.state.searchKey === '' && !this.state.heightLightNumber) { this.init() }
         }, BUGDATAUPDATETIME);////10秒轮询一次
     }
     openPolling = () => {
