@@ -793,6 +793,7 @@ export function checkOverTime(record, currentTime) {
     } else {
         if (record.bsd_duration_time && durationTime > record.bsd_duration_time) { isOver = true }
     }
+    if (record.status === 0) { isOver = false }
     return { isOver, durationTime };
 }
 
