@@ -69,35 +69,35 @@ export default class BugViewNew extends Component {
         clearInterval(time2);
     }
     initFilter = async () => {
-        status_filter.length = 0;
-        major_filter.length = 0;
-        uploader_filter.length = 0;
-        bug_type_filter.length = 0;
-        bug_level_filter.length = 0;
+
         let bugFreezeData = await this.getBugFreezeData();
-        status_filter = [...originStatus, ...bugFreezeData.map((item) => { return { text: item.des, value: 5 + '-' + item.id, freeze_value: item.id } })]
+        status_filter.length = 0;
+        status_filter = [...originStatus, ...bugFreezeData.map((item, index) => { return { key: index, text: item.des, value: 5 + '-' + item.id, freeze_value: item.id } })]
         // console.log('status_filter:', status_filter)
         let bugTypeData = await this.getBugTypeInfo();
-        bugTypeData.forEach((item) => {
-            bug_type_filter.push({ text: item.name, value: item.id });
+        bug_type_filter.length = 0;
+        bugTypeData.forEach((item, index) => {
+            bug_type_filter.push({ key: index, text: item.name, value: item.id });
         })
         let bugLevelData = await this.getBugLevelInfo();
-        bugLevelData.forEach((item) => {
-            bug_level_filter.push({ text: item.name, value: item.id });
+        bug_level_filter.length = 0;
+        bugLevelData.forEach((item, index) => {
+            bug_level_filter.push({ key: index, text: item.name, value: item.id });
         })
         let marjorData = await this.getMajorInfo();
-        marjorData.forEach((item) => {
-            major_filter.push({ text: item.name, value: item.id });
+        major_filter.length = 0;
+        marjorData.forEach((item, index) => {
+            major_filter.push({ key: index, text: item.name, value: item.id });
         })
         let uploaderData = await this.getUploaderInfo();
-        uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
+        uploader_filter.length = 0;
+        uploader_filter = uploaderData.map((item, index) => { return { key: index, text: item.user_name, value: item.user_id } })
     }
 
     init = async () => {
         console.log('init BugViewNew')
-        this.updateDataByRedux();
         let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
-        finallyData.forEach((item) => { item.key = item.id })
+        finallyData.forEach((item, index) => { item.key = index })
         orignData = finallyData;
         this.setState({
             data: finallyData,
@@ -303,9 +303,6 @@ export default class BugViewNew extends Component {
             }
         })
     }
-    updateDataByRedux = () => {
-        // Store.dispatch(showBugNum(null))
-    }
     render() {
         const columns = [
             {
@@ -313,7 +310,7 @@ export default class BugViewNew extends Component {
                 dataIndex: 'id',
                 title: '编号',
                 align: 'center',
-                width: 70,
+                width: 80,
                 render: (text, record) => {
                     return <div>{text}</div>
                 }
@@ -329,7 +326,7 @@ export default class BugViewNew extends Component {
             },
             {
                 key: 'device_name', dataIndex: 'device_name', title: '巡检点',
-                width: 100,
+                width: 140,
                 align: 'center',
                 render: (text, record) => {
                     let result = '/'
@@ -346,13 +343,13 @@ export default class BugViewNew extends Component {
             },
             {
                 key: 'user_name', dataIndex: 'user_name', title: '发现人',
-                width: 120,
+                width: 100,
                 align: 'center',
                 filters: uploader_filter,
                 onFilter: (value, record) => record.user_id === value,
             },
             {
-                key: 'area_remark', dataIndex: 'area_remark', title: '巡检点范围',
+                key: 'area_remark', dataIndex: 'area_remark', title: '巡检范围',
                 width: 140,
                 align: 'center',
                 render: (text, record) => {
@@ -414,8 +411,8 @@ export default class BugViewNew extends Component {
                 }
             },
             {
-                key: 'buglevel', dataIndex: 'buglevel', title: '缺陷类型',
-                width: 120,
+                key: 'buglevel', dataIndex: 'buglevel', title: '等级',
+                width: 80,
                 align: 'center',
                 filters: bug_level_filter,
                 onFilter: (value, record) => record.buglevel === value,
@@ -433,8 +430,8 @@ export default class BugViewNew extends Component {
                 }
             },
             {
-                key: 'major_name', dataIndex: 'major_name', title: '缺陷专业',
-                width: 140,
+                key: 'major_name', dataIndex: 'major_name', title: '专业',
+                width: 120,
                 align: 'center',
                 filters: major_filter,
                 onFilter: (value, record) => record.major_id === value,
@@ -447,11 +444,11 @@ export default class BugViewNew extends Component {
                 }
             },
             {
-                title: '缺陷状态',
+                title: '状态',
                 dataIndex: 'status',
                 filters: status_filter,
                 align: 'center',
-                width: 120,
+                width: 80,
                 onFilter: (value, record) => record.status === value || record.status + '-' + record.bug_freeze_id === value,
                 render: (text, record) => {
                     let str = '';
@@ -523,7 +520,7 @@ export default class BugViewNew extends Component {
                 title: '操作',
                 dataIndex: 'actions',
                 align: 'center',
-                width: 120,
+                width: 100,
                 render: (text, record) => {
                     let majorHasFlag = JSON.parse(localUserInfo).major_id_all && JSON.parse(localUserInfo).major_id_all.split(',').indexOf(String(record.major_id)) !== -1
                     let fixable = majorHasFlag && (record.status < 2 || record.status === 6 || record.status === 7);
