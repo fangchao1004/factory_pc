@@ -95,21 +95,21 @@ export default class BugAboutMeViewNew extends Component {
         unsubscribe();
     }
     initFilter = async () => {
-        status_filter.length = 0;
-        major_filter.length = 0;
-        uploader_filter.length = 0;
-        bug_level_filter.length = 0;
         let bugFreezeData = await this.getBugFreezeData();
+        status_filter.length = 0;
         status_filter = [...originStatus, ...bugFreezeData.map((item) => { return { text: item.des, value: 5 + '-' + item.id, freeze_value: item.id } })]
         let bugLevelData = await this.getBugLevelInfo();
+        bug_level_filter.length = 0;
         bugLevelData.forEach((item) => {
             bug_level_filter.push({ text: item.name, value: item.id });
         })
         let marjorData = await this.getMajorInfo();
+        major_filter.length = 0;
         marjorData.forEach((item) => {
             major_filter.push({ text: item.name, value: item.id });
         })
         let uploaderData = await this.getUploaderInfo();
+        uploader_filter.length = 0;
         uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
     }
     init = async () => {
@@ -365,7 +365,7 @@ export default class BugAboutMeViewNew extends Component {
                 dataIndex: 'id',
                 title: '编号',
                 align: 'center',
-                width: 70,
+                width: 80,
                 render: (text, record) => {
                     return <div>{text}</div>
                 }
@@ -381,7 +381,7 @@ export default class BugAboutMeViewNew extends Component {
             },
             {
                 key: 'device_name', dataIndex: 'device_name', title: '巡检点',
-                width: 100,
+                width: 140,
                 align: 'center',
                 render: (text, record) => {
                     let result = '/'
@@ -404,7 +404,7 @@ export default class BugAboutMeViewNew extends Component {
                 onFilter: (value, record) => record.user_id === value,
             },
             {
-                key: 'area_remark', dataIndex: 'area_remark', title: '巡检点范围',
+                key: 'area_remark', dataIndex: 'area_remark', title: '巡检范围',
                 width: 140,
                 align: 'center',
                 render: (text, record) => {
@@ -466,8 +466,8 @@ export default class BugAboutMeViewNew extends Component {
                 }
             },
             {
-                key: 'buglevel', dataIndex: 'buglevel', title: '缺陷类型',
-                width: 120,
+                key: 'buglevel', dataIndex: 'buglevel', title: '等级',
+                width: 80,
                 align: 'center',
                 filters: bug_level_filter,
                 onFilter: (value, record) => record.buglevel === value,
@@ -485,8 +485,8 @@ export default class BugAboutMeViewNew extends Component {
                 }
             },
             {
-                key: 'major_id', dataIndex: 'major_id', title: '缺陷专业',
-                width: 140,
+                key: 'major_id', dataIndex: 'major_id', title: '专业',
+                width: 120,
                 align: 'center',
                 filters: major_filter,
                 onFilter: (value, record) => record.major_id === value,
@@ -495,11 +495,11 @@ export default class BugAboutMeViewNew extends Component {
                 }
             },
             {
-                title: '缺陷状态',
+                title: '状态',
                 dataIndex: 'status',
                 filters: status_filter,
                 align: 'center',
-                width: 120,
+                width: 80,
                 onFilter: (value, record) => record.status === value || record.status + '-' + record.bug_freeze_id === value,
                 render: (text, record) => {
                     let str = '';
@@ -571,7 +571,7 @@ export default class BugAboutMeViewNew extends Component {
                 title: '操作',
                 dataIndex: 'actions',
                 align: 'center',
-                width: 120,
+                width: 100,
                 render: (_, record) => {
                     let majorHasFlag = JSON.parse(localUserInfo).major_id_all && JSON.parse(localUserInfo).major_id_all.split(',').indexOf(String(record.major_id)) !== -1
                     let fixable = majorHasFlag && (record.status < 2 || record.status === 6 || record.status === 7);

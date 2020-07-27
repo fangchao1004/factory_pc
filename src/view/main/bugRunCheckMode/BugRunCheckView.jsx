@@ -62,27 +62,27 @@ export default class BugRunCheckView extends Component {
         clearInterval(time2);
     }
     initFilter = async () => {
-        status_filter.length = 0;
-        major_filter.length = 0;
-        uploader_filter.length = 0;
-        bug_type_filter.length = 0;
-        bug_level_filter.length = 0;
         let bugFreezeData = await this.getBugFreezeData();
+        status_filter.length = 0;
         status_filter = [...originStatus, ...bugFreezeData.map((item) => { return { text: item.des, value: 5 + '-' + item.id, freeze_value: item.id } })]
         // console.log('status_filter:', status_filter)
         let bugTypeData = await this.getBugTypeInfo();
+        bug_type_filter.length = 0;
         bugTypeData.forEach((item) => {
             bug_type_filter.push({ text: item.name, value: item.id });
         })
         let bugLevelData = await this.getBugLevelInfo();
+        bug_level_filter.length = 0;
         bugLevelData.forEach((item) => {
             bug_level_filter.push({ text: item.name, value: item.id });
         })
         let marjorData = await this.getMajorInfo();
+        major_filter.length = 0;
         marjorData.forEach((item) => {
             major_filter.push({ text: item.name, value: item.id });
         })
         let uploaderData = await this.getUploaderInfo();
+        uploader_filter.length = 0;
         uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
     }
 
@@ -307,7 +307,7 @@ export default class BugRunCheckView extends Component {
                 dataIndex: 'id',
                 title: '编号',
                 align: 'center',
-                width: 70,
+                width: 80,
                 render: (text, record) => {
                     return <div>{text}</div>
                 }
@@ -323,7 +323,7 @@ export default class BugRunCheckView extends Component {
             },
             {
                 key: 'device_name', dataIndex: 'device_name', title: '巡检点',
-                width: 100,
+                width: 140,
                 align: 'center',
                 render: (text, record) => {
                     let result = '/'
@@ -346,8 +346,8 @@ export default class BugRunCheckView extends Component {
                 onFilter: (value, record) => record.user_id === value,
             },
             {
-                key: 'area_remark', dataIndex: 'area_remark', title: '巡检点范围',
-                width: 100,
+                key: 'area_remark', dataIndex: 'area_remark', title: '巡检范围',
+                width: 140,
                 align: 'center',
                 render: (text, record) => {
                     let result = '/'
@@ -408,7 +408,7 @@ export default class BugRunCheckView extends Component {
                 }
             },
             {
-                key: 'buglevel', dataIndex: 'buglevel', title: '缺陷类型',
+                key: 'buglevel', dataIndex: 'buglevel', title: '等级',
                 width: 80,
                 align: 'center',
                 filters: bug_level_filter,
@@ -427,8 +427,8 @@ export default class BugRunCheckView extends Component {
                 }
             },
             {
-                key: 'major_name', dataIndex: 'major_name', title: '缺陷专业',
-                width: 140,
+                key: 'major_name', dataIndex: 'major_name', title: '专业',
+                width: 120,
                 align: 'center',
                 filters: major_filter,
                 onFilter: (value, record) => record.major_id === value,
@@ -441,10 +441,10 @@ export default class BugRunCheckView extends Component {
                 }
             },
             {
-                title: '缺陷状态',
+                title: '状态',
                 dataIndex: 'status',
                 align: 'center',
-                width: 90,
+                width: 80,
                 render: (text, record) => {
                     let str = '';
                     let color = record.status === 5 ? '#9254de' : 'blue'
@@ -497,7 +497,7 @@ export default class BugRunCheckView extends Component {
                 dataIndex: 'over',
                 filters: originOverTime,
                 align: 'center',
-                width: 40,
+                width: 80,
                 onFilter: (value, record) => {
                     let isOver = checkOverTime(record, currentTime).isOver
                     let overValue = isOver ? 0 : 1;
@@ -515,7 +515,7 @@ export default class BugRunCheckView extends Component {
                 title: '操作',
                 dataIndex: 'actions',
                 align: 'center',
-                width: 120,
+                width: 100,
                 render: (text, record) => {
                     let runable = record.status === 3;
                     return <div style={{ display: 'flex', flexDirection: 'column' }}>
