@@ -134,7 +134,7 @@ class EquipmentTypeView extends Component {
                     columns={columns}
                     pagination={{
                         showSizeChanger: true,
-                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                        pageSizeOptions: ['10', '50', '100'],
                     }}
                 />
                 <AddDeviceTypeView onOk={this.addStaffOnOk} onCancel={this.addStaffOnCancel} visible={this.state.addStaffVisible} {...this.props} />

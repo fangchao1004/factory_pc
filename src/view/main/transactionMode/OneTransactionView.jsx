@@ -170,7 +170,7 @@ export default class TransactionView extends Component {
                         total: this.state.dataCount,
                         current: this.state.currentPage,
                         showSizeChanger: true,
-                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                        pageSizeOptions: ['10', '50', '100'],
                         onShowSizeChange: (currentPage, pageSize) => { this.setState({ currentPage, currentPageSize: pageSize }, () => { this.getNewInfo(); }); },
                         onChange: (page) => { this.setState({ currentPage: page }, () => { this.getNewInfo(); }) },
                     }}

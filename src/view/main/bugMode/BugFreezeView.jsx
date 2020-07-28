@@ -81,7 +81,7 @@ export default props => {
             dataSource={freezes}
             pagination={{
                 showSizeChanger: true,
-                pageSizeOptions: ['10', '20', '50', '80', '100'],
+                pageSizeOptions: ['10', '50', '100'],
             }}
         />
         <AddBugLTM visible={addModalVisible} onCancel={() => { setAddModalVisible(false) }} onOk={addFreeze} title={title} />

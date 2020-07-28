@@ -574,7 +574,13 @@ export default class BugViewNew extends Component {
                     columns={columns}
                     pagination={{
                         showSizeChanger: true,
-                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                        pageSizeOptions: ['10', '50', '100'],
+                        onChange: () => {
+                            document.documentElement.scrollTop = document.body.scrollTop = 0;
+                        },
+                        onShowSizeChange: () => {
+                            document.documentElement.scrollTop = document.body.scrollTop = 0;
+                        }
                     }}
                 />
                 <AddBugView

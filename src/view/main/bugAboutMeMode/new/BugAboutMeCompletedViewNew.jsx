@@ -323,7 +323,13 @@ export default class BugAboutMeCompletedViewNew extends Component {
                     columns={columns}
                     pagination={{
                         showSizeChanger: true,
-                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                        pageSizeOptions: ['10', '50', '100'],
+                        onChange: () => {
+                            document.documentElement.scrollTop = document.body.scrollTop = 0;
+                        },
+                        onShowSizeChange: () => {
+                            document.documentElement.scrollTop = document.body.scrollTop = 0;
+                        }
                     }}
                 />
                 <ShowImgView showModal={this.state.showModal1} cancel={() => { this.setState({ showModal1: false }) }} showLoading={this.state.showLoading} imguuid={this.state.imguuid} />

@@ -546,7 +546,13 @@ export default class BugRunCheckView extends Component {
                     columns={columns}
                     pagination={{
                         showSizeChanger: true,
-                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                        pageSizeOptions: ['10', '50', '100'],
+                        onChange: () => {
+                            document.documentElement.scrollTop = document.body.scrollTop = 0;
+                        },
+                        onShowSizeChange: () => {
+                            document.documentElement.scrollTop = document.body.scrollTop = 0;
+                        }
                     }}
                 />
                 <StepLogView visible={this.state.stepLogVisible} onCancel={() => { this.setState({ stepLogVisible: false }) }} record={this.state.currentRecord} />

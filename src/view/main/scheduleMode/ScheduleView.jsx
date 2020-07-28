@@ -85,7 +85,7 @@ class ScheduleView extends Component {
                         onChange: (pageNum) => { this.setState({ pageNum }) },
                         current: this.state.pageNum,
                         showSizeChanger: true,
-                        pageSizeOptions: ['10', '20', '50', '80', '100'],
+                        pageSizeOptions: ['10', '50', '100'],
                     }}
                 />
             </div>

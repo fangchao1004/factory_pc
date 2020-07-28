@@ -153,7 +153,7 @@ class EquipmentArea3View extends Component {
                         columns={columns}
                         pagination={{
                             showSizeChanger: true,
-                            pageSizeOptions: ['10', '20', '50', '80', '100'],
+                            pageSizeOptions: ['10', '50', '100'],
                         }}
                     />
                     <AddArea3View visible={this.state.addVisible} onOk={this.addArea3ok} onCancel={this.addArea3cancel} />
