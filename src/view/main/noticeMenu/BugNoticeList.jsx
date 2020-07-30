@@ -70,7 +70,7 @@ class BugNoticeList extends Component {
                                             Store.dispatch(showBugNum(item.id))
                                         }, 500);
                                     } else {
-                                        console.log('有专工权限且要有专业，选择的是:', item)
+                                        console.log('没有专工权限或者是没有专业，选择的是:', item)
                                         this.props.closePopAndOpenModal(item)
                                     }
                                     HttpApi.obs({ sql: `update bugs set isread = 1 where id = ${item.id}` }, (res) => {
