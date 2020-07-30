@@ -15,7 +15,6 @@ import ShowImgView from '../ShowImgView';
 import { getDuration, checkOverTime, removeOneBugIdFromList } from '../../../util/Tool';
 
 var major_filter = [];///用于筛选任务专业的数据 选项
-var bug_type_filter = [];///用于筛选类别的数据 选项
 var status_filter = [];///用于筛选状态的数据
 const bug_level_filter = [];
 var uploader_filter = [];///用于筛选上传者的数据 选项
@@ -74,11 +73,6 @@ export default class BugViewNew extends Component {
         status_filter.length = 0;
         status_filter = [...originStatus, ...bugFreezeData.map((item, index) => { return { key: index, text: item.des, value: 5 + '-' + item.id, freeze_value: item.id } })]
         // console.log('status_filter:', status_filter)
-        let bugTypeData = await this.getBugTypeInfo();
-        bug_type_filter.length = 0;
-        bugTypeData.forEach((item, index) => {
-            bug_type_filter.push({ key: index, text: item.name, value: item.id });
-        })
         let bugLevelData = await this.getBugLevelInfo();
         bug_level_filter.length = 0;
         bugLevelData.forEach((item, index) => {
@@ -124,18 +118,6 @@ export default class BugViewNew extends Component {
     }
     getBugFreezeData = () => {
         let sql = `select * from bug_freeze_status  where effective = 1`
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
-    getBugTypeInfo = () => {
-        let sql = `select * from bug_types  where effective = 1`
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = [];

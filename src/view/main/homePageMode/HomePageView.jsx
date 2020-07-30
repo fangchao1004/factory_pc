@@ -25,7 +25,6 @@ class HomePageView extends Component {
         let sql = `select * from area_0 where effective = 1`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                console.log('data:', res.data.data)
                 this.setState({
                     groupList: res.data.data.map((item) => { return { id: item.id, name: item.name } })
                 })

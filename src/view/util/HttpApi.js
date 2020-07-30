@@ -70,21 +70,6 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
-
-    /**
-     * 查找那些关于我的缺陷
-     * @param {*} params 
-     * @param {*} f1 
-     * @param {*} f2 
-     */
-    static findBugsAboutMe(params, f1, f2) {
-        Axios.post(Testuri + 'findBugsAboutMe', params).then(res => {
-            if (f1) { f1(res) }
-        }).catch(res => {
-            if (f2) { f2(res) }
-        })
-    }
-
     /**
      * 获取今天巡检点的巡检情况。(只要今天在的record记录中，出现了某些人
      * ，就认为他是巡检人员。就把他所对应的所有的巡检点记录都查询出来。
@@ -438,35 +423,6 @@ class HttpApi {
             if (f2) { f2(res) }
         })
     }
-    static addBugType(params, f1, f2) {
-        Axios.post(Testuri + 'insert_bug_type', params).then(res => {
-            if (f1) { f1(res) }
-        }).catch(res => {
-            if (f2) { f2(res) }
-        })
-    }
-    static getBugType(params, f1, f2) {
-        Axios.post(Testuri + 'find_bug_type', params).then(res => {
-            if (f1) { f1(res) }
-        }).catch(res => {
-            if (f2) { f2(res) }
-        })
-    }
-    static removeBugType(params, f1, f2) {
-        Axios.post(Testuri + 'remove_bug_type', params).then(res => {
-            if (f1) { f1(res) }
-        }).catch(res => {
-            if (f2) { f2(res) }
-        })
-    }
-    static updateBugType(params, f1, f2) {
-        Axios.post(Testuri + 'update_bug_type', params).then(res => {
-            if (f1) { f1(res) }
-        }).catch(res => {
-            if (f2) { f2(res) }
-        })
-    }
-
     /**
      * 操作sql server 部分接口
      * *******************************************************
