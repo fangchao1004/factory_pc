@@ -317,8 +317,12 @@ class TimeView extends Component {
         return (
             <div>
                 <Alert style={{ marginBottom: 10 }} type='info' message='拥有管理员权限可以编辑巡检点数量, 待检数: 经过方案筛选后的巡检点数量统计 ' />
-                {this.state.isAdmin ?
-                    <Button type={'primary'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showAddModal: true }) }}>添加时间段</Button> : null}
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    {this.state.isAdmin ?
+                        <Button type={'primary'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showAddModal: true }) }}>添加时间段</Button>
+                        : null}
+                    {/* <Button icon={'export'} type={'primary'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showAddModal: true }) }}>导出巡检记录</Button> */}
+                </div>
                 <Table
                     loading={this.state.loading}
                     bordered

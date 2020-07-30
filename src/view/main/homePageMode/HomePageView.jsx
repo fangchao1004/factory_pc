@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PieView from './PieView'
 import LineChartView from './LineChartView'
-import { Row, Col } from 'antd'
+import { Row, Col, Radio, Skeleton } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import { getAllowTime, findCountInfoByTime } from '../../util/Tool'
 import DeivceRecordAndStatusView from './drawer/DeivceRecordAndStatusVIew';
@@ -13,10 +13,24 @@ class HomePageView extends Component {
             groupData: [], ////根据巡检点类型分组后的数据
             drawerVisible: false,
             onePieData: null,
+            area0_id: 1,
+            groupList: [],
         }
     }
     componentDidMount() {
         this.init();
+        this.getArea0Info();
+    }
+    getArea0Info = () => {
+        let sql = `select * from area_0 where effective = 1`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                console.log('data:', res.data.data)
+                this.setState({
+                    groupList: res.data.data.map((item) => { return { id: item.id, name: item.name } })
+                })
+            }
+        })
     }
     init = async () => {
         ///获取所有巡检点的当前的状态统计信息。
@@ -50,10 +64,12 @@ class HomePageView extends Component {
         })
     }
     testHandler = async () => {
-        let allowTimeList = await getAllowTime();
+        let allowTimeList = await getAllowTime(this.state.area0_id);
+        // console.log('allowTimeList:', allowTimeList)
         let countResultList = [];
         for (let index = 0; index < allowTimeList.length; index++) {
             const element = allowTimeList[index];
+            // console.log('element:', element)
             let result = await findCountInfoByTime(element);
             const data = result[0];
             // console.log('data:', data)
@@ -150,8 +166,19 @@ class HomePageView extends Component {
     render() {
         return (
             <div >
-                <Row gutter={10}>
-                    {this.renderPieView()}
+                <Row style={{ height: 56, marginTop: -66 }} type='flex' align='middle' justify='end'>
+                    <Col>
+                        <Radio.Group value={this.state.area0_id} buttonStyle="solid" onChange={(e) => {
+                            this.setState({ area0_id: e.target.value, groupData: [] }, () => {
+                                this.init();
+                            })
+                        }}>
+                            {this.state.groupList.map((item, index) => { return <Radio.Button key={index} value={item.id}>{item.name}</Radio.Button> })}
+                        </Radio.Group>
+                    </Col>
+                </Row>
+                <Row gutter={10} style={{ marginTop: 10 }}>
+                    {this.state.groupData.length > 0 ? this.renderPieView() : <Skeleton active />}
                 </Row>
                 <Row>
                     <Col span={24}>

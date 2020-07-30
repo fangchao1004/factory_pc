@@ -390,14 +390,15 @@ export function transfromDataToRunerAndGroupLeader(runnerList) {
     }]
     return treeData;
 }
-export async function getAllowTime() {
+export async function getAllowTime(area0_id = 1) {
     ///首先获取最新的 allow_time 表。因为要根据它来，指定分组的sql语句
     return new Promise((resolve, reject) => {
-        let sql = `select id,begin,end,name,isCross from allow_time where effective = 1`
+        let sql = `select id,begin,end,name,isCross,area0_id from allow_time where effective = 1 and area0_id = ${area0_id}`
         HttpApi.obs({ sql }, (res) => {
             if (res.data.code === 0) {
-                // console.log('res:', res.data.data)
-                res.data.data.map((item) => {
+                let tempList = [];
+                let finallyResult = [];
+                tempList = res.data.data.map((item) => {
                     // if (item.isCross) { allowTimeList.unshift(item) }
                     item.begin = moment().format('YYYY-MM-DD ') + item.begin
                     if (item.isCross) {
@@ -409,17 +410,18 @@ export async function getAllowTime() {
                     }
                     return item;
                 })
-                res.data.data.forEach((item) => {
+                tempList.forEach((item) => {
+                    // console.log('item:', item)
+                    finallyResult.push(item);
                     if (item.isCross) {
                         let item_copy = JSON.parse(JSON.stringify(item));
-                        // item_copy.id = -1; ///赋值一个不存在的id值 -1
                         item_copy.date = -1;/// 昨天
                         item_copy.begin = moment(item.begin).add('day', -1).format('YYYY-MM-DD HH:mm:ss')
                         item_copy.end = moment(item.end).add('day', -1).format('YYYY-MM-DD HH:mm:ss')
-                        res.data.data.unshift(item_copy)
+                        finallyResult.unshift(item_copy)
                     }
                 })
-                resolve(res.data.data)
+                resolve(finallyResult)
             } else {
                 resolve([])
             }

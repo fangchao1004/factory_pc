@@ -86,12 +86,14 @@ class EditTable extends Component {
         const { id, content, scheme_data } = this.props.data
         // console.log("id:", id)
         let finaResult = this.changeDataConstruct(content, scheme_data);
-        console.log('finaResult:', finaResult)
+        console.log('表单数据:', finaResult)
         await this.getDateSchemeData();
         await this.getAllowTimeSchemeData();
         this.setState({
             dataSource: finaResult,
             id: id
+        }, () => {
+            console.log('表单数据已经setState')
         })
     }
     changeDataConstruct = (content, scheme_data) => {

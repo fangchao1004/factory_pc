@@ -58,10 +58,10 @@ export default class LoginView extends React.Component {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: '#4A72FE'
+          backgroundColor: '#6D8FFF'
         }}
       >
-        <div style={{ width: '100%', height: 600, backgroundColor: 'rgba(255,255,255,0.2)' }}>
+        <div style={{ width: '100%', height: 600, backgroundColor: 'rgba(255,255,255,0)' }}>
           <div style={{ height: 100, fontSize: 30, padding: 40, paddingLeft: 150, color: '#FFFFFF', fontWeight: 800 }}>中节能（合肥）信息综合管理平台</div>
           <div style={{
             width: '100%', height: 400, backgroundImage: `url(${Background})`,

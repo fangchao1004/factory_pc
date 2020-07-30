@@ -73,7 +73,7 @@ export default class EditableTable extends Component {
     })
   }
   getDateSchemeData = () => {
-    let sql = `select * from scheme_of_cycleDate where effective = 1`
+    let sql = `select * from scheme_of_cycleDate where effective = 1 and area0_id= ${this.props.id}`
     HttpApi.obs({ sql }, (res) => {
       if (res.data.code === 0) {
         // console.log('getDateSchemeData:', res.data.data);
@@ -85,7 +85,7 @@ export default class EditableTable extends Component {
     })
   }
   getAllowTimeSchemeData = () => {
-    let sql = `select * from scheme_of_allowTime where effective = 1`
+    let sql = `select * from scheme_of_allowTime where effective = 1 and area0_id= ${this.props.id}`
     HttpApi.obs({ sql }, (res) => {
       if (res.data.code === 0) {
         // console.log('getAllowTimeSchemeData:', res.data.data);

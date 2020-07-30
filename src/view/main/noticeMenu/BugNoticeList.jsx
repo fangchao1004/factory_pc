@@ -9,9 +9,11 @@ class BugNoticeList extends Component {
     constructor(props) {
         super(props);
         let localUserInfo = window.localStorage.getItem('userinfo')
+        // console.log('localUserInfo:', localUserInfo)
         this.state = {
             dataSource: [], modalVisible: false, selectItem: null,
             permissionManager: JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('0') !== -1,
+            major_id_all: JSON.parse(localUserInfo).major_id_all
         }
     }
     componentDidMount() {
@@ -61,13 +63,14 @@ class BugNoticeList extends Component {
                         <List.Item
                             actions={[
                                 <Button type='link' size="small" style={{ padding: 0 }} onClick={() => {
-                                    if (this.state.permissionManager) { ///只要有专工权限，就直接跳转
+                                    if (this.state.permissionManager && this.state.major_id_all) { ///有专工权限且要有专业，就直接跳转
                                         this.props.closePop()
                                         this.props.history.push('./bugAboutMe')
                                         setTimeout(() => {
                                             Store.dispatch(showBugNum(item.id))
                                         }, 500);
                                     } else {
+                                        console.log('有专工权限且要有专业，选择的是:', item)
                                         this.props.closePopAndOpenModal(item)
                                     }
                                     HttpApi.obs({ sql: `update bugs set isread = 1 where id = ${item.id}` }, (res) => {
