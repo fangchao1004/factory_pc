@@ -42,6 +42,7 @@ class TimeView extends Component {
     }
     init = async () => {
         this.setState({ loading: true })
+        // console.log("1:::", new Date().getTime())
         let resultTime = await this.getAllowTimeInfo();
         this.getInfoAndChangeData(resultTime);
         let resultArea0123 = await this.getArea0123InfoByArea0Id();
@@ -103,17 +104,24 @@ class TimeView extends Component {
     getInfoAndChangeData = async (resultList) => {
         let copyTime = moment(this.state.selectTime.format('YYYY-MM-DD'));
         for (let index = 0; index < resultList.length; index++) {
+            // let time2 = new Date().getTime();
             const element = resultList[index];
             let beginTime = copyTime.format('YYYY-MM-DD ') + element.begin
             let endTime = element.isCross === 1 ? copyTime.add(1, 'day').format('YYYY-MM-DD ') + element.end : copyTime.format('YYYY-MM-DD ') + element.end
             element.bt = beginTime;
             element.et = endTime;
             let result = await this.getCountInfoFromDB(element);
+            // let time3 = new Date().getTime();
+            // console.log("getCountInfoFromDB 花费时间：", time3 - time2)
             element.actually = result[0] ? result[0].actu_count : '/';
             element.checkMan = result[0] ? result[0].users_name : '/'
             element.actu_des_list = result[0] ? result[0].actu_des_list : '/'
             let devicesResult = await getDevicesInfoByIdListStr(element);
+            // let time4 = new Date().getTime();
+            // console.log("getDevicesInfoByIdListStr 花费时间：", time4 - time3)
             let listAfterFilter = filterDevicesByDateScheme(devicesResult, this.state.selectTime);///每个时间区间内的设备-进过方案筛选后还剩哪些设备需要巡检
+            // let time5 = new Date().getTime();
+            // console.log("filterDevicesByDateScheme 花费时间：", time5 - time4)
             element.afterFilter = listAfterFilter.length;
             // element.afterFilter_list = listAfterFilter;///经过方案过滤后，剩余应该巡检的设备列表
             let lostList = []
@@ -125,7 +133,9 @@ class TimeView extends Component {
                 })
             }
             element.lostList = lostList;
+
         }
+        // console.log("4:::", new Date().getTime())
         this.setState({
             loading: false,
             dataSource: resultList.map((item, index) => { item.key = index; return item })

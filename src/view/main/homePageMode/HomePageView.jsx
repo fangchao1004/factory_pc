@@ -92,30 +92,30 @@ class HomePageView extends Component {
         }
         return countResultList;
     }
-    changeDataConstruct = (v) => {
-        let finallyResult = [];
-        for (const key in v) {
-            // console.log(key, v[key]);//// 员工A  [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
-            ///对 v[key] 这个数组进行遍历
-            let tempArr = JSON.parse(JSON.stringify(v[key]));
-            let result_arr = [{ device_status: 1, status_count: 0 }, { device_status: 2, status_count: 0 }, { device_status: null, status_count: 0 }]
-            tempArr.forEach((item) => {
-                if (item.device_status === 1) {
-                    result_arr[0].status_count = result_arr[0].status_count + 1
-                } else if (item.device_status === 2) {
-                    result_arr[1].status_count = result_arr[1].status_count + 1
-                } else {
-                    result_arr[2].status_count = result_arr[2].status_count + 1
-                }
-            })
-            // console.log(key, result_arr);
-            finallyResult.push({ 'user_name': key, 'count_data': result_arr });
-        }
-        return finallyResult
-    }
+    // changeDataConstruct = (v) => {
+    //     let finallyResult = [];
+    //     for (const key in v) {
+    //         // console.log(key, v[key]);//// 员工A  [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+    //         ///对 v[key] 这个数组进行遍历
+    //         let tempArr = JSON.parse(JSON.stringify(v[key]));
+    //         let result_arr = [{ device_status: 1, status_count: 0 }, { device_status: 2, status_count: 0 }, { device_status: null, status_count: 0 }]
+    //         tempArr.forEach((item) => {
+    //             if (item.device_status === 1) {
+    //                 result_arr[0].status_count = result_arr[0].status_count + 1
+    //             } else if (item.device_status === 2) {
+    //                 result_arr[1].status_count = result_arr[1].status_count + 1
+    //             } else {
+    //                 result_arr[2].status_count = result_arr[2].status_count + 1
+    //             }
+    //         })
+    //         // console.log(key, result_arr);
+    //         finallyResult.push({ 'user_name': key, 'count_data': result_arr });
+    //     }
+    //     return finallyResult
+    // }
     getAllDeviceStatusCount = () => {
         let sql = `select devices.status as device_status,count(devices.status) as status_count from devices
-        where devices.effective = 1
+        where devices.effective = 1 and devices.area0_id = ${this.state.area0_id}
         group by devices.status`
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
@@ -156,6 +156,7 @@ class HomePageView extends Component {
         return cellsArr
     }
     openDrawerHandler = (data) => {
+        // console.log('openDrawerHandler:', data)
         this.setState({ drawerVisible: true, onePieData: data })
     }
     closeDrawerHandler = () => {
@@ -186,7 +187,7 @@ class HomePageView extends Component {
                         </div>
                     </Col>
                 </Row>
-                <DeivceRecordAndStatusView {...this.props} visible={this.state.drawerVisible} data={this.state.onePieData} close={this.closeDrawerHandler} />
+                <DeivceRecordAndStatusView {...this.props} visible={this.state.drawerVisible} data={this.state.onePieData} close={this.closeDrawerHandler} area0_id={this.state.area0_id} />
             </div>
         );
     }

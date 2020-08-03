@@ -474,7 +474,7 @@ class HttpApi {
         left join (select * from users where effective = 1) us on us.id = rds.user_id
         left join (select * from devices where effective = 1) des on des.id = rds.device_id 
         left join (select * from device_types where effective = 1) dts on dts.id = rds.device_type_id 
-        where device_id = "${device_id}" and rds.effective = 1 order by rds.id desc 
+        where device_id = "${device_id}" and rds.effective = 1 order by rds.id desc limit 200
         `
             let result = [];
             HttpApi.obs({ sql }, (res) => {
