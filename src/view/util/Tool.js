@@ -433,14 +433,14 @@ export async function getAllowTime(area0_id = 1) {
  */
 export async function findCountInfoByTime(oneTime) {
     // console.log('oneTime:', oneTime)
-    let sql = `select a_t.id,a_t.begin,a_t.end,a_t.name,group_concat(distinct a_m_d.device_id) actu_concat,count(distinct a_m_d.device_id) actu_count,temp_table.need_count, group_concat(distinct user_name) users_name,group_concat(actully_device_List.device_status) status_arr from allow_time a_t
+    let sql = `select a_t.id,a_t.begin,a_t.end,a_t.name,group_concat(distinct a_m_d.device_id) actu_concat,count(distinct a_m_d.device_id) actu_count,temp_table.need_devices, group_concat(distinct user_name) users_name,group_concat(actully_device_List.device_status) status_arr from allow_time a_t
     left join (select * from allowTime_map_device where effective = 1) a_m_d on a_t.id = a_m_d.allow_time_id
     inner join (select distinct device_id,user_name,device_status from records 
                 left join (select users.id,users.name as user_name from users where effective = 1) users 
                 on users.id = records.user_id  
                 where checkedAt>'${oneTime.begin}' and checkedAt<'${oneTime.end}' and effective = 1 and (is_clean = 0 || is_clean is NULL)) actully_device_List 
     on actully_device_List.device_id = a_m_d.device_id
-    left join (select a_t.id,count(distinct a_m_d.device_id) need_count from allow_time a_t
+    left join (select a_t.id,group_concat(distinct a_m_d.device_id) need_devices from allow_time a_t
     left join (select * from allowTime_map_device where effective = 1) a_m_d on a_t.id = a_m_d.allow_time_id
     where a_t.id = ${oneTime.id} and a_t.effective = 1
     group by a_t.id) temp_table on temp_table.id = a_t.id
@@ -739,10 +739,13 @@ export function getRecordInfoByStartEndTimeAndDevices(record) {
  */
 export function getDevicesInfoByIdListStr(record) {
     return new Promise((resolve, reject) => {
-        let sql = `select devices.*,group_concat(distinct date_value) as date_value_list,group_concat(distinct title) as scheme_title,group_concat(distinct scheme_of_cycleDate.id) as sche_cyc_id,group_concat(distinct scheme_of_cycleDate.cycleDate_id) as cycleDate_id from devices
+        let sql = `select devices.*,group_concat(distinct date_value) as date_value_list,group_concat(distinct title) as scheme_title,group_concat(distinct scheme_of_cycleDate.id) as sche_cyc_id,group_concat(distinct scheme_of_cycleDate.cycleDate_id) as cycleDate_id,concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name from devices
         left join (select * from sche_cyc_map_device where effective = 1) sche_cyc_map_device on sche_cyc_map_device.device_id = devices.id
         left join (select * from scheme_of_cycleDate where effective = 1) scheme_of_cycleDate on scheme_of_cycleDate.id = sche_cyc_map_device.scheme_id
         left join (select * from sche_cyc_map_date where effective = 1) sche_cyc_map_date on sche_cyc_map_date.scheme_id = sche_cyc_map_device.scheme_id
+        left join (select * from area_3 where effective = 1) area_3 on devices.area_id = area_3.id
+        left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
+        left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
         where devices.effective = 1 and devices.id in (${record.select_map_device})
         group by devices.id`
         let result = []

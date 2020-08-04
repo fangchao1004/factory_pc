@@ -162,6 +162,7 @@ class TimeView extends Component {
         group by a_t.id) temp_table on temp_table.id = a_t.id
         where a_t.id = ${element.id} and a_t.effective = 1
         group by a_t.id`
+        // console.log('sql:', sql)
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
@@ -294,7 +295,7 @@ class TimeView extends Component {
             {
                 title: '巡检人员',
                 dataIndex: 'checkMan',
-                width: 120,
+                width: 140,
                 align: 'center'
             }, {
                 title: '操作',

@@ -69,7 +69,7 @@ class DeivceRecordAndStatusView extends Component {
                 break;
         }
         return new Promise((resolve, reject) => {
-            let sql = `select devices.id,devices.name as device_name,concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name from devices 
+            let sql = `select devices.id,devices.name as name,concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name from devices 
             left join (select * from area_3 where effective = 1) area_3 on devices.area_id = area_3.id
             left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
             left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
@@ -88,59 +88,33 @@ class DeivceRecordAndStatusView extends Component {
      * 情况二
      */
     getInfo = async (data) => {
-        let deviceIdList = data.deviceIdStr.split(',')
-        let statusList = data.statusStr.split(',')
-        let deviceStatusList = deviceIdList.map((item, index) => { return { id: parseInt(deviceIdList[index]), status: parseInt(statusList[index]) } })
-        let result = await this.getAllowTimeDeivceList(data);
-        // console.log('data:', data)
-        result.forEach((item) => {
-            deviceStatusList.forEach((cell) => {
-                if (item.device_id === cell.id) { item.status = cell.status }
-            })
-        })
         let filterList = [];
-        switch (data.item) {
-            case '正常':
-                this.setState({ alertType: 'success' })
-                filterList = result.filter((item) => { return item.status === 1 })
-                break;
-            case '故障':
-                this.setState({ alertType: 'error' })
-                filterList = result.filter((item) => { return item.status === 2 })
-                break;
-            case '待检':
-                this.setState({ alertType: 'info' })
-                filterList = result.filter((item) => { return !item.status })
-                break;
-            default:
-                break;
+        if (data.devices && data.devices.length > 0) {
+            switch (data.item) {
+                case '正常':
+                    this.setState({ alertType: 'success' })
+                    filterList = data.devices.filter((item) => { return item.status === 1 })
+                    break;
+                case '故障':
+                    this.setState({ alertType: 'error' })
+                    filterList = data.devices.filter((item) => { return item.status === 2 })
+                    break;
+                case '待检':
+                    this.setState({ alertType: 'info' })
+                    filterList = data.devices.filter((item) => { return !item.status })
+                    break;
+                default:
+                    break;
+            }
+            this.setState({ list: filterList.map((item, index) => { item.key = index; return item }) })
         }
-        console.log('filterList:', filterList)
-        this.setState({ list: filterList.map((item, index) => { item.key = index; return item }) })
-    }
-    getAllowTimeDeivceList = (data) => {
-        return new Promise((resolve, reject) => {
-            let sql = `select a_m_d.device_id,devices.name as device_name,concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name from
-            (select id  from allow_time where effective = 1 and begin ='${data.begin}' and end = '${data.end}' and area0_id = ${this.state.area0_id}) target_allow_time
-            left join (select * from allowTime_map_device where effective = 1) as a_m_d on a_m_d.allow_time_id= target_allow_time.id
-            left join (select * from devices where effective = 1) devices on devices.id = a_m_d.device_id
-            left join (select * from area_3 where effective = 1) area_3 on devices.area_id = area_3.id
-            left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
-            left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id`
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data;
-                }
-                resolve(result);
-            })
-        })
+
     }
     render() {
         const columns = [
             {
                 title: '巡检点',
-                dataIndex: 'device_name'
+                dataIndex: 'name'
             },
             {
                 title: '区域',

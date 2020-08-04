@@ -27,13 +27,11 @@ export default class PieView extends React.Component {
     let newArr = [];
     let totalCount = 0;
     data.datasource.forEach((ele) => {
-      // if (ele.status_count > 0) {
       totalCount += ele.status_count;
       let stautsTxt = '待检'
       if (ele.device_status === 1) { stautsTxt = '正常' }
       else if (ele.device_status === 2) { stautsTxt = '故障' }
-      newArr.push({ item: stautsTxt, count: ele.status_count, begin: data.begin, end: data.end, date: data.date, deviceIdStr: data.deviceIdStr, statusStr: data.statusStr });
-      // }
+      newArr.push({ item: stautsTxt, count: ele.status_count, begin: data.begin, end: data.end, date: data.date, devices: data.devices, statusStr: data.statusStr });
     })
     // console.log('处理后的数据：', newArr);
     this.setState({ data: newArr, titleStr: data.title, allCount: totalCount, checkMan: data.checkMan || '' })
@@ -43,7 +41,7 @@ export default class PieView extends React.Component {
     const { Html } = Guide;
     const dv = new DataView();
     const str = '<div style="color:#8c8c8c;font-size:10px;text-align:center;width: 12em;">' + this.state.titleStr + '<br><span style="color:#262626;font-size:24px">' + this.state.allCount + '</span></div>'
-    let str2 = this.state.checkMan ? '<div style="color:#8c8c8c;font-size:14px;text-align:center;width: 12em;">[' + this.state.checkMan + ']</div>' : '<div></div>'
+    let str2 = this.state.checkMan ? '<div style="color:#8c8c8c;font-size:14px;text-align:center;background-color:#fa8c16;color:#FFFFFF;padding:0 5px 0 5px;border-radius:2px">' + this.state.checkMan + '</div>' : '<div></div>'
 
     dv.source(this.state.data).transform({
       type: "percent",

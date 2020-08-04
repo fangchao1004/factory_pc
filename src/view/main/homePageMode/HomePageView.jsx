@@ -3,8 +3,9 @@ import PieView from './PieView'
 import LineChartView from './LineChartView'
 import { Row, Col, Radio, Skeleton } from 'antd'
 import HttpApi from '../../util/HttpApi'
-import { getAllowTime, findCountInfoByTime } from '../../util/Tool'
+import { getAllowTime, findCountInfoByTime, getDevicesInfoByIdListStr, filterDevicesByDateScheme } from '../../util/Tool'
 import DeivceRecordAndStatusView from './drawer/DeivceRecordAndStatusVIew';
+import moment from 'moment';
 
 class HomePageView extends Component {
     constructor(props) {
@@ -64,55 +65,30 @@ class HomePageView extends Component {
     }
     testHandler = async () => {
         let allowTimeList = await getAllowTime(this.state.area0_id);
-        // console.log('allowTimeList:', allowTimeList)
         let countResultList = [];
         for (let index = 0; index < allowTimeList.length; index++) {
             const element = allowTimeList[index];
-            // console.log('element:', element)
             let result = await findCountInfoByTime(element);
             const data = result[0];
-            // console.log('data:', data)
             if (data) {
+                // console.log('data.need_devices:', data.need_devices)
+                let devicesResult = await getDevicesInfoByIdListStr({ select_map_device: data.need_devices });
+                let listAfterFilter = filterDevicesByDateScheme(devicesResult, moment());///每个时间区间内的设备-进过方案筛选后还剩哪些设备需要巡检
                 let status_1_count = 0;
                 let status_2_count = 0;
-                data.status_arr.split(',').forEach(element => {
-                    if (String(element) === "1") { status_1_count++ } else { status_2_count++ }
+                listAfterFilter.forEach(element => {
+                    if (element.status === 1) { status_1_count++ } else { status_2_count++ }
                 });
-                // data['status_1_count'] = status_1_count;
-                // data['status_2_count'] = status_2_count;
-                // data['正常'] = status_1_count;
-                // data['故障'] = status_2_count;
-                // data['待检'] = data.need_count - data.actu_count
-                // delete data['status_arr']
-                data['label'] = data.date === -1 ? '昨天 ' + data.begin + '~' + data.end : '今天 ' + data.begin + '~' + data.end
+                data['afterFilter'] = listAfterFilter;
+                data['afterFilter_count'] = listAfterFilter.length;
+                data['label'] = data.date === -1 ? '昨天 ' + data.begin + '~' + data.end : '今天 ' + data.begin + '~' + data.end;
                 data['count_data'] = [{ device_status: 1, status_count: status_1_count },
-                { device_status: 2, status_count: status_2_count }, { device_status: 3, status_count: data.need_count - data.actu_count }]
-                countResultList.push(data)
+                { device_status: 2, status_count: status_2_count }, { device_status: 3, status_count: data.afterFilter_count - data.actu_count }];
+                countResultList.push(data);
             }
         }
         return countResultList;
     }
-    // changeDataConstruct = (v) => {
-    //     let finallyResult = [];
-    //     for (const key in v) {
-    //         // console.log(key, v[key]);//// 员工A  [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
-    //         ///对 v[key] 这个数组进行遍历
-    //         let tempArr = JSON.parse(JSON.stringify(v[key]));
-    //         let result_arr = [{ device_status: 1, status_count: 0 }, { device_status: 2, status_count: 0 }, { device_status: null, status_count: 0 }]
-    //         tempArr.forEach((item) => {
-    //             if (item.device_status === 1) {
-    //                 result_arr[0].status_count = result_arr[0].status_count + 1
-    //             } else if (item.device_status === 2) {
-    //                 result_arr[1].status_count = result_arr[1].status_count + 1
-    //             } else {
-    //                 result_arr[2].status_count = result_arr[2].status_count + 1
-    //             }
-    //         })
-    //         // console.log(key, result_arr);
-    //         finallyResult.push({ 'user_name': key, 'count_data': result_arr });
-    //     }
-    //     return finallyResult
-    // }
     getAllDeviceStatusCount = () => {
         let sql = `select devices.status as device_status,count(devices.status) as status_count from devices
         where devices.effective = 1 and devices.area0_id = ${this.state.area0_id}
@@ -142,11 +118,9 @@ class HomePageView extends Component {
         let cellsArr = [];
         let copy_data = JSON.parse(JSON.stringify(this.state.groupData))
         if (copy_data.length === 0) { return null }
-        // console.log('copy_data:', copy_data)
         copy_data.forEach((item, index) => {
             // console.log(item);
-            let dataObj = { datasource: item.count_data, title: item.label, checkMan: item.users_name, begin: item.begin, end: item.end, date: item.date, deviceIdStr: item.actu_concat, statusStr: item.status_arr }
-            // console.log('dataObj:',dataObj);
+            let dataObj = { datasource: item.count_data, title: item.label, checkMan: item.users_name, begin: item.begin, end: item.end, date: item.date, devices: item.afterFilter }
             cellsArr.push(
                 <Col span={8} key={index}>
                     <PieView data={dataObj} openDrawer={this.openDrawerHandler} />
@@ -156,7 +130,6 @@ class HomePageView extends Component {
         return cellsArr
     }
     openDrawerHandler = (data) => {
-        // console.log('openDrawerHandler:', data)
         this.setState({ drawerVisible: true, onePieData: data })
     }
     closeDrawerHandler = () => {
