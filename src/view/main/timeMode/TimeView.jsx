@@ -6,6 +6,7 @@ import RecordDetailByTime from './RecordDetailByTime';
 import { translate, getDevicesInfoByIdListStr, filterDevicesByDateScheme, combinAreaAndDeviceTest, renderTreeNodeListByDataTest } from '../../util/Tool'
 import UpdateTimeView from './UpdateTimeView';
 import AddTimeView from './AddTimeView';
+import ExportRecordView from './ExportRecordView';
 const { TreeNode } = TreeSelect;
 
 var allowTime_map_device_name;
@@ -28,6 +29,7 @@ class TimeView extends Component {
             isAdmin: JSON.parse(window.localStorage.getItem('userinfo')).isadmin,
             treeNodeList: [],
             selectTime: moment(),
+            showExportRecordView: false,
         }
     }
     componentDidMount() {
@@ -332,7 +334,7 @@ class TimeView extends Component {
                     {this.state.isAdmin ?
                         <Button type={'primary'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showAddModal: true }) }}>添加时间段</Button>
                         : null}
-                    {/* <Button icon={'export'} type={'primary'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showAddModal: true }) }}>导出巡检记录</Button> */}
+                    <Button icon={'export'} type={'primary'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showExportRecordView: true }) }}>导出巡检记录</Button>
                 </div>
                 <Table
                     loading={this.state.loading}
@@ -344,6 +346,7 @@ class TimeView extends Component {
                 <RecordDetailByTime visible={this.state.showDrawer} record={this.state.oneRecord} close={this.closeHandler} {...this.props} />
                 <UpdateTimeView visible={this.state.showUpdateModal} record={this.state.oneRecord} onOk={this.UpdateTimeOk} onCancel={() => { this.setState({ showUpdateModal: false }) }} />
                 <AddTimeView visible={this.state.showAddModal} onOk={this.AddTimeOk} onCancel={() => { this.setState({ showAddModal: false }) }} />
+                <ExportRecordView showModal={this.state.showExportRecordView} cancel={() => { this.setState({ showExportRecordView: false }) }} {...this.props} />
             </div>
         );
     }
