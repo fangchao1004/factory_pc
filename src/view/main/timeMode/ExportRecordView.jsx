@@ -136,7 +136,7 @@ class ExportRecordView extends Component {
         if (area0list.length === 0) { message.error('请完善选项'); return }
         let recordList = await this.searchRecordByCondition(this.state.timeStampCheckList, this.state.area0CheckList)//area/查询得到对应的records记录
         ///开始对record中的content和device_status,area0_id。进行处理
-        if (recordList.length === 0) { message.warn('为查询到符合条件的巡检数据'); return }
+        if (recordList.length === 0) { message.warn('未查询到符合条件的巡检数据'); return }
         let data = this.transConstract(recordList);
         // console.log('data:', data)
         // return;
@@ -172,7 +172,9 @@ class ExportRecordView extends Component {
             })
         })
     }
-
+    disabledDate = (current) => {
+        return current > moment().endOf('day');
+    }
     ///////////////////
     render() {
         return (
@@ -200,9 +202,10 @@ class ExportRecordView extends Component {
                     </Col>
                     <Col span={19}>
                         <RangePicker
+                            disabledDate={this.disabledDate}
                             ranges={{
                                 '今日': [moment(), moment()],
-                                '本月': [moment().startOf('month'), moment().endOf('month')],
+                                '本月': [moment().startOf('month'), moment().endOf('day')],
                                 '上月': [moment().add(-1, 'month').startOf('month'), moment().add(-1, 'month').endOf('month')],
                             }}
                             defaultValue={[moment().startOf('day'), moment().endOf('day')]}

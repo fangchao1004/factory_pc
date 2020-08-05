@@ -297,6 +297,9 @@ class ExportBugView extends Component {
         this.reset();
         message.info('正在导出Excel文件，请从浏览器下载文件夹中查看');
     }
+    disabledDate = (current) => {
+        return current > moment().endOf('day');
+    }
     renderExportExcelView = () => {
         return (
             <div>
@@ -306,9 +309,10 @@ class ExportBugView extends Component {
                     </Col>
                     <Col span={19}>
                         <RangePicker
+                            disabledDate={this.disabledDate}
                             ranges={{
                                 '今日': [moment(), moment()],
-                                '本月': [moment().startOf('month'), moment().endOf('month')],
+                                '本月': [moment().startOf('month'), moment().endOf('day')],
                                 '上月': [moment().add(-1, 'month').startOf('month'), moment().add(-1, 'month').endOf('month')],
                             }}
                             defaultValue={[moment().startOf('day'), moment().endOf('day')]}
