@@ -42,7 +42,7 @@ class ExportRecordView extends Component {
     reset = () => {
         this.setState({
             timeStampCheckList: [moment().startOf('day').format('YYYY-MM-DD HH:ss:mm'), moment().endOf('day').format('YYYY-MM-DD HH:ss:mm')],/// 时间段区间默认是今日 ['2019-01-01 00:00:00','2019-01-01 23:59:59']
-            area0CheckList: [],///[]
+            area0CheckList: [this.props.id],///[]
             area0CheckAll: false,
             exporting: false,
         })
