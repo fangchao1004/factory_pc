@@ -333,7 +333,7 @@ class TimeView extends Component {
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     {this.state.isAdmin ?
                         <Button type={'primary'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showAddModal: true }) }}>添加时间段</Button>
-                        : null}
+                        : <span></span>}
                     <Button icon={'export'} type={'primary'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showExportRecordView: true }) }}>导出巡检记录</Button>
                 </div>
                 <Table
