@@ -132,6 +132,7 @@ class ExportRecordView extends Component {
         return excelOptionList;
     }
     exportHandler = async () => {
+        this.setState({ exporting: true })
         let area0list = this.state.area0CheckList;
         if (area0list.length === 0) { message.error('请完善选项'); return }
         let recordList = await this.searchRecordByCondition(this.state.timeStampCheckList, this.state.area0CheckList)//area/查询得到对应的records记录
