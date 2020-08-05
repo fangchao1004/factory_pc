@@ -137,7 +137,7 @@ class ExportRecordView extends Component {
         if (area0list.length === 0) { message.error('请完善选项'); return }
         let recordList = await this.searchRecordByCondition(this.state.timeStampCheckList, this.state.area0CheckList)//area/查询得到对应的records记录
         ///开始对record中的content和device_status,area0_id。进行处理
-        if (recordList.length === 0) { message.warn('未查询到符合条件的巡检数据'); return }
+        if (recordList.length === 0) { message.warn('未查询到符合条件的巡检数据'); this.setState({ exporting: false }); return }
         let data = this.transConstract(recordList);
         // console.log('data:', data)
         // return;
