@@ -143,9 +143,9 @@ export default class BugViewNewComplete extends Component {
                 dataIndex: 'id',
                 title: '编号',
                 align: 'center',
-                width: 80,
+                width: 120,
                 render: (text, record) => {
-                    return <div>{text}</div>
+                    return <div>{record.serial_no || text}</div>
                 }
             },
             {

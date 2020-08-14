@@ -34,7 +34,7 @@ export const BROWERTYPE = 'browerType';
 export const BUGIDLIST = 'bugIdList'///和我相关的缺陷的id
 // const a = <a href="https://www.jb51.net" title="脚本之家" target="_blank">Welcome</a>
 export const VersionlistData = [
-    { title: '版本号', description: `V 1.5.0.6` },
+    { title: '版本号', description: `V 1.5.0.8` },
     // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
     // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
     // { title: '更新', description: '1.0.9 添加巡检点信息修改功能' }
@@ -85,4 +85,6 @@ export const VersionlistData = [
     // { title: '更新', description: '1.5.0.4 test 有测温测振组件的record,无法正常计算bug数的问题解决，针对每个缺陷的操作流程，计算每一步的用时是否超时，并且支持导出到excel中' }
     // { title: '更新', description: '1.5.0.5 record查询优化，首页查统计询优化' }
     // { title: '更新', description: '1.5.0.6 支持巡检记录导出' }
+    // { title: '更新', description: '1.5.0.7 test 新增缺陷添加流水号，以年为周期重置' }
+    // { title: '更新', description: '1.5.0.8 首页统计不准的bug处理' }
 ]

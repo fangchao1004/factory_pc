@@ -3,7 +3,7 @@ import PieView from './PieView'
 import LineChartView from './LineChartView'
 import { Row, Col, Radio, Skeleton } from 'antd'
 import HttpApi from '../../util/HttpApi'
-import { getAllowTime, findCountInfoByTime, getDevicesInfoByIdListStr, filterDevicesByDateScheme } from '../../util/Tool'
+import { getAllowTime, findCountInfoByTime, getDevicesInfoByIdListStr, filterDevicesByDateScheme, pickUpActuConcatDeviceList } from '../../util/Tool'
 import DeivceRecordAndStatusView from './drawer/DeivceRecordAndStatusVIew';
 import moment from 'moment';
 
@@ -65,25 +65,34 @@ class HomePageView extends Component {
     }
     testHandler = async () => {
         let allowTimeList = await getAllowTime(this.state.area0_id);
+        ///测试时使用的，目的是获取某一天的巡检记录-后期考虑在首页加个 DatePicker
+        // allowTimeList = allowTimeList.map((item) => {
+        //     item.begin = moment(item.begin).add('day', -1).format('YYYY-MM-DD HH:mm:ss');
+        //     item.end = moment(item.end).add('day', -1).format('YYYY-MM-DD HH:mm:ss')
+        //     return item
+        // })
         let countResultList = [];
         for (let index = 0; index < allowTimeList.length; index++) {
             const element = allowTimeList[index];
             let result = await findCountInfoByTime(element);
             const data = result[0];
             if (data) {
-                // console.log('data.need_devices:', data.need_devices)
                 let devicesResult = await getDevicesInfoByIdListStr({ select_map_device: data.need_devices });
                 let listAfterFilter = filterDevicesByDateScheme(devicesResult, moment());///每个时间区间内的设备-进过方案筛选后还剩哪些设备需要巡检
                 let status_1_count = 0;
                 let status_2_count = 0;
-                listAfterFilter.forEach(element => {
+                ///从 listAfterFilter 中获取 data.actu_concat 对应的设备状态
+                let actu_devices = pickUpActuConcatDeviceList(data.actu_concat.split(','), listAfterFilter)
+                data.actu_devices = actu_devices;
+                actu_devices.forEach(element => {
                     if (element.status === 1) { status_1_count++ } else { status_2_count++ }
                 });
+                // console.log('status_1_count:', status_1_count, 'status_2_count:', status_2_count, 'status3_count:', listAfterFilter.length - data.actu_count)
                 data['afterFilter'] = listAfterFilter;
                 data['afterFilter_count'] = listAfterFilter.length;
                 data['label'] = data.date === -1 ? '昨天 ' + data.begin + '~' + data.end : '今天 ' + data.begin + '~' + data.end;
                 data['count_data'] = [{ device_status: 1, status_count: status_1_count },
-                { device_status: 2, status_count: status_2_count }, { device_status: 3, status_count: data.afterFilter_count - data.actu_count }];
+                { device_status: 2, status_count: status_2_count }, { device_status: 3, status_count: listAfterFilter.length - data.actu_count }];
                 countResultList.push(data);
             }
         }
@@ -120,7 +129,7 @@ class HomePageView extends Component {
         if (copy_data.length === 0) { return null }
         copy_data.forEach((item, index) => {
             // console.log(item);
-            let dataObj = { datasource: item.count_data, title: item.label, checkMan: item.users_name, begin: item.begin, end: item.end, date: item.date, devices: item.afterFilter }
+            let dataObj = { datasource: item.count_data, title: item.label, checkMan: item.users_name, begin: item.begin, end: item.end, date: item.date, devices: item.afterFilter, actu_devices: item.actu_devices }
             cellsArr.push(
                 <Col span={8} key={index}>
                     <PieView data={dataObj} openDrawer={this.openDrawerHandler} />

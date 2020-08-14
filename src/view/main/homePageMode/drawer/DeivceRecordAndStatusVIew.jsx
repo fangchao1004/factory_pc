@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Drawer, Table, Alert } from 'antd';
 import HttpApi from '../../../util/HttpApi';
+import { getNoCheckDevices } from '../../../util/Tool';
 
 /**
  * 巡检点的当前时间区间内的巡检状态列表
@@ -88,20 +89,21 @@ class DeivceRecordAndStatusView extends Component {
      * 情况二
      */
     getInfo = async (data) => {
+        // console.log('data2:', data)
         let filterList = [];
         if (data.devices && data.devices.length > 0) {
             switch (data.item) {
                 case '正常':
                     this.setState({ alertType: 'success' })
-                    filterList = data.devices.filter((item) => { return item.status === 1 })
+                    filterList = data.actu_devices.filter((item) => { return item.status === 1 })
                     break;
                 case '故障':
                     this.setState({ alertType: 'error' })
-                    filterList = data.devices.filter((item) => { return item.status === 2 })
+                    filterList = data.actu_devices.filter((item) => { return item.status === 2 })
                     break;
                 case '待检':
                     this.setState({ alertType: 'info' })
-                    filterList = data.devices.filter((item) => { return !item.status })
+                    filterList = getNoCheckDevices(data.actu_devices, data.devices);
                     break;
                 default:
                     break;

@@ -31,7 +31,7 @@ export default class PieView extends React.Component {
       let stautsTxt = '待检'
       if (ele.device_status === 1) { stautsTxt = '正常' }
       else if (ele.device_status === 2) { stautsTxt = '故障' }
-      newArr.push({ item: stautsTxt, count: ele.status_count, begin: data.begin, end: data.end, date: data.date, devices: data.devices, statusStr: data.statusStr });
+      newArr.push({ item: stautsTxt, count: ele.status_count, begin: data.begin, end: data.end, date: data.date, devices: data.devices, statusStr: data.statusStr, actu_devices: data.actu_devices });
     })
     // console.log('处理后的数据：', newArr);
     this.setState({ data: newArr, titleStr: data.title, allCount: totalCount, checkMan: data.checkMan || '' })

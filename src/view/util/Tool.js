@@ -951,3 +951,27 @@ export function calcOverTimeByStepList(bugList) {
     }
     return bugList
 }
+
+export function pickUpActuConcatDeviceList(actu_concat = [], afterFilter = []) {
+    let result = [];
+    for (let index = 0; index < actu_concat.length; index++) {
+        const actu_device_id = actu_concat[index];
+        for (let index = 0; index < afterFilter.length; index++) {
+            const afterFilter_device = afterFilter[index];
+            if (parseInt(afterFilter_device.id) === parseInt(actu_device_id)) {
+                result.push(afterFilter_device);
+            }
+        }
+    }
+    return result
+}
+
+export function getNoCheckDevices(actu_device, devices) {
+    let result = [];
+    let actu_device_id = actu_device.map((item) => parseInt(item.id))
+    for (let index = 0; index < devices.length; index++) {
+        const device = devices[index];
+        if (device.id && actu_device_id.indexOf(device.id) === -1) { result.push(device) }
+    }
+    return result;
+}
