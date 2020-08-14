@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PieView from './PieView'
 import LineChartView from './LineChartView'
-import { Row, Col, Radio, Skeleton } from 'antd'
+import { Row, Col, Radio, Skeleton, DatePicker } from 'antd'
 import HttpApi from '../../util/HttpApi'
 import { getAllowTime, findCountInfoByTime, getDevicesInfoByIdListStr, filterDevicesByDateScheme, pickUpActuConcatDeviceList } from '../../util/Tool'
 import DeivceRecordAndStatusView from './drawer/DeivceRecordAndStatusVIew';
@@ -16,6 +16,7 @@ class HomePageView extends Component {
             onePieData: null,
             area0_id: 1,
             groupList: [],
+            selectM: moment()
         }
     }
     componentDidMount() {
@@ -47,15 +48,6 @@ class HomePageView extends Component {
             })
         }
         allDeviceStatusCount.sort((a, b) => { return a.device_status - b.device_status })///按照device_status的大小排序
-        // console.log('获取所有巡检点的 状态统计 信息:', allDeviceStatusCount);////[{device_status: 1, status_count: 3},{device_status: 2, status_count: 4}]
-        // let allTodayRecordInfo = await this.getEveryUserRecordToday(); ///获取当日 所有巡检点的巡检情况（针对参加巡检的人员的分组）
-        // console.log('allTodayRecordInfo:', allTodayRecordInfo); ////这里的数据很有指导性---如果后期修改要看这个数据结构
-        // let b = {};
-        // for (let item of allTodayRecordInfo) {
-        //     if (b.hasOwnProperty(item.user_name)) { b[item.user_name].push(item) }
-        //     else { b[item.user_name] = [item] }
-        // }
-        // let result = this.changeDataConstruct(b);////进行数据结构的改变统计
         let result = await this.testHandler();
         let linkAll = [{ label: '所有巡检点', count_data: allDeviceStatusCount }, ...result]
         // console.log('linkAll:', linkAll);////如果后期看不懂，要看这里的数据结构
@@ -65,12 +57,15 @@ class HomePageView extends Component {
     }
     testHandler = async () => {
         let allowTimeList = await getAllowTime(this.state.area0_id);
-        ///测试时使用的，目的是获取某一天的巡检记录-后期考虑在首页加个 DatePicker
-        // allowTimeList = allowTimeList.map((item) => {
-        //     item.begin = moment(item.begin).add('day', -1).format('YYYY-MM-DD HH:mm:ss');
-        //     item.end = moment(item.end).add('day', -1).format('YYYY-MM-DD HH:mm:ss')
-        //     return item
-        // })
+        ///加个 DatePicker 目的是获取某一天的巡检记录-
+        let gap_day = this.state.selectM.diff(moment(), 'day');
+        // console.log('day差值：', gap_day)
+        allowTimeList = allowTimeList.map((item) => {
+            item.begin = moment(item.begin).add('day', gap_day).format('YYYY-MM-DD HH:mm:ss');
+            item.end = moment(item.end).add('day', gap_day).format('YYYY-MM-DD HH:mm:ss')
+            return item
+        })
+        // console.log('allowTimeList:', allowTimeList)
         let countResultList = [];
         for (let index = 0; index < allowTimeList.length; index++) {
             const element = allowTimeList[index];
@@ -78,7 +73,7 @@ class HomePageView extends Component {
             const data = result[0];
             if (data) {
                 let devicesResult = await getDevicesInfoByIdListStr({ select_map_device: data.need_devices });
-                let listAfterFilter = filterDevicesByDateScheme(devicesResult, moment());///每个时间区间内的设备-进过方案筛选后还剩哪些设备需要巡检
+                let listAfterFilter = filterDevicesByDateScheme(devicesResult, moment().add('day', gap_day));///每个时间区间内的设备-进过方案筛选后还剩哪些设备需要巡检
                 let status_1_count = 0;
                 let status_2_count = 0;
                 ///从 listAfterFilter 中获取 data.actu_concat 对应的设备状态
@@ -148,7 +143,21 @@ class HomePageView extends Component {
     render() {
         return (
             <div >
-                <Row style={{ height: 56, marginTop: -66 }} type='flex' align='middle' justify='end'>
+                <Row style={{ height: 56, marginTop: -66, gap: 10 }} type='flex' align='middle' justify='end'>
+                    <Col>
+                        <DatePicker
+                            allowClear={false}
+                            value={this.state.selectM}
+                            disabledDate={(current) => {
+                                return current > moment().endOf('day');
+                            }}
+                            onChange={(m) => {
+                                this.setState({ selectM: m, groupData: [] }, () => {
+                                    // let day = this.state.selectM.diff(moment(), 'day')
+                                    this.init();
+                                })
+                            }} />
+                    </Col>
                     <Col>
                         <Radio.Group value={this.state.area0_id} buttonStyle="solid" onChange={(e) => {
                             this.setState({ area0_id: e.target.value, groupData: [] }, () => {
