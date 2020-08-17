@@ -1,6 +1,6 @@
 import Axios from 'axios';
 
-export const Testuri = 'http://ixiaomu.cn:3008/'///小木服务器数据库 3008正式 3010测试
+export const Testuri = 'http://ixiaomu.cn:3010/'///小木服务器数据库 3008正式 3010测试
 // export const Testuri = 'http://localhost:3010/'///本地服务器测试用
 // export const Testuri = 'http://localhost:2019/'///本地服务器测试用 socket.io 服务测试
 export const environmentIsTest = Testuri === 'http://ixiaomu.cn:3010/' ///是不是测试环境
@@ -449,11 +449,11 @@ class HttpApi {
      */
     static getArea123Info(area0_id) {
         return new Promise((resolve, reject) => {
-            let sql = `select area_1.id as area1_id , area_1.name as area1_name, area_2.id as area2_id ,area_2.name as area2_name,area_3.id as area3_id,area_3.name as area3_name from area_1
+            let sql = `select area_1.order_key,area_1.id as area1_id , area_1.name as area1_name, area_2.id as area2_id ,area_2.name as area2_name,area_3.id as area3_id,area_3.name as area3_name from area_1
             left join (select * from area_2 where effective = 1)area_2 on area_1.id = area_2.area1_id
             left join (select * from area_3 where effective = 1)area_3 on area_2.id = area_3.area2_id
             where area_1.effective = 1 and area_1.area0_id = ${area0_id}
-            order by area_1.id`;
+            order by area_1.order_key,area_1.id`;
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {
@@ -496,13 +496,13 @@ class HttpApi {
 
     static getArea0123Info() {
         return new Promise((resolve, reject) => {
-            let sql = `select area_0.id as area0_id , area_0.name as area0_name, area_1.id as area1_id , area_1.name as area1_name, area_2.id as area2_id ,area_2.name as area2_name,area_3.id as area3_id,area_3.name as area3_name 
+            let sql = `select area_0.id as area0_id , area_0.name as area0_name, area_1.id as area1_id , area_1.name as area1_name, area_2.id as area2_id ,area_2.name as area2_name,area_3.id as area3_id,area_3.name as area3_name ,area_1.order_key 
             from area_0
             left join (select * from area_1 where effective = 1)area_1 on area_0.id = area_1.area0_id
             left join (select * from area_2 where effective = 1)area_2 on area_1.id = area_2.area1_id
             left join (select * from area_3 where effective = 1)area_3 on area_2.id = area_3.area2_id
             where area_0.effective = 1
-            order by area_0.id,area_1.id`;
+            order by area_0.id,area_1.order_key,area_1.id`;
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Select, TreeSelect, Input, message, Modal, Form, Tooltip } from 'antd'
 import HttpApi from '../../util/HttpApi'
-import { translate } from '../../util/Tool'
+import { translate, sortByOrderKey } from '../../util/Tool'
 import moment from 'moment'
 
 const { TextArea } = Input;
@@ -71,7 +71,7 @@ class AddBugView extends Component {
     }
     init = async () => {
         let resultArea0123 = await HttpApi.getArea0123Info();
-        area0123_List = translate(['area0_id', 'area1_id', 'area2_id', 'area3_id'], resultArea0123, 2)
+        area0123_List = sortByOrderKey(translate(['area0_id', 'area1_id', 'area2_id', 'area3_id'], resultArea0123, 2))
         let marjorData = await this.getMajorInfo();
         major_Options = marjorData.map((major, index) => <Select.Option value={major.id} key={major.id}><Tooltip key={index} title={major.name}>{major.name}</Tooltip></Select.Option>)
         this.forceUpdate();

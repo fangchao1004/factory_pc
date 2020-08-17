@@ -68,7 +68,7 @@ class EquipmentArea1View extends Component {
         return new Promise((resolve, reject) => {
             let sql = `select area_1.id as area1_id,area_1.name as area1_name,area0_id,area_0.name as area0_name from area_1
             left join (select * from area_0 where effective = 1) area_0 on area_0.id = area_1.area0_id
-            where area_1.effective = 1`
+            where area_1.effective = 1 order by area_1.order_key`
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {

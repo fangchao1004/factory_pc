@@ -52,6 +52,7 @@ export function translate(keys, data, selectLevel = null, pValue = '') {
             else if (!selectLevel) { selectable = true; }
             map[k] = {
                 title: item[String(key).substring(0, key.length - 2) + 'name'],
+                order_key: item.order_key,
                 value,
                 key: value,
                 selectable,
@@ -107,11 +108,12 @@ export function transfromDataTo3level(area123result, all3 = true) {
     let rootObj = {}
     area123result.forEach((item) => {
         rootObj[item.area1_id] = {
+            order_key: item.order_key, ///新增order_key
             title: item.area1_name,
             value: item.area1_id + '',
             key: item.area1_id + '',
             selectable: all3,
-            children: []
+            children: [],
         }
     })
     let rootList = [];
@@ -785,20 +787,20 @@ export function filterDevicesByDateScheme(deviceList, momentTarget) {
 }
 export function checkOverTime(record, currentTime) {
     let durationTime;
-    if (record.status === 0) {
-        let temp1 = currentTime - moment(record.createdAt).toDate().getTime();
-        durationTime = temp1 > 0 ? temp1 : 0
-    } else if (record.last_status_time) {
-        let temp2 = currentTime - moment(record.last_status_time).toDate().getTime();
-        durationTime = temp2 > 0 ? temp2 : 0
-    }
     let isOver = false
     if (record.status < 2) { ///如果缺陷的状态处在2之前，即专工处理之前，那么就根据缺陷的等级来判断时间区间大小
         if (record.bld_duration_time && durationTime > record.bld_duration_time) { isOver = true }
     } else {
         if (record.bsd_duration_time && durationTime > record.bsd_duration_time) { isOver = true }
     }
-    if (record.status === 0) { isOver = false }
+    if (record.status === 0) {
+        isOver = false
+        let temp1 = currentTime - moment(record.createdAt).toDate().getTime();
+        durationTime = temp1 > 0 ? temp1 : 0
+    } else if (record.status !== 0 && record.last_status_time) {
+        let temp2 = currentTime - moment(record.last_status_time).toDate().getTime();
+        durationTime = temp2 > 0 ? temp2 : 0
+    }
     return { isOver, durationTime };
 }
 
@@ -974,4 +976,29 @@ export function getNoCheckDevices(actu_device, devices) {
         if (device.id && actu_device_id.indexOf(device.id) === -1) { result.push(device) }
     }
     return result;
+}
+/**
+ * 适用与包含厂区的情况
+ * @param {*} result 
+ */
+export function sortByOrderKey(result) {
+    let copyResult = JSON.parse(JSON.stringify(result))
+    copyResult.forEach((item) => {
+        item.children.sort((x, y) => {
+            return x.order_key - y.order_key
+        })
+    })
+    return copyResult
+}
+
+/**
+ * 适用与1级及以下
+ * @param {*} result 
+ */
+export function sortByOrderKey2(result) {
+    let copyResult = JSON.parse(JSON.stringify(result))
+    copyResult.sort((x, y) => {
+        return x.order_key - y.order_key
+    })
+    return copyResult
 }

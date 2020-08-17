@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Modal, Form, Input, Select, TreeSelect } from 'antd'
 import HttpApi from '../../../util/HttpApi'
-import { transfromDataTo3level } from '../../../util/Tool'
+import { transfromDataTo3level, sortByOrderKey2 } from '../../../util/Tool'
 
 /**
  * 添加员工的表单界面
@@ -76,8 +76,7 @@ export default class AddEquipmentView extends Component {
         let nfcResult = await this.getNfcInfo();
         let result = await HttpApi.getArea123Info(this.props.id);
         let resultList = transfromDataTo3level(result, false);
-        // console.log('resultList', resultList);
-        this.setState({ areas: resultList, types: typeResult, nfcs: nfcResult })
+        this.setState({ areas: sortByOrderKey2(resultList), types: typeResult, nfcs: nfcResult })
     }
     getTypeInfo = () => {
         return new Promise((resolve, reject) => {

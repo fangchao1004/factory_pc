@@ -3,7 +3,7 @@ import { Table, Button, TreeSelect, message, DatePicker, Tag, Alert } from 'antd
 import moment from 'moment';
 import HttpApi from '../../util/HttpApi';
 import RecordDetailByTime from './RecordDetailByTime';
-import { translate, getDevicesInfoByIdListStr, filterDevicesByDateScheme, combinAreaAndDeviceTest, renderTreeNodeListByDataTest } from '../../util/Tool'
+import { translate, getDevicesInfoByIdListStr, filterDevicesByDateScheme, combinAreaAndDeviceTest, renderTreeNodeListByDataTest, sortByOrderKey2 } from '../../util/Tool'
 import UpdateTimeView from './UpdateTimeView';
 import AddTimeView from './AddTimeView';
 import ExportRecordView from './ExportRecordView';
@@ -50,7 +50,7 @@ class TimeView extends Component {
         let resultArea0123 = await this.getArea0123InfoByArea0Id();
         let deviceInfo = await this.getDeviceInfo();
         let result = translate(['area1_id', 'area2_id', 'area3_id'], resultArea0123)
-        let tempData2 = combinAreaAndDeviceTest(result, deviceInfo, 2);
+        let tempData2 = combinAreaAndDeviceTest(sortByOrderKey2(result), deviceInfo, 2);
         let treeNodeList = renderTreeNodeListByDataTest(tempData2, TreeNode, 3);
         this.setState({
             treeNodeList
@@ -69,13 +69,13 @@ class TimeView extends Component {
     }
     getArea0123InfoByArea0Id = () => {
         return new Promise((resolve, reject) => {
-            let sql = `select area_0.id as area0_id , area_0.name as area0_name, area_1.id as area1_id , area_1.name as area1_name, area_2.id as area2_id ,area_2.name as area2_name,area_3.id as area3_id,area_3.name as area3_name 
+            let sql = `select area_1.order_key, area_0.id as area0_id, area_0.name as area0_name, area_1.id as area1_id , area_1.name as area1_name, area_2.id as area2_id ,area_2.name as area2_name,area_3.id as area3_id,area_3.name as area3_name 
             from area_0
             left join (select * from area_1 where effective = 1)area_1 on area_0.id = area_1.area0_id
             left join (select * from area_2 where effective = 1)area_2 on area_1.id = area_2.area1_id
             left join (select * from area_3 where effective = 1)area_3 on area_2.id = area_3.area2_id
             where area_0.effective = 1 and area_0.id = ${this.props.id}
-            order by area_0.id,area_1.id`;
+            order by area_0.id,area_1.order_key,area_1.id`;
             HttpApi.obs({ sql }, (res) => {
                 let result = [];
                 if (res.data.code === 0) {

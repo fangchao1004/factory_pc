@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Tree, Col, Row } from 'antd';
 import HttpApi from '../../../util/HttpApi';
-import { combinAreaAndDevice, renderTreeNodeListByData, translate } from '../../../util/Tool'
+import { combinAreaAndDevice, renderTreeNodeListByData, translate, sortByOrderKey } from '../../../util/Tool'
 import "./treeView.css"
 import DeviceInfoView from './DeviceInfoView';
 const { TreeNode } = Tree;
@@ -24,7 +24,7 @@ export default class TreeView extends Component {
         let resultArea0123 = await HttpApi.getArea0123Info();
         let deviceInfo = await this.getDeviceInfo();
         let result = translate(['area0_id', 'area1_id', 'area2_id', 'area3_id'], resultArea0123)
-        let tempData2 = combinAreaAndDevice(result, deviceInfo);
+        let tempData2 = combinAreaAndDevice(sortByOrderKey(result), deviceInfo);
         this.setState({
             areaAndDeivceList: tempData2
         })

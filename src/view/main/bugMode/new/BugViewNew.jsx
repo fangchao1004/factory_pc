@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm, Tooltip, Alert, Modal, Input, Icon } from 'antd'
+import { Table, Tag, Button, message, Popconfirm, Tooltip, Alert, Modal, Input, Icon, Popover } from 'antd'
 import HttpApi, { Testuri } from '../../../util/HttpApi'
 import moment from 'moment'
 // import Store from '../../../../redux/store/Store';
@@ -13,7 +13,7 @@ import FuncPanelForRunner from './FuncPanelForRunner';
 import { originOverTime, originStatus, BUGLOOPTIME, NOTICEMUSICOPEN, BUGDATAUPDATETIME } from '../../../util/AppData'
 import ShowImgView from '../ShowImgView';
 import { getDuration, checkOverTime, removeOneBugIdFromList } from '../../../util/Tool';
-
+const description = "待维修计时：当前时刻-记录上传至数据库时刻 非打点时刻"
 var major_filter = [];///用于筛选任务专业的数据 选项
 var status_filter = [];///用于筛选状态的数据
 const bug_level_filter = [];
@@ -471,7 +471,7 @@ export default class BugViewNew extends Component {
                         children: <div>
                             <Tag color={color}>{str}</Tag>
                             <br />
-                            {record.last_status_time && record.status !== 5 ? <Tag style={{ marginTop: 8 }} color={timeColor}>{getDuration(durationTime, 1, true)}</Tag> : null}
+                            {(record.last_status_time && record.status !== 5) || (!record.last_status_time && record.status === 0) ? <Tag style={{ marginTop: 8 }} color={timeColor}>{getDuration(durationTime, 1, true)}</Tag> : null}
                         </div>,
                         props: {
                             colSpan: 2,
@@ -480,11 +480,15 @@ export default class BugViewNew extends Component {
                 }
             },
             {
-                title: '用时',
+                title: <div>
+                    <Popover content={description} title={null}>
+                        <Icon type="info-circle" style={{ marginRight: 5 }} />
+                    </Popover>
+                    用时</div>,
                 dataIndex: 'over',
                 filters: originOverTime,
                 align: 'center',
-                width: 80,
+                width: 100,
                 onFilter: (value, record) => {
                     let isOver = checkOverTime(record, currentTime).isOver
                     let overValue = isOver ? 0 : 1;
