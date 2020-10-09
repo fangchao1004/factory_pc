@@ -17,7 +17,7 @@ class BugNoticeList extends Component {
         }
     }
     componentDidMount() {
-        this.props.data.map((item, index) => {
+        this.props.data.unreadBugs.map((item, index) => {
             item.key = index;
             switch (item.status) {
                 case 0:
@@ -50,19 +50,19 @@ class BugNoticeList extends Component {
             }
             return item
         })
-        this.setState({ dataSource: this.props.data })
+        this.setState({ dataSource: this.props.data.unreadBugs })
     }
     render() {
         return (
-            <div >
+            <div>
                 <List
                     style={{ height: 300, overflow: 'scroll' }}
                     itemLayout="horizontal"
                     dataSource={this.state.dataSource}
                     renderItem={item => (
                         <List.Item
-                            actions={[
-                                <Button type='link' size="small" style={{ padding: 0 }} onClick={() => {
+                            extra={
+                                <Button type='link' size="small" style={{ padding: 0, marginRight: 8 }} onClick={() => {
                                     if (this.state.permissionManager && this.state.major_id_all) { ///有专工权限且要有专业，就直接跳转
                                         this.props.closePop()
                                         this.props.history.push('./bugAboutMe')
@@ -80,7 +80,7 @@ class BugNoticeList extends Component {
                                             removeOneBugIdFromList(item.id)
                                         }
                                     })
-                                }}>详情</Button>]}
+                                }}>详情</Button>}
                         >
                             <List.Item.Meta
                                 avatar={<Avatar style={{ backgroundColor: item.avatar_color, verticalAlign: 'middle' }} size="large">{item.stauts_people}</Avatar>}

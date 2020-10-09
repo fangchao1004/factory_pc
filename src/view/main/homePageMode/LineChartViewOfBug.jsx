@@ -102,7 +102,7 @@ class LineChartViewOfBug extends Component {
             }
         };
         return (
-            <div style={{ backgroundColor: '#F0F2F5' }}>
+            <div style={{ backgroundColor: '#FFFFFF' }}>
                 <div style={{ marginLeft: 20, padding: 20, fontSize: 20 }}>近一个月统计</div>
                 <Chart height={400} data={dv} scale={cols} forceFit>
                     <Legend />

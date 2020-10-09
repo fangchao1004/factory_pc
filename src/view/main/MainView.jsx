@@ -24,7 +24,7 @@ import UserMenuView from './userMenu/UserMenuView'
 import HttpApi from '../util/HttpApi';
 // import Store from '../../redux/store/Store';
 // import Socket from '../socket/Socket'
-import { NOTICEINFO, BUGDATAUPDATETIME, NOTIFY_MP3 } from '../util/AppData'
+import { NOTICEINFO, BUGDATAUPDATETIME, NOTIFY_MP3, WARN_MP3 } from '../util/AppData'
 import { checkLocalStorageBugIdList, BrowserType } from '../util/Tool';
 import NoticeMenu from './noticeMenu/NoticeMenu';
 import DetailModal from './noticeMenu/DetailModal';
@@ -55,10 +55,9 @@ export default class MainView extends Component {
             aboutMeBugNum: 0,
             aboutMeTaskNum: 0,
             runBugNum: 0,
-            noticeMenuData: [],
-            dotCount: 0,
             area0List: [],
             unreadBugs: [],
+            unreadWarns: [],
         }
         tempNoticeStr = noticeinfo ? noticeinfo : ''///获取曾提醒过的最新内容。作为临时数据。
         BrowserType();
@@ -72,12 +71,12 @@ export default class MainView extends Component {
         // Socket();
     }
     init = async () => {
-
         var myBugList = [];
         var runBugList = [];
         var taskList = await this.getTaskInfo();
         let area0List = await this.getArea0List();
         let unreadBugs = [];
+        let warnList = [];///警告通知
         this.setState({
             area0List: area0List.map((item) => { return { id: item.id, name: item.name } })
         })
@@ -101,6 +100,11 @@ export default class MainView extends Component {
             // console.log('如果有的运行 未读的bug:', unreadBugs2)
             unreadBugs = unreadBugs.concat(unreadBugs2)
             runBugList = await this.getRunBugsInfo();
+            warnList = await this.getWarningNotice();
+            this.setState({ unreadWarns: warnList })
+            if (warnList.length > 0) {
+                this._audio2.play();
+            }
         }
         // console.log('unreadBugs:', unreadBugs)
         checkLocalStorageBugIdList(unreadBugs, this._audio)
@@ -185,6 +189,18 @@ export default class MainView extends Component {
             })
         })
     }
+    getWarningNotice = () => {
+        return new Promise((resolve, reject) => {
+            let sql = `select * from monitor_warning where is_read = 0`
+            let result = [];
+            HttpApi.obs({ sql }, data => {
+                if (data.data.code === 0) {
+                    result = data.data.data
+                }
+                resolve(result);
+            })
+        })
+    }
     toggle = () => {
         this.setState({
             collapsed: !this.state.collapsed
@@ -252,11 +268,11 @@ export default class MainView extends Component {
     render() {
         return (
             <Layout style={{ minHeight: '100vh' }}>
-                <Sider collapsible collapsed={this.state.collapsed} trigger={null} width={255} style={{ overflow: 'auto', height: '100vh', position: 'fixed', left: 0 }}>
+                <Sider collapsible collapsed={this.state.collapsed} trigger={null} width={220} style={{ overflow: 'auto', height: '100vh', position: 'fixed', left: 0 }}>
                     <div style={{ height: 64, backgroundColor: '#011529', padding: '16 24', position: 'relative' }}>
                         <img src={logopng} alt="" width="32" height="32" style={{ position: 'absolute', left: 24, top: 16 }} />
                         {this.state.collapsed ? null :
-                            <span style={{ position: 'absolute', top: 18, left: 60, width: 180, color: '#fff', fontSize: 17, marginLeft: 20 }}>信息综合管理平台</span>
+                            <span style={{ position: 'absolute', top: 18, left: 60, width: 180, color: '#fff', fontSize: 17, marginLeft: 20 }}>信息管理平台</span>
                         }
                     </div>
                     <Menu theme="dark" mode="inline" selectedKeys={[this.props.location.pathname]} >
@@ -357,23 +373,24 @@ export default class MainView extends Component {
                         </SubMenu>
                     </Menu>
                 </Sider>
-                <Layout style={{ marginLeft: this.state.collapsed ? 80 : 255 }}>
-                    <Header style={{ position: 'fixed', zIndex: 10, width: `calc(100% - ${this.state.collapsed ? 80 : 255}px)`, backgroundColor: '#fff', padding: 0, borderBottomStyle: 'solid', borderBottomWidth: 1, borderBottomColor: '#e8e8e8' }}>
+                <Layout style={{ marginLeft: this.state.collapsed ? 80 : 220 }}>
+                    <Header style={{ position: 'fixed', zIndex: 10, width: `calc(100% - ${this.state.collapsed ? 80 : 220}px)`, backgroundColor: '#fff', padding: 0, borderBottomStyle: 'solid', borderBottomWidth: 1, borderBottomColor: '#e8e8e8' }}>
                         <Row>
                             <Col span={2}>
                                 <Icon className="trigger" style={{ fontSize: 24, marginLeft: 30 }} type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'} onClick={this.toggle} />
                             </Col>
                             <Col span={22} style={{ textAlign: 'right', paddingRight: 24 }}>
                                 <span style={{ marginRight: 24 }}>
-                                    <Popover visible={this.state.noticePopVisible} onVisibleChange={(visible) => { this.setState({ noticePopVisible: visible }) }} trigger="click" destroyTooltipOnHide placement="bottomRight" content={<NoticeMenu {...this.props} data={this.state.unreadBugs}
+                                    <Popover visible={this.state.noticePopVisible} onVisibleChange={(visible) => { this.setState({ noticePopVisible: visible }) }} trigger="click" destroyTooltipOnHide placement="bottomRight" content={<NoticeMenu {...this.props} data={{ unreadBugs: this.state.unreadBugs, unreadWarns: this.state.unreadWarns }}
                                         closePop={() => { this.setState({ noticePopVisible: false }) }}
                                         closePopAndOpenModal={(item) => { this.setState({ noticePopVisible: false, modalVisible: true, selectItem: item }) }} />}>
-                                        <Badge count={this.state.unreadBugs.length}>
+                                        <Badge count={this.state.unreadBugs.length + this.state.unreadWarns.length}>
                                             <Icon type="bell" style={{ fontSize: 24, color: '#597ef7', cursor: "pointer" }} />
                                         </Badge>
                                     </Popover>
                                     <div style={{ display: 'none' }}>
                                         <audio ref={(audio) => { this._audio = audio }} src={NOTIFY_MP3} controls="controls" ></audio>
+                                        <audio ref={(audio) => { this._audio2 = audio }} src={WARN_MP3} controls="controls" ></audio>
                                     </div>
                                     <DetailModal visible={this.state.modalVisible} item={this.state.selectItem} onCancel={() => { this.setState({ modalVisible: false }) }} />
                                 </span>
@@ -436,7 +453,7 @@ class ContentView extends Component {
         return tempRouteList
     }
     render() {
-        return <Content style={{ background: '#fff', minHeight: 280, marginTop: 64 }}>
+        return <Content style={{ background: '#F1F2F5', minHeight: 280, marginTop: 64 }}>
             <section>
                 <Route
                     exact

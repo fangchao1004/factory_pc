@@ -1,6 +1,7 @@
 import Axios from 'axios';
 
-export const Testuri = 'http://ixiaomu.cn:3010/'///小木服务器数据库 3008正式 3010测试
+export const Testuri = 'http://ixiaomu.cn:3008/'///小木服务器数据库 3008正式 3010测试
+const TesturiM = 'http://ixiaomu.cn:3099/'
 // export const Testuri = 'http://localhost:3010/'///本地服务器测试用
 // export const Testuri = 'http://localhost:2019/'///本地服务器测试用 socket.io 服务测试
 export const environmentIsTest = Testuri === 'http://ixiaomu.cn:3010/' ///是不是测试环境
@@ -539,6 +540,18 @@ class HttpApi {
                 resolve(result);
             })
         })
+    }
+
+    static getMonitorData = (time_type = 1) => {
+        return Axios.post(TesturiM + 'getMonitorData', { time_type })
+    }
+    static getMonitorLevel = () => {
+        let sql = `select * from monitor_level`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    static updateMonitorLevel = (params) => {
+        let sql = `update monitor_level set min = ${params.min},max = ${params.max},count = ${params.count} where monitor_level.key = ${params.key}`
+        return Axios.post(Testuri + 'obs', { sql })
     }
 }
 

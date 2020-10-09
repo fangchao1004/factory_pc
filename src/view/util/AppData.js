@@ -20,6 +20,7 @@ export const tableCellOptionsData = [
     { "value": "6", "text": "图片选择器" }, { "value": "2", "text": "数字输入框" },
     { "value": "13", "text": "副标题" }];
 export const NOTIFY_MP3 = 'http://60.174.196.158:12345/assets/notice.mp3'
+export const WARN_MP3 = 'http://60.174.196.158:12345/assets/warn.mp3'
 export const BUGLOOPTIME = 1000;///毫秒，缺陷模块每隔1秒去刷新时间 不请求数据
 export const BUGDATAUPDATETIME = 5000;///毫秒，缺陷模块的数据和main模块中的徽标数每隔10秒去更新一次 请求数据
 export const MAXBUGIDALL = 'MaxBugIdAll';///最大的bugid
@@ -34,7 +35,7 @@ export const BROWERTYPE = 'browerType';
 export const BUGIDLIST = 'bugIdList'///和我相关的缺陷的id
 // const a = <a href="https://www.jb51.net" title="脚本之家" target="_blank">Welcome</a>
 export const VersionlistData = [
-    { title: '版本号', description: `V 1.5.0.8` },
+    { title: '版本号', description: `V 1.5.1` },
     // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
     // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
     // { title: '更新', description: '1.0.9 添加巡检点信息修改功能' }
@@ -87,4 +88,6 @@ export const VersionlistData = [
     // { title: '更新', description: '1.5.0.6 支持巡检记录导出' }
     // { title: '更新', description: '1.5.0.7 test 新增缺陷添加流水号，以年为周期重置' }
     // { title: '更新', description: '1.5.0.8 首页统计不准的bug处理' }
+    // { title: '更新', description: '1.5.0.9 区域排序处理' }
+    { title: '更新', description: '1.5.1 缺陷添加时间区间选择' }
 ]

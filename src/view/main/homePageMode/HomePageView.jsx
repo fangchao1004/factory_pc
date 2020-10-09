@@ -169,7 +169,7 @@ class HomePageView extends Component {
                     </Col>
                 </Row>
                 <Row gutter={10} style={{ marginTop: 10 }}>
-                    {this.state.groupData.length > 0 ? this.renderPieView() : <Skeleton active />}
+                    {this.state.groupData.length > 0 ? this.renderPieView() : <div style={{ backgroundColor: '#FFFFFF' }}><Skeleton active paragraph={{ rows: 10 }} /></div>}
                 </Row>
                 <Row>
                     <Col span={24}>

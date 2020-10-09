@@ -55,7 +55,7 @@ export default class PieViewOfBug extends React.Component {
       }
     };
     return (
-      <div style={{ backgroundColor: '#F0F2F5', height: 280, marginBottom: 10, borderRadius: 5 }}>
+      <div style={{ backgroundColor: '#FFFFFF', height: 280, marginBottom: 10, borderRadius: 5 }}>
         <Chart
           height={280}
           data={dv}

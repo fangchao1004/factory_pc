@@ -1,11 +1,13 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm, Tooltip, Modal, Icon } from 'antd'
+import { Table, Tag, Button, message, Popconfirm, Tooltip, Modal, Icon, DatePicker } from 'antd'
 import HttpApi, { Testuri } from '../../../util/HttpApi'
 // import Store from '../../../../redux/store/Store';
 // import { showBugNum } from '../../../../redux/actions/BugAction';
 import '../BugViewCss.css'
 import StepLogView from './StepLogView';
 import ShowImgView from '../ShowImgView';
+import moment from 'moment'
+
 
 var major_filter = [];///用于筛选任务专业的数据 选项
 const bug_level_filter = [];
@@ -25,6 +27,7 @@ export default class BugViewNewComplete extends Component {
             imguuid: null,
             currentRecord: {},///当前选择的某一行。某一个缺陷对象
             stepLogVisible: false,
+            dateRange: [moment().startOf('month'), moment().endOf('day')],
         }
     }
     componentDidMount() {
@@ -109,7 +112,7 @@ export default class BugViewNewComplete extends Component {
             left join (select * from area_3 where effective = 1) area_3 on des.area_id = area_3.id
             left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
             left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
-            where bugs.status = 4 and bugs.effective = 1 order by bugs.id desc`
+            where bugs.status = 4 and bugs.effective = 1 and bugs.createdAt>'${this.state.dateRange[0].format('YYYY-MM-DD HH:mm:ss')}' and bugs.createdAt<'${this.state.dateRange[1].format('YYYY-MM-DD HH:mm:ss')}' order by bugs.id desc`
         }
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
@@ -324,6 +327,18 @@ export default class BugViewNewComplete extends Component {
         ]
         return (
             <Fragment>
+                <div style={{ textAlign: 'right' }}>
+                    <DatePicker.RangePicker style={{ marginRight: 10, marginBottom: 10 }} value={this.state.dateRange} allowClear={false} disabledDate={(current) => current > moment().endOf('day')} ranges={{
+                        '今日': [moment(), moment()],
+                        '本月': [moment().startOf('month'), moment().endOf('day')],
+                        '上月': [moment().add(-1, 'month').startOf('month'), moment().add(-1, 'month').endOf('month')],
+                        '上季度': [moment().add(-3, 'month').startOf('month'), moment().add(-1, 'month').endOf('month')]
+                    }} onChange={(v) => {
+                        if (v && v.length > 0) {
+                            this.setState({ dateRange: v }, () => { this.init() })
+                        }
+                    }} />
+                </div>
                 <Table
                     bordered
                     dataSource={this.state.data}

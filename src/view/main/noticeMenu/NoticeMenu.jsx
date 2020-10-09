@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Tabs } from 'antd';
+import { Tabs, Badge } from 'antd';
 import TaskNoticeList from './TaskNoticeList'
 import BugNoticeList from './BugNoticeList'
+import WarnNoticeList from './WarnNoticeList'
 const { TabPane } = Tabs;
 export default class NoticeMenu extends Component {
     constructor(props) {
@@ -13,6 +14,7 @@ export default class NoticeMenu extends Component {
         this.contentListNoTitle = {
             BugNoticeList: <BugNoticeList  {...props} />,
             TaskNoticeList: <TaskNoticeList {...props} />,
+            WarnNoticeList: <WarnNoticeList {...props} />,
         };
     }
     onTabChange = (key) => {
@@ -20,14 +22,14 @@ export default class NoticeMenu extends Component {
     }
     render() {
         return (
-            <Tabs defaultActiveKey="1" size={'small'} style={{ width: 350 }} >
-                <TabPane tab="缺陷" key="1">
+            <Tabs defaultActiveKey="1" size={'small'} style={{ width: 320 }}  >
+                <TabPane tab={<Badge count={this.props.data.unreadBugs.length}>缺陷</Badge>} key="1">
                     <BugNoticeList {...this.props} />
                 </TabPane>
-                {/* <TabPane tab="Tab2" key="2">
-                    <TaskNoticeList />
-                </TabPane> */}
-            </Tabs>
+                <TabPane tab={<Badge count={this.props.data.unreadWarns.length}>报警</Badge>} key="2">
+                    <WarnNoticeList  {...this.props} />
+                </TabPane>
+            </Tabs >
         );
     }
 }

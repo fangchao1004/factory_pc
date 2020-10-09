@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Card } from 'antd';
 import HomePageView from './HomePageView';
 import BugsPageView from './BugsPageView';
+// import MonitorView from './MonitorView';
 
 const tabListNoTitle = [{
     key: 'HomePageView',
@@ -31,9 +32,9 @@ class HomePageRoot extends Component {
     render() {
         return (
             <Card
-                bodyStyle={{ padding: 10 }}
                 bordered={false}
                 style={{ width: '100%' }}
+                bodyStyle={{ backgroundColor: '#F1F2F5', padding: 10 }}
                 tabList={tabListNoTitle}
                 activeTabKey={this.state.noTitleKey}
                 onTabChange={(key) => { this.onTabChange(key); }}
