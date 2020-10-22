@@ -2,15 +2,19 @@ import React, { Component } from 'react';
 import { Card } from 'antd';
 import HomePageView from './HomePageView';
 import BugsPageView from './BugsPageView';
-// import MonitorView from './MonitorView';
+import MonitorView from './MonitorView';
 
-const tabListNoTitle = [{
-    key: 'HomePageView',
-    tab: '巡检统计',
-}, {
-    key: 'BugsPageView',
-    tab: '缺陷统计',
-}];
+const tabListNoTitle = [
+    {
+        key: 'MonitorView',
+        tab: '数据监控',
+    }, {
+        key: 'HomePageView',
+        tab: '巡检统计',
+    }, {
+        key: 'BugsPageView',
+        tab: '缺陷统计',
+    }];
 
 var contentListNoTitle
 
@@ -18,12 +22,13 @@ class HomePageRoot extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            key: 'HomePageView',
-            noTitleKey: 'HomePageView',
+            key: 'MonitorView',
+            noTitleKey: 'MonitorView',
         }
         contentListNoTitle = {
             HomePageView: <HomePageView {...props} />,
-            BugsPageView: <BugsPageView />
+            BugsPageView: <BugsPageView />,
+            MonitorView: <MonitorView />
         };
     }
     onTabChange = (key) => {

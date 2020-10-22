@@ -35,7 +35,7 @@ export const BROWERTYPE = 'browerType';
 export const BUGIDLIST = 'bugIdList'///和我相关的缺陷的id
 // const a = <a href="https://www.jb51.net" title="脚本之家" target="_blank">Welcome</a>
 export const VersionlistData = [
-    { title: '版本号', description: `V 1.5.1` },
+    { title: '版本号', description: `V 1.5.2` },
     // { title: '更新', description: '1.0.7支持缺陷数据导出为Excel' }
     // { title: '更新', description: '1.0.8 添加考勤信息-测试版本' }
     // { title: '更新', description: '1.0.9 添加巡检点信息修改功能' }
@@ -89,5 +89,6 @@ export const VersionlistData = [
     // { title: '更新', description: '1.5.0.7 test 新增缺陷添加流水号，以年为周期重置' }
     // { title: '更新', description: '1.5.0.8 首页统计不准的bug处理' }
     // { title: '更新', description: '1.5.0.9 区域排序处理' }
-    { title: '更新', description: '1.5.1 缺陷添加时间区间选择' }
+    // { title: '更新', description: '1.5.1 缺陷添加时间区间选择' }
+    { title: '更新', description: '1.5.2 添加数据监控及报警功能' }
 ]

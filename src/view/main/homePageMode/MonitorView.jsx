@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import HttpApi from '../../util/HttpApi';
-import { Table, Row, Col, Radio, Tag, Button, Modal, Form, InputNumber, Alert, message } from 'antd';
+import { Table, Row, Col, Radio, Tag, Button, Modal, Form, InputNumber, Alert, message, Switch, Icon } from 'antd';
 let test_list = []
 let loop;
 let config_list = []
@@ -12,6 +12,7 @@ export default () => {
     const [timeType, setTimeType] = useState(4)
     const [showPanel, setShowPanel] = useState(false)
     const [selectItem, setSelectedItem] = useState(null)
+    const [switchData, setSwitchData] = useState([])
     const [isAdmin] = useState(JSON.parse(localUserInfo).isadmin || 0)
     const setDataHandler = useCallback((data_obj) => {
         // console.log('data_obj:', data_obj)
@@ -34,6 +35,16 @@ export default () => {
         setDataSource(temp_list.map((item, index) => { item.key = index; return item }))
         setLoading(false)
     }, [])
+    const getSwitchData = useCallback(() => {
+        ///获取switch 数据
+        let sql = `select * from monitor_switch`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                setSwitchData(res.data.data)
+            }
+            setLoading(false)
+        })
+    }, [])
     const getDataHandler = useCallback(async () => {
         setLoading(true)
         // console.log('getDataHandler')
@@ -55,7 +66,19 @@ export default () => {
             }
         }
         setDataHandler(data_obj)
-    }, [timeType, setDataHandler])
+        getSwitchData()
+    }, [timeType, setDataHandler, getSwitchData])
+
+    const changeSwitch = useCallback((v, device_no) => {
+        let sql = `update monitor_switch set iswork = ${v ? 1 : 0} where device_no = ${device_no}`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                getSwitchData()
+                setLoading(true)
+                message.success(`${device_no}号炉${v ? '开启报警' : '关闭报警'}`)
+            }
+        })
+    }, [getSwitchData])
 
     useEffect(() => {
         getDataHandler();
@@ -66,11 +89,11 @@ export default () => {
     }, [getDataHandler])
     const columns = [
         {
-            dataIndex: 'pjt', title: '项目', width: 200
+            dataIndex: 'pjt', title: <div><Icon type="profile" /> 项目</div>, width: 200
         }, {
-            dataIndex: 'value', title: '设备', children: [
+            dataIndex: 'value', title: <div><Icon type="hdd" /> 设备</div>, children: [
                 {
-                    dataIndex: 'device1', title: '1号炉', align: 'center', render: (text, record) => {
+                    dataIndex: 'device1', title: <div>{switchData.length > 0 ? (switchData[0].iswork ? <Icon type="dashboard" theme="twoTone" /> : <Icon type="dashboard" />) : <Icon type="dashboard" />} 1号炉 {isAdmin ? <Switch size='small' checked={switchData.length > 0 ? (switchData[0].iswork ? true : false) : false} onChange={(v) => { changeSwitch(v, 1) }} /> : null}</div>, align: 'center', render: (text, record) => {
                         const temp = record['value']['device_list'].filter((item) => item.device_no === 1)[0];
                         if (!temp) { return '-' }
                         let value = temp['value_list'][0]['value'] || '/'
@@ -82,7 +105,7 @@ export default () => {
                     }
                 },
                 {
-                    dataIndex: 'device2', title: '2号炉', align: 'center', render: (text, record) => {
+                    dataIndex: 'device2', title: <div>{switchData.length > 0 ? (switchData[1].iswork ? <Icon type="dashboard" theme="twoTone" /> : <Icon type="dashboard" />) : <Icon type="dashboard" />} 2号炉 {isAdmin ? <Switch size='small' checked={switchData.length > 0 ? (switchData[1].iswork ? true : false) : false} onChange={(v) => { changeSwitch(v, 2) }} /> : null}</div>, align: 'center', render: (text, record) => {
                         const temp = record['value']['device_list'].filter((item) => item.device_no === 2)[0];
                         if (!temp) { return '-' }
                         let value = temp['value_list'][0]['value'] || '/'
@@ -94,7 +117,7 @@ export default () => {
                     }
                 },
                 {
-                    dataIndex: 'device3', title: '3号炉', align: 'center', render: (text, record) => {
+                    dataIndex: 'device3', title: <div>{switchData.length > 0 ? (switchData[2].iswork ? <Icon type="dashboard" theme="twoTone" /> : <Icon type="dashboard" />) : <Icon type="dashboard" />} 3号炉 {isAdmin ? <Switch size='small' checked={switchData.length > 0 ? (switchData[2].iswork ? true : false) : false} onChange={(v) => { changeSwitch(v, 3) }} /> : null}</div>, align: 'center', render: (text, record) => {
                         const temp = record['value']['device_list'].filter((item) => item.device_no === 3)[0];
                         if (!temp) { return '-' }
                         let value = temp['value_list'][0]['value'] || '/'
@@ -106,7 +129,7 @@ export default () => {
                     }
                 },
                 {
-                    dataIndex: 'device4', title: '4号炉', align: 'center', render: (text, record) => {
+                    dataIndex: 'device4', title: <div>{switchData.length > 0 ? (switchData[3].iswork ? <Icon type="dashboard" theme="twoTone" /> : <Icon type="dashboard" />) : <Icon type="dashboard" />} 4号炉 {isAdmin ? <Switch size='small' checked={switchData.length > 0 ? (switchData[3].iswork ? true : false) : false} onChange={(v) => { changeSwitch(v, 4) }} /> : null}</div>, align: 'center', render: (text, record) => {
                         const temp = record['value']['device_list'].filter((item) => item.device_no === 4)[0];
                         if (!temp) { return '-' }
                         let value = temp['value_list'][0]['value'] || '/'
@@ -119,7 +142,7 @@ export default () => {
                 }
             ]
         }, {
-            dataIndex: 'duration', title: '区间', width: 240, render: (text, record) => {
+            dataIndex: 'duration', title: <div><Icon type="line-chart" /> 区间</div>, width: 240, render: (text, record) => {
                 if (timeType === 1) {
                     return '-'
                 }
@@ -159,6 +182,7 @@ export default () => {
             <Table loading={loading} columns={columns} bordered size="small" dataSource={dataSource} pagination={false} />
         </div>
         <SetPanel data={selectItem} visible={showPanel} onCancel={() => { setShowPanel(false) }} onOk={() => { getDataHandler() }} />
+        {/* <DevicePanel data={switchData} visible={showDevicePanel} onCancel={() => { setShowDevicePanel(false) }} onOk={(data) => {}} /> */}
     </div>
 }
 
@@ -224,3 +248,54 @@ function configForm(props) {
 }
 
 const ConfigForm = Form.create({ name: 'areaForm' })(configForm)
+
+// function DevicePanel(props) {
+//     const [device1, setDevice1] = useState()
+//     const [device2, setDevice2] = useState()
+//     const [device3, setDevice3] = useState()
+//     const [device4, setDevice4] = useState()
+//     useEffect(() => {
+//         if (props.data.length > 0) {
+//             setDevice1(props.data[0].iswork ? true : false)
+//             setDevice2(props.data[1].iswork ? true : false)
+//             setDevice3(props.data[2].iswork ? true : false)
+//             setDevice4(props.data[3].iswork ? true : false)
+//         }
+//     }, [props.data])
+//     return <Modal
+//         destroyOnClose
+//         title='设备设置'
+//         visible={props.visible}
+//         onCancel={() => { props.onCancel() }}
+//         onOk={() => {
+//             let data = [{ device_no: 1, iswork: device1 ? 1 : 0 },
+//             { device_no: 2, iswork: device2 ? 1 : 0 },
+//             { device_no: 3, iswork: device3 ? 1 : 0 },
+//             { device_no: 4, iswork: device4 ? 1 : 0 }]
+//             props.onOk(data)
+//         }}
+//     >
+//         <Alert style={{ marginBottom: 16 }} message='设备是否开启报警' />
+//         {props.data ? props.data.map((item, index) => {
+//             return <Row key={index} gutter={[0, 16]}><Col span={4}><Icon type="hdd" /> {item.device_no + '号炉'}</Col><Col span={8}><Switch checkedChildren="开启" unCheckedChildren="关闭" defaultChecked={item.iswork ? true : false} onChange={(v) => {
+//                 console.log('v:', v, item.device_no)
+//                 switch (item.device_no) {
+//                     case 1:
+//                         setDevice1(v)
+//                         break;
+//                     case 2:
+//                         setDevice2(v)
+//                         break;
+//                     case 3:
+//                         setDevice3(v)
+//                         break;
+//                     case 4:
+//                         setDevice4(v)
+//                         break;
+//                     default:
+//                         break;
+//                 }
+//             }} /></Col></Row>
+//         }) : null}
+//     </Modal >
+// }

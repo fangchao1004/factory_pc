@@ -261,6 +261,7 @@ class ExportBugView extends Component {
          ) tmp_freeze_table on tmp_freeze_table.bug_id = t1.id
         order by major_id
         `;
+        console.log('finallySql:', finallySql)
         let result = await this.getBugsInfo(finallySql);///获取符合条件的缺陷数据
         if (result.length === 0) { message.warn('没有查询到符合条件的缺陷数据-请修改查询条件'); return }
         let result_bsd = await this.getBugStatusDuration();

@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Popconfirm, Tooltip, Alert, Modal, Input, Icon, Popover, DatePicker } from 'antd'
+import { Table, Tag, Button, message, Popconfirm, Tooltip, Alert, Modal, Input, Icon, Popover } from 'antd'
 import HttpApi, { Testuri } from '../../../util/HttpApi'
 import moment from 'moment'
 // import Store from '../../../../redux/store/Store';
@@ -41,7 +41,6 @@ export default class BugViewNew extends Component {
             runnerVisible: false,
             stepLogVisible: false,
             openMusic: storage.getItem(NOTICEMUSICOPEN) === 'true',
-            dateRange: [moment().startOf('month'), moment().endOf('day')],
         }
     }
     componentDidMount() {
@@ -192,7 +191,7 @@ export default class BugViewNew extends Component {
 						left join (select * from bug_tag_status where effective = 1) bug_tag_status on bug_tag_status.id = t2.tag_id
 						left join (select * from bug_freeze_status where effective = 1) bug_freeze_status on bug_freeze_status.id = t2.freeze_id
 						) tmp_freeze_table on tmp_freeze_table.bug_id = bugs.id
-            where bugs.status != 4 and bugs.effective = 1 and bugs.createdAt>'${this.state.dateRange[0].format('YYYY-MM-DD HH:mm:ss')}' and bugs.createdAt<'${this.state.dateRange[1].format('YYYY-MM-DD HH:mm:ss')}' order by bugs.id desc`
+            where bugs.status != 4 and bugs.effective = 1 order by bugs.id desc`
         }
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
@@ -548,16 +547,6 @@ export default class BugViewNew extends Component {
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
                     <Button type={'primary'} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
                     <div style={{ textAlign: 'right' }}>
-                        <DatePicker.RangePicker style={{ marginRight: 10 }} value={this.state.dateRange} allowClear={false} disabledDate={(current) => current > moment().endOf('day')} ranges={{
-                            '今日': [moment(), moment()],
-                            '本月': [moment().startOf('month'), moment().endOf('day')],
-                            '上月': [moment().add(-1, 'month').startOf('month'), moment().add(-1, 'month').endOf('month')],
-                            '上季度': [moment().add(-3, 'month').startOf('month'), moment().add(-1, 'month').endOf('month')]
-                        }} onChange={(v) => {
-                            if (v && v.length > 0) {
-                                this.setState({ dateRange: v }, () => { this.init() })
-                            }
-                        }} />
                         <Input.Search style={{ width: 340 }} allowClear placeholder="支持内容、巡检点和巡检范围的模糊查询"
                             onChange={(e) => { this.setState({ searchKey: e.target.value }); if (e.target.value === '') { this.init(); } }}
                             onPressEnter={(e) => { this.filterBySearch(e.target.value) }} onSearch={this.filterBySearch} enterButton />

@@ -101,6 +101,7 @@ export default class MainView extends Component {
             unreadBugs = unreadBugs.concat(unreadBugs2)
             runBugList = await this.getRunBugsInfo();
             warnList = await this.getWarningNotice();
+            // console.log('warnList:', warnList)
             this.setState({ unreadWarns: warnList })
             if (warnList.length > 0) {
                 this._audio2.play();
@@ -376,10 +377,13 @@ export default class MainView extends Component {
                 <Layout style={{ marginLeft: this.state.collapsed ? 80 : 220 }}>
                     <Header style={{ position: 'fixed', zIndex: 10, width: `calc(100% - ${this.state.collapsed ? 80 : 220}px)`, backgroundColor: '#fff', padding: 0, borderBottomStyle: 'solid', borderBottomWidth: 1, borderBottomColor: '#e8e8e8' }}>
                         <Row>
-                            <Col span={2}>
-                                <Icon className="trigger" style={{ fontSize: 24, marginLeft: 30 }} type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'} onClick={this.toggle} />
+                            <Col span={3}>
+                                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+                                    <Icon className="trigger" style={{ fontSize: 24, marginLeft: 10 }} type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'} onClick={this.toggle} />
+                                    <div id="tp-weather-widget" style={{ marginLeft: 10 }} ></div>
+                                </div>
                             </Col>
-                            <Col span={22} style={{ textAlign: 'right', paddingRight: 24 }}>
+                            <Col span={21} style={{ textAlign: 'right', paddingRight: 24 }}>
                                 <span style={{ marginRight: 24 }}>
                                     <Popover visible={this.state.noticePopVisible} onVisibleChange={(visible) => { this.setState({ noticePopVisible: visible }) }} trigger="click" destroyTooltipOnHide placement="bottomRight" content={<NoticeMenu {...this.props} data={{ unreadBugs: this.state.unreadBugs, unreadWarns: this.state.unreadWarns }}
                                         closePop={() => { this.setState({ noticePopVisible: false }) }}

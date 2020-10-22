@@ -34,6 +34,9 @@ export default class LoginView extends React.Component {
             storage.removeItem(USERINFO);
             storage[USERINFO] = JSON.stringify(doc.data.data[0]);
             this.props.history.push('/mainView/home')
+            setTimeout(() => {
+              window.location.reload();
+          }, 100);
           } else {
             message.error("用户名/密码错误")
           }
