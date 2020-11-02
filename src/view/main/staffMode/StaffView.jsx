@@ -21,9 +21,9 @@ export default () => {
     }, [])
     const getUserList = useCallback(async () => {
         setLoading(true)
-        let sql = `select users.*,levels.name as level_name,group_concat(role_map_user.role_value) as role_value_all,group_concat(roles.des) as role_des_all from users
+        let sql = `select users.*,levels.name as level_name,group_concat(roles.value) as role_value_all,group_concat(roles.des) as role_des_all from users
         left join (select * from role_map_user where effective = 1) role_map_user on role_map_user.user_id = users.id
-        left join roles on roles.value = role_map_user.role_value
+        left join roles on roles.id = role_map_user.role_id
         left join (select id,name from levels where effective = 1) levels on levels.id = users.level_id
         where users.effective = 1
         group by users.id order by users.level_id`
@@ -93,7 +93,7 @@ export default () => {
                     setShowUpdate(true)
                 }}>编辑</Button>
                 <Divider type="vertical" />
-                <Popconfirm title="确定要删除该部门吗?" onConfirm={() => { }}>
+                <Popconfirm title="确定要删除该员工吗?" onConfirm={() => { }}>
                     <Button icon='delete' size="small" type="danger">删除</Button>
                 </Popconfirm>
             </div>

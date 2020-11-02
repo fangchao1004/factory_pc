@@ -9,7 +9,7 @@ function sortByLevel(list) {
 export default props => {
     const [roleList, setRoleList] = useState([])
     const [userList, setUserList] = useState([])
-    const [selectRoleValue, setSelectRoleValue] = useState(0)///默认选中的是value 0 即 专工
+    const [selectRoleIndex, setSelectRoleIndex] = useState(0)///默认选中的是index===0 即 专工
     const [levelOptions, setLevelOptions] = useState([])
     const [loading, setLoading] = useState(false)
     const getLevelList = useCallback(async () => {
@@ -27,13 +27,14 @@ export default props => {
         let sql = `select * from roles order by sort_num`
         let result = await HttpApi.obs({ sql })
         if (result.data.code === 0) {
-            setRoleList(result.data.data.map((item, index) => { item.key = index; return item }))
+            let temp = result.data.data.map((item, index) => { item.key = index; return item });
+            setRoleList(temp)
         }
     }, [setRoleList])
     const getUserList = useCallback(async (whoHasList) => {
-        let sql = `select users.*,levels.name as level_name,group_concat(role_map_user.role_value) as role_value_all,group_concat(roles.des) as role_des_all from users
+        let sql = `select users.*,levels.name as level_name,group_concat(roles.value) as role_value_all,group_concat(roles.des) as role_des_all from users
         left join (select * from role_map_user where effective = 1) role_map_user on role_map_user.user_id = users.id
-        left join roles on roles.value = role_map_user.role_value
+        left join roles on roles.id = role_map_user.role_id
         left join (select id,name from levels where effective = 1) levels on levels.id = users.level_id
         where users.effective = 1
         group by users.id order by users.level_id`
@@ -57,24 +58,24 @@ export default props => {
             setUserList(tempList.map((item, index) => { item.key = index; return item }))
         }
     }, [])
+    ///当前选中的角色 有哪些人已经获取了
     const getOneRoleWhoIsHas = useCallback(async () => {
-        let sql = `select * from role_map_user where effective = 1 and role_value = ${selectRoleValue}`
-        let result = await HttpApi.obs({ sql })
-        let tempList = [];
-        if (result.data.code === 0) {
-            tempList = result.data.data.map((item) => item.user_id);
+        if (roleList.length > 0) {
+            // console.log('roleList:', roleList)
+            // console.log('selectRoleIndex:', selectRoleIndex)
+            // console.log('roleList[selectRoleIndex].id:', roleList[selectRoleIndex].id)
+            let sql = `select * from role_map_user where effective = 1 and role_id = ${roleList[selectRoleIndex].id}`
+            let result = await HttpApi.obs({ sql })
+            let tempList = [];
+            if (result.data.code === 0) {
+                tempList = result.data.data.map((item) => item.user_id);
+            }
+            getUserList(tempList);
         }
-        getUserList(tempList);
-    }, [selectRoleValue, getUserList])
-    const getInfoByValue = useCallback(() => {
-        let result = roleList.filter((item) => {
-            return item.value === selectRoleValue
-        });
-        return result[0] || {}
-    }, [selectRoleValue, roleList])
-    const addNewRoleToMap = useCallback(async (user_id, role_value) => {
+    }, [roleList, selectRoleIndex, getUserList])
+    const addNewRoleToMap = useCallback(async (user_id, role_id) => {
         setLoading(true)
-        let sql = `insert into role_map_user (user_id,role_value) VALUES (${user_id},${role_value})`
+        let sql = `insert into role_map_user (user_id,role_id) VALUES (${user_id},${role_id})`
         console.log('sql:', sql)
         let result = await HttpApi.obs({ sql })
         if (result.data.code === 0) {
@@ -84,9 +85,9 @@ export default props => {
         }
         setLoading(false)
     }, [getRoleList, getOneRoleWhoIsHas])
-    const closeOneUserRole = useCallback(async (user_id, role_value) => {
+    const closeOneUserRole = useCallback(async (user_id, role_id) => {
         setLoading(true)
-        let sql = `update role_map_user set effective = 0 where user_id = ${user_id} and role_value = ${role_value}`
+        let sql = `update role_map_user set effective = 0 where user_id = ${user_id} and role_id = ${role_id}`
         let result = await HttpApi.obs({ sql })
         if (result.data.code === 0) {
             message.success('关闭成功')
@@ -96,18 +97,20 @@ export default props => {
         setLoading(false)
     }, [getRoleList, getOneRoleWhoIsHas])
     useEffect(() => {
-        getLevelList()
-        getRoleList();
+        getLevelList();///1部门options
+        getRoleList();///2左侧角色list
+    }, [getRoleList, getLevelList])
+    useEffect(() => {
         getOneRoleWhoIsHas();
-    }, [getRoleList, getOneRoleWhoIsHas, getLevelList])
+    }, [getOneRoleWhoIsHas])
     const columns = [
         {
             title: '操作', width: 100, dataIndex: 'hasCurrentRole', key: 'hasCurrentRole', render: (text, record) => {
                 return <Switch checkedChildren='开启' unCheckedChildren='关闭' checked={text} onChange={(value) => {
                     if (value) {
-                        addNewRoleToMap(record.id, selectRoleValue)
+                        addNewRoleToMap(record.id, roleList[selectRoleIndex].id)
                     } else {
-                        closeOneUserRole(record.id, selectRoleValue)
+                        closeOneUserRole(record.id, roleList[selectRoleIndex].id)
                     }
                 }} />
             }
@@ -128,14 +131,14 @@ export default props => {
                 <div style={styles.list}>
                     <List
                         size="small"
-                        header={<div><Tag color='#fa541c'>角色-当前选中:</Tag><Tag color={getInfoByValue().color}>{getInfoByValue().des}</Tag></div>}
+                        header={<div><Tag color='#fa541c'>角色-当前选中:</Tag><Tag color={roleList[selectRoleIndex] ? roleList[selectRoleIndex].color : ''}>{roleList[selectRoleIndex] ? roleList[selectRoleIndex].des : ''}</Tag></div>}
                         bordered
                         dataSource={roleList}
-                        renderItem={item => (
+                        renderItem={(item, index) => (
                             <List.Item style={{ cursor: 'pointer' }}>
                                 <List.Item.Meta
                                     onClick={() => {
-                                        setSelectRoleValue(item.value)
+                                        setSelectRoleIndex(index)
                                     }}
                                     avatar={<Avatar style={{ backgroundColor: item.color }} >{item.des}</Avatar>}
                                     title={<span>{item.des}</span>}
