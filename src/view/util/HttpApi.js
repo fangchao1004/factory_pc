@@ -1,6 +1,6 @@
 import Axios from 'axios';
 
-export const Testuri = 'http://ixiaomu.cn:3008/'///小木服务器数据库 3008正式 3010测试
+export const Testuri = 'http://ixiaomu.cn:3010/'///小木服务器数据库 3008正式 3010测试
 const TesturiM = 'http://ixiaomu.cn:3099/'
 // export const Testuri = 'http://localhost:3010/'///本地服务器测试用
 // export const Testuri = 'http://localhost:2019/'///本地服务器测试用 socket.io 服务测试
@@ -23,11 +23,15 @@ class HttpApi {
      * @param {*} f2 
      */
     static obs(params, f1, f2) {
-        Axios.post(Testuri + 'obs', params).then(res => {
-            if (f1) { f1(res) }
-        }).catch(res => {
-            if (f2) { f2(res) }
-        })
+        if (f1) {
+            return Axios.post(Testuri + 'obs', params).then(res => {
+                if (f1) { f1(res) }
+            }).catch(res => {
+                if (f2) { f2(res) }
+            })
+        } else {
+            return Axios.post(Testuri + 'obs', params)
+        }
     }
 
     /**
@@ -275,11 +279,15 @@ class HttpApi {
         })
     }
     static getUserLevel(params, f1, f2) {
-        Axios.post(Testuri + 'find_level', params).then(res => {
-            if (f1) { f1(res) }
-        }).catch(res => {
-            if (f2) { f2(res) }
-        })
+        if (f1) {
+            Axios.post(Testuri + 'find_level', params).then(res => {
+                if (f1) { f1(res) }
+            }).catch(res => {
+                if (f2) { f2(res) }
+            })
+        } else {
+            return Axios.post(Testuri + 'find_level')
+        }
     }
     static removeUserLevel(params, f1, f2) {
         Axios.post(Testuri + 'remove_level', params).then(res => {

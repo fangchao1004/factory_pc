@@ -54,7 +54,7 @@ export default () => {
         }
         test_list.length = 0;
         let result = await HttpApi.getMonitorData()
-        // console.log('result:', result.data)
+        console.log('result:', result.data)
         // return;
         ///数据结构做横向切割转换
         let data_obj = {};

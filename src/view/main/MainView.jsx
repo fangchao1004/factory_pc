@@ -67,7 +67,7 @@ export default class MainView extends Component {
         this.init();
         // unsubscribe = Store.subscribe(() => {
         // });
-        this.openPolling();///开启轮询---定时去获取缺陷了任务数据
+        // this.openPolling();///开启轮询---定时去获取缺陷了任务数据
         // Socket();
     }
     init = async () => {

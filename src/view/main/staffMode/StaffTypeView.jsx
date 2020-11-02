@@ -83,7 +83,6 @@ class StaffTypeView extends Component {
             {
                 title: '职位名称',
                 dataIndex: 'name',
-                align: 'center',
                 render: (text) => (
                     <div>{text}</div>
                 )
@@ -91,32 +90,35 @@ class StaffTypeView extends Component {
             {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 150,
+                width: 170,
                 align: 'center',
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
-                        <Popconfirm title="确定要删除该部门吗?" onConfirm={this.deleteLevelConfirm.bind(null, record)}>
-                            <Button size="small" type="danger">删除</Button>
-                        </Popconfirm>
+                        <Button icon='edit' size="small" type="primary" onClick={this.updateLevel.bind(this, record)}>修改</Button>
                         <Divider type="vertical" />
-                        <Button size="small" type="primary" onClick={this.updateLevel.bind(this, record)}>修改</Button></div>
+                        <Popconfirm title="确定要删除该部门吗?" onConfirm={this.deleteLevelConfirm.bind(null, record)}>
+                            <Button icon='delete' size="small" type="danger">删除</Button>
+                        </Popconfirm>
+                    </div>
                 )
             }
         ];
 
         return (
-            <div>
+            <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
                 <Row>
                     <Col span={6}>
-                        <Button type="primary" style={{ marginBottom: 10 }} onClick={this.addLevel.bind(this)}>
+                        <Button type="primary" size="small" style={{ marginBottom: 10 }} onClick={this.addLevel.bind(this)}>
                             添加部门
                          </Button>
                     </Col>
                 </Row>
                 <Table
+                    size="small"
                     bordered
                     dataSource={this.state.levels}
                     columns={columns}
+                    pagination={false}
                 />
                 <AddStaffTypeView visible={this.state.addLevelVisible} onOk={this.addLevelOnOk}
                     onCancel={this.addLevelOnCancel} />
