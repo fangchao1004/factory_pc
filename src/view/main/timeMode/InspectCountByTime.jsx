@@ -272,12 +272,13 @@ export default class InspectCountByTime extends Component {
             }
         ]
         return (
-            <div>
+            <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
                 <>
                     {this.state.progressValue > 0 && this.state.progressValue < 100 ? <Progress style={{ marginBottom: 10 }} status="active" percent={this.state.progressValue} /> : null}
                     {/* <span style={{ fontWeight: 800, fontSize: 16, marginRight: 15 }}>日期区间</span> */}
                     <span style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16, fontWeight: 800, marginRight: 15 }}>日期区间</span>
                     <DatePicker.RangePicker
+                        size="small"
                         style={{ marginBottom: 10 }}
                         disabledDate={(current) => {
                             return (current > moment().add('day', -1).endOf('day') || current < moment().add('month', -6).startOf('day'))
@@ -303,6 +304,7 @@ export default class InspectCountByTime extends Component {
                     ,丁组<span style={{ color: '#1790FF', marginLeft: 5, marginRight: 5, fontWeight: 800, fontSize: 16 }}>{this.state.ding_count}</span>]
                 </span>} />
                 <Table
+                    size="small"
                     loading={this.state.loading}
                     bordered
                     columns={columns}

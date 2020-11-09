@@ -1,240 +1,87 @@
-import React, { Component, Fragment } from 'react';
-import { Table, Tag, Button, message, Tooltip, Alert, Input, Modal, Icon } from 'antd'
-import HttpApi, { Testuri } from '../../../util/HttpApi'
-import moment from 'moment'
-import Store from '../../../../redux/store/Store';
-import FuncPanelForRepair from '../../bugMode/new/FuncPanelForRepair';
-import StepLogView from '../../bugMode/new/StepLogView';
-import FuncPanelForEngineer from '../../bugMode/new/FuncPanelForEngineer';
-import FuncPanelForRunner from '../../bugMode/new/FuncPanelForRunner';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { originStatus, BUGLOOPTIME, BUGDATAUPDATETIME, originOverTime } from '../../../util/AppData'
-import ShowImgView from '../../bugMode/ShowImgView';
+import moment from 'moment'
+import HttpApi, { Testuri } from '../../../util/HttpApi';
+import { Table, Tag, Button, message, Tooltip, Alert, Input, Icon, Modal } from 'antd'
 import { getDuration, checkOverTime } from '../../../util/Tool';
+import { completeByEngineer, completeByRunner, dontNeedfixByRepair, exchangeBugMajorByEngineer, exchangeBugMajorByRepair, fixCompleteByRepair, freezeBugStepByEngineer, freezeBugStepByRepair, goBackEngineerByRunner, goBackFixByEngineer, goBackStartByEngineer, passByEngineer } from '../../../util/OpreationTool';
+import StepLogView from '../../bugMode/new/StepLogView';
+import FuncPanelForRunner from '../../bugMode/new/FuncPanelForRunner';
+import FuncPanelForEngineer from '../../bugMode/new/FuncPanelForEngineer';
+import FuncPanelForRepair from '../../bugMode/new/FuncPanelForRepair';
+import { AppDataContext } from '../../../../redux/AppRedux';
 
+
+const storage = window.localStorage;
+const localUserInfo = storage.getItem('userinfo');
 var major_filter = [];///用于筛选任务专业的数据 选项
 var status_filter = [];///用于筛选状态的数据
-const bug_level_filter = [];
+var bug_level_filter = [];///用于筛选缺陷等级 一二三级 选项
 var uploader_filter = [];///用于筛选上传者的数据 选项
+var originalData = [];
 
-var storage = window.localStorage;
-var localUserInfo = '';
-var orignData = [];
-var time;
-var currentTime;
-var time2;
-var unsubscribe;
-export default class BugAboutMeViewNew extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            searchKey: '',
-            data: [],
-            showModal1: false,///img显示框
-            showLoading: true,///现实loading图片
-            preImguuid: null,///上一次加载的图片的uuid
-            imguuid: null,
-            currentRecord: {},///当前选择的某一行。某一个缺陷对象
+export default props => {
+    // console.log('localUserInfo:', localUserInfo)
+    const { appState, appDispatch } = useContext(AppDataContext)
+    const [searchKey, setSearchKey] = useState('');///搜索关键字
+    const [bugList, setBugList] = useState([]);///数据
+    const [imguuid, setImguuid] = useState(null);///图片的uuid
+    const [currentRecord, setcurrentRecord] = useState({});///当前选择的某一行。某一个缺陷对象
+    const [repairVisible, setRepairVisible] = useState(false);///展示维修界面
+    const [engineerVisible, setEngineerVisible] = useState(false);///展示专工界面
+    const [runnerVisible, setRunnerVisible] = useState(false);///展示运行界面
+    const [stepLogVisible, setStepLogVisible] = useState(false);///展示步骤界面
+    // const [heightLightBugId, setHeightLightNumber] = useState(0);///高亮的缺陷id
+    const [currentTime, setCurrentTime] = useState(null);///当前时刻
+    const [hasP3] = useState(JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('3') !== -1);///维修权限
+    const [hasP1] = useState(JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('1') !== -1);///运行权限
+    const [hasP0] = useState(JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('0') !== -1);///专工权限
 
-            repairVisible: false,
-            engineerVisible: false,
-            runnerVisible: false,
-            stepLogVisible: false,
-            heightLightNumber: 0,
+    ///初始化过滤选项
+    const initFilter = useCallback(async () => {
+        console.log('初始化过滤选项')
+        ///挂起状态
+        let sql = `select * from bug_freeze_status where effective = 1`
+        let res_bugfreeze = await HttpApi.obs({ sql })
+        if (res_bugfreeze.data.code === 0) {
+            const bugFreezeData = res_bugfreeze.data.data;
+            status_filter.length = 0;
+            status_filter = [...originStatus, ...bugFreezeData.map((item) => { return { text: item.des, value: 5 + '-' + item.id, freeze_value: item.id } })]
         }
-    }
-    componentDidMount() {
-        currentTime = moment().toDate().getTime();
-        localUserInfo = storage.getItem('userinfo');
-        this.init();
-        this.initFilter();
-        // console.log('个人所有专业:', JSON.parse(localUserInfo).major_id_all)
-        this.openPolling();
-        this.openPollingForData();
-        unsubscribe = Store.subscribe(() => {
-            if (Store.getState().bug.bugNum) {
-                console.log('高亮:', Store.getState().bug.bugNum)
-                this.setState({
-                    heightLightNumber: Store.getState().bug.bugNum
-                }, () => {
-                    this.changeTargetItemTop();
-                })
-            }
-        });
-    }
-    /**
-     *将要查看的某一个缺陷，的位置调整到数组的第一位
-     * @memberof BugAboutMeViewNew
-     */
-    changeTargetItemTop = () => {
-        let targetItem = {};
-        this.state.data.forEach((item) => {
-            if (item.id === this.state.heightLightNumber) { targetItem = item }
-        })
-        let filterList = this.state.data.filter((item) => { return item.id !== this.state.heightLightNumber })
-        // console.log('[targetItem, ...filterList]:', [targetItem, ...filterList])
-        this.setState({
-            data: [targetItem, ...filterList]
-        })
-    }
-    openPollingForData = () => {
-        time2 = setInterval(() => {
-            ///高亮和查询时，不再刷新数据
-            if (this.state.searchKey === '' && !this.state.heightLightNumber) { this.init() }
-        }, BUGDATAUPDATETIME);////10秒轮询一次
-    }
-    openPolling = () => {
-        time = setInterval(() => {
-            currentTime = moment().toDate().getTime();
-            this.forceUpdate();
-        }, BUGLOOPTIME);////1秒轮询一次
-    }
-    componentWillUnmount() {
-        console.log('我的缺陷界面销毁')
-        clearInterval(time);
-        clearInterval(time2);
-        unsubscribe();
-    }
-    initFilter = async () => {
-        let bugFreezeData = await this.getBugFreezeData();
-        status_filter.length = 0;
-        status_filter = [...originStatus, ...bugFreezeData.map((item) => { return { text: item.des, value: 5 + '-' + item.id, freeze_value: item.id } })]
-        let bugLevelData = await this.getBugLevelInfo();
-        bug_level_filter.length = 0;
-        bugLevelData.forEach((item) => {
-            bug_level_filter.push({ text: item.name, value: item.id });
-        })
-        let marjorData = await this.getMajorInfo();
-        major_filter.length = 0;
-        marjorData.forEach((item) => {
-            major_filter.push({ text: item.name, value: item.id });
-        })
-        let uploaderData = await this.getUploaderInfo();
-        uploader_filter.length = 0;
-        uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
-    }
-    init = async () => {
-        console.log('init BugAboutMeViewNew')
+        ///一二三级
+        let res_level = await HttpApi.getBugLevel({ effective: 1 })
+        if (res_level.data.code === 0) {
+            let bugLevelData = res_level.data.data
+            bug_level_filter.length = 0;
+            bug_level_filter = bugLevelData.map((item) => { return { text: item.name, value: item.id } })
+            // console.log('bug_level_filter:', bug_level_filter)
+        }
+        ///各个专业
+        let sql_major = `select m.id,m.name from majors m where effective = 1`
+        let res_major = await HttpApi.obs({ sql: sql_major })
+        if (res_major.data.code === 0) {
+            let marjorData = res_major.data.data
+            major_filter.length = 0;
+            major_filter = marjorData.map((item) => { return { text: item.name, value: item.id } })
+        }
+        ///所有上传者
         if (JSON.parse(localUserInfo).major_id_all) {
-            let finallyData = await this.getBugsInfo();///从数据库中获取最新的bugs数据
-            finallyData.forEach((item) => { item.key = item.id })
-            this.autoFixHandler(finallyData);
-            orignData = finallyData;
-            this.setState({
-                data: finallyData,
-            })
-            this.updateDataByRedux();
-            // notifyMusicForNewBug(this._audio, storage.getItem(NOTICEMUSICOPEN) === 'true', finallyData[0], MAXBUGIDMY);
-        }
-    }
-    /**
-     * 自动维修-个人专业的缺陷
-     */
-    autoFixHandler = (list) => {
-        let user_id = JSON.parse(localUserInfo).id;
-        let user_major_id = JSON.parse(localUserInfo).major_id_all;
-        if (JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('3') !== -1 && user_major_id && user_major_id.length > 0) { ///有维修权限
-            let needList = [];
-            list.forEach(element => {
-                if (user_major_id.indexOf(element.major_id) !== -1 && element.status === 0) {
-                    needList.push(element.id);
-                }
-            });
-            console.log('有维修权限,待自动维修的缺陷id有:', needList)
-            // return;
-            //应该用批量插入
-            if (needList.length > 0) {
-                let valuesStr = '';
-                let time = moment().format('YYYY-MM-DD HH:mm:ss');
-                needList.forEach(bug_id => {
-                    valuesStr += `(${bug_id},10,${user_id},'${time}'),`
-                });
-                valuesStr = valuesStr.substring(0, valuesStr.length - 1);
-                let sql = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,createdAt) VALUES ${valuesStr}`
-                HttpApi.obs({ sql }, (res) => {
-                    if (res.data.code === 0) {
-                        let sql = `update bugs set isread = 1,status = 1,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id in (${needList.join(',')}) `;
-                        HttpApi.obs({ sql }, (res) => {
-                            if (res.data.code === 0) {
-                                message.success('默认自动开始维修');
-                                this.init();
-                            } else { message.error('自动添加维修记录操作失败') }
-                        })
-                    } else { message.error('自动添加维修记录操作失败') }
-                })
+            let sql_all_uploader = `select distinct(users.name) as user_name,bugs.user_id from bugs
+            left join(select * from users where effective = 1) users on users.id = bugs.user_id
+            where bugs.effective = 1 and bugs.status != 4 and bugs.major_id in (${JSON.parse(localUserInfo).major_id_all})`
+            let res_all_uploader = await HttpApi.obs({ sql: sql_all_uploader })
+            if (res_all_uploader.data.code === 0) {
+                let uploaderData = res_all_uploader.data.data
+                uploader_filter.length = 0;
+                uploader_filter = uploaderData.map((item) => { return { text: item.user_name, value: item.user_id } })
             }
-        } else {
-            console.log('没有维修权限')
         }
-    }
-    /**
-     * 查询上传者 去重
-     * 未完成的缺陷
-     */
-    getUploaderInfo = () => {
-        let sql = `select distinct(users.name) as user_name,bugs.user_id from bugs
-                left join(select * from users where effective = 1) users
-                on users.id = bugs.user_id
-                where bugs.effective = 1 and bugs.status != 4 and bugs.major_id in (${JSON.parse(localUserInfo).major_id_all})`
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
-    getBugFreezeData = () => {
-        let sql = `select * from bug_freeze_status  where effective = 1`
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
-    getBugLevelInfo = () => {
-        return new Promise((resolve, reject) => {
-            let result = [];
-            HttpApi.getBugLevel({ effective: 1 }, (res) => {
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
-    getMajorInfo = () => {
-        let sql = `select m.id,m.name from majors m where effective = 1`
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
-    getOneBugInfo = (bug_id, isDelete) => {
-        let sql = `select bugs.* from bugs where id = ${bug_id} and effective = ${isDelete ? 0 : 1} `;
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
-                let result = null;
-                if (res.data.code === 0) {
-                    result = res.data.data[0]
-                }
-                resolve(result);
-            })
-        })
-    }
-    getBugsInfo = (sql = null) => {
-        if (!sql) {
-            sql = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,
+    }, [])
+    ///初始化数据
+    const init = useCallback(async () => {
+        console.log('初始化')
+        if (JSON.parse(localUserInfo).major_id_all) {
+            let sql_get_bug = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,
             area_1.name as area1_name,area_1.id as area1_id,
             area_2.name as area2_name,area_2.id as area3_id,
             area_3.name as area3_name,area_3.id as area3_id,
@@ -260,462 +107,74 @@ export default class BugAboutMeViewNew extends Component {
                         left join (select * from bug_tag_status where effective = 1) bug_tag_status on bug_tag_status.id = t2.tag_id
                         left join (select * from bug_freeze_status where effective = 1) bug_freeze_status on bug_freeze_status.id = t2.freeze_id
                         ) tmp_freeze_table on tmp_freeze_table.bug_id = bugs.id
-            where bugs.status != 4 and bugs.major_id in (${ JSON.parse(localUserInfo).major_id_all}) and bugs.effective = 1 order by bugs.id desc`
-        }
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) {
-                    result = res.data.data
-                }
-                resolve(result);
-            })
-        })
-    }
-    getOneRecordInfo = (device_id) => {
-        let sql1 = ' select * from records rds where effective = 1 and device_id = ' + device_id + ' order by rds.id desc limit 1';
-        let sqlText = sql1;
-        return new Promise((resolve, reject) => {
-            HttpApi.obs({ sql: sqlText }, (res) => {
-                let result = null;
-                if (res.data.code === 0) {
-                    result = res.data.data[0]
-                }
-                resolve(result);
-            })
-        })
-    }
-    ////改变包含了这个bug_id 的record 再数据库中的值。 isDelete 是否为 删除缺陷的操作
-    changeRecordData = async (bugId, isDelete = false) => {
-        // let bugId = this.state.currentRecord.id;
-        ///1，要根据bug_id 去bugs表中去查询该条数据，获取其中的 device_id 字段信息
-        let oneBugInfo = await this.getOneBugInfo(bugId, isDelete);
-        let device_id = oneBugInfo.device_id;
-        // return;
-        if (!device_id) { return }
-        ///2，根据 device_id 去record 表中 找到 这个巡检点最新的一次record。 获取到后，在本地修改。再最为一条新数据插入到records表中
-        let oneRecordInfo = await this.getOneRecordInfo(device_id);
-        let bug_content = JSON.parse(oneRecordInfo.content);
-        ///content 数组。找到其中bug_id 不为null的。把bug_id 和 bugId 相同的给至null,再手动判断是不是bug_id字段都是null了。如果是device_status就要至1（正常）
-        let bug_id_count = 0;
-        ///先知道 有多少个 bug_id 不为null
-        bug_content.forEach((oneSelect) => {
-            if (oneSelect.bug_id) {
-                bug_id_count++;
-            }
-        })
-        // console.log('me 这个巡检点还有几个bug:', bug_id_count);
-        if (bug_id_count > 0) {
-            ///如果找到对应的bug_id。将它至null,说明这个缺陷已经解决了。就不要再出现在record中了。同时bug_id_count减1
-            bug_content.forEach((oneSelect) => {
-                if (oneSelect.bug_id === bugId) {
-                    oneSelect.bug_id = null;
-                    bug_id_count--;
-                }
-            })
-            // console.log('处理完一个bug后的content为:', bug_content);
-            // console.log('me 这个巡检点还有几个bug:', bug_id_count);
-            oneRecordInfo.content = JSON.stringify(bug_content);
-            if (bug_id_count === 0) {
-                oneRecordInfo.device_status = 1;
+            where bugs.status != 4 and bugs.major_id in (${JSON.parse(localUserInfo).major_id_all}) and bugs.effective = 1 order by bugs.id desc`
+            let res_bug_list = await HttpApi.obs({ sql: sql_get_bug });///从数据库中获取最新的bugs数据
+            if (res_bug_list.data.code === 0) {
+                let bug_list = res_bug_list.data.data
+                bug_list = bug_list.map((item) => { item.key = item.id; return item })
+                console.log('bug_list:', bug_list)
+                originalData = bug_list;
+                autoFixHandler(bug_list);
+                setBugList(bug_list);
+                appDispatch({ type: 'aboutMeBugCount', data: bug_list.length })
             }
         }
-        oneRecordInfo.user_id = JSON.parse(localUserInfo).id;///更新record的上传人。
-        delete oneRecordInfo.id;
-        delete oneRecordInfo.createdAt;
-        delete oneRecordInfo.updatedAt;
-        oneRecordInfo.is_clean = 1; ///标注为 消缺时的record
-        // console.log('待入库的最新record:', oneRecordInfo);
-        HttpApi.insertRecordInfo(oneRecordInfo, (res) => {
-            if (res.data.code === 0) {
-                // console.log('关于我的 入库成功。');
-                if (oneRecordInfo.device_status === 1) {
-                    ///手动更新数据库中，对应巡检点的状态
-                    HttpApi.updateDeviceInfo({ query: { id: device_id }, update: { status: 1 } }, (res) => {
-                        if (res.data.code === 0) { message.success('对应巡检点最新巡检记录更新-巡检点状态恢复正常'); }
-                    })
-                } else {
-                    HttpApi.updateDeviceInfo({ query: { id: device_id }, update: { status: 2 } }, (res) => {
-                        if (res.data.code === 0) { message.info('对应巡检点最新巡检记录更新'); } ///这么做的目的是只要有record上传，就要更新对应巡检点的updateAt
-                    })
+        setCurrentTime(moment().toDate().getTime())
+        // eslint-disable-next-line 
+    }, [])
+    ///自动维修处理
+    const autoFixHandler = useCallback(async (list) => {
+        let user_id = JSON.parse(localUserInfo).id;
+        let user_major_id = JSON.parse(localUserInfo).major_id_all;
+        ///有维修权限 且 有专业
+        if (hasP3 && user_major_id && user_major_id.length > 0) {
+            let needList = [];
+            list.forEach(element => {
+                if (user_major_id.indexOf(element.major_id) !== -1 && element.status === 0) {
+                    needList.push(element.id);
                 }
+            });
+            console.log('有维修权限,待自动维修的缺陷id有:', needList)
+            // return;
+            //应该用批量插入
+            if (needList.length > 0) {
+                let valuesStr = '';
+                let time = moment().format('YYYY-MM-DD HH:mm:ss');
+                needList.forEach(bug_id => {
+                    valuesStr += `(${bug_id},10,${user_id},'${time}'),`
+                });
+                valuesStr = valuesStr.substring(0, valuesStr.length - 1);
+                let sql_step = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,createdAt) VALUES ${valuesStr}`
+                let res_step = await HttpApi.obs({ sql: sql_step });
+                if (res_step.data.code === 0) {
+                    let sql_update_bug = `update bugs set isread = 1,status = 1,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id in (${needList.join(',')}) `;
+                    let res_update_bug = await HttpApi.obs({ sql: sql_update_bug });
+                    if (res_update_bug.data.code === 0) {
+                        message.success('默认自动开始维修');
+                        init();
+                    } else { message.error('自动添加维修记录操作失败') }
+                } else { message.error('自动添加维修记录操作失败') }
+                return
             }
-        })
-    }
-    // deleteBugsHandler = (record) => {
-    //     HttpApi.obs({ sql: `update bugs set effective = 0 where id = ${record.id} ` }, (res) => {
-    //         if (res.data.code === 0) {
-    //             message.success('移除缺陷成功');
-    //             this.init();
-    //             ///要利用redux刷新 mainView处的徽标数
-    //             this.updateDataByRedux();
-    //             ///再创建一个新的record记录插入records表
-    //             this.changeRecordData(record.id, true);
-    //         }
-    //     })
-    // }
-    updateDataByRedux = () => {
-        ///每次删除
-        // Store.dispatch(showBugNum(null)) ///随便派发一个值，目的是让 mainView处监听到 执行init();
-    }
-    render() {
-        const columns = [
-            {
-                key: 'id',
-                dataIndex: 'id',
-                title: '编号',
-                align: 'center',
-                width: 120,
-                render: (text, record) => {
-                    return <div>{record.serial_no || text}</div>
-                }
-            },
-            {
-                key: 'checkedAt', dataIndex: 'checkedAt', title: '时间',
-                width: 120,
-                align: 'center',
-                sorter: (a, b) => {
-                    return new Date(a.checkedAt).getTime() - new Date(b.checkedAt).getTime()
-                },
-                render: (text, record) => { return <div>{text || '/'}</div> }
-            },
-            {
-                key: 'device_name', dataIndex: 'device_name', title: '巡检点',
-                width: 140,
-                align: 'center',
-                render: (text, record) => {
-                    let result = '/'
-                    let iconType = 'laptop'
-                    if (text && text !== '') { result = text }
-                    else { result = record.area_remark; iconType = 'environment' }
-                    return <div className='hideText lineClamp5'>
-                        <Tooltip title={<div dangerouslySetInnerHTML={{ __html: result }} />}>
-                            <Icon type={iconType} style={{ marginRight: 4 }} />
-                            <div dangerouslySetInnerHTML={{ __html: result }} />
-                        </Tooltip>
-                    </div>
-                }
-            },
-            {
-                key: 'user_name', dataIndex: 'user_name', title: '发现人',
-                width: 120,
-                align: 'center',
-                filters: uploader_filter,
-                onFilter: (value, record) => record.user_id === value,
-            },
-            {
-                key: 'area_remark', dataIndex: 'area_remark', title: '巡检范围',
-                width: 140,
-                align: 'center',
-                render: (text, record) => {
-                    let result = '/'
-                    let iconType = 'environment'
-                    if (text) { result = text }
-                    else { result = record.area_name }
-                    return <div className='hideText lineClamp5'>
-                        <Tooltip title={<div dangerouslySetInnerHTML={{ __html: result }} />}>
-                            <Icon type={iconType} style={{ marginRight: 4 }} />
-                            <div dangerouslySetInnerHTML={{ __html: result }} />
-                        </Tooltip>
-                    </div>
-                }
-            },
-            {
-                key: 'content',
-                dataIndex: 'content',
-                title: '内容',
-                align: 'center',
-                render: (text, record) => {
-                    let obj = JSON.parse(text);
-                    let contentobj = JSON.parse(record.content);
-                    let imgs_arr = JSON.parse(JSON.stringify(contentobj.imgs));
-                    let result_arr = [];
-                    imgs_arr.forEach((item, index) => {
-                        result_arr.push({ key: index + item, name: ('图片' + (index + 1)), uuid: item });
-                    })
-                    let comArr = [];
-                    result_arr.forEach((item, index) => {
-                        comArr.push(
-                            <img alt='' style={{ width: 50, height: 50, marginRight: 10 }} key={index} src={Testuri + 'get_jpg?uuid=' + item.uuid}
-                                onClick={() => {
-                                    this.setState({ imguuid: item.uuid })
-                                }}
-                            />
-                        )
-                    });
-                    let result = ''
-                    if (comArr.length > 0) { result = comArr }
-                    return <div>
-                        <div className='hideText lineClamp3' style={{ fontWeight: 900, minWidth: 120 }}>
-                            <Tooltip title={<span>{record.title_name}{record.title_remark}</span>} placement='topLeft'>
-                                <span>{record.title_name}</span>
-                                <span style={{ color: '#41A8FF' }}>
-                                    {record.title_remark}
-                                </span>
-                            </Tooltip>
-                        </div>
-                        {record.title_name ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
-                        <div className={record.title_name ? 'hideText lineClamp2' : 'hideText lineClamp5'}>
-                            <Tooltip title={<div dangerouslySetInnerHTML={{ __html: obj.text }} />}>
-                                <div dangerouslySetInnerHTML={{ __html: obj.text }} />
-                            </Tooltip>
-                        </div>
-                        {imgs_arr && imgs_arr.length > 0 ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
-                        <div>{result}</div>
-                    </div>
-                }
-            },
-            {
-                key: 'buglevel', dataIndex: 'buglevel', title: '等级',
-                width: 80,
-                align: 'center',
-                filters: bug_level_filter,
-                onFilter: (value, record) => record.buglevel === value,
-                render: (text) => {
-                    let result = null;
-                    let resultCom = '/'
-                    let color = '#505659';
-                    if (text) {
-                        if (text === 1) { result = '一级'; color = '#f50' }
-                        else if (text === 2) { result = '二级'; color = '#FF9900' }
-                        else if (text === 3) { result = '三级'; color = '#87d068' }
-                        resultCom = <Tag color={color}>{result}</Tag>
-                    }
-                    return resultCom
-                }
-            },
-            {
-                key: 'major_id', dataIndex: 'major_id', title: '专业',
-                width: 120,
-                align: 'center',
-                filters: major_filter,
-                onFilter: (value, record) => record.major_id === value,
-                render: (text, record) => {
-                    return <div dangerouslySetInnerHTML={{ __html: record.major_name }} />
-                }
-            },
-            {
-                title: '状态',
-                dataIndex: 'status',
-                filters: status_filter,
-                align: 'center',
-                width: 80,
-                onFilter: (value, record) => record.status === value || record.status + '-' + record.bug_freeze_id === value,
-                render: (text, record) => {
-                    let str = '';
-                    let color = record.status === 5 ? '#9254de' : 'blue'
-                    switch (text) {
-                        case 0:
-                            str = '待维修'
-                            break;
-                        case 1:
-                            str = '维修中'
-                            break;
-                        case 2:
-                            str = '专工验收中'
-                            break;
-                        case 3:
-                            str = '运行验收中'
-                            break;
-                        case 4:
-                            str = '完毕'
-                            break;
-                        case 5:
-                            str = record.bug_freeze_des || '状态被删除'
-                            break;
-                        case 6:
-                            str = '申请转专业中'
-                            break;
-                        case 7:
-                            str = '申请挂起中'
-                            break;
-                        default:
-                            break;
-                    }
-                    let result = checkOverTime(record, currentTime)
-                    let isOver = result.isOver;
-                    let durationTime = result.durationTime;
-                    let timeColor = isOver ? 'red' : 'green'
-                    return {
-                        children: <div>
-                            <Tag color={color}>{str}</Tag>
-                            <br />
-                            {record.last_status_time && record.status !== 5 ? <Tag style={{ marginTop: 8 }} color={timeColor}>{getDuration(durationTime, 1, true)}</Tag> : null}
-                        </div>,
-                        props: {
-                            colSpan: 2,
-                        }
-                    }
-                }
-            },
-            {
-                title: '用时',
-                dataIndex: 'over',
-                filters: originOverTime,
-                align: 'center',
-                width: 80,
-                onFilter: (value, record) => {
-                    let isOver = checkOverTime(record, currentTime).isOver
-                    let overValue = isOver ? 0 : 1;
-                    return overValue === value
-                },
-                render: () => {
-                    return {
-                        props: {
-                            colSpan: 0,
-                        }
-                    }
-                }
-            },
-            {
-                title: '操作',
-                dataIndex: 'actions',
-                align: 'center',
-                width: 100,
-                render: (_, record) => {
-                    let majorHasFlag = JSON.parse(localUserInfo).major_id_all && JSON.parse(localUserInfo).major_id_all.split(',').indexOf(String(record.major_id)) !== -1
-                    let fixable = majorHasFlag && (record.status < 2 || record.status === 6 || record.status === 7);
-                    let engable = majorHasFlag && (record.status < 3 || record.status > 4);
-                    let runable = record.status === 3;
-                    return <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <Button size="small" type="default" onClick={() => { this.setState({ stepLogVisible: true, currentRecord: record }) }}>处理记录</Button>
-                        {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('3') !== -1 ?
-                            <>
-                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                                <Button disabled={!fixable} size="small" type="primary" onClick={() => { this.repairHandler(record) }}>维修处理</Button>
-                            </> : null}
-                        {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('0') !== -1 ?
-                            <>
-                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                                <Button disabled={!engable} size="small" type="primary" onClick={() => { this.engineerHandler(record) }}>专工处理</Button>
-                            </> : null}
-                        {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('1') !== -1 ?
-                            <>
-                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                                <Button disabled={!runable} size="small" type="primary" onClick={() => { this.runnerHandler(record) }}>运行处理</Button>
-                            </> : null}
-                        {/* {JSON.parse(localUserInfo).isadmin === 1 ?
-                            <>
-                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                                <Popconfirm title="确定要删除该缺陷吗?" onConfirm={() => { this.deleteBugsHandler(record); removeOneBugIdFromList(record.id) }}>
-                                    <Button size="small" type="danger">删除</Button>
-                                </Popconfirm>
-                            </> : null} */}
-                    </div>
-                }
-            }
-        ]
-        return (
-            < Fragment >
-                <Alert message="以专业来划分是否相关; 维修权限人员打开该页面后, 那些待维修的缺陷自动改变为维修中状态" type="info" showIcon />
-                <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
-                    <div style={{ textAlign: 'right', width: '100%' }}>
-                        <Input.Search style={{ width: 340 }} allowClear placeholder="支持内容、巡检点和巡检范围的模糊查询"
-                            onChange={(e) => { this.setState({ searchKey: e.target.value }); if (e.target.value === '') { this.init(); } }}
-                            onPressEnter={(e) => { this.filterBySearch(e.target.value) }} onSearch={this.filterBySearch} enterButton />
-                    </div>
-                </div>
-                <Table
-                    style={{ marginTop: 10 }}
-                    rowClassName={(record, index) => { if (record.id === this.state.heightLightNumber) { return 'row' } else { return '' } }}
-                    bordered
-                    dataSource={this.state.data}
-                    columns={columns}
-                    pagination={{
-                        showSizeChanger: true,
-                        pageSizeOptions: ['10', '50', '100'],
-                        onChange: () => {
-                            document.documentElement.scrollTop = document.body.scrollTop = 0;
-                        },
-                        onShowSizeChange: () => {
-                            document.documentElement.scrollTop = document.body.scrollTop = 0;
-                        }
-                    }}
-                />
-                <ShowImgView showModal={this.state.showModal1} cancel={() => { this.setState({ showModal1: false }) }} showLoading={this.state.showLoading} imguuid={this.state.imguuid} />
-                <StepLogView visible={this.state.stepLogVisible} onCancel={() => { this.setState({ stepLogVisible: false }) }} record={this.state.currentRecord} />
-                <FuncPanelForRepair visible={this.state.repairVisible} onOk={(v) => {
-                    switch (v.selectValue) {
-                        case 1:
-                            this.exchangeBugMajorByRepair(v);
-                            break;
-                        case 2:
-                            this.freezeBugStepByRepair(v);
-                            break;
-                        case 3:
-                            this.fixCompleteByRepair(v);
-                            break;
-                        case 4:
-                            this.dontNeedfixByRepair(v);
-                            break;
-                        default:
-                            break;
-                    }
-                    this.setState({ repairVisible: false })
-                }} onCancel={() => { this.setState({ repairVisible: false }) }} />
-                <FuncPanelForEngineer visible={this.state.engineerVisible} record={this.state.currentRecord} onOk={(v) => {
-                    switch (v.selectValue) {
-                        case 1:
-                            this.exchangeBugMajorByEngineer(v);
-                            break;
-                        case 2:
-                            this.freezeBugStepByEngineer(v);
-                            break;
-                        case 3:
-                            this.goBackStartByEngineer(v);
-                            break;
-                        case 4:
-                            this.completeByEngineer(v);
-                            break;
-                        case 5:
-                            this.goBackFixByEngineer(v);
-                            break;
-                        case 6:
-                            this.passByEngineer(v);
-                            break;
-                        default:
-                            break;
-                    }
-                    this.setState({ engineerVisible: false })
-                }} onCancel={() => { this.setState({ engineerVisible: false }) }} />
-                <FuncPanelForRunner visible={this.state.runnerVisible} onOk={(v) => {
-                    switch (v.selectValue) {
-                        case 1:
-                            this.completeByRunner(v);
-                            break;
-                        case 2:
-                            this.goBackEngineerByRunner(v);
-                            break;
-                        default:
-                            break;
-                    }
-                    this.setState({ runnerVisible: false })
-                }} onCancel={() => { this.setState({ runnerVisible: false }) }} />
-                <Modal visible={this.state.imguuid !== null} destroyOnClose centered
-                    width={410} bodyStyle={{ textAlign: 'center', padding: 5, margin: 0 }} footer={null} onCancel={() => {
-                        this.setState({ imguuid: null })
-                    }}>
-                    <img alt='' style={{ width: 400 }} src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} />
-                    {/* <img alt='' style={{ width: 400 }} src={'http://ixiaomu.cn:3008/get_jpg?uuid=' + this.state.imguuid} /> */}
-                </Modal>
-            </Fragment >
-        );
-    }
-    filterBySearch = (v) => {
+        } else {
+            console.log('没有同时拥有维修权限和专业')
+        }
+    }, [init, hasP3])
+    const filterBySearch = useCallback((v) => {
         if (v === '0') { message.error('请输入详细信息'); return }
-        let data = JSON.parse(JSON.stringify(orignData));
+        let data = JSON.parse(JSON.stringify(originalData));
         data.forEach((item) => {
             if (item.area_remark && item.area_remark.indexOf(v) !== -1) {
                 let coptAreaRemark = item.area_remark;
                 let subStr = new RegExp(v);//创建正则表达式对象
-                let afterReplace = coptAreaRemark.replace(subStr, `<span style='background-color:#ff7a45'>${v}</span>`);
+                let afterReplace = coptAreaRemark.replace(subStr, `<span style='background-color:#FDFF05'>${v}</span>`);
                 item.area_remark = afterReplace
                 item.exist = true
             }
             if (item.content && JSON.parse(item.content).text && JSON.parse(item.content).text.indexOf(v) !== -1) {
                 let coptItemContent = JSON.parse(item.content);
                 let subStr = new RegExp(v);//创建正则表达式对象
-                let afterReplace = coptItemContent.text.replace(subStr, `<span style='background-color:#ff7a45'>${v}</span>`);
+                let afterReplace = coptItemContent.text.replace(subStr, `<span style='background-color:#FDFF05'>${v}</span>`);
                 coptItemContent.text = afterReplace
                 item.content = JSON.stringify(coptItemContent)
                 item.exist = true
@@ -723,194 +182,392 @@ export default class BugAboutMeViewNew extends Component {
             if (item.device_name && item.device_name.indexOf(v) !== -1) {
                 let coptDeviceName = item.device_name;
                 let subStr = new RegExp(v);//创建正则表达式对象
-                let afterReplace = coptDeviceName.replace(subStr, `<span style='background-color:#ff7a45'>${v}</span>`);
+                let afterReplace = coptDeviceName.replace(subStr, `<span style='background-color:#FDFF05'>${v}</span>`);
                 item.device_name = afterReplace
                 item.exist = true
             }
         })
         let newResult = data.filter((item) => { return item.exist === true })
-        this.setState({ data: newResult })
-    }
-    repairHandler = (record) => {
-        this.setState({ repairVisible: true, currentRecord: record })
-    }
-    engineerHandler = (record) => {
-        this.setState({ engineerVisible: true, currentRecord: record })
-    }
-    runnerHandler = (record) => {
-        this.setState({ runnerVisible: true, currentRecord: record })
-    }
-    ////////////////////// 维修人员处理
-    exchangeBugMajorByRepair = (v) => {
-        let remark = v.remarkText;
-        let bug_id = this.state.currentRecord.id;
-        let user_id = JSON.parse(localUserInfo).id;
-        let major_id = v.selectMajorId;
-        let sql = `INSERT INTO bug_step_log(bug_id,tag_id,major_id,user_id,remark,createdAt) VALUES(${bug_id},1,${major_id},${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
-        HttpApi.obs({ sql }, (res) => {
-            if (res.data.code === 0) {
-                let sql = `update bugs set isread = 0,status = 6,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
-                HttpApi.obs({ sql }, (res) => {
-                    if (res.data.code === 0) { message.success('申请转专业成功'); this.init(); } else { message.error('申请转专业失败') }
-                })
-            } else { message.error('申请转专业失败') }
-        })
-    }
-    freezeBugStepByRepair = (v) => {
-        let remark = v.remarkText;
-        let freeze_id = v.selectFreezeId;
-        let bug_id = this.state.currentRecord.id;
-        let user_id = JSON.parse(localUserInfo).id;
-        let sql = `INSERT INTO bug_step_log(freeze_id,bug_id,tag_id,user_id,remark,createdAt) VALUES(${freeze_id},${bug_id},2,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
-        HttpApi.obs({ sql }, (res) => {
-            if (res.data.code === 0) {
-                let sql = `update bugs set isread = 0,status = 7,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
-                HttpApi.obs({ sql }, (res) => {
-                    if (res.data.code === 0) { message.success('申请挂起成功'); this.init(); } else { message.error('申请挂起失败') }
-                })
-            } else { message.error('申请挂起失败') }
-        })
-    }
-    fixCompleteByRepair = (v) => {
-        let remark = v.remarkText;
-        let bug_id = this.state.currentRecord.id;
-        let user_id = JSON.parse(localUserInfo).id;
-        let sql = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt) VALUES(${bug_id},4,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
-        HttpApi.obs({ sql }, (res) => {
-            if (res.data.code === 0) {
-                let sql = `update bugs set isread = 0,status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
-                HttpApi.obs({ sql }, (res) => {
-                    if (res.data.code === 0) { message.success('完成维修'); this.init(); } else { message.error('维修失败') }
-                })
-            } else { message.error('操作失败') }
-        })
-    }
-    dontNeedfixByRepair = (v) => {
-        let remark = v.remarkText;
-        let bug_id = this.state.currentRecord.id;
-        let user_id = JSON.parse(localUserInfo).id;
-        let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},16,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
-        HttpApi.obs({ sql }, (res) => {
-            if (res.data.code === 0) {
-                let sql = `update bugs set isread = 0,status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
-                HttpApi.obs({ sql }, (res) => {
-                    if (res.data.code === 0) { message.success('维修人员认为无需维修'); this.init(); } else { message.error('维修人员认为无需维修操作失败') }
-                })
-            } else { message.error('维修人员认为无需维修操作失败') }
-        })
-    }
-    ////////////////////// 专工处理
-    exchangeBugMajorByEngineer = (v) => {
-        let remark = v.remarkText;
-        let bug_id = this.state.currentRecord.id;
-        let user_id = JSON.parse(localUserInfo).id;
-        let major_id = v.selectMajorId;
-        let sql = `INSERT INTO bug_step_log(bug_id,tag_id,major_id,user_id,remark,createdAt) VALUES(${bug_id},3,${major_id},${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
-        HttpApi.obs({ sql }, (res) => {
-            let sql = `update bugs set isread = 0,major_id = ${major_id},status = 0,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
-            HttpApi.obs({ sql }, (res) => {
-                if (res.data.code === 0) { message.success('转专业成功'); this.init(); } else { message.error('转专业失败') }
+        setBugList(newResult)
+    }, [])
+    ///跳转来的缺陷，位置置顶
+    const changeTargetItemTop = useCallback(() => {
+        // console.log('跳转来的缺陷，位置置顶')
+        // console.log('高亮id:', appState.heightLightBugId)
+        // console.log('originalData:', originalData)
+        if (appState.heightLightBugId && originalData.length > 0) {
+            let targetItem = {};
+            originalData.forEach((item) => {
+                if (item.id === appState.heightLightBugId) { targetItem = item }
             })
-        })
-    }
-    freezeBugStepByEngineer = (v) => {
-        let remark = v.remarkText;
-        let bug_id = this.state.currentRecord.id;
-        let user_id = JSON.parse(localUserInfo).id;
-        let freeze_id = v.selectFreezeId;
-        let sql = `INSERT INTO bug_step_log(freeze_id,bug_id,tag_id,user_id,remark,createdAt) VALUES(${freeze_id},${bug_id},15,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
-        HttpApi.obs({ sql }, (res) => {
-            if (res.data.code === 0) {
-                let sql = `update bugs set isread = 0,status = 5,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
-                HttpApi.obs({ sql }, (res) => {
-                    if (res.data.code === 0) { message.success('挂起成功'); this.init(); } else { message.error('挂起失败') }
+            let filterList = originalData.filter((item) => { return item.id !== appState.heightLightBugId })
+            let resList = [targetItem, ...filterList].map((item, index) => { item.key = index; return item });
+            // console.log('resList:', resList)
+            setBugList(resList)
+        }
+    }, [appState.heightLightBugId])
+
+    useEffect(() => {
+        initFilter();
+        init();
+    }, [initFilter, init])
+
+    useEffect(() => {
+        let loop_for_timestamp;
+        if (loop_for_timestamp) { clearInterval(loop_for_timestamp) }
+        loop_for_timestamp = setInterval(() => {
+            setCurrentTime(moment().toDate().getTime())
+        }, BUGLOOPTIME);////1秒循环一次 刷新计时
+        let loop_for_buglist;
+        if (loop_for_buglist) { clearInterval(loop_for_buglist) }
+        loop_for_buglist = setInterval(() => {
+            if (searchKey === '' && !appState.heightLightBugId) { init() }
+        }, BUGDATAUPDATETIME);////5秒循环一次 获取数据
+        return () => {
+            clearInterval(loop_for_timestamp)
+            clearInterval(loop_for_buglist)
+        }
+    }, [searchKey, appState.heightLightBugId, init])
+
+    useEffect(() => {
+        changeTargetItemTop();
+    }, [changeTargetItemTop])
+
+    const columns = [
+        {
+            key: 'id',
+            dataIndex: 'id',
+            title: '编号',
+            align: 'center',
+            width: 120,
+            render: (text, record) => {
+                return <div>{record.serial_no || text}</div>
+            }
+        },
+        {
+            key: 'checkedAt', dataIndex: 'checkedAt', title: '时间',
+            width: 120,
+            align: 'center',
+            sorter: (a, b) => {
+                return new Date(a.checkedAt).getTime() - new Date(b.checkedAt).getTime()
+            },
+            render: (text, record) => { return <div>{text || '/'}</div> }
+        },
+        {
+            key: 'device_name', dataIndex: 'device_name', title: '巡检点',
+            width: 140,
+            align: 'center',
+            render: (text, record) => {
+                let result = '/'
+                let iconType = 'laptop'
+                if (text && text !== '') { result = text }
+                else { result = record.area_remark; iconType = 'environment' }
+                return <div className='hideText lineClamp5'>
+                    <Tooltip title={<div dangerouslySetInnerHTML={{ __html: result }} />}>
+                        <Icon type={iconType} style={{ marginRight: 4 }} />
+                        <div dangerouslySetInnerHTML={{ __html: result }} />
+                    </Tooltip>
+                </div>
+            }
+        },
+        {
+            key: 'user_name', dataIndex: 'user_name', title: '发现人',
+            width: 120,
+            align: 'center',
+            filters: uploader_filter,
+            onFilter: (value, record) => record.user_id === value,
+        },
+        {
+            key: 'area_remark', dataIndex: 'area_remark', title: '巡检范围',
+            width: 140,
+            align: 'center',
+            render: (text, record) => {
+                let result = '/'
+                let iconType = 'environment'
+                if (text) { result = text }
+                else { result = record.area_name }
+                return <div className='hideText lineClamp5'>
+                    <Tooltip title={<div dangerouslySetInnerHTML={{ __html: result }} />}>
+                        <Icon type={iconType} style={{ marginRight: 4 }} />
+                        <div dangerouslySetInnerHTML={{ __html: result }} />
+                    </Tooltip>
+                </div>
+            }
+        },
+        {
+            key: 'content',
+            dataIndex: 'content',
+            title: '内容',
+            align: 'center',
+            render: (text, record) => {
+                let obj = JSON.parse(text);
+                let contentobj = JSON.parse(record.content);
+                let imgs_arr = JSON.parse(JSON.stringify(contentobj.imgs));
+                let result_arr = [];
+                imgs_arr.forEach((item, index) => {
+                    result_arr.push({ key: index + item, name: ('图片' + (index + 1)), uuid: item });
                 })
-            } else { message.error('挂起失败') }
-        })
-    }
-    goBackStartByEngineer = (v) => {
-        let remark = v.remarkText;
-        let bug_id = this.state.currentRecord.id;
-        let user_id = JSON.parse(localUserInfo).id;
-        let sql = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt) VALUES(${bug_id},9,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
-        HttpApi.obs({ sql }, (res) => {
-            if (res.data.code === 0) {
-                let sql = `update bugs set isread = 0,status = 0,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
-                HttpApi.obs({ sql }, (res) => {
-                    if (res.data.code === 0) { message.success('恢复维修流程成功'); this.init(); } else { message.error('恢复维修流程失败') }
-                })
-            } else { message.error('恢复维修流程失败') }
-        })
-    }
-    completeByEngineer = (v) => {
-        let remark = v.remarkText;
-        let bug_id = this.state.currentRecord.id;
-        let user_id = JSON.parse(localUserInfo).id;
-        let sql = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt) VALUES(${bug_id},5,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
-        HttpApi.obs({ sql }, (res) => {
-            if (res.data.code === 0) {
-                let sql = `update bugs set isread = 0,status = 3,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
-                HttpApi.obs({ sql }, (res) => {
-                    if (res.data.code === 0) { message.success('专工完成验收'); this.init(); } else { message.error('专工验收操作失败') }
-                })
-            } else { message.error('专工验收操作失败') }
-        })
-    }
-    goBackFixByEngineer = (v) => {
-        let remark = v.remarkText;
-        let bug_id = this.state.currentRecord.id;
-        let user_id = JSON.parse(localUserInfo).id;
-        let sql = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt) VALUES(${bug_id},7,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
-        HttpApi.obs({ sql }, (res) => {
-            if (res.data.code === 0) {
-                let sql = `update bugs set isread = 0,status = 1,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
-                HttpApi.obs({ sql }, (res) => {
-                    if (res.data.code === 0) { message.success('专工打回操作成功'); this.init(); } else { message.error('专工打回操作失败') }
-                })
-            } else { message.error('专工打回操作失败') }
-        })
-    }
-    passByEngineer = (v) => {
-        let remark = v.remarkText;
-        let bug_id = this.state.currentRecord.id;
-        let user_id = JSON.parse(localUserInfo).id;
-        let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},17,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
-        HttpApi.obs({ sql }, (res) => {
-            if (res.data.code === 0) {
-                let sql = `update bugs set isread = 0,status = 3,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
-                HttpApi.obs({ sql }, (res) => {
-                    if (res.data.code === 0) { message.success('专工确认无需维修'); this.init(); } else { message.error('专工确认无需维修操作失败') }
-                })
-            } else { message.error('专工确认无需维修操作失败') }
-        })
-    }
-    /////////////// 运行处理
-    completeByRunner = (v) => {
-        let remark = v.remarkText;
-        let bug_id = this.state.currentRecord.id;
-        let user_id = JSON.parse(localUserInfo).id;
-        let sql = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt) VALUES(${bug_id},6,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
-        HttpApi.obs({ sql }, (res) => {
-            if (res.data.code === 0) {
-                let sql = `update bugs set status = 4,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
-                HttpApi.obs({ sql }, (res) => {
-                    if (res.data.code === 0) { message.success('运行验收操作成功'); this.init(); this.changeRecordData(bug_id); } else { message.error('运行验收操作失败') }
-                })
-            } else { message.error('运行验收操作失败') }
-        })
-    }
-    goBackEngineerByRunner = (v) => {
-        let remark = v.remarkText;
-        let bug_id = this.state.currentRecord.id;
-        let user_id = JSON.parse(localUserInfo).id;
-        let sql = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt) VALUES(${bug_id},8,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
-        HttpApi.obs({ sql }, (res) => {
-            if (res.data.code === 0) {
-                let sql = `update bugs set isread = 0,status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
-                HttpApi.obs({ sql }, (res) => {
-                    if (res.data.code === 0) { message.success('运行打回操作成功'); this.init(); } else { message.error('运行打回操作失败') }
-                })
-            } else { message.error('运行打回操作失败') }
-        })
+                let comArr = [];
+                result_arr.forEach((item, index) => {
+                    comArr.push(
+                        <img alt='' style={{ width: 50, height: 50, marginRight: 10 }} key={index} src={Testuri + 'get_jpg?uuid=' + item.uuid}
+                            onClick={() => {
+                                setImguuid(item.uuid)
+                            }}
+                        />
+                    )
+                });
+                let result = ''
+                if (comArr.length > 0) { result = comArr }
+                return <div>
+                    <div className='hideText lineClamp3' style={{ fontWeight: 900, minWidth: 120 }}>
+                        <Tooltip title={<span>{record.title_name}{record.title_remark}</span>} placement='topLeft'>
+                            <span>{record.title_name}</span>
+                            <span style={{ color: '#41A8FF' }}>
+                                {record.title_remark}
+                            </span>
+                        </Tooltip>
+                    </div>
+                    {record.title_name ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
+                    <div className={record.title_name ? 'hideText lineClamp2' : 'hideText lineClamp5'}>
+                        <Tooltip title={<div dangerouslySetInnerHTML={{ __html: obj.text }} />}>
+                            <div dangerouslySetInnerHTML={{ __html: obj.text }} />
+                        </Tooltip>
+                    </div>
+                    {imgs_arr && imgs_arr.length > 0 ? <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /> : null}
+                    <div>{result}</div>
+                </div>
+            }
+        },
+        {
+            key: 'buglevel', dataIndex: 'buglevel', title: '等级',
+            width: 80,
+            align: 'center',
+            filters: bug_level_filter,
+            onFilter: (value, record) => record.buglevel === value,
+            render: (text) => {
+                let result = null;
+                let resultCom = '/'
+                let color = '#505659';
+                if (text) {
+                    if (text === 1) { result = '一级'; color = '#f50' }
+                    else if (text === 2) { result = '二级'; color = '#FF9900' }
+                    else if (text === 3) { result = '三级'; color = '#87d068' }
+                    resultCom = <Tag color={color}>{result}</Tag>
+                }
+                return resultCom
+            }
+        },
+        {
+            key: 'major_id', dataIndex: 'major_id', title: '专业',
+            width: 120,
+            align: 'center',
+            filters: major_filter,
+            onFilter: (value, record) => record.major_id === value,
+            render: (text, record) => {
+                return <div dangerouslySetInnerHTML={{ __html: record.major_name }} />
+            }
+        },
+        {
+            title: '状态',
+            dataIndex: 'status',
+            filters: status_filter,
+            align: 'center',
+            width: 80,
+            onFilter: (value, record) => record.status === value || record.status + '-' + record.bug_freeze_id === value,
+            render: (text, record) => {
+                let str = '';
+                let color = record.status === 5 ? '#9254de' : 'blue'
+                switch (text) {
+                    case 0:
+                        str = '待维修'
+                        break;
+                    case 1:
+                        str = '维修中'
+                        break;
+                    case 2:
+                        str = '专工验收中'
+                        break;
+                    case 3:
+                        str = '运行验收中'
+                        break;
+                    case 4:
+                        str = '完毕'
+                        break;
+                    case 5:
+                        str = record.bug_freeze_des || '状态被删除'
+                        break;
+                    case 6:
+                        str = '申请转专业中'
+                        break;
+                    case 7:
+                        str = '申请挂起中'
+                        break;
+                    default:
+                        break;
+                }
+                let result = checkOverTime(record, currentTime)
+                let isOver = result.isOver;
+                let durationTime = result.durationTime;
+                let timeColor = isOver ? 'red' : 'green'
+                return {
+                    children: <div>
+                        <Tag color={color}>{str}</Tag>
+                        <br />
+                        {record.last_status_time && record.status !== 5 ? <Tag style={{ marginTop: 8 }} color={timeColor}>{getDuration(durationTime, 1, true)}</Tag> : null}
+                    </div>,
+                    props: {
+                        colSpan: 2,
+                    }
+                }
+            }
+        },
+        {
+            title: '用时',
+            dataIndex: 'over',
+            filters: originOverTime,
+            align: 'center',
+            width: 80,
+            onFilter: (value, record) => {
+                let isOver = checkOverTime(record, currentTime).isOver
+                let overValue = isOver ? 0 : 1;
+                return overValue === value
+            },
+            render: () => {
+                return {
+                    props: {
+                        colSpan: 0,
+                    }
+                }
+            }
+        },
+        {
+            title: '操作',
+            dataIndex: 'actions',
+            align: 'center',
+            width: 100,
+            render: (_, record) => {
+                let majorHasFlag = JSON.parse(localUserInfo).major_id_all && JSON.parse(localUserInfo).major_id_all.split(',').indexOf(String(record.major_id)) !== -1
+                let fixable = majorHasFlag && (record.status < 2 || record.status === 6 || record.status === 7);
+                let engable = majorHasFlag && (record.status < 3 || record.status > 4);
+                let runable = record.status === 3;
+                return <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <Button size="small" type="default" onClick={() => { setStepLogVisible(true); setcurrentRecord(record); }}>处理记录</Button>
+                    {hasP3 ?
+                        <>
+                            <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                            <Button disabled={!fixable} size="small" type="primary" onClick={() => { setRepairVisible(true); setcurrentRecord(record); }}>维修处理</Button>
+                        </> : null}
+                    {hasP0 ?
+                        <>
+                            <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                            <Button disabled={!engable} size="small" type="primary" onClick={() => { setEngineerVisible(true); setcurrentRecord(record); }}>专工处理</Button>
+                        </> : null}
+                    {hasP1 ?
+                        <>
+                            <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                            <Button disabled={!runable} size="small" type="primary" onClick={() => { setRunnerVisible(true); setcurrentRecord(record); }}>运行处理</Button>
+                        </> : null}
+                </div>
+            }
+        }
+    ]
+    return <div style={styles.root}>
+        <Alert message="以专业来划分是否相关; 维修权限人员打开该页面后, 那些待维修的缺陷自动改变为维修中状态" type="info" showIcon />
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
+            <div style={{ textAlign: 'right', width: '100%' }}>
+                <Input.Search size="small" style={{ width: 340 }} allowClear placeholder="支持内容、巡检点和巡检范围的模糊查询"
+                    onChange={(e) => { setSearchKey(e.target.value); if (e.target.value === '') { init() } }}
+                    onPressEnter={(e) => { filterBySearch(e.target.value) }} onSearch={filterBySearch} enterButton />
+            </div>
+        </div>
+        <Table
+            size="small"
+            style={{ marginTop: 10 }}
+            rowClassName={(record, index) => { if (record.id === appState.heightLightBugId) { return 'row' } else { return '' } }}
+            bordered
+            dataSource={bugList}
+            columns={columns}
+            pagination={{
+                showSizeChanger: true,
+                pageSizeOptions: ['10', '50', '100'],
+                onChange: () => {
+                    document.documentElement.scrollTop = document.body.scrollTop = 0;
+                },
+                onShowSizeChange: () => {
+                    document.documentElement.scrollTop = document.body.scrollTop = 0;
+                }
+            }}
+        />
+        <Modal visible={imguuid !== null} destroyOnClose centered
+            width={410} bodyStyle={{ textAlign: 'center', padding: 5, margin: 0 }} footer={null} onCancel={() => { setImguuid(null) }}>
+            <img alt='' style={{ width: 400 }} src={Testuri + 'get_jpg?uuid=' + imguuid} />
+        </Modal>
+        {/* <ShowImgView showModal={showModal1} cancel={() => { setShowModal1(false) }} showLoading={showLoading} imguuid={imguuid} /> */}
+        <StepLogView visible={stepLogVisible} onCancel={() => { setStepLogVisible(false) }} record={currentRecord} />
+        <FuncPanelForRepair visible={repairVisible} onOk={(v) => {
+            switch (v.selectValue) {
+                case 1:
+                    exchangeBugMajorByRepair(v, currentRecord, init);
+                    break;
+                case 2:
+                    freezeBugStepByRepair(v, currentRecord, init);
+                    break;
+                case 3:
+                    fixCompleteByRepair(v, currentRecord, init);
+                    break;
+                case 4:
+                    dontNeedfixByRepair(v, currentRecord, init);
+                    break;
+                default:
+                    break;
+            }
+            setRepairVisible(false)
+        }} onCancel={() => { setRepairVisible(false) }} />
+        <FuncPanelForEngineer visible={engineerVisible} record={currentRecord} onOk={(v) => {
+            switch (v.selectValue) {
+                case 1:
+                    exchangeBugMajorByEngineer(v, currentRecord, init);
+                    break;
+                case 2:
+                    freezeBugStepByEngineer(v, currentRecord, init);
+                    break;
+                case 3:
+                    goBackStartByEngineer(v, currentRecord, init);
+                    break;
+                case 4:
+                    completeByEngineer(v, currentRecord, init);
+                    break;
+                case 5:
+                    goBackFixByEngineer(v, currentRecord, init);
+                    break;
+                case 6:
+                    passByEngineer(v, currentRecord, init);
+                    break;
+                default:
+                    break;
+            }
+            setEngineerVisible(false)
+        }} onCancel={() => { setEngineerVisible(false) }} />
+        <FuncPanelForRunner visible={runnerVisible} onOk={(v) => {
+            switch (v.selectValue) {
+                case 1:
+                    completeByRunner(v, currentRecord, init);
+                    break;
+                case 2:
+                    goBackEngineerByRunner(v, currentRecord, init);
+                    break;
+                default:
+                    break;
+            }
+            setRunnerVisible(false)
+        }} onCancel={() => { setRunnerVisible(false) }} />
+    </div>
+}
+const styles = {
+    root: {
+        backgroundColor: '#FFFFFF',
+        width: '100%',
+        padding: 10,
     }
 }

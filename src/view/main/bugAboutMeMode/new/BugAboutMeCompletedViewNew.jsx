@@ -1,8 +1,6 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { Table, Tag, Button, message, Popconfirm, Tooltip, Modal, Icon, DatePicker } from 'antd'
 import HttpApi, { Testuri } from '../../../util/HttpApi'
-// import Store from '../../../../redux/store/Store';
-// import { showBugNum } from '../../../../redux/actions/BugAction';
 import StepLogView from '../../bugMode/new/StepLogView';
 import ShowImgView from '../../bugMode/ShowImgView';
 import moment from 'moment'
@@ -109,7 +107,7 @@ export default class BugAboutMeCompletedViewNew extends Component {
                 left join(select * from area_3 where effective = 1) area_3 on des.area_id = area_3.id
                 left join(select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
                 left join(select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
-                where bugs.status = 4 and bugs.major_id in (${ JSON.parse(localUserInfo).major_id_all}) and bugs.effective = 1 and bugs.createdAt>'${this.state.dateRange[0].format('YYYY-MM-DD HH:mm:ss')}' and bugs.createdAt<'${this.state.dateRange[1].format('YYYY-MM-DD HH:mm:ss')}' order by bugs.id desc`
+                where bugs.status = 4 and bugs.major_id in (${JSON.parse(localUserInfo).major_id_all}) and bugs.effective = 1 and bugs.createdAt>'${this.state.dateRange[0].format('YYYY-MM-DD HH:mm:ss')}' and bugs.createdAt<'${this.state.dateRange[1].format('YYYY-MM-DD HH:mm:ss')}' order by bugs.id desc`
         }
         return new Promise((resolve, reject) => {
             HttpApi.obs({ sql }, (res) => {
@@ -132,10 +130,6 @@ export default class BugAboutMeCompletedViewNew extends Component {
             }
         })
     }
-    // updateDataByRedux = () => {
-    //     ///每次删除
-    //     Store.dispatch(showBugNum(null)) ///随便派发一个值，目的是让 mainView处监听到 执行init();
-    // }
     render() {
         const columns = [
             {
@@ -318,9 +312,9 @@ export default class BugAboutMeCompletedViewNew extends Component {
             }
         ]
         return (
-            <Fragment>
+            <div style={{ backgroundColor: '#FFFFFF', height: '100vh', padding: 10 }}>
                 <div style={{ textAlign: 'right' }}>
-                    <DatePicker.RangePicker style={{ marginRight: 10, marginBottom: 10 }} value={this.state.dateRange} allowClear={false} disabledDate={(current) => current > moment().endOf('day')} ranges={{
+                    <DatePicker.RangePicker size="small" value={this.state.dateRange} allowClear={false} disabledDate={(current) => current > moment().endOf('day')} ranges={{
                         '今日': [moment(), moment()],
                         '本月': [moment().startOf('month'), moment().endOf('day')],
                         '上月': [moment().add(-1, 'month').startOf('month'), moment().add(-1, 'month').endOf('month')],
@@ -332,6 +326,8 @@ export default class BugAboutMeCompletedViewNew extends Component {
                     }} />
                 </div>
                 <Table
+                    style={{ marginTop: 10 }}
+                    size="small"
                     bordered
                     dataSource={this.state.data}
                     columns={columns}
@@ -355,7 +351,7 @@ export default class BugAboutMeCompletedViewNew extends Component {
                     <img alt='' style={{ width: 400 }} src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} />
                     {/* <img alt='' style={{ width: 400 }} src={'http://ixiaomu.cn:3008/get_jpg?uuid=' + this.state.imguuid} /> */}
                 </Modal>
-            </Fragment >
+            </div >
         );
     }
 }

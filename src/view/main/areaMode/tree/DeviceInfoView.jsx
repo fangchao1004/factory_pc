@@ -111,11 +111,12 @@ class DeviceInfoView extends Component {
             ]
         }]
         return (
-            <div>
+            <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
                 {this.state.showTable ?
                     <div>
                         <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>巡检点巡检记录</h2>
                         <Table
+                            size="small"
                             bordered
                             dataSource={this.state.deviceRecords}
                             columns={columns}

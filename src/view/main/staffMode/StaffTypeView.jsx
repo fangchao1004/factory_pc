@@ -108,7 +108,7 @@ class StaffTypeView extends Component {
             <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
                 <Row>
                     <Col span={6}>
-                        <Button type="primary" size="small" style={{ marginBottom: 10 }} onClick={this.addLevel.bind(this)}>
+                        <Button icon='plus' type="primary" size="small" style={{ marginBottom: 10 }} onClick={this.addLevel.bind(this)}>
                             添加部门
                          </Button>
                     </Col>

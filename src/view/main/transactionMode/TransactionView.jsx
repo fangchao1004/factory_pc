@@ -183,17 +183,18 @@ export default class TransactionView extends Component {
             }
         ]
         return (
-            <div>
+            <div style={{ padding: 10, backgroundColor: '#FFFFFF' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>所有消费记录</h2>
-                    <DatePicker.RangePicker disabledDate={this.disabledDate} value={this.state.dateRange} ranges={{
+                    {/* <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>所有消费记录</h2> */}
+                    <DatePicker.RangePicker size='small' disabledDate={this.disabledDate} value={this.state.dateRange} ranges={{
                         '今日': [moment(), moment()],
                         '本月': [moment().startOf('month'), moment().endOf('day')],
                     }} onChange={(v) => {
                         if (v && v.length > 0) { this.setState({ dateRange: v, dataCount: 10, currentPage: 1 }, () => { this.init({}) }) } else { message.warn('请选择日期'); }
                     }} />
                     <Search
-                        style={{ width: '40%' }}
+                        size="small"
+                        style={{ width: 300 }}
                         placeholder="支持人员姓名模糊查询"
                         enterButton="搜索"
                         allowClear
@@ -211,6 +212,7 @@ export default class TransactionView extends Component {
                     />
                 </div>
                 <Table
+                    size="small"
                     loading={this.state.loading}
                     style={{ marginTop: 10 }}
                     bordered

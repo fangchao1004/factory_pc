@@ -465,8 +465,9 @@ class OneAttendanceView extends Component {
             }
         ]
         return (
-            <div>
+            <div style={{ padding: 10, backgroundColor: '#FFFFFF' }}>
                 <Table
+                    size="small"
                     bordered
                     dataSource={this.state.data}
                     columns={columns}

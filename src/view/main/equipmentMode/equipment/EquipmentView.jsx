@@ -248,7 +248,7 @@ class EquipmentView extends Component {
                 title: '操作',
                 dataIndex: 'actions',
                 align: 'center',
-                width: 100,
+                width: 80,
                 render: (text, record) => (
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <Button size="small" type='primary' onClick={() => this.openModalHandler(record)} >查看</Button>
@@ -268,19 +268,18 @@ class EquipmentView extends Component {
         ];
 
         return (
-            <div>
-
+            <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     {
                         this.state.isAdmin ? (<Row>
                             <Col span={6}>
-                                <Button onClick={this.addEquipment} type="primary">
+                                <Button size="small" onClick={this.addEquipment} type="primary">
                                     添加巡检点
                              </Button>
                             </Col>
                         </Row>) : <div></div>
                     }
-                    <Search style={{ width: 400 }} placeholder="名称模糊查询" enterButton
+                    <Search size="small" style={{ width: 400 }} placeholder="名称模糊查询" enterButton
                         onChange={(e) => {
                             if (e.target.value === '') { this.init(); }
                         }}
@@ -295,6 +294,7 @@ class EquipmentView extends Component {
                     />
                 </div>
                 <Table
+                    size="small"
                     style={{ marginTop: 10 }}
                     bordered
                     dataSource={this.state.dataSource}

@@ -51,7 +51,7 @@ class AreaModeRoot extends Component {
         }
         return (
             <Card
-                bodyStyle={{ padding: 10 }}
+                bodyStyle={{ padding: 10, backgroundColor: '#F1F2F5' }}
                 bordered={false}
                 style={{ width: '100%' }}
                 tabList={tabs}

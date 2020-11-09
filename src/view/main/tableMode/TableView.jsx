@@ -65,7 +65,7 @@ class TableView extends Component {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'space-between', width: '102%', marginTop: 10 }}>
                             <div>
-                                <Button type='ghost' onClick={() => {
+                                <Button icon={'edit'} size="small" type='ghost' onClick={() => {
                                     HttpApi.getDeviceInfo({ effective: 1, type_id: element.device_type_id, status: 2 }, (res) => {
                                         if (res.data.code === 0) {
                                             if (res.data.data.length > 0) { message.error('使用该表单模版的某类巡检点中，某些巡检点还有未消除的缺陷，请消缺后再尝试变动表单', 5); return }
@@ -75,7 +75,7 @@ class TableView extends Component {
                                         }
                                     })
                                 }}>修改</Button>
-                                <Button style={{ marginLeft: 20 }} type='primary' onClick={() => { this.openModalHandler(element) }}>详情</Button>
+                                <Button icon={'search'} size="small" style={{ marginLeft: 20 }} type='primary' onClick={() => { this.openModalHandler(element) }}>详情</Button>
                             </div>
                         </div>
 
@@ -133,9 +133,9 @@ class TableView extends Component {
     }
     render() {
         return (
-            <div>
+            <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
                 <div style={{ textAlign: 'right' }}>
-                    <Search style={{ width: 400 }} placeholder="名称模糊查询" enterButton
+                    <Search size="small" style={{ width: 400 }} placeholder="名称模糊查询" enterButton
                         onChange={(e) => {
                             if (e.target.value === '') { this.init(); }
                         }}

@@ -1,23 +1,18 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { List, Avatar, Tag, Button } from 'antd';
 import { omitTextLength, removeOneBugIdFromList } from '../../util/Tool';
 import HttpApi from '../../util/HttpApi';
 import moment from 'moment'
-import Store from '../../../redux/store/Store';
-import { showBugNum } from '../../../redux/actions/BugAction';
-class BugNoticeList extends Component {
-    constructor(props) {
-        super(props);
-        let localUserInfo = window.localStorage.getItem('userinfo')
-        // console.log('localUserInfo:', localUserInfo)
-        this.state = {
-            dataSource: [], modalVisible: false, selectItem: null,
-            permissionManager: JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('0') !== -1,
-            major_id_all: JSON.parse(localUserInfo).major_id_all
-        }
-    }
-    componentDidMount() {
-        this.props.data.unreadBugs.map((item, index) => {
+import { AppDataContext } from '../../../redux/AppRedux';
+const localUserInfo = window.localStorage.getItem('userinfo')
+
+export default props => {
+    const { appDispatch } = useContext(AppDataContext)
+    const [dataSource, setDataSource] = useState([])
+    const [hasP0] = useState(JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('0') !== -1)///专工权限
+    const [major_id_all] = useState(JSON.parse(localUserInfo).major_id_all)
+    useEffect(() => {
+        let tempList = props.data.unreadBugs.map((item, index) => {
             item.key = index;
             switch (item.status) {
                 case 0:
@@ -50,54 +45,48 @@ class BugNoticeList extends Component {
             }
             return item
         })
-        this.setState({ dataSource: this.props.data.unreadBugs })
-    }
-    render() {
-        return (
-            <div>
-                <List
-                    style={{ height: 300, overflow: 'scroll' }}
-                    itemLayout="horizontal"
-                    dataSource={this.state.dataSource}
-                    renderItem={item => (
-                        <List.Item
-                            extra={
-                                <Button type='link' size="small" style={{ padding: 0, marginRight: 8 }} onClick={() => {
-                                    if (this.state.permissionManager && this.state.major_id_all) { ///有专工权限且要有专业，就直接跳转
-                                        this.props.closePop()
-                                        this.props.history.push('./bugAboutMe')
-                                        setTimeout(() => {
-                                            Store.dispatch(showBugNum(item.id))
-                                        }, 500);
-                                    } else {
-                                        console.log('没有专工权限或者是没有专业，选择的是:', item)
-                                        this.props.closePopAndOpenModal(item)
-                                    }
-                                    HttpApi.obs({ sql: `update bugs set isread = 1 where id = ${item.id}` }, (res) => {
-                                        if (res.data.code === 0) {
-                                            ///将缓存中的对应缺陷id 剔除
-                                            // console.log('将缓存中的对应缺陷id 剔除')
-                                            removeOneBugIdFromList(item.id)
-                                        }
-                                    })
-                                }}>详情</Button>}
-                        >
-                            <List.Item.Meta
-                                avatar={<Avatar style={{ backgroundColor: item.avatar_color, verticalAlign: 'middle' }} size="large">{item.stauts_people}</Avatar>}
-                                title={<Tag color={'blue'}>编号:{item.id}-{item.tag_des}</Tag>}
-                                description={
-                                    <div>
-                                        <div>{omitTextLength(JSON.parse(item.content).text, 20)}</div>
-                                        <div>{item.last_status_time ? moment(item.last_status_time, 'YYYY-MM-DD HH:mm:ss').fromNow() : moment(item.createdAt).utcOffset(0).fromNow()}</div>
-                                    </div>
-                                }
-                            />
-                        </List.Item>
-                    )}
+        setDataSource(tempList)
+    }, [props.data.unreadBugs])
+    return <List
+        style={{ height: 300, overflow: 'scroll' }}
+        itemLayout="horizontal"
+        dataSource={dataSource}
+        renderItem={item => (
+            <List.Item
+                extra={
+                    <Button type='link' size="small" style={{ padding: 0, marginRight: 8 }} onClick={async () => {
+                        if (hasP0 && major_id_all) { ///有专工权限且要有专业，就直接跳转
+                            props.closePop()
+                            if (props.history.location.pathname === '/mainView/bugAboutMe') {
+                                appDispatch({ type: 'heightLightBugId', data: item.id })
+                            } else {
+                                props.history.push('./bugAboutMe')
+                                setTimeout(() => {
+                                    appDispatch({ type: 'heightLightBugId', data: item.id })
+                                }, 1000);
+                            }
+                        } else {
+                            console.log('没有专工权限或者是没有专业，选择的是:', item)
+                            props.closePopAndOpenModal(item)
+                        }
+                        let res = await HttpApi.obs({ sql: `update bugs set isread = 1 where id = ${item.id}` })
+                        if (res.data.code === 0) {
+                            console.log('将缓存中的对应缺陷id 剔除')
+                            removeOneBugIdFromList(item.id)
+                        }
+                    }}>详情</Button>}
+            >
+                <List.Item.Meta
+                    avatar={<Avatar style={{ backgroundColor: item.avatar_color, verticalAlign: 'middle' }} size="large">{item.stauts_people}</Avatar>}
+                    title={<Tag color={'blue'}>编号:{item.id}-{item.tag_des}</Tag>}
+                    description={
+                        <div>
+                            <div>{omitTextLength(JSON.parse(item.content).text, 20)}</div>
+                            <div>{item.last_status_time ? moment(item.last_status_time, 'YYYY-MM-DD HH:mm:ss').fromNow() : moment(item.createdAt).utcOffset(0).fromNow()}</div>
+                        </div>
+                    }
                 />
-            </div>
-        );
-    }
+            </List.Item>
+        )}
+    />
 }
-
-export default BugNoticeList;

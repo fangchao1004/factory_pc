@@ -244,11 +244,15 @@ class HttpApi {
         })
     }
     static getUserInfo(params, f1, f2) {
-        Axios.post(Testuri + 'find_user', params).then(res => {
-            if (f1) { f1(res) }
-        }).catch(res => {
-            if (f2) { f2(res) }
-        })
+        if (f1) {
+            return Axios.post(Testuri + 'find_user', params).then(res => {
+                if (f1) { f1(res) }
+            }).catch(res => {
+                if (f2) { f2(res) }
+            })
+        } else {
+            return Axios.post(Testuri + 'find_user', params)
+        }
     }
     static addUserInfo(params, f1, f2) {
         Axios.post(Testuri + 'insert_user', params).then(res => {
@@ -339,18 +343,26 @@ class HttpApi {
         })
     }
     static getTaskInfo(params, f1, f2) {
-        Axios.post(Testuri + 'find_task', params).then(res => {
-            if (f1) { f1(res) }
-        }).catch(res => {
-            if (f2) { f2(res) }
-        })
+        if (f1) {
+            return Axios.post(Testuri + 'find_task', params).then(res => {
+                if (f1) { f1(res) }
+            }).catch(res => {
+                if (f2) { f2(res) }
+            })
+        } else {
+            return Axios.post(Testuri + 'find_task', params)
+        }
     }
     static updateTaskInfo(params, f1, f2) {
-        Axios.post(Testuri + 'update_task', params).then(res => {
-            if (f1) { f1(res) }
-        }).catch(res => {
-            if (f2) { f2(res) }
-        })
+        if (f1) {
+            return Axios.post(Testuri + 'update_task', params).then(res => {
+                if (f1) { f1(res) }
+            }).catch(res => {
+                if (f2) { f2(res) }
+            })
+        } else {
+            return Axios.post(Testuri + 'update_task', params)
+        }
     }
     static sendMessageToStaffs(params, f1, f2) {
         Axios.post(Testuri + 'sendMessageToStaffs', params).then(res => {
@@ -412,11 +424,15 @@ class HttpApi {
         })
     }
     static getBugLevel(params, f1, f2) {
-        Axios.post(Testuri + 'find_bug_level', params).then(res => {
-            if (f1) { f1(res) }
-        }).catch(res => {
-            if (f2) { f2(res) }
-        })
+        if (f1) {
+            return Axios.post(Testuri + 'find_bug_level', params).then(res => {
+                if (f1) { f1(res) }
+            }).catch(res => {
+                if (f2) { f2(res) }
+            })
+        } else {
+            return Axios.post(Testuri + 'find_bug_level', params)
+        }
     }
     static removeBugLevel(params, f1, f2) {
         Axios.post(Testuri + 'remove_bug_level', params).then(res => {

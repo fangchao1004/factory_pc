@@ -22,7 +22,7 @@ function AddTaskForm(props) {
         <Form.Item label="内容" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('content', {
                 rules: [{ required: true, message: '请输入任务内容' }]
-            })(<Input.TextArea autosize={{ minRows: 2, maxRows: 6 }} placeholder="请输入任务内容"></Input.TextArea>)}
+            })(<Input.TextArea autoSize={{ minRows: 2, maxRows: 6 }} placeholder="请输入任务内容"></Input.TextArea>)}
         </Form.Item>
         <Form.Item label="截止日期" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('overTime', {
@@ -44,7 +44,7 @@ function disabledDate(current) {
 
 const TaskForm = Form.create({ name: 'staffForm' })(AddTaskForm)
 
-export default function AddTaskView(props) {
+export default function (props) {
     const staffFormRef = React.useRef(null)
     const [data, setData] = React.useState(null)
     const [loading, setLoading] = React.useState(false)

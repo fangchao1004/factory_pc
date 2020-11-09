@@ -234,7 +234,7 @@ class EditTable extends Component {
                     } else {
                         return (
                             <Popconfirm title="确认删除吗?" onConfirm={() => this.handleDelete(record.key)}>
-                                <Button type='danger'>删除</Button>
+                                <Button size="small" type='danger'>删除</Button>
                             </Popconfirm>
                         )
                     }
@@ -386,18 +386,19 @@ class EditTable extends Component {
         return <div>
             <Row>
                 <Col span={6}>
-                    <Button onClick={this.handleAdd} type="primary" style={{ marginBottom: 10 }}>添加表单项目</Button>
+                    <Button size="small" onClick={this.handleAdd} type="primary" style={{ marginBottom: 10 }}>添加表单项目</Button>
                 </Col>
                 <Col span={18}>
                     <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
                         <Popconfirm placement='leftTop' title="请您再次确认要提交修改后的表单吗?" onConfirm={this.okHandler}>
-                            <Button loading={this.state.loading} type='danger'>确定上传</Button>
+                            <Button size="small" loading={this.state.loading} type='danger'>确定上传</Button>
                         </Popconfirm>
                     </div>
                 </Col>
             </Row>
             <DndProvider backend={HTML5Backend}>
                 <Table
+                    size="small"
                     rowClassName={() => 'editable-row'}
                     bordered
                     dataSource={this.state.dataSource}

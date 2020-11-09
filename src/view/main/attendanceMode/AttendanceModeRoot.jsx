@@ -23,18 +23,16 @@ class AttendanceModeRoot extends Component {
 
     render() {
         return (
-            <div>
-                <Card
-                    bodyStyle={{ padding: 10 }}
-                    bordered={false}
-                    style={{ width: '100%' }}
-                    tabList={tabListNoTitle}
-                    activeTabKey={this.state.noTitleKey}
-                    onTabChange={(key) => { this.onTabChange(key); }}
-                >
-                    {contentListNoTitle[this.state.noTitleKey]}
-                </Card>
-            </div>
+            <Card
+                bodyStyle={{ padding: 10, backgroundColor: '#F1F2F5' }}
+                bordered={false}
+                style={{ width: '100%' }}
+                tabList={tabListNoTitle}
+                activeTabKey={this.state.noTitleKey}
+                onTabChange={(key) => { this.onTabChange(key); }}
+            >
+                {contentListNoTitle[this.state.noTitleKey]}
+            </Card>
         );
     }
 }

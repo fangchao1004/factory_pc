@@ -90,7 +90,7 @@ class ScheduleCreateView extends Component {
                         {this.state.loopTags.length > 0 ?
                             <div>
                                 <div>{this.state.loopTags.length}天</div>
-                                <Button style={{ marginTop: 10 }} size='small' onClick={() => { addTagBeginKey = 8; this.setState({ loopTags: [], beginTagForJia: null }) }}>清空</Button>
+                                <Button type="danger" style={{ marginTop: 10 }} size='small' onClick={() => { addTagBeginKey = 8; this.setState({ loopTags: [], beginTagForJia: null }) }}>清空</Button>
                             </div>
                             : null}
                     </Col>
@@ -313,14 +313,14 @@ class ScheduleCreateView extends Component {
 
     render() {
         return (
-            <div>
+            <div style={{ padding: 10, backgroundColor: '#FFFFFF' }}>
                 <Row>
                     <Col span={6}>
-                        <Button onClick={this.createTable} type="primary" style={{ marginBottom: 10 }}>创建新表单</Button>
+                        <Button size="small" onClick={this.createTable} type="primary" style={{ marginBottom: 10 }}>创建新表单</Button>
                     </Col>
                     <Col span={18}>
                         <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
-                            {this.state.listOfyear.length > 0 ? <Fragment> <Button onClick={() => { this.setState({ listOfyear: [] }) }} type="primary" style={{ marginBottom: 10, marginLeft: 30 }}>重置</Button>
+                            {this.state.listOfyear.length > 0 ? <Fragment> <Button size="small" onClick={() => { this.setState({ listOfyear: [] }) }} type="primary" style={{ marginBottom: 10, marginLeft: 10 }}>重置</Button>
                                 <Popconfirm
                                     placement="topRight"
                                     title={'确定要更新轮值表吗？原先的轮值表数据将会被替换'}
@@ -328,7 +328,7 @@ class ScheduleCreateView extends Component {
                                     okText="确定"
                                     cancelText="取消"
                                 >
-                                    <Button type="danger" style={{ marginBottom: 10 }}>确认无误-保存入库</Button>
+                                    <Button size="small" type="danger" style={{ marginBottom: 10 }}>确认无误-保存入库</Button>
                                     {/* onClick={this.comfrimToDB} */}
                                 </Popconfirm>
                             </Fragment> : null}
@@ -345,6 +345,7 @@ class ScheduleCreateView extends Component {
                     {this.renderContent()}
                 </Modal>
                 <Table
+                    size="small"
                     bordered
                     dataSource={this.state.listOfyear}
                     columns={columns}

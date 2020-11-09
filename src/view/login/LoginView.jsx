@@ -22,25 +22,39 @@ export default class LoginView extends React.Component {
   }
 
   onLoginOk = e => {
-    this.refs.form.validateFields((error, values) => {
+    this.refs.form.validateFields(async (error, values) => {
       if (!error) {
         let sql = `select users.* ,group_concat(u_m_j.mj_id) as major_id_all, group_concat(majors.name) as major_name_all from users
         left join (select * from user_map_major where effective = 1) u_m_j on u_m_j.user_id = users.id
         left join (select * from majors  where effective = 1) majors on majors.id = u_m_j.mj_id
         where users.username = '${values.userName}' and users.password = '${values.password}' and users.effective = 1
         group by users.id`
-        HttpApi.obs({ sql }, doc => {
-          if (doc.data.code === 0 && doc.data.data.length > 0) {
-            storage.removeItem(USERINFO);
-            storage[USERINFO] = JSON.stringify(doc.data.data[0]);
-            this.props.history.push('/mainView/home')
-            setTimeout(() => {
-              window.location.reload();
-          }, 100);
-          } else {
-            message.error("用户名/密码错误")
+        let result = await HttpApi.obs({ sql })
+        if (result.data.code === 0 && result.data.data.length > 0) {
+          const user = result.data.data[0]
+          storage.removeItem(USERINFO);
+          ///查询登录用户的角色数据
+          let sql = `select roles.id,roles.value,roles.des from role_map_user
+          left join roles on roles.id = role_map_user.role_id
+          where user_id = ${user.id} and effective = 1`
+          let result_role = await HttpApi.obs({ sql })
+          let tempObj = {};
+          if (result_role.data.code === 0 && result_role.data.data.length > 0) {
+            const role_list = result_role.data.data
+            tempObj['role_id_all'] = role_list.map((item) => item.id).join(',')
+            tempObj['role_name_all'] = role_list.map((item) => item.des).join(',')
+            tempObj['role_value_all'] = role_list.map((item) => item.value).join(',')///用role 替代 permission 
+            tempObj['permission'] = role_list.map((item) => item.value).join(',')
           }
-        })
+          const new_user = { ...user, ...tempObj }
+          storage[USERINFO] = JSON.stringify(new_user);
+          this.props.history.push('/mainView/home')
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+        } else {
+          message.error("用户名/密码错误")
+        }
       }
     })
   }

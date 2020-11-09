@@ -280,6 +280,7 @@ export default function PreviewTaskView(props) {
 
     // console.log('props.task.status:', props.task);
     return <Modal width={700}
+        destroyOnClose
         centered
         title="任务详情"
         onCancel={() => {

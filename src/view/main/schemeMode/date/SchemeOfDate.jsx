@@ -173,7 +173,7 @@ class SchemeOfDate extends Component {
             }, {
                 title: '操作',
                 dataIndex: 'action',
-                width: 100,
+                width: 80,
                 render: (text, record) => {
                     return <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <Button type='primary' size="small" onClick={() => { this.setState({ record, updateVisible: true }) }} >修改</Button>
@@ -186,9 +186,9 @@ class SchemeOfDate extends Component {
             }
         ]
         return (
-            <div>
-                <Button type='primary' onClick={() => { this.setState({ addVisible: true }) }}>添加日期方案</Button>
-                <Table style={{ marginTop: 10 }} bordered columns={columns} dataSource={this.state.data} pagination={false} />
+            <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
+                <Button size="small" type='primary' onClick={() => { this.setState({ addVisible: true }) }}>添加日期方案</Button>
+                <Table size="small" style={{ marginTop: 10 }} bordered columns={columns} dataSource={this.state.data} pagination={false} />
                 <AddDateSchemeView visible={this.state.addVisible} onOk={this.addSchemeOk} onCancel={this.addSchemeCancel} />
                 <UpdateDateSchemeView visible={this.state.updateVisible} onOk={this.updateSchemeOk} onCancel={this.updateSchemeCancel} record={this.state.record} />
             </div>

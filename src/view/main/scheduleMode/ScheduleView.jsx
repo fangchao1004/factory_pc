@@ -75,8 +75,9 @@ class ScheduleView extends Component {
 
     render() {
         return (
-            <div>
+            <div style={{ padding: 10, backgroundColor: '#FFFFFF' }}>
                 <Table
+                    size="small"
                     rowClassName={(record, index) => { if (record.time === todayLab) { return 'row' } else { return '' } }}
                     bordered
                     dataSource={this.state.schedulesData}

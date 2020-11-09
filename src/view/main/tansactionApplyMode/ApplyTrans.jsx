@@ -62,7 +62,7 @@ class ApproveTrans extends Component {
     }
     render() {
         return (
-            <div>
+            <div style={{ padding: 10, backgroundColor: '#FFFFFF' }}>
                 <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>发起申请</h2>
                 <div style={{ borderStyle: 'solid', borderColor: "#DDDDDD", padding: 20, paddingTop: 30, borderWidth: 1, borderRadius: 4, marginTop: 10 }}>
                     <Row>
@@ -134,7 +134,7 @@ class ApproveTrans extends Component {
                         </Col>
                     </Row>
                     <Popconfirm title="确认检查无误-要提交申请吗?" onConfirm={this.applyHandler}>
-                        <Button style={{ marginTop: 10 }} type={'primary'}>提交申请</Button>
+                        <Button size="small" type={'danger'} style={{ marginTop: 10 }} >提交申请</Button>
                     </Popconfirm>
                 </div>
             </div>

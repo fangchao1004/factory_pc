@@ -71,10 +71,11 @@ export default props => {
             )
         }
     ]
-    return <div>
+    return <div style={{ padding: 10, backgroundColor: '#FFFFFF' }}>
         <Alert message="请勿随意删除, 至少保持一个缺陷状态用于挂起操作时的具体选项" type="info" showIcon />
-        <Button style={{ marginTop: 10 }} type={'primary'} onClick={() => { setTitle('添加状态'); setAddModalVisible(true) }}>添加状态</Button>
+        <Button size="small" style={{ marginTop: 10 }} type={'primary'} onClick={() => { setTitle('添加状态'); setAddModalVisible(true) }}>添加状态</Button>
         <Table
+            size="small"
             style={{ marginTop: 10 }}
             bordered
             columns={columns}

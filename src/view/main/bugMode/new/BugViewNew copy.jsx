@@ -1,11 +1,14 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Table, Tag, Button, message, Popconfirm, Tooltip, Alert, Modal, Input, Icon, Popover } from 'antd'
 import HttpApi, { Testuri } from '../../../util/HttpApi'
 import moment from 'moment'
 import AddBugView from '../AddBugView';
 import ExportBugView from '../ExportBugView';
 import '../BugViewCss.css'
+import FuncPanelForRepair from './FuncPanelForRepair';
 import StepLogView from './StepLogView';
+import FuncPanelForEngineer from './FuncPanelForEngineer';
+import FuncPanelForRunner from './FuncPanelForRunner';
 import { originOverTime, originStatus, BUGLOOPTIME, NOTICEMUSICOPEN, BUGDATAUPDATETIME } from '../../../util/AppData'
 import ShowImgView from '../ShowImgView';
 import { getDuration, checkOverTime, removeOneBugIdFromList } from '../../../util/Tool';
@@ -504,8 +507,28 @@ export default class BugViewNew extends Component {
                 align: 'center',
                 width: 100,
                 render: (text, record) => {
+                    let majorHasFlag = JSON.parse(localUserInfo).major_id_all && JSON.parse(localUserInfo).major_id_all.split(',').indexOf(String(record.major_id)) !== -1
+                    let fixable = majorHasFlag && (record.status < 2 || record.status === 6 || record.status === 7);
+                    let engable = majorHasFlag && (record.status < 3 || record.status > 4);
+                    let runable = record.status === 3;
+
                     return <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <Button size="small" type="default" onClick={() => { this.setState({ stepLogVisible: true, currentRecord: record }) }}>处理记录</Button>
+                        {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('3') !== -1 ?
+                            <>
+                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                                <Button disabled={!fixable} size="small" type="primary" onClick={() => { this.repairHandler(record) }}>维修处理</Button>
+                            </> : null}
+                        {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('0') !== -1 ?
+                            <>
+                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                                <Button disabled={!engable} size="small" type="primary" onClick={() => { this.engineerHandler(record) }}>专工处理</Button>
+                            </> : null}
+                        {JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.indexOf('1') !== -1 ?
+                            <>
+                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                                <Button disabled={!runable} size="small" type="primary" onClick={() => { this.runnerHandler(record) }}>运行处理</Button>
+                            </> : null}
                         {JSON.parse(localUserInfo).isadmin === 1 ?
                             <>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
@@ -518,19 +541,18 @@ export default class BugViewNew extends Component {
             }
         ]
         return (
-            <div style={{ padding: 10, backgroundColor: '#FFFFFF' }}>
+            < Fragment >
                 <Alert message="当个人与缺陷专业匹配且当前进度符合流程顺序操作按钮才可使用; 可点击处理记录按钮查看记录; " type="info" showIcon />
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
-                    <Button size="small" type={'primary'} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
+                    <Button type={'primary'} onClick={() => { this.setState({ showModal7: true }) }}>添加缺陷</Button>
                     <div style={{ textAlign: 'right' }}>
-                        <Input.Search size="small" style={{ width: 340 }} allowClear placeholder="支持内容、巡检点和巡检范围的模糊查询"
+                        <Input.Search style={{ width: 340 }} allowClear placeholder="支持内容、巡检点和巡检范围的模糊查询"
                             onChange={(e) => { this.setState({ searchKey: e.target.value }); if (e.target.value === '') { this.init(); } }}
                             onPressEnter={(e) => { this.filterBySearch(e.target.value) }} onSearch={this.filterBySearch} enterButton />
-                        <Button size="small" icon={'export'} style={{ marginLeft: 10 }} type={'primary'} onClick={() => { this.setState({ showModal8: true }) }}>导出缺陷</Button>
+                        <Button icon={'export'} style={{ marginLeft: 10 }} type={'primary'} onClick={() => { this.setState({ showModal8: true }) }}>导出缺陷</Button>
                     </div>
                 </div>
                 <Table
-                    size="small"
                     style={{ marginTop: 10 }}
                     bordered
                     dataSource={this.state.data}
@@ -555,6 +577,63 @@ export default class BugViewNew extends Component {
                     cancel={() => { this.setState({ showModal8: false }) }} />
                 <ShowImgView showModal={this.state.showModal1} cancel={() => { this.setState({ showModal1: false }) }} showLoading={this.state.showLoading} imguuid={this.state.imguuid} />
                 <StepLogView visible={this.state.stepLogVisible} onCancel={() => { this.setState({ stepLogVisible: false }) }} record={this.state.currentRecord} />
+                <FuncPanelForRepair visible={this.state.repairVisible} onOk={(v) => {
+                    switch (v.selectValue) {
+                        case 1:
+                            this.exchangeBugMajorByRepair(v);
+                            break;
+                        case 2:
+                            this.freezeBugStepByRepair(v);
+                            break;
+                        case 3:
+                            this.fixCompleteByRepair(v);
+                            break;
+                        case 4:
+                            this.dontNeedfixByRepair(v);
+                            break;
+                        default:
+                            break;
+                    }
+                    this.setState({ repairVisible: false })
+                }} onCancel={() => { this.setState({ repairVisible: false }) }} />
+                <FuncPanelForEngineer visible={this.state.engineerVisible} record={this.state.currentRecord} onOk={(v) => {
+                    switch (v.selectValue) {
+                        case 1:
+                            this.exchangeBugMajorByEngineer(v);
+                            break;
+                        case 2:
+                            this.freezeBugStepByEngineer(v);
+                            break;
+                        case 3:
+                            this.goBackStartByEngineer(v);
+                            break;
+                        case 4:
+                            this.completeByEngineer(v);
+                            break;
+                        case 5:
+                            this.goBackFixByEngineer(v);
+                            break;
+                        case 6:
+                            this.passByEngineer(v);
+                            break;
+                        default:
+                            break;
+                    }
+                    this.setState({ engineerVisible: false })
+                }} onCancel={() => { this.setState({ engineerVisible: false }) }} />
+                <FuncPanelForRunner visible={this.state.runnerVisible} onOk={(v) => {
+                    switch (v.selectValue) {
+                        case 1:
+                            this.completeByRunner(v);
+                            break;
+                        case 2:
+                            this.goBackEngineerByRunner(v);
+                            break;
+                        default:
+                            break;
+                    }
+                    this.setState({ runnerVisible: false })
+                }} onCancel={() => { this.setState({ runnerVisible: false }) }} />
                 <Modal visible={this.state.imguuid !== null} destroyOnClose centered
                     width={410} bodyStyle={{ textAlign: 'center', padding: 5, margin: 0 }} footer={null} onCancel={() => {
                         this.setState({ imguuid: null })
@@ -562,7 +641,7 @@ export default class BugViewNew extends Component {
                     <img alt='' style={{ width: 400 }} src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} />
                     {/* <img alt='' style={{ width: 400 }} src={'http://ixiaomu.cn:3008/get_jpg?uuid=' + this.state.imguuid} /> */}
                 </Modal>
-            </div >
+            </Fragment >
         );
     }
     filterBySearch = (v) => {
@@ -594,5 +673,188 @@ export default class BugViewNew extends Component {
         })
         let newResult = data.filter((item) => { return item.exist === true })
         this.setState({ data: newResult })
+    }
+    repairHandler = (record) => {
+        this.setState({ repairVisible: true, currentRecord: record })
+    }
+    engineerHandler = (record) => {
+        this.setState({ engineerVisible: true, currentRecord: record })
+    }
+    runnerHandler = (record) => {
+        this.setState({ runnerVisible: true, currentRecord: record })
+    }
+    ////////////////////// 维修人员处理
+    exchangeBugMajorByRepair = (v) => {
+        let remark = v.remarkText;
+        let bug_id = this.state.currentRecord.id;
+        let user_id = JSON.parse(localUserInfo).id;
+        let major_id = v.selectMajorId;
+        let sql = `INSERT INTO bug_step_log (bug_id,tag_id,major_id,user_id,remark,createdAt) VALUES (${bug_id},1,${major_id},${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                let sql = `update bugs set isread = 0,status = 6,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                HttpApi.obs({ sql }, (res) => {
+                    if (res.data.code === 0) { message.success('申请转专业成功'); this.init(); } else { message.error('申请转专业失败') }
+                })
+            } else { message.error('申请转专业失败') }
+        })
+    }
+    freezeBugStepByRepair = (v) => {
+        let remark = v.remarkText;
+        let freeze_id = v.selectFreezeId;
+        let bug_id = this.state.currentRecord.id;
+        let user_id = JSON.parse(localUserInfo).id;
+        let sql = `INSERT INTO bug_step_log (freeze_id,bug_id,tag_id,user_id,remark,createdAt) VALUES (${freeze_id},${bug_id},2,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                let sql = `update bugs set isread = 0,status = 7,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                HttpApi.obs({ sql }, (res) => {
+                    if (res.data.code === 0) { message.success('申请挂起成功'); this.init(); } else { message.error('申请挂起失败') }
+                })
+            } else { message.error('申请挂起失败') }
+        })
+    }
+    fixCompleteByRepair = (v) => {
+        let remark = v.remarkText;
+        let bug_id = this.state.currentRecord.id;
+        let user_id = JSON.parse(localUserInfo).id;
+        let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},4,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                let sql = `update bugs set isread = 0,status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+
+                HttpApi.obs({ sql }, (res) => {
+                    if (res.data.code === 0) { message.success('完成维修'); this.init(); } else { message.error('维修失败') }
+                })
+            } else { message.error('操作失败') }
+        })
+    }
+    dontNeedfixByRepair = (v) => {
+        let remark = v.remarkText;
+        let bug_id = this.state.currentRecord.id;
+        let user_id = JSON.parse(localUserInfo).id;
+        let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},16,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                let sql = `update bugs set isread = 0,status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                HttpApi.obs({ sql }, (res) => {
+                    if (res.data.code === 0) { message.success('维修人员认为无需维修'); this.init(); } else { message.error('维修人员认为无需维修操作失败') }
+                })
+            } else { message.error('维修人员认为无需维修操作失败') }
+        })
+    }
+    ////////////////////// 专工处理
+    exchangeBugMajorByEngineer = (v) => {
+        let remark = v.remarkText;
+        let bug_id = this.state.currentRecord.id;
+        let user_id = JSON.parse(localUserInfo).id;
+        let major_id = v.selectMajorId;
+        let sql = `INSERT INTO bug_step_log (bug_id,tag_id,major_id,user_id,remark,createdAt) VALUES (${bug_id},3,${major_id},${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+        HttpApi.obs({ sql }, (res) => {
+            let sql = `update bugs set isread = 0,major_id = ${major_id},status = 0,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+            HttpApi.obs({ sql }, (res) => {
+                if (res.data.code === 0) { message.success('转专业成功'); this.init(); } else { message.error('转专业失败') }
+            })
+        })
+    }
+    freezeBugStepByEngineer = (v) => {
+        let remark = v.remarkText;
+        let bug_id = this.state.currentRecord.id;
+        let user_id = JSON.parse(localUserInfo).id;
+        let freeze_id = v.selectFreezeId;
+        let sql = `INSERT INTO bug_step_log (freeze_id,bug_id,tag_id,user_id,remark,createdAt) VALUES (${freeze_id},${bug_id},15,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                let sql = `update bugs set isread = 0,status = 5,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                HttpApi.obs({ sql }, (res) => {
+                    if (res.data.code === 0) { message.success('挂起成功'); this.init(); } else { message.error('挂起失败') }
+                })
+            } else { message.error('挂起失败') }
+        })
+    }
+    goBackStartByEngineer = (v) => {
+        let remark = v.remarkText;
+        let bug_id = this.state.currentRecord.id;
+        let user_id = JSON.parse(localUserInfo).id;
+        let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},9,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                let sql = `update bugs set isread = 0,status = 0,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                HttpApi.obs({ sql }, (res) => {
+                    if (res.data.code === 0) { message.success('恢复维修流程成功'); this.init(); } else { message.error('恢复维修流程失败') }
+                })
+            } else { message.error('恢复维修流程失败') }
+        })
+    }
+    completeByEngineer = (v) => {
+        let remark = v.remarkText;
+        let bug_id = this.state.currentRecord.id;
+        let user_id = JSON.parse(localUserInfo).id;
+        let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},5,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                let sql = `update bugs set isread = 0,status = 3,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                HttpApi.obs({ sql }, (res) => {
+                    if (res.data.code === 0) { message.success('专工完成验收'); this.init(); } else { message.error('专工验收操作失败') }
+                })
+            } else { message.error('专工验收操作失败') }
+        })
+    }
+    goBackFixByEngineer = (v) => {
+        let remark = v.remarkText;
+        let bug_id = this.state.currentRecord.id;
+        let user_id = JSON.parse(localUserInfo).id;
+        let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},7,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                let sql = `update bugs set isread = 0,status = 1,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                HttpApi.obs({ sql }, (res) => {
+                    if (res.data.code === 0) { message.success('专工打回操作成功'); this.init(); } else { message.error('专工打回操作失败') }
+                })
+            } else { message.error('专工打回操作失败') }
+        })
+    }
+    passByEngineer = (v) => {
+        let remark = v.remarkText;
+        let bug_id = this.state.currentRecord.id;
+        let user_id = JSON.parse(localUserInfo).id;
+        let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},17,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                let sql = `update bugs set isread = 0,status = 3,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                HttpApi.obs({ sql }, (res) => {
+                    if (res.data.code === 0) { message.success('专工确认无需维修'); this.init(); } else { message.error('专工确认无需维修操作失败') }
+                })
+            } else { message.error('专工确认无需维修操作失败') }
+        })
+    }
+    /////////////// 运行处理
+    completeByRunner = (v) => {
+        let remark = v.remarkText;
+        let bug_id = this.state.currentRecord.id;
+        let user_id = JSON.parse(localUserInfo).id;
+        let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},6,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                let sql = `update bugs set status = 4,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                HttpApi.obs({ sql }, (res) => {
+                    if (res.data.code === 0) { message.success('运行验收操作成功'); this.init(); this.changeRecordData(bug_id); } else { message.error('运行验收操作失败') }
+                })
+            } else { message.error('运行验收操作失败') }
+        })
+    }
+    goBackEngineerByRunner = (v) => {
+        let remark = v.remarkText;
+        let bug_id = this.state.currentRecord.id;
+        let user_id = JSON.parse(localUserInfo).id;
+        let sql = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},8,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+        HttpApi.obs({ sql }, (res) => {
+            if (res.data.code === 0) {
+                let sql = `update bugs set isread = 0,status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
+                HttpApi.obs({ sql }, (res) => {
+                    if (res.data.code === 0) { message.success('运行打回操作成功'); this.init(); } else { message.error('运行打回操作失败') }
+                })
+            } else { message.error('运行打回操作失败') }
+        })
     }
 }

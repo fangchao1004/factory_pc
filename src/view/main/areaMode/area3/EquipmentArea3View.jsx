@@ -138,16 +138,17 @@ class EquipmentArea3View extends Component {
             }
         ]
         return (
-            <div>
+            <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
                 <div>
                     <Row>
                         <Col span={6}>
-                            <Button onClick={() => { this.setState({ addVisible: true }) }} type="primary" style={{ marginBottom: 10 }}>
+                            <Button size="small" onClick={() => { this.setState({ addVisible: true }) }} type="primary" style={{ marginBottom: 10 }}>
                                 添加第三级巡检点范围
                          </Button>
                         </Col>
                     </Row>
                     <Table
+                        size="small"
                         bordered
                         dataSource={this.state.dataSource}
                         columns={columns}

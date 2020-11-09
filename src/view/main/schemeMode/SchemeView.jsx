@@ -168,9 +168,9 @@ export default class SchemeView extends Component {
                 }
             }
         ]
-        return <div>
+        return <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                {this.state.isEditing ? <Button type='primary' onClick={() => {
+                {this.state.isEditing ? <Button size="small" type='primary' onClick={() => {
                     this.state.schemeData.push({
                         id: new Date().getTime(),
                         effective: 1,
@@ -187,7 +187,7 @@ export default class SchemeView extends Component {
                     <Popconfirm title='确定恢复重置吗？' onConfirm={() => {
                         this.setState({ isEditing: false })
                         this.init();
-                    }}><Button style={{ marginRight: 20 }} type='dashed'>取消-恢复重置</Button></Popconfirm>
+                    }}><Button size="small" style={{ marginRight: 20 }} type='dashed'>取消-恢复重置</Button></Popconfirm>
                     <Popconfirm title='确定提交修改吗？' onConfirm={() => {
                         /// 要修改scheme表和scheme_map_value表。
                         /// 在更新scheme_map_value表的时候，要怎么数据汇总处理呢? 只能整体替换scheme_map_value表。设备挂载的是scheme表的id,映射表的整体替换不会引用已有的设备和方案的映射关系
@@ -199,9 +199,9 @@ export default class SchemeView extends Component {
                             console.log('确定提交修改吗？:', this.state.schemeData);
 
                         }
-                    }}><Button type='danger' >确认修改</Button></Popconfirm>
+                    }}><Button size="small" type='danger' >确认修改</Button></Popconfirm>
                 </div> :
-                    <Button type='primary' onClick={() => { this.setState({ isEditing: true }) }}>开始编辑</Button>}</div>
+                    <Button size="small" type='primary' onClick={() => { this.setState({ isEditing: true }) }}>开始编辑</Button>}</div>
             <Table style={{ marginTop: 10 }} bordered columns={schemeCloums} dataSource={this.state.schemeData} pagination={false} />
         </div >
     }

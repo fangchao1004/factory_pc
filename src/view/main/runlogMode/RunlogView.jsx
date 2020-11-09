@@ -112,9 +112,10 @@ class RunlogView extends Component {
             }
         ]
         return (
-            <div>
-                <Button type='primary' onClick={() => { this.setState({ addVisible: true }) }}>添加日志</Button>
+            <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
+                <Button size="small" type='primary' onClick={() => { this.setState({ addVisible: true }) }}>添加日志</Button>
                 <Table
+                    size="small"
                     style={{ marginTop: 10 }}
                     bordered
                     dataSource={this.state.datasource}

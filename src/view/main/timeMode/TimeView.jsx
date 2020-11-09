@@ -302,7 +302,7 @@ class TimeView extends Component {
             }, {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 100,
+                width: 80,
                 align: 'center',
                 render: (text, record) => (
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -328,15 +328,16 @@ class TimeView extends Component {
             }
         ]
         return (
-            <div>
+            <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
                 <Alert style={{ marginBottom: 10 }} type='info' message='拥有管理员权限可以编辑巡检点数量, 待检数: 经过方案筛选后的巡检点数量统计 ' />
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     {this.state.isAdmin ?
-                        <Button type={'primary'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showAddModal: true }) }}>添加时间段</Button>
+                        <Button size="small" type={'primary'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showAddModal: true }) }}>添加时间段</Button>
                         : <span></span>}
-                    <Button icon={'export'} type={'primary'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showExportRecordView: true }) }}>导出巡检记录</Button>
+                    <Button size="small" icon={'export'} type={'primary'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showExportRecordView: true }) }}>导出巡检记录</Button>
                 </div>
                 <Table
+                    size="small"
                     loading={this.state.loading}
                     bordered
                     columns={columns}

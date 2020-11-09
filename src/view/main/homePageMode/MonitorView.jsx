@@ -86,6 +86,9 @@ export default () => {
         loop = setInterval(() => {
             getDataHandler();
         }, 1 * 60 * 1000)
+        return () => {
+            clearInterval(loop)
+        }
     }, [getDataHandler])
     const columns = [
         {

@@ -1,8 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { Table, Tag, Button, message, Popconfirm, Tooltip, Modal, Icon, DatePicker } from 'antd'
 import HttpApi, { Testuri } from '../../../util/HttpApi'
-// import Store from '../../../../redux/store/Store';
-// import { showBugNum } from '../../../../redux/actions/BugAction';
 import '../BugViewCss.css'
 import StepLogView from './StepLogView';
 import ShowImgView from '../ShowImgView';
@@ -129,16 +127,9 @@ export default class BugViewNewComplete extends Component {
             if (res.data.code === 0) {
                 message.success('移除缺陷成功');
                 this.init();
-                ///要利用redux刷新 mainView处的徽标数
-                // this.updateDataByRedux();
-                ///再创建一个新的record记录插入records表
             }
         })
     }
-    // updateDataByRedux = () => {
-    //     ///每次删除
-    //     Store.dispatch(showBugNum(null)) ///随便派发一个值，目的是让 mainView处监听到 执行init();
-    // }
     render() {
         const columns = [
             {
@@ -326,9 +317,9 @@ export default class BugViewNewComplete extends Component {
             }
         ]
         return (
-            <Fragment>
+            <div style={{ padding: 10, backgroundColor: '#FFFFFF' }}>
                 <div style={{ textAlign: 'right' }}>
-                    <DatePicker.RangePicker style={{ marginRight: 10, marginBottom: 10 }} value={this.state.dateRange} allowClear={false} disabledDate={(current) => current > moment().endOf('day')} ranges={{
+                    <DatePicker.RangePicker size="small" style={{ marginRight: 10, marginBottom: 10 }} value={this.state.dateRange} allowClear={false} disabledDate={(current) => current > moment().endOf('day')} ranges={{
                         '今日': [moment(), moment()],
                         '本月': [moment().startOf('month'), moment().endOf('day')],
                         '上月': [moment().add(-1, 'month').startOf('month'), moment().add(-1, 'month').endOf('month')],
@@ -340,6 +331,7 @@ export default class BugViewNewComplete extends Component {
                     }} />
                 </div>
                 <Table
+                    size="small"
                     bordered
                     dataSource={this.state.data}
                     columns={columns}
@@ -363,7 +355,7 @@ export default class BugViewNewComplete extends Component {
                     <img alt='' style={{ width: 400 }} src={Testuri + 'get_jpg?uuid=' + this.state.imguuid} />
                     {/* <img alt='' style={{ width: 400 }} src={'http://ixiaomu.cn:3008/get_jpg?uuid=' + this.state.imguuid} /> */}
                 </Modal>
-            </Fragment >
+            </div >
         );
     }
 }

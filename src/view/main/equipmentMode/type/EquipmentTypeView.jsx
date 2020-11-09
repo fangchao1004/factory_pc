@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, Button, Row, Col, message, Popconfirm, Divider } from 'antd'
+import { Table, Button, message, Popconfirm, Divider } from 'antd'
 import HttpApi from '../../../util/HttpApi';
 import AddDeviceTypeView from './AddDeviceTypeView';
 import UpdateDeviceTypeView from './UpdateDeviceTypeView';
@@ -119,15 +119,10 @@ class EquipmentTypeView extends Component {
         ];
 
         return (
-            <div>
-                <Row>
-                    <Col span={6}>
-                        <Button onClick={this.addStaff} type="primary" style={{ marginBottom: 10 }}>
-                            添加巡检点类型
-                         </Button>
-                    </Col>
-                </Row>
+            <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
+                <Button size="small" onClick={this.addStaff} type="primary" style={{ marginBottom: 10 }}>添加巡检点类型</Button>
                 <Table
+                    size="small"
                     rowClassName={() => 'editable-row'}
                     bordered
                     dataSource={this.state.dataSource}

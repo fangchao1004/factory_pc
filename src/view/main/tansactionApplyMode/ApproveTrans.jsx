@@ -315,10 +315,10 @@ class ApproveTrans extends Component {
             columns.push(operationObj);
         }
         return (
-            <div>
+            <div style={{ padding: 10, backgroundColor: '#FFFFFF' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>申请记录</h2>
-                    <DatePicker.RangePicker disabledDate={this.disabledDate} value={this.state.dateRange} ranges={{
+                    <DatePicker.RangePicker size='small' disabledDate={this.disabledDate} value={this.state.dateRange} ranges={{
                         '今日': [moment(), moment()],
                         '本月': [moment().startOf('month'), moment().endOf('day')],
                     }} onChange={(v) => {
@@ -326,8 +326,8 @@ class ApproveTrans extends Component {
                     }} />
                 </div>
                 <Table
+                    size="small"
                     loading={this.state.loading}
-                    style={{ marginTop: 10 }}
                     bordered
                     dataSource={this.state.data}
                     columns={columns}

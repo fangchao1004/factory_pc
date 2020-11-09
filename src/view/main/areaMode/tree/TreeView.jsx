@@ -83,7 +83,7 @@ export default class TreeView extends Component {
     };
     render() {
         return (
-            <div>
+            <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
                 <Row>
                     <Col span={10} style={{ borderRight: 2, borderRightColor: "#DDDDDD", borderRightStyle: 'dashed' }}>
                         <Tree showLine className="hide-file-icon" showIcon onSelect={this.onSelect}>

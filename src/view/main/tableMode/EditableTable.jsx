@@ -194,7 +194,7 @@ export default class EditableTable extends Component {
             } else {
               return (
                 <Popconfirm title="确认删除吗?" onConfirm={() => this.handleDelete(record.key)}>
-                  <Button type='danger'>删除</Button>
+                  <Button size="small" type='danger'>删除</Button>
                 </Popconfirm>
               )
             }
@@ -203,22 +203,23 @@ export default class EditableTable extends Component {
       }];
 
     return (
-      <div>
+      <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
         <Row>
           <Col span={6}>
-            <Button onClick={this.handleAdd} type="primary" style={{ marginBottom: 10 }}>
+            <Button size="small" onClick={this.handleAdd} type="primary" style={{ marginBottom: 10 }}>
               添加表单项目
           </Button>
           </Col>
           <Col span={18} >
             <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
-              <Button onClick={this.readyHandler} type="primary" style={{ marginBottom: 10 }}>
+              <Button size="small" onClick={this.readyHandler} type="primary" style={{ marginBottom: 10 }}>
                 预览
               </Button>
             </div>
           </Col>
         </Row>
         <Table
+          size="small"
           rowClassName={() => 'editable-row'}
           bordered
           dataSource={dataSource}

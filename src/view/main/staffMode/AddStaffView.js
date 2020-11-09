@@ -1,11 +1,11 @@
 import React from 'react'
 import { Modal, Form, Input, Select, Switch } from 'antd'
 import HttpApi from '../../util/HttpApi'
-import { permisstion } from '../../util/AppData'
+// import { permisstion } from '../../util/AppData'
 
-const permissionOptions = permisstion.map(
-    permission => <Select.Option value={permission.value} key={permission.value}>{permission.name}</Select.Option>
-)
+// const permissionOptions = permisstion.map(
+//     permission => <Select.Option value={permission.value} key={permission.value}>{permission.name}</Select.Option>
+// )
 
 // function getTreeData(levels) { ///目的是 让生产运行部 产生子选项 甲乙丙丁组
 //     // console.log('levelsL;', levels);
@@ -75,11 +75,11 @@ function AddStaffForm(props) {
                 rules: [{ required: false, message: '请选择员工NFC' }]
             })(<Select showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{nfcOptions}</Select>)}
         </Form.Item>
-        <Form.Item label="员工权限" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+        {/* <Form.Item label="员工权限" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('permission', {
                 rules: [{ required: false, message: '请选择员工权限' }]
             })(<Select mode="multiple" showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{permissionOptions}</Select>)}
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item label="所属专业" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {getFieldDecorator('major_id', {
                 rules: [{ required: false, message: '请选择员工专业' }]

@@ -201,7 +201,7 @@ class AttendanceView extends Component {
             {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 150,
+                width: 80,
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
                         <Button size="small" type="primary" onClick={() => { this.checkOneHistory(record) }} >查看</Button>
@@ -212,15 +212,16 @@ class AttendanceView extends Component {
 
 
         return (
-            <div>
+            <div style={{ padding: 10, backgroundColor: '#FFFFFF' }}>
                 {userinfo && JSON.parse(userinfo).isadmin ?
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>员工考勤记录</h2>
-                        <Search style={{ width: 400 }} allowClear placeholder="支持姓名模糊查询" onSearch={value => this.onSearch(value)} onChange={e => this.onChange(e.currentTarget.value)} enterButton />
+                        <Search size="small" style={{ width: 400 }} allowClear placeholder="支持姓名模糊查询" onSearch={value => this.onSearch(value)} onChange={e => this.onChange(e.currentTarget.value)} enterButton />
                     </div> :
                     <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>个人考勤记录</h2>
                 }
                 <Table
+                    size="small"
                     style={{ marginTop: 10 }}
                     bordered
                     dataSource={this.state.users}
