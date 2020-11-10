@@ -241,7 +241,7 @@ export default props => {
             align: 'center',
             width: 120,
             render: (text, record) => {
-                return <div>{record.serial_no || text}</div>
+                return <div>{text}</div>
             }
         },
         {

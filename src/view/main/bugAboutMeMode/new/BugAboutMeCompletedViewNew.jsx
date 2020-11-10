@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, Tag, Button, message, Popconfirm, Tooltip, Modal, Icon, DatePicker } from 'antd'
+import { Table, Tag, Button, message, Tooltip, Modal, Icon, DatePicker } from 'antd'
 import HttpApi, { Testuri } from '../../../util/HttpApi'
 import StepLogView from '../../bugMode/new/StepLogView';
 import ShowImgView from '../../bugMode/ShowImgView';
@@ -124,9 +124,6 @@ export default class BugAboutMeCompletedViewNew extends Component {
             if (res.data.code === 0) {
                 message.success('移除缺陷成功');
                 this.init();
-                ///要利用redux刷新 mainView处的徽标数
-                // this.updateDataByRedux();
-                ///再创建一个新的record记录插入records表
             }
         })
     }
@@ -139,7 +136,7 @@ export default class BugAboutMeCompletedViewNew extends Component {
                 align: 'center',
                 width: 120,
                 render: (text, record) => {
-                    return <div>{record.serial_no || text}</div>
+                    return <div>{text}</div>
                 }
             },
             {
@@ -300,13 +297,13 @@ export default class BugAboutMeCompletedViewNew extends Component {
                 render: (text, record) => (
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <Button size="small" type="default" onClick={() => { this.setState({ stepLogVisible: true, currentRecord: record }) }}>处理记录</Button>
-                        {JSON.parse(localUserInfo).isadmin === 1 ?
+                        {/* {JSON.parse(localUserInfo).isadmin === 1 ?
                             <>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                 <Popconfirm title="确定要删除该缺陷吗?" onConfirm={() => { this.deleteBugsHandler(record); }}>
                                     <Button size="small" type="danger">删除</Button>
                                 </Popconfirm>
-                            </> : null}
+                            </> : null} */}
                     </div>
                 )
             }

@@ -269,11 +269,15 @@ class HttpApi {
         })
     }
     static updateUserInfo(params, f1, f2) {
-        Axios.post(Testuri + 'update_user', params).then(res => {
-            if (f1) { f1(res) }
-        }).catch(res => {
-            if (f2) { f2(res) }
-        })
+        if (f1) {
+            return Axios.post(Testuri + 'update_user', params).then(res => {
+                if (f1) { f1(res) }
+            }).catch(res => {
+                if (f2) { f2(res) }
+            })
+        } else {
+            return Axios.post(Testuri + 'update_user', params)
+        }
     }
     static addUserLevel(params, f1, f2) {
         Axios.post(Testuri + 'insert_level', params).then(res => {

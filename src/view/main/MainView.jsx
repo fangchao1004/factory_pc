@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useContext, useRef } from 'react';
-import { Layout, Menu, Icon, Row, Col, Popover, Badge, Avatar } from 'antd'
+import { Layout, Menu, Icon, Row, Col, Popover, Badge, Avatar, Dropdown, Modal } from 'antd'
 import { Route, Link, Redirect } from 'react-router-dom'
 import logopng from '../../assets/logo.png'
 import HomePageRoot from './homePageMode/HomePageRoot';
@@ -12,7 +12,6 @@ import TaskModeRoot from './taskMode/TaskModeRoot'
 import BugModeRoot from './bugMode/BugModeRoot';
 import BugAboutMeModeRoot from './bugAboutMeMode/BugAboutMeModeRoot';
 import BugRunChecModekRoot from './bugRunCheckMode/BugRunChecModekRoot';
-import SettingViewRoot from './settingMode/SettingViewRoot';
 import TransactionModeRoot from './transactionMode/TransactionModeRoot';
 import CarModeRoot from './carMode/CarModeRoot'
 import AttendanceModeRoot from './attendanceMode/AttendanceModeRoot'
@@ -20,14 +19,16 @@ import ScheduleRoot from './scheduleMode/ScheduleRoot'
 import TansactionApplyModeRoot from './tansactionApplyMode/TansactionApplyModeRoot'
 import SchemeModeRoot from './schemeMode/SchemeModeRoot'
 import RunlogModeRoot from './runlogMode/RunlogModeRoot'
-import UserMenuView from './userMenu/UserMenuView'
-import HttpApi from '../util/HttpApi';
+// import UserMenuView from './userMenu/UserMenuView'///废弃
+// import SettingViewRoot from './settingMode/SettingViewRoot';///废弃
+import HttpApi, { environmentIsTest } from '../util/HttpApi';
 import { BUGDATAUPDATETIME, NOTIFY_MP3, WARN_MP3 } from '../util/AppData'
 import { checkLocalStorageBugIdList, BrowserType } from '../util/Tool';
 import NoticeMenu from './noticeMenu/NoticeMenu';
 import DetailModal from './noticeMenu/DetailModal';
 import { AppDataContext } from '../../redux/AppRedux'
 import { useMemo } from 'react';
+import UserCenterView from './userCenter/UserCenterView';
 
 const { Header, Content, Sider } = Layout;
 const SubMenu = Menu.SubMenu
@@ -49,6 +50,41 @@ export default props => {
     const [area0List, setArea0List] = useState([])
     const [unreadBugList, setUnreadBugList] = useState([])
     const [unreadWarnList, setUnreadWarnList] = useState([])
+
+    const menu = (
+        <Menu onClick={(target) => {
+            switch (target.key) {
+                case '1':
+                    props.history.push('/mainView/usersetting')
+                    break;
+                case '2':
+                    Modal.confirm({
+                        title: `确认要退出吗？`,
+                        okText: '确定',
+                        okType: 'danger',
+                        onOk: async function () {
+                            props.history.replace('/')
+                            storage.removeItem('userinfo');
+                            window.location.href = environmentIsTest ? '/test/' : '/';
+                        }
+                    })
+                    break;
+                default:
+                    break;
+            }
+        }}>
+            <Menu.Item key="1">
+                <Icon type="user" />
+                <span>个人中心</span>
+            </Menu.Item>
+            <Menu.Divider />
+            <Menu.Item key="2">
+                <Icon type="poweroff" />
+                <span>退出登录</span>
+            </Menu.Item>
+        </Menu>
+    );
+
     const init = useCallback(async () => {
         var myBugList = [];
         var runBugList = [];
@@ -239,7 +275,7 @@ export default props => {
             />
             <Route
                 path={`${props.match.path}/usersetting`}
-                render={() => localUserInfo ? <SettingViewRoot {...props} /> : <Redirect to='/' />}
+                render={() => localUserInfo ? <UserCenterView /> : <Redirect to='/' />}
             />
             <Route
                 exact
@@ -292,13 +328,13 @@ export default props => {
                     <span>区域</span>
                     <Link to={`${props.match.url}/area`} />
                 </Menu.Item>
-                <SubMenu key="巡检点" title={<span><Icon type="scan" />巡检</span>}>
+                <SubMenu key="巡检点" title={<span><Icon type="scan" /> <span>巡检</span></span>}>
                     {renderByArea0()}
                 </SubMenu>
                 <SubMenu key="缺陷" title={
                     <span>
                         <Icon type="reconciliation" />
-                        缺陷
+                        <span>缺陷</span>
                         <Badge dot={permissionRun ? (appState.aboutMeBugCount + appState.runBugCount) > 0 : appState.aboutMeBugCount > 0}
                             style={{ marginLeft: 30 }} />
                     </span>
@@ -376,7 +412,7 @@ export default props => {
                     <Link to={`${props.match.url}/car`} />
                 </Menu.Item>
                 <SubMenu key="设置" title={<span><Icon type="setting" /><span>设置</span></span>}>
-                    <Menu.Item key="/mainView/usersetting"><Icon type="switcher" /><span>个人设置</span><Link to={`${props.match.url}/usersetting`} /></Menu.Item>
+                    <Menu.Item key="/mainView/usersetting"><Icon type="switcher" /><span>个人中心</span><Link to={`${props.match.url}/usersetting`} /></Menu.Item>
                 </SubMenu>
             </Menu>
         </Sider>
@@ -411,11 +447,9 @@ export default props => {
                             </div>
                             <DetailModal visible={modalVisible} item={selectItem} onCancel={() => { setModalVisible(false) }} />
                         </span>
-                        <Popover trigger="click" width={220} placement="bottomRight" content={<UserMenuView />}>
-                            <Avatar shape="square" style={{ backgroundColor: '#597ef7', verticalAlign: 'middle', cursor: "pointer" }} size="large">
-                                {JSON.parse(localUserInfo).name}
-                            </Avatar>
-                        </Popover>
+                        <Dropdown overlay={menu} trigger={['click']}>
+                            <Avatar style={{ backgroundColor: '#1890ff', cursor: 'pointer' }} shape='square' size={36}>{JSON.parse(localUserInfo).name}</Avatar>
+                        </Dropdown>
                     </Col>
                 </Row>
             </Header>

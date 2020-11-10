@@ -94,7 +94,7 @@ class StaffTypeView extends Component {
                 align: 'center',
                 render: (text, record) => (
                     <div style={{ textAlign: 'center' }}>
-                        <Button icon='edit' size="small" type="primary" onClick={this.updateLevel.bind(this, record)}>修改</Button>
+                        <Button icon='edit' size="small" type="primary" onClick={this.updateLevel.bind(this, record)}>编辑</Button>
                         <Divider type="vertical" />
                         <Popconfirm title="确定要删除该部门吗?" onConfirm={this.deleteLevelConfirm.bind(null, record)}>
                             <Button icon='delete' size="small" type="danger">删除</Button>

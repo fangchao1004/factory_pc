@@ -185,7 +185,6 @@ export default () => {
             <Table loading={loading} columns={columns} bordered size="small" dataSource={dataSource} pagination={false} />
         </div>
         <SetPanel data={selectItem} visible={showPanel} onCancel={() => { setShowPanel(false) }} onOk={() => { getDataHandler() }} />
-        {/* <DevicePanel data={switchData} visible={showDevicePanel} onCancel={() => { setShowDevicePanel(false) }} onOk={(data) => {}} /> */}
     </div>
 }
 
@@ -251,54 +250,3 @@ function configForm(props) {
 }
 
 const ConfigForm = Form.create({ name: 'areaForm' })(configForm)
-
-// function DevicePanel(props) {
-//     const [device1, setDevice1] = useState()
-//     const [device2, setDevice2] = useState()
-//     const [device3, setDevice3] = useState()
-//     const [device4, setDevice4] = useState()
-//     useEffect(() => {
-//         if (props.data.length > 0) {
-//             setDevice1(props.data[0].iswork ? true : false)
-//             setDevice2(props.data[1].iswork ? true : false)
-//             setDevice3(props.data[2].iswork ? true : false)
-//             setDevice4(props.data[3].iswork ? true : false)
-//         }
-//     }, [props.data])
-//     return <Modal
-//         destroyOnClose
-//         title='设备设置'
-//         visible={props.visible}
-//         onCancel={() => { props.onCancel() }}
-//         onOk={() => {
-//             let data = [{ device_no: 1, iswork: device1 ? 1 : 0 },
-//             { device_no: 2, iswork: device2 ? 1 : 0 },
-//             { device_no: 3, iswork: device3 ? 1 : 0 },
-//             { device_no: 4, iswork: device4 ? 1 : 0 }]
-//             props.onOk(data)
-//         }}
-//     >
-//         <Alert style={{ marginBottom: 16 }} message='设备是否开启报警' />
-//         {props.data ? props.data.map((item, index) => {
-//             return <Row key={index} gutter={[0, 16]}><Col span={4}><Icon type="hdd" /> {item.device_no + '号炉'}</Col><Col span={8}><Switch checkedChildren="开启" unCheckedChildren="关闭" defaultChecked={item.iswork ? true : false} onChange={(v) => {
-//                 console.log('v:', v, item.device_no)
-//                 switch (item.device_no) {
-//                     case 1:
-//                         setDevice1(v)
-//                         break;
-//                     case 2:
-//                         setDevice2(v)
-//                         break;
-//                     case 3:
-//                         setDevice3(v)
-//                         break;
-//                     case 4:
-//                         setDevice4(v)
-//                         break;
-//                     default:
-//                         break;
-//                 }
-//             }} /></Col></Row>
-//         }) : null}
-//     </Modal >
-// }

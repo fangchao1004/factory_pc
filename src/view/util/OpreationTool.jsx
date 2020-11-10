@@ -180,6 +180,7 @@ export async function passByEngineer(v, currentRecord, initCallback) {
 
 ////改变包含了这个bug_id 的record 再数据库中的值。 isDelete 是否为 删除缺陷的操作
 export async function changeRecordData(bugId, isDelete = false) {
+    // console.log('changeRecordData')
     // let bugId = this.state.currentRecord.id;
     ///1，要根据bug_id 去bugs表中去查询该条数据，获取其中的 device_id 字段信息
     let sql_1 = `select bugs.* from bugs where id = ${bugId} and effective = ${isDelete ? 0 : 1}`;
@@ -192,7 +193,7 @@ export async function changeRecordData(bugId, isDelete = false) {
         let sql2 = ' select * from records rds where effective = 1 and device_id = ' + device_id + ' order by rds.id desc limit 1';
         let res_sql2 = await HttpApi.obs({ sql: sql2 })
         if (res_sql2.data.code === 0) {
-            let oneRecordInfo = res_sql2.data.data
+            let oneRecordInfo = res_sql2.data.data[0]
             let bug_content = JSON.parse(oneRecordInfo.content);
             ///content 数组。找到其中bug_id 不为null的。把bug_id 和 bugId 相同的给至null,再手动判断是不是bug_id字段都是null了。如果是device_status就要至1（正常）
             let bug_id_count = 0;

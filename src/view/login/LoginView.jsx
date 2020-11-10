@@ -24,9 +24,10 @@ export default class LoginView extends React.Component {
   onLoginOk = e => {
     this.refs.form.validateFields(async (error, values) => {
       if (!error) {
-        let sql = `select users.* ,group_concat(u_m_j.mj_id) as major_id_all, group_concat(majors.name) as major_name_all from users
+        let sql = `select users.* ,group_concat(u_m_j.mj_id) as major_id_all, group_concat(majors.name) as major_name_all,levels.name as level_name from users
         left join (select * from user_map_major where effective = 1) u_m_j on u_m_j.user_id = users.id
         left join (select * from majors  where effective = 1) majors on majors.id = u_m_j.mj_id
+        left join (select * from levels  where effective = 1) levels on levels.id = users.level_id
         where users.username = '${values.userName}' and users.password = '${values.password}' and users.effective = 1
         group by users.id`
         let result = await HttpApi.obs({ sql })

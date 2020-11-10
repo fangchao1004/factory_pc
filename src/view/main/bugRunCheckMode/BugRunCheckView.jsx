@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { originStatus, BUGLOOPTIME, BUGDATAUPDATETIME, originOverTime } from '../../util/AppData'
 import moment from 'moment'
 import HttpApi, { Testuri } from '../../util/HttpApi';
-import { Table, Tag, Button, message, Tooltip, Alert, Input, Icon, Modal } from 'antd'
+import { Table, Tag, Button, message, Tooltip, Input, Icon, Modal } from 'antd'
 import { getDuration, checkOverTime } from '../../util/Tool';
 import { completeByRunner, goBackEngineerByRunner } from '../../util/OpreationTool';
 import StepLogView from '../bugMode/new/StepLogView';
@@ -195,7 +195,7 @@ export default props => {
             align: 'center',
             width: 120,
             render: (text, record) => {
-                return <div>{record.serial_no || text}</div>
+                return <div>{text}</div>
             }
         },
         {
@@ -414,8 +414,7 @@ export default props => {
         }
     ]
     return <div style={styles.root}>
-        <Alert message="以专业来划分是否相关; 维修权限人员打开该页面后, 那些待维修的缺陷自动改变为维修中状态" type="info" showIcon />
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
             <div style={{ textAlign: 'right', width: '100%' }}>
                 <Input.Search size="small" style={{ width: 340 }} allowClear placeholder="支持内容、巡检点和巡检范围的模糊查询"
                     onChange={(e) => { setSearchKey(e.target.value); if (e.target.value === '') { init() } }}

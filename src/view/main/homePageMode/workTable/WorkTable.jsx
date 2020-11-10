@@ -7,7 +7,7 @@ export default props => {
     return <div style={styles.root}>
         <Row gutter={10}>
             <Col span={9}>
-                <div style={{ width: "100%", backgroundColor: '#FFFFFF' }}>
+                <div style={{ width: "100%", backgroundColor: '#FFFFFF', height: 300 }}>
                     {/* <BugPage /> */}
                 </div>
             </Col>
