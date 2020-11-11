@@ -2,7 +2,8 @@ import React from 'react'
 import { Form, Card, message } from 'antd'
 import LoginFromClass from './LoginForm'
 import HttpApi from '../util/HttpApi'
-import Background from '../../assets/bg.jpg';
+import Background1 from '../../assets/bg1.jpg';
+import Background2 from '../../assets/bg2.jpg';
 // import downloadUrl from '../../assets/downloadurl.png'
 import { USERINFO } from '../util/AppData'
 
@@ -70,41 +71,28 @@ export default class LoginView extends React.Component {
           // flex: 1,
           // // flexDirection: 'row',
           // alignItems: 'center',
-          // backgroundColor: '#0099FF'
+          // backgroundColor: '#0099FF',
+          backgroundImage: `url(${Background1})`,
           width: '100%',
           height: '100%',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: '#6D8FFF'
+          // backgroundColor: '#6D8FFF's
         }}
       >
         <div style={{ width: '100%', height: 600, backgroundColor: 'rgba(255,255,255,0)' }}>
           <div style={{ height: 100, fontSize: 30, padding: 40, paddingLeft: 150, color: '#FFFFFF', fontWeight: 800 }}>中节能（合肥）信息综合管理平台</div>
           <div style={{
-            width: '100%', height: 400, backgroundImage: `url(${Background})`,
+            width: '100%', height: 400, backgroundImage: `url(${Background2})`,
             display: 'flex', flexDirection: 'row-reverse', alignItems: 'center'
           }}>
             <Card title={<div style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
               <span style={{ color: '#888' }}>登录</span>
-              {/* <img src={downloadUrl} alt="" width="30" height="30" style={{ cursor: 'pointer' }}
-                onClick={() => { this.setState({ modalvisible: true }) }}
-              /> */}
             </div>}
               style={{ width: 300, height: 280, marginRight: 120 }}>
               <LoginFrom ref="form" onLoginOk={this.onLoginOk} />
             </Card>
-            {/* <Modal
-              // confirmLoading={this.state.modalvisible}
-              width={350}
-              hight={500}
-              title={<div>客户端下载二维码</div>}
-              visible={this.state.modalvisible}
-              onCancel={() => { this.setState({ modalvisible: false }) }}
-              footer={null}
-            >
-              <img src={downloadUrl} alt="" width="300" height="300" />
-            </Modal> */}
           </div>
         </div>
         <div style={{ position: 'fixed', bottom: 15, textAlign: 'center' }}>

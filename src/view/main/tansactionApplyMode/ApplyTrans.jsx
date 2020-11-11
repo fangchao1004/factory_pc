@@ -1,145 +1,104 @@
-import React, { Component } from 'react';
-import { Col, Row, Button, Select, InputNumber, Popconfirm, message, Input } from 'antd';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Button, Select, InputNumber, message, Input, Card, Form, Modal } from 'antd';
 import moment from 'moment';
 import HttpApi from '../../util/HttpApi'
 const storage = window.localStorage;
+const localUserInfo = storage.getItem('userinfo');
 const { Option } = Select;
-var result = [];
 /**
  * 发起申请消费-界面
  */
-class ApproveTrans extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            foods: [],
-            peopleNum: 2,
-            selectfoods: ['2'],///默认选择2 午餐
-            remarkText: null,
+export default _ => {
+    const [foodList, setFoodList] = useState([])
+    const init = useCallback(async () => {
+        // console.log('init')
+        let sql = `select * from foods`
+        let res = await HttpApi.obs({ sql });
+        if (res.data.code === 0) {
+            setFoodList(res.data.data)
         }
-    }
-    componentDidMount() {
-        this.init();
-    }
-    init = async () => {
-        result = await this.getFoodsInfo();
-        let foods = result.map((item, index) => { return <Option key={item.id}> {item.type}--{item.price} </Option> })
-        this.setState({ foods })
-    }
-    getFoodsInfo = () => {
-        return new Promise((resolve, reject) => {
-            let sql = `select * from foods`
-            HttpApi.obs({ sql }, (res) => {
-                let result = [];
-                if (res.data.code === 0) { result = res.data.data }
-                resolve(result);
-            })
-        })
-    }
-    applyHandler = () => {
-        if (this.state.remarkText === null || this.state.remarkText === '') { message.error('请说明具体事由'); return; }
-        // console.log('applyHandler', this.state.selectfoods, this.state.peopleNum, moment().format('YYYY-MM-DD'), JSON.parse(storage.getItem('userinfo')).name);
-        if (this.state.selectfoods.length === 0) { message.error('请选择消费类型'); return }
-        let total_price = this.getTotalPrice(this.state.selectfoods, result, this.state.peopleNum);
-        let apply_id = JSON.parse(storage.getItem('userinfo')).id;
-        let apply_time = moment().format('YYYY-MM-DD HH:mm:ss');
-        let type = this.state.selectfoods.join(',')
-        let sql = `insert into applyRecords(total_price,apply_id,apply_time,type,people_count,remark) values (${total_price},${apply_id},'${apply_time}','${type}',${this.state.peopleNum},'${this.state.remarkText}') `;
-        HttpApi.obs({ sql }, (res) => {
-            if (res.data.code === 0) { message.success('申请提交成功') } else { message.error('申请提交失败') }
-        })
-    }
-    getTotalPrice = (selectfoods, result, peopleNum) => {
-        let count = 0;
-        selectfoods.forEach((item) => {
-            result.forEach((ele) => {
-                if (item + '' === ele.id + '') {
-                    count = count + ele.price
-                }
-            })
-        })
-        return count * peopleNum;
-    }
-    render() {
-        return (
-            <div style={{ padding: 10, backgroundColor: '#FFFFFF' }}>
-                <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>发起申请</h2>
-                <div style={{ borderStyle: 'solid', borderColor: "#DDDDDD", padding: 20, paddingTop: 30, borderWidth: 1, borderRadius: 4, marginTop: 10 }}>
-                    <Row>
-                        <Col span={12}>
-                            <Row>
-                                <Col span={6}>
-                                    消费类型:
-                                </Col>
-                                <Col span={18}>
-                                    <Select
-                                        mode="multiple"
-                                        placeholder="请选择消费类型"
-                                        value={this.state.selectfoods}
-                                        onChange={(v) => {
-                                            this.setState({ selectfoods: v })
-                                        }}
-                                        style={{ width: '70%' }}
-                                    >
-                                        {this.state.foods}
-                                    </Select>
-                                </Col>
-                            </Row>
-                        </Col>
-                        <Col span={12}>
-                            <Row>
-                                <Col span={6}>
-                                    人数:
-                                </Col>
-                                <Col span={18}>
-                                    <InputNumber min={1} max={100} value={this.state.peopleNum} onChange={(v) => {
-                                        this.setState({ peopleNum: v ? v : 2 })
-                                    }} />
-                                </Col>
-                            </Row>
-                        </Col>
-                    </Row>
-                    <Row style={{ marginTop: 10 }}>
-                        <Col span={12}>
-                            <Row>
-                                <Col span={6}>
-                                    日期:
-                            </Col>
-                                <Col span={18}>
-                                    {moment().format('YYYY-MM-DD')}
-                                </Col>
-                            </Row>
-                        </Col>
-                        <Col span={12}>
-                            <Row>
-                                <Col span={6}>
-                                    申请人:
-                            </Col>
-                                <Col span={18}>
-                                    {JSON.parse(storage.getItem('userinfo')).name}
-                                </Col>
-                            </Row>
-                        </Col>
-                    </Row>
-                    <Row style={{ marginTop: 10 }}>
-                        <Col span={12}>
-                            <Row>
-                                <Col span={6}>
-                                    具体事由:
-                            </Col>
-                                <Col span={18}>
-                                    <Input style={{ width: '70%' }} placeholder="说明相关情况" value={this.state.remarkText} onChange={(e) => { this.setState({ remarkText: e.target.value }) }} />
-                                </Col>
-                            </Row>
-                        </Col>
-                    </Row>
-                    <Popconfirm title="确认检查无误-要提交申请吗?" onConfirm={this.applyHandler}>
-                        <Button size="small" type={'danger'} style={{ marginTop: 10 }} >提交申请</Button>
-                    </Popconfirm>
-                </div>
-            </div>
-        );
-    }
+    }, [])
+    useEffect(() => {
+        init();
+    }, [init])
+    return <Card hoverable={true} >
+        <ApplyForm foodList={foodList} />
+    </Card>
 }
+function TempForm(props) {
+    const { getFieldDecorator } = props.form
+    return <Form onSubmit={(e) => {
+        e.preventDefault();
+        props.form.validateFields((err, values) => {
+            if (!err) {
+                Modal.confirm({
+                    title: `确认要提交吗？`,
+                    okText: '确定',
+                    okType: 'danger',
+                    onOk: async function () {
+                        let total_price = getTotalPrice(props.foodList, values.food_list, values.people_count);
+                        let apply_id = JSON.parse(storage.getItem('userinfo')).id;
+                        let apply_time = moment().format('YYYY-MM-DD HH:mm:ss');
+                        let type = values.food_list.join(',')
+                        let sql = `insert into applyRecords(total_price,apply_id,apply_time,type,people_count,remark) values (${total_price},${apply_id},'${apply_time}','${type}',${values.people_count},'${values.remark}') `;
+                        let res = await HttpApi.obs({ sql })
+                        if (res.data.code === 0) { message.success('申请提交成功'); props.form.resetFields() } else { message.error('申请提交失败') }
+                    }
+                })
+            }
+        });
+    }}>
+        <Form.Item label="消费类型:" labelCol={{ span: 8 }} wrapperCol={{ span: 8 }}>
+            {getFieldDecorator('food_list', {
+                initialValue: [1],
+                rules: [{ required: true }]
+            })(<Select
+                mode="multiple"
+                placeholder="请选择消费类型"
+            >
+                {props.foodList.map((item, index) => { return <Option key={item.id} value={item.id}> {item.type}--{item.price} </Option> })}
+            </Select>)}
+        </Form.Item>
+        <Form.Item label="人数:" labelCol={{ span: 8 }} wrapperCol={{ span: 8 }}>
+            {getFieldDecorator('people_count', {
+                initialValue: 1,
+                rules: [{ required: true, message: '请输入人数' }]
+            })(<InputNumber style={{ width: '100%' }} min={1} max={99} ></InputNumber>)}
+        </Form.Item>
+        <Form.Item label="备注:" labelCol={{ span: 8 }} wrapperCol={{ span: 8 }}>
+            {getFieldDecorator('remark', {
+                rules: [{ required: true, message: '请填写备注说明事由' }]
+            })(<Input.TextArea rows={4} allowClear placeholder='请填写备注说明事由'></Input.TextArea>)}
+        </Form.Item>
+        <Form.Item label="日期:" labelCol={{ span: 8 }} wrapperCol={{ span: 8 }}>
+            {getFieldDecorator('date', {
+                initialValue: moment().format('YYYY-MM-DD'),
+                rules: [{ required: true }]
+            })(<Input disabled></Input>)}
+        </Form.Item>
+        <Form.Item label="申请人:" labelCol={{ span: 8 }} wrapperCol={{ span: 8 }}>
+            {getFieldDecorator('apply_user_id', {
+                initialValue: JSON.parse(localUserInfo).name,
+                rules: [{ required: true }]
+            })(<Input disabled ></Input>)}
+        </Form.Item>
+        <Form.Item wrapperCol={{ span: 16 }}>
+            <div style={{ textAlign: 'right' }}>
+                <Button size="small" type="danger" htmlType="submit">提交</Button>
+            </div>
+        </Form.Item>
+    </Form>
+}
+const ApplyForm = Form.create({ name: 'Form' })(TempForm)
 
-export default ApproveTrans;
+function getTotalPrice(foodList, selectfoods, peopleNum) {
+    let count_price = 0;
+    selectfoods.forEach((foodid) => {
+        foodList.forEach((item) => {
+            if (foodid === item.id) {
+                count_price = count_price + item.price
+            }
+        })
+    })
+    return count_price * peopleNum;
+}

@@ -448,7 +448,7 @@ export default props => {
                             <DetailModal visible={modalVisible} item={selectItem} onCancel={() => { setModalVisible(false) }} />
                         </span>
                         <Dropdown overlay={menu} trigger={['click']}>
-                            <Avatar style={{ backgroundColor: '#1890ff', cursor: 'pointer' }} shape='square' size={36}>{JSON.parse(localUserInfo).name}</Avatar>
+                            <Avatar style={{ backgroundColor: '#1890ff', cursor: 'pointer' }} size={36}>{JSON.parse(localUserInfo).name}</Avatar>
                         </Dropdown>
                     </Col>
                 </Row>
