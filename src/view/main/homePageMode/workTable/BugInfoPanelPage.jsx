@@ -1,4 +1,4 @@
-import { Button, Card, Descriptions, Icon, Modal, Tag, Timeline } from 'antd';
+import { Alert, Button, Card, Descriptions, Icon, message, Modal, Switch, Tag, Timeline } from 'antd';
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import HttpApi, { Testuri } from '../../../util/HttpApi';
 import { statusToDes } from './AllAboutMeInfoPage';
@@ -46,7 +46,7 @@ export default props => {
         setEngable(engable)
         setRunable(runable)
     }, [bug])
-    const refreshStepAndBuglistStore = useCallback(async () => {
+    const initBugList = useCallback(async () => {
         let myBugList = [];
         let runBugList = [];
         let res_my_bug_list = await HttpApi.getBugListAboutMe(JSON.parse(localUserInfo).major_id_all)
@@ -64,8 +64,11 @@ export default props => {
         }
         let result = combin2BugList(runBugList, myBugList)
         appDispatch({ type: 'allAboutMeBugList', data: sortById_desc(result) })
-        init()
-    }, [appDispatch, hasP1, init])
+    }, [appDispatch, hasP1])
+    const refreshStepAndBuglistStore = useCallback(async () => {
+        initBugList();
+        init();
+    }, [initBugList, init])
     const getTimeHandler = useCallback(() => {
         let result = checkOverTime(bug, currentTime)
         let isOver = result.isOver;
@@ -74,6 +77,14 @@ export default props => {
         let temp = bug.last_status_time && bug.status !== 5 ? <Tag style={{ marginTop: 8 }} color={timeColor}>{getDuration(durationTime, 1, true)}</Tag> : '-'
         return temp
     }, [bug, currentTime])
+    const changeBugIsRed = useCallback(async (v) => {
+        let sql = `update bugs set is_red = ${v ? 1 : 0} where id = ${bug.id}`
+        let res_run_bug_list = await HttpApi.obs({ sql })
+        if (res_run_bug_list.data.code === 0) {
+            message.success('标记操作成功')
+            initBugList()
+        } else { message.error('操作失败') }
+    }, [bug, initBugList])
     useEffect(() => {
         initbug()
         init();
@@ -96,6 +107,7 @@ export default props => {
         onCancel={props.onCancel}
         footer={null}
     >
+        <Alert style={styles.alert} message={'专工可对缺陷进行加急标记；标记后显示为红色'} />
         {bug ?
             <Descriptions bordered size='small' column={2}>
                 <Descriptions.Item label="编号">{bug.id}</Descriptions.Item>
@@ -107,6 +119,7 @@ export default props => {
                 <Descriptions.Item label="等级">{levelToDes(bug)}</Descriptions.Item>
                 <Descriptions.Item label="发现人">{bug.user_name}</Descriptions.Item>
                 <Descriptions.Item label="状态">{statusToDes(bug).des}</Descriptions.Item>
+                <Descriptions.Item label="加急"><Switch disabled={!hasP0} checked={bug.is_red ? true : false} onChange={changeBugIsRed} checkedChildren='开启' unCheckedChildren='关闭' /></Descriptions.Item>
                 <Descriptions.Item label="内容">{<RenderContent data={bug} setImguuid={setImguuid} />}</Descriptions.Item>
             </Descriptions> : null}
         <Card style={styles.card} title='处理记录' size='small' bodyStyle={{ paddingBottom: 0 }}>
@@ -191,6 +204,7 @@ const styles = {
     card: { marginTop: 16 },
     icon: { marginRight: 5 },
     button: { marginRight: 10 },
+    alert: { marginBottom: 10 }
 }
 function RenderContent(params) {
     let record = params.data

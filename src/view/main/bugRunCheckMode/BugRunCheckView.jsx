@@ -195,7 +195,7 @@ export default props => {
             align: 'center',
             width: 120,
             render: (text, record) => {
-                return <div>{text}</div>
+                return <Tag color={record.is_red ? '#f5222d' : '#1890ff'}>{text}</Tag>
             }
         },
         {

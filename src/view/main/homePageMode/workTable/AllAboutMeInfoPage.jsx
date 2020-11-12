@@ -40,7 +40,7 @@ export default props => {
             size="small"
             header={<div style={styles.title}>
                 <span>相关缺陷</span>
-                {appState.allAboutMeBugList.length > 0 ? <Tag color='blue'>{'# ' + appState.allAboutMeBugList.length}</Tag> : null}
+                {appState.allAboutMeBugList.length > 0 ? <Tag style={styles.tag} color='blue'>{'# ' + appState.allAboutMeBugList.length}</Tag> : null}
             </div>}
             bordered
             dataSource={appState.allAboutMeBugList}
@@ -72,6 +72,9 @@ const styles = {
     title: {
         display: 'flex', justifyContent: 'space-between', color: '#1890ff'
     },
+    tag: {
+        margin: 0
+    }
 }
 export function statusToDes(record) {
     let str = '';
