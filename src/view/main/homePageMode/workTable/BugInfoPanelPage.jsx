@@ -189,6 +189,7 @@ export default props => {
             switch (v.selectValue) {
                 case 1:
                     completeByRunner(v, bug, refreshStepAndBuglistStore);
+                    props.onCancel();
                     break;
                 case 2:
                     goBackEngineerByRunner(v, bug, refreshStepAndBuglistStore);

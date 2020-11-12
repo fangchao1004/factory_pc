@@ -108,6 +108,7 @@ export default class FuncPanelForRepair extends Component {
     render() {
         return (
             <Modal
+                destroyOnClose
                 width={550}
                 title='维修处理面板'
                 visible={this.state.visible}

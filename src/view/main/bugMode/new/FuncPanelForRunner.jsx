@@ -37,6 +37,7 @@ export default class FuncPanelForRunner extends Component {
     render() {
         return (
             <Modal
+                destroyOnClose
                 width={550}
                 title='运行处理面板'
                 visible={this.state.visible}

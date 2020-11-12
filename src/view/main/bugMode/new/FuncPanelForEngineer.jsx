@@ -50,6 +50,7 @@ export default class FuncPanelForEngineer extends Component {
     componentWillReceiveProps(nextProps) {
         if (JSON.stringify(nextProps) !== JSON.stringify(this.props)) {
             // console.log('不同时再刷新')
+            if (!nextProps.record) { return }
             let selectValue = nextProps.record.bug_step_tag_id === 16 ? 6 : 4
             let selectMajorId = null;
             let selectFreezeId = null;
@@ -136,6 +137,7 @@ export default class FuncPanelForEngineer extends Component {
     render() {
         return (
             <Modal
+                destroyOnClose
                 width={550}
                 title='专工处理面板'
                 visible={this.state.visible}
