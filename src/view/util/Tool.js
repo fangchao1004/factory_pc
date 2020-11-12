@@ -788,11 +788,6 @@ export function filterDevicesByDateScheme(deviceList, momentTarget) {
 export function checkOverTime(record, currentTime) {
     let durationTime;
     let isOver = false
-    if (record.status < 2) { ///如果缺陷的状态处在2之前，即专工处理之前，那么就根据缺陷的等级来判断时间区间大小
-        if (record.bld_duration_time && durationTime > record.bld_duration_time) { isOver = true }
-    } else {
-        if (record.bsd_duration_time && durationTime > record.bsd_duration_time) { isOver = true }
-    }
     if (record.status === 0) {
         isOver = false
         let temp1 = currentTime - moment(record.createdAt).toDate().getTime();
@@ -800,6 +795,11 @@ export function checkOverTime(record, currentTime) {
     } else if (record.status !== 0 && record.last_status_time) {
         let temp2 = currentTime - moment(record.last_status_time).toDate().getTime();
         durationTime = temp2 > 0 ? temp2 : 0
+    }
+    if (record.status < 2) { ///如果缺陷的状态处在2之前，即专工处理之前，那么就根据缺陷的等级来判断时间区间大小
+        if (record.bld_duration_time && durationTime > record.bld_duration_time) { isOver = true }
+    } else {
+        if (record.bsd_duration_time && durationTime > record.bsd_duration_time) { isOver = true }
     }
     return { isOver, durationTime };
 }
@@ -1001,4 +1001,33 @@ export function sortByOrderKey2(result) {
         return x.order_key - y.order_key
     })
     return copyResult
+}
+/**
+ *合并两个数组，去重复
+ * @export
+ * @param {*} list1
+ * @param {*} list2
+ * @returns
+ */
+export function combin2BugList(list1_p, list2_p) {
+    let list1 = JSON.parse(JSON.stringify(list1_p))
+    let list2 = JSON.parse(JSON.stringify(list2_p))
+    list1.forEach((item1) => {
+        let isExist = false;
+        list2.forEach((item2) => {
+            if (item1.id === item2.id) { isExist = true }
+        })
+        if (!isExist) {
+            list2.push(item1)
+        }
+    })
+    return list2
+}
+export function sortById_desc(list_params) {
+    let list = JSON.parse(JSON.stringify(list_params))
+    if (list.length === 0) { return [] }
+    list.sort((x, y) => {
+        return y.id - x.id
+    })
+    return list
 }

@@ -81,38 +81,11 @@ export default props => {
     const init = useCallback(async () => {
         console.log('初始化')
         if (JSON.parse(localUserInfo).major_id_all) {
-            let sql_get_bug = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,
-            area_1.name as area1_name,area_1.id as area1_id,
-            area_2.name as area2_name,area_2.id as area3_id,
-            area_3.name as area3_name,area_3.id as area3_id,
-            concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
-            tmp_freeze_table.freeze_id as bug_freeze_id,
-            tmp_freeze_table.freeze_des as bug_freeze_des,
-            tmp_freeze_table.major_id as bug_step_major_id,
-            tmp_freeze_table.tag_id as bug_step_tag_id,
-            bsd.duration_time as bsd_duration_time,
-            bld.duration_time as bld_duration_time
-            from bugs
-            left join (select * from bug_level_duration where effective = 1) bld on bld.level_value = bugs.buglevel
-            left join (select * from bug_status_duration where effective = 1) bsd on bsd.status = bugs.status
-            left join (select * from devices where effective = 1) des on bugs.device_id = des.id
-            left join (select * from users where effective = 1) urs on bugs.user_id = urs.id
-            left join (select * from majors where effective = 1) mjs on bugs.major_id = mjs.id
-            left join (select * from area_3 where effective = 1) area_3 on des.area_id = area_3.id
-            left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
-            left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
-            left join (select t2.*,bug_tag_status.des as tag_des,bug_freeze_status.des as freeze_des 
-                       from (select bug_id,max(id) as max_id from bug_step_log where effective = 1 group by bug_id) t1
-                        left join (select * from bug_step_log where effective = 1) t2 on t2.id = t1.max_id
-                        left join (select * from bug_tag_status where effective = 1) bug_tag_status on bug_tag_status.id = t2.tag_id
-                        left join (select * from bug_freeze_status where effective = 1) bug_freeze_status on bug_freeze_status.id = t2.freeze_id
-                        ) tmp_freeze_table on tmp_freeze_table.bug_id = bugs.id
-            where bugs.status != 4 and bugs.major_id in (${JSON.parse(localUserInfo).major_id_all}) and bugs.effective = 1 order by bugs.id desc`
-            let res_bug_list = await HttpApi.obs({ sql: sql_get_bug });///从数据库中获取最新的bugs数据
+            let res_bug_list = await HttpApi.getBugListAboutMe(JSON.parse(localUserInfo).major_id_all)///从数据库中获取最新的bugs数据
             if (res_bug_list.data.code === 0) {
                 let bug_list = res_bug_list.data.data
                 bug_list = bug_list.map((item) => { item.key = item.id; return item })
-                console.log('bug_list:', bug_list)
+                // console.log('bug_list:', bug_list)
                 originalData = bug_list;
                 autoFixHandler(bug_list);
                 setBugList(bug_list);
@@ -453,17 +426,17 @@ export default props => {
                 let runable = record.status === 3;
                 return <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <Button size="small" type="default" onClick={() => { setStepLogVisible(true); setcurrentRecord(record); }}>处理记录</Button>
-                    {hasP3 ?
+                    {hasP3 && fixable ?
                         <>
                             <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                            <Button disabled={!fixable} size="small" type="primary" onClick={() => { setRepairVisible(true); setcurrentRecord(record); }}>维修处理</Button>
+                            <Button size="small" type="primary" onClick={() => { setRepairVisible(true); setcurrentRecord(record); }}>维修处理</Button>
                         </> : null}
-                    {hasP0 ?
+                    {hasP0 && engable ?
                         <>
                             <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                            <Button disabled={!engable} size="small" type="primary" onClick={() => { setEngineerVisible(true); setcurrentRecord(record); }}>专工处理</Button>
+                            <Button size="small" type="primary" onClick={() => { setEngineerVisible(true); setcurrentRecord(record); }}>专工处理</Button>
                         </> : null}
-                    {hasP1 ?
+                    {hasP1 && runable ?
                         <>
                             <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                             <Button disabled={!runable} size="small" type="primary" onClick={() => { setRunnerVisible(true); setcurrentRecord(record); }}>运行处理</Button>

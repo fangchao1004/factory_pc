@@ -104,7 +104,7 @@ export default props => {
             if (res_bug_list.data.code === 0) {
                 let bug_list = res_bug_list.data.data
                 bug_list = bug_list.map((item) => { item.key = item.id; return item })
-                console.log('run_bug_list:', bug_list)
+                // console.log('run_bug_list:', bug_list)
                 originalData = bug_list;
                 setBugList(bug_list);
                 appDispatch({ type: 'runBugCount', data: bug_list.length })

@@ -23,7 +23,7 @@ import RunlogModeRoot from './runlogMode/RunlogModeRoot'
 // import SettingViewRoot from './settingMode/SettingViewRoot';///废弃
 import HttpApi, { environmentIsTest } from '../util/HttpApi';
 import { BUGDATAUPDATETIME, NOTIFY_MP3, WARN_MP3 } from '../util/AppData'
-import { checkLocalStorageBugIdList, BrowserType } from '../util/Tool';
+import { checkLocalStorageBugIdList, BrowserType, combin2BugList, sortById_desc } from '../util/Tool';
 import NoticeMenu from './noticeMenu/NoticeMenu';
 import DetailModal from './noticeMenu/DetailModal';
 import { AppDataContext } from '../../redux/AppRedux'
@@ -62,10 +62,12 @@ export default props => {
                         title: `确认要退出吗？`,
                         okText: '确定',
                         okType: 'danger',
-                        onOk: async function () {
-                            props.history.replace('/')
+                        onOk: function () {
                             storage.removeItem('userinfo');
-                            window.location.href = environmentIsTest ? '/test/' : '/';
+                            props.history.replace('/')
+                            setTimeout(() => {
+                                window.location.href = environmentIsTest ? '/test/' : '/';
+                            }, 1000);
                         }
                     })
                     break;
@@ -107,8 +109,11 @@ export default props => {
             // console.log('维修或专工未读的bug:', unreadBugs1)
             unreadBugs = unreadBugs.concat(unreadBugs1)
             ///getMyBugsInfo
-            let sql = `select * from bugs where bugs.status != 4 and bugs.major_id in (${major_id_all}) and bugs.effective = 1 `
-            let res_my_bug_list = await HttpApi.obs({ sql });
+            // let sql = `select bugs.*,majors.name as major_name from bugs
+            // left join (select * from majors where effective = 1) majors on majors.id = bugs.major_id
+            // where bugs.status != 4 and bugs.major_id in (${major_id_all}) and bugs.effective = 1 `
+            // let res_my_bug_list = await HttpApi.obs({ sql });
+            let res_my_bug_list = await HttpApi.getBugListAboutMe(major_id_all)
             if (res_my_bug_list.data.code === 0) {
                 myBugList = res_my_bug_list.data.data
                 // console.log('于我相关的缺陷数据:', res_my_bug_list.data.data) ///🌟
@@ -120,7 +125,9 @@ export default props => {
             // console.log('如果有的运行 未读的bug:', unreadBugs2)
             unreadBugs = unreadBugs.concat(unreadBugs2)
             ///getRunBugsInfo
-            let sql = `select * from bugs where bugs.status = 3 and bugs.effective = 1 `
+            let sql = `select bugs.*,majors.name as major_name from bugs
+            left join (select * from majors where effective = 1) majors on majors.id = bugs.major_id
+            where bugs.status = 3 and bugs.effective = 1 `
             let res_run_bug_list = await HttpApi.obs({ sql })
             if (res_run_bug_list.data.code === 0) {
                 runBugList = res_run_bug_list.data.data
@@ -138,14 +145,17 @@ export default props => {
                 }
             }
         }
+        let result = combin2BugList(runBugList, myBugList)
+        // console.log('myBugList:', myBugList)
         // console.log('未读的缺陷信息:', unreadBugs)///🌟
         checkLocalStorageBugIdList(unreadBugs, audio1.current) ///🌟 temp
         setUnreadBugList(unreadBugs)
         appDispatch({ type: 'unreadBugCount', data: unreadBugs.length })
         appDispatch({ type: 'unreadWarnCount', data: unreadWarns.length })
         appDispatch({ type: 'aboutMeBugCount', data: myBugList.length })
-        appDispatch({ type: 'aboutMeTaskCount', data: taskList.length })
+        appDispatch({ type: 'aboutMeTaskList', data: sortById_desc(taskList) })
         appDispatch({ type: 'runBugCount', data: runBugList.length })
+        appDispatch({ type: 'allAboutMeBugList', data: sortById_desc(result) })
     }, [appDispatch, major_id_all, permissionFix, permissionManager, permissionRun, localUserInfo])
     const getArea0List = useCallback(async () => {
         ///获取area0数据动态生成菜单栏
@@ -165,9 +175,9 @@ export default props => {
         ///循环loop
         let loop;
         if (loop) { clearInterval(loop) }
-        loop = setInterval(() => {
-            init()
-        }, BUGDATAUPDATETIME)
+        // loop = setInterval(() => {
+        //     init()
+        // }, BUGDATAUPDATETIME)
         return () => {
             ///移除clearloop
             clearInterval(loop)
@@ -368,7 +378,7 @@ export default props => {
                 <Menu.Item key="/mainView/task">
                     <Icon type="project" />
                     <span>任务</span>
-                    <Badge count={appState.aboutMeTaskCount} overflowCount={99} style={{ marginLeft: 35 }}>
+                    <Badge count={appState.aboutMeTaskList.length} overflowCount={99} style={{ marginLeft: 35 }}>
                     </Badge>
                     <Link to={`${props.match.url}/task`} />
                 </Menu.Item>

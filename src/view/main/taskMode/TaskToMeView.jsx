@@ -29,7 +29,7 @@ export default props => {
             });
             setTasklist(result)
             let undidtasklist = result.filter((item) => { return item.status === 0 });
-            appDispatch({ type: 'aboutMeTaskCount', data: undidtasklist.length })
+            appDispatch({ type: 'aboutMeTaskList', data: undidtasklist })
         }
         let res_user = await HttpApi.getUserInfo({ effective: 1 })
         if (res_user.data.code === 0) {

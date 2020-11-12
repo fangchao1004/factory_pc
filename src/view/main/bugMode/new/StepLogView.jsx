@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import HttpApi, { Testuri } from '../../../util/HttpApi';
-import { Modal, Timeline, Tag, Empty } from 'antd';
-import { originStatus } from '../../../util/AppData'
-import moment from 'moment'
-import { getDuration } from '../../../util/Tool';
+import { Modal, Timeline, Empty } from 'antd';
+import { RenderTimeLine } from '../../homePageMode/workTable/BugInfoPanelPage';
 /**
  * 缺陷处理日志界面
  */
@@ -22,48 +20,15 @@ export default class StepLogView extends Component {
             visible: param.visible,
         })
         if (param.visible) {
-            let result = await this.getStepData(param.record.id);
-            let newList = [...param.firstStep, ...result]; ///合并
-            // console.log('newList:', newList)
-            this.setState({
-                stepList: newList
-            })
+            let res = await HttpApi.getBugStepLogList(param.record.id);
+            if (res.data.code === 0) {
+                let newList = [...param.firstStep, ...res.data.data]; ///合并
+                // console.log('newList:', newList)
+                this.setState({
+                    stepList: newList
+                })
+            }
         }
-    }
-    getStepData = (bugId) => {
-        return new Promise((resolve, reject) => {
-            let sql = `select bug_step_log.*,users.name as user_name,bug_tag_status.des as tag_des,majors.name as major_name,bug_freeze_status.des as freeze_des from bug_step_log 
-            left join (select * from users where effective = 1) users on users.id = bug_step_log.user_id
-            left join (select * from majors where effective = 1) majors on majors.id = bug_step_log.major_id
-            left join (select * from bug_tag_status where effective = 1) bug_tag_status on bug_tag_status.id = bug_step_log.tag_id
-            left join (select * from bug_freeze_status where effective = 1) bug_freeze_status on bug_freeze_status.id = bug_step_log.freeze_id
-            where bug_step_log.effective = 1 and bug_step_log.bug_id = ${bugId}`
-            let result = [];
-            HttpApi.obs({ sql }, (res) => {
-                if (res.data.code === 0) {
-                    result = res.data.data;
-                }
-                resolve(result);
-            })
-        })
-    }
-    getStepData = (bugId) => {
-        return new Promise((resolve, reject) => {
-            let sql = `select bug_step_log.*,users.name as user_name,bsd.duration_time as bug_next_status_duration,bug_tag_status.bug_next_status,bug_tag_status.des as tag_des,majors.name as major_name,bug_freeze_status.des as freeze_des from bug_step_log 
-            left join (select * from users where effective = 1) users on users.id = bug_step_log.user_id
-            left join (select * from majors where effective = 1) majors on majors.id = bug_step_log.major_id
-            left join (select * from bug_tag_status where effective = 1) bug_tag_status on bug_tag_status.id = bug_step_log.tag_id
-            left join (select * from bug_freeze_status where effective = 1) bug_freeze_status on bug_freeze_status.id = bug_step_log.freeze_id
-            left join (select * from bug_status_duration where effective = 1) bsd on bsd.status = bug_tag_status.bug_next_status
-            where bug_step_log.effective = 1 and bug_step_log.bug_id = ${bugId} order by bug_step_log.id`
-            let result = [];
-            HttpApi.obs({ sql }, (res) => {
-                if (res.data.code === 0) {
-                    result = res.data.data;
-                }
-                resolve(result);
-            })
-        })
     }
     componentWillReceiveProps(nextProps) {
         let firstStep = [{ createdAt: nextProps.record.checkedAt, user_name: nextProps.record.user_name, tag_des: '上报缺陷' }];
@@ -87,49 +52,6 @@ export default class StepLogView extends Component {
         }
         return str
     }
-    changeStatusToStr = (record) => {
-        let str = '/'
-        originStatus.forEach((item) => {
-            if (item.value === record.status) { str = item.text }
-        })
-        if (record.status === 5) { str = record.bug_freeze_des }
-        return str
-    }
-    getLineRender = () => {
-        let resultList = [];
-        this.state.stepList.forEach((item, index) => {
-            let createdAtTime = moment(item.createdAt).toDate().getTime();
-            let preCreatedAtTime = index > 0 ? moment(this.state.stepList[index - 1].createdAt).toDate().getTime() : 0
-            // let duration = index > 0 ? this.state.stepList[index - 1].bug_next_status_duration : 0 ///设定时间
-            // let color = 'green'
-            // if (index > 0 && (createdAtTime - preCreatedAtTime) > duration) {
-            //     color = 'red'
-            // }
-            resultList.push(<Timeline.Item key={index}>
-                <div style={{ backgroundColor: '' }}>
-                    <div>
-                        {index > 0 ? <Tag style={{ marginBottom: 8 }} color={'#d3adf7'}>{"耗时:" + getDuration(createdAtTime - preCreatedAtTime)}</Tag> : null}
-                    </div>
-                    <div>
-                        <Tag color={'#1690FF'}>{item.createdAt}</Tag>
-                        <Tag color={'#ff7a45'} >{item.user_name}</Tag>
-                        {item.tag_des ? <Tag color={'blue'}>{item.tag_des} {item.freeze_des ? '- ' + item.freeze_des : (item.major_name ? '- ' + item.major_name : '')}</Tag> : null}
-                    </div>
-                    {/* {index > 0 && this.state.stepList[index - 1].bug_next_status === 3 ? <Tag color={color} >{"用时:" + getDuration(createdAtTime - preCreatedAtTime)}</Tag> : null} */}
-                    <div>{item.imgs ? item.imgs.split(',').map((img, i) =>
-                        <img alt='' style={{ width: 50, height: 50, marginTop: 10, marginRight: 10 }} key={img} src={Testuri + 'get_jpg?uuid=' + img}
-                            onClick={() => {
-                                this.setState({ imguuid: img })
-                            }}
-                        />
-                    )
-                        : ''}</div>
-                    {item.remark ? <div style={{ color: '#FF9900', marginTop: item.imgs ? 5 : 10 }}>{'备注: ' + item.remark}</div> : ''}
-                </div>
-            </Timeline.Item>)
-        })
-        return resultList;
-    }
     render() {
         return (
             <Modal
@@ -143,7 +65,7 @@ export default class StepLogView extends Component {
                 <div style={{ height: this.state.stepList.length > 0 ? 400 : 200, overflow: "scroll" }}>
                     {this.state.stepList.length > 0 ?
                         <Timeline style={{ marginTop: 10 }} >
-                            {this.getLineRender()}
+                            {RenderTimeLine(this.state.stepList, (imguuid) => { this.setState({ imguuid }) })}
                         </Timeline> : <Empty />}
                 </div>
                 <Modal visible={this.state.imguuid !== null} destroyOnClose centered

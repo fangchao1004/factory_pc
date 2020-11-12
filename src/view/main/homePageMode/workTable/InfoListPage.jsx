@@ -48,7 +48,7 @@ export default props => {
                         if (!text) { message.error('通知不可为空'); return }
                         addNotice({ content: text, time: moment().format('YYYY-MM-DD HH:mm:ss'), name: JSON.parse(localUserInfo).name })
                     }} okText='确定' >
-                        <Button size="small" type="primary">发布通知</Button>
+                        <Button icon='upload' size="small" type="primary">发布通知</Button>
                     </Popconfirm>
                 </div>
             </div> : null}
