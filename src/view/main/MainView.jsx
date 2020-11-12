@@ -175,9 +175,9 @@ export default props => {
         ///循环loop
         let loop;
         if (loop) { clearInterval(loop) }
-        // loop = setInterval(() => {
-        //     init()
-        // }, BUGDATAUPDATETIME)
+        loop = setInterval(() => {
+            init()
+        }, BUGDATAUPDATETIME)
         return () => {
             ///移除clearloop
             clearInterval(loop)
