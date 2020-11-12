@@ -3,12 +3,13 @@ import React, { useState, useEffect, useCallback, useContext } from 'react';
 import HttpApi, { Testuri } from '../../../util/HttpApi';
 import { statusToDes } from './AllAboutMeInfoPage';
 import moment from 'moment';
-import { combin2BugList, getDuration, sortById_desc } from '../../../util/Tool';
+import { checkOverTime, combin2BugList, getDuration, sortById_desc } from '../../../util/Tool';
 import FuncPanelForEngineer from '../../bugMode/new/FuncPanelForEngineer';
 import { completeByEngineer, completeByRunner, dontNeedfixByRepair, exchangeBugMajorByEngineer, exchangeBugMajorByRepair, fixCompleteByRepair, freezeBugStepByEngineer, freezeBugStepByRepair, goBackEngineerByRunner, goBackFixByEngineer, goBackStartByEngineer, passByEngineer } from '../../../util/OpreationTool';
 import FuncPanelForRunner from '../../bugMode/new/FuncPanelForRunner';
 import FuncPanelForRepair from '../../bugMode/new/FuncPanelForRepair';
 import { AppDataContext } from '../../../../redux/AppRedux';
+import { BUGLOOPTIME } from '../../../util/AppData';
 const storage = window.localStorage;
 const localUserInfo = storage.getItem('userinfo');
 export default props => {
@@ -25,8 +26,11 @@ export default props => {
     const [hasP1] = useState(localUserInfo && JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('1') !== -1);///运行权限
     const [hasP3] = useState(localUserInfo && JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('3') !== -1);///维修权限
     const [bug, setBug] = useState(props.bug)
+    const [currentTime, setCurrentTime] = useState(null);///当前时刻
+
     const initbug = useCallback(() => {
         if (props.bug) { setBug(appState.allAboutMeBugList.filter((item) => { return item.id === props.bug.id })[0]) }
+        setCurrentTime(moment().toDate().getTime())
     }, [appState.allAboutMeBugList, props.bug])
     const init = useCallback(async () => {
         if (!bug) { return }
@@ -62,10 +66,28 @@ export default props => {
         appDispatch({ type: 'allAboutMeBugList', data: sortById_desc(result) })
         init()
     }, [appDispatch, hasP1, init])
+    const getTimeHandler = useCallback(() => {
+        let result = checkOverTime(bug, currentTime)
+        let isOver = result.isOver;
+        let durationTime = result.durationTime;
+        let timeColor = isOver ? 'red' : 'green'
+        let temp = bug.last_status_time && bug.status !== 5 ? <Tag style={{ marginTop: 8 }} color={timeColor}>{getDuration(durationTime, 1, true)}</Tag> : '-'
+        return temp
+    }, [bug, currentTime])
     useEffect(() => {
         initbug()
         init();
     }, [initbug, init])
+    useEffect(() => {
+        let loop_for_timestamp;
+        if (loop_for_timestamp) { clearInterval(loop_for_timestamp) }
+        loop_for_timestamp = setInterval(() => {
+            setCurrentTime(moment().toDate().getTime())
+        }, BUGLOOPTIME);////1秒循环一次 刷新计时
+        return () => {
+            clearInterval(loop_for_timestamp)
+        }
+    }, [])
     return <Modal
         width={800}
         title='缺陷信息'
@@ -78,8 +100,9 @@ export default props => {
             <Descriptions bordered size='small' column={2}>
                 <Descriptions.Item label="编号">{bug.id}</Descriptions.Item>
                 <Descriptions.Item label="时间">{bug.checkedAt}</Descriptions.Item>
-                <Descriptions.Item label="区域">{bug.area_name || bug.area_remark}</Descriptions.Item>
                 <Descriptions.Item label="专业">{bug.major_name}</Descriptions.Item>
+                <Descriptions.Item label="计时"> {getTimeHandler()}</Descriptions.Item>
+                <Descriptions.Item label="区域">{bug.area_name || bug.area_remark}</Descriptions.Item>
                 <Descriptions.Item label="巡检点">{bug.device_name || '-'}</Descriptions.Item>
                 <Descriptions.Item label="等级">{levelToDes(bug)}</Descriptions.Item>
                 <Descriptions.Item label="发现人">{bug.user_name}</Descriptions.Item>
@@ -96,9 +119,9 @@ export default props => {
         </Card>
         <Card style={styles.card} title='操作面板' size='small'>
             <div >
-                {fixable && hasP3 ? <Button style={styles.button} type='primary' onClick={() => { setRepairVisible(true) }}>维修处理</Button> : null}
-                {engable && hasP0 ? <Button style={styles.button} type='primary' onClick={() => { setEngineerVisible(true) }}>专工处理</Button> : null}
-                {runable && hasP1 ? <Button style={styles.button} type='primary' onClick={() => { setRunnerVisible(true) }}>运行处理</Button> : null}
+                {fixable && hasP3 ? <Button icon='tool' size="small" style={styles.button} type='primary' onClick={() => { setRepairVisible(true) }}>维修处理</Button> : null}
+                {engable && hasP0 ? <Button icon='tool' size="small" style={styles.button} type='primary' onClick={() => { setEngineerVisible(true) }}>专工处理</Button> : null}
+                {runable && hasP1 ? <Button icon='tool' size="small" style={styles.button} type='primary' onClick={() => { setRunnerVisible(true) }}>运行处理</Button> : null}
             </div>
         </Card>
         <Modal visible={imguuid !== null} destroyOnClose centered

@@ -1,9 +1,10 @@
-import { Avatar, Button, List, Tag } from 'antd';
+import { Avatar, Button, Icon, List, Tag } from 'antd';
 import React, { useContext, useState } from 'react';
 import { AppDataContext } from '../../../../redux/AppRedux';
+// import taskIcon from '../../../../assets/taskIcon.png';
 import fixIcon from '../../../../assets/fixIcon.png';
-import taskIcon from '../../../../assets/taskIcon.png';
-import pauseIcon from '../../../../assets/pauseIcon.png';
+import fixIcon_red from '../../../../assets/fixIcon_red.png';
+import fixIcon_pause from '../../../../assets/fixIcon_pause.png';
 import { omitTextLength } from '../../../util/Tool'
 
 import moment from 'moment';
@@ -48,8 +49,10 @@ export default props => {
                     extra={<Button size="small" type={'link'} onClick={() => { setBugPanelVisible(true); setSelectBugItem(item) }}>查看</Button>}
                 >
                     <List.Item.Meta
-                        avatar={<Avatar shape="square" src={item.status === 5 ? pauseIcon : fixIcon} />}
-                        title={<><Tag color='#ff7a45'>{moment(item.createdAt).format('YYYY-MM-DD')}</Tag><Tag color='blue'>{'编号:' + item.id}</Tag><Tag color='orange'>{omitTextLength(item.major_name, 8)}</Tag></>}
+                        avatar={<Avatar shape="square" src={item.status === 5 ? fixIcon_pause : (item.is_red ? fixIcon_red : fixIcon)} />}
+                        title={<><Tag color={item.is_red ? '#f5222d' : (item.status === 5 ? '#9254de' : '#52c41a')}>{'编号:' + item.id}</Tag>
+                            <Tag color={item.is_red ? '#f5222d' : (item.status === 5 ? '#9254de' : '#1890ff')}>{moment(item.createdAt).format('YYYY-MM-DD')}</Tag>
+                            <Tag color='orange'>{omitTextLength(item.major_name, 8)}</Tag></>}
                         description={
                             <div>
                                 <Tag color={statusToDes(item).color}>{statusToDes(item).des}</Tag>
