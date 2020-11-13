@@ -1,6 +1,6 @@
 import React, { useReducer } from 'react';
 import MainView from './view/main/MainView';
-import LoginView from './view/login/LoginView'
+import LoginView from './view/login/LoginViewNew'
 import { HashRouter, Route } from 'react-router-dom'
 
 const appState = {}

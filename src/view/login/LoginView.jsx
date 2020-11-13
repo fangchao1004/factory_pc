@@ -6,10 +6,9 @@ import Background1 from '../../assets/bg1.jpg';
 import Background2 from '../../assets/bg2.jpg';
 // import downloadUrl from '../../assets/downloadurl.png'
 import { USERINFO } from '../util/AppData'
-
-
 const LoginFrom = Form.create({ name: 'normal_login' })(LoginFromClass)
 var storage = window.localStorage;
+///废弃
 export default class LoginView extends React.Component {
   constructor(props) {
     super(props);
@@ -65,23 +64,16 @@ export default class LoginView extends React.Component {
     return (
       <div
         style={{
-          // width: '100%',
-          // height: '100vh',
-          // display: 'flex',
-          // flex: 1,
-          // // flexDirection: 'row',
-          // alignItems: 'center',
-          // backgroundColor: '#0099FF',
           backgroundImage: `url(${Background1})`,
+          backgroundSize: '100% 100%',
           width: '100%',
           height: '100%',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          // backgroundColor: '#6D8FFF's
         }}
       >
-        <div style={{ width: '100%', height: 600, backgroundColor: 'rgba(255,255,255,0)' }}>
+        {/* <div style={{ width: '100%', height: 600, backgroundColor: 'rgba(255,255,255,0)' }}>
           <div style={{ height: 100, fontSize: 30, padding: 40, paddingLeft: 150, color: '#FFFFFF', fontWeight: 800 }}>中节能（合肥）信息综合管理平台</div>
           <div style={{
             width: '100%', height: 400, backgroundImage: `url(${Background2})`,
@@ -94,6 +86,9 @@ export default class LoginView extends React.Component {
               <LoginFrom ref="form" onLoginOk={this.onLoginOk} />
             </Card>
           </div>
+        </div> */}
+        <div style={{ width: 800, height: 400, backgroundColor: 'rgba(255,255,255,0.5)' }}>
+
         </div>
         <div style={{ position: 'fixed', bottom: 15, textAlign: 'center' }}>
           <img style={{ cursor: 'pointer' }} src='https://hefeixiaomu.oss-cn-hangzhou.aliyuncs.com/xiaomu/xiaomu_logo_64.png' alt="" width="20" height="20" onClick={() => {
