@@ -66,12 +66,13 @@ const styles = {
         direction: 'row'
     },
     title: {
+        color: '#3C4265',
         fontSize: 20,
         fontWeight: 800,
         fontStyle: 'oblique'
     },
     subTitle: {
-        color: '#C3D2FB',
+        color: '#8FB7FF',
         fontStyle: 'oblique'
     },
     titleV: {
@@ -119,7 +120,7 @@ function LoginForm(props) {
         </Form.Item>
         <Form.Item wrapperCol={{ offset: 2, span: 20 }}>
             <div style={{ textAlign: 'right' }}>
-                <Button style={{ width: '100%' }} size="small" type="primary" htmlType="submit" icon='login'>登录</Button>
+                <Button style={{ width: '100%' }} type="primary" htmlType="submit" icon='login'>登录</Button>
             </div>
         </Form.Item>
     </Form>
