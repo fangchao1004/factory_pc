@@ -15,7 +15,7 @@ export default props => {
                 <div style={{ width: "100%", backgroundColor: '#FFFFFF', height: 300 }}></div>
             </Col>
             <Col span={6}>
-                <div style={{ width: "100%", backgroundColor: '#FFFFFF', height: 700 }}>
+                <div style={{ width: "100%", backgroundColor: '#FFFFFF', height: 770 }}>
                     <InfoListPage />
                 </div>
             </Col>

@@ -116,7 +116,7 @@ function LoginForm(props) {
         <Form.Item wrapperCol={{ offset: 2, span: 20 }}>
             {getFieldDecorator('password', {
                 rules: [{ required: true, message: '请输入密码' }]
-            })(<Input placeholder='请输入密码' />)}
+            })(<Input type='password' placeholder='请输入密码' />)}
         </Form.Item>
         <Form.Item wrapperCol={{ offset: 2, span: 20 }}>
             <div style={{ textAlign: 'right' }}>

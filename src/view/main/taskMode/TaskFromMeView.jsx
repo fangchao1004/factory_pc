@@ -166,6 +166,12 @@ export default props => {
     useEffect(() => { init() }, [init])
     const columns = [
         {
+            title: '编号',
+            dataIndex: 'id',
+            align: 'center',
+            width: 120,
+        },
+        {
             title: '任务发起时间',
             dataIndex: 'createdAt',
             align: 'center',

@@ -35,9 +35,10 @@ export default props => {
     }, [getNoticeList])
     return <div style={styles.root}>
         <div style={styles.title} >
-            <h2 style={{ marginTop: 4, borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>通知栏</h2>
+            {/* <h2 style={{ marginTop: 4, borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>通知栏</h2> */}
+            <span style={{ margin: '2px 0px 0px 12px', color: '#1890ff' }}>通知栏</span>
         </div>
-        <div style={{ overflow: 'auto', height: isAdmin ? 'calc(100% - 172px)' : 'calc(100% - 40px)' }}>
+        <div style={{ overflow: 'auto', height: isAdmin ? 'calc(100% - 190px)' : 'calc(100% - 40px)' }}>
             {renderInfoList(noticeList, removeNotice)}
         </div>
         {isAdmin ?
@@ -64,27 +65,32 @@ const styles = {
     title: {
         display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
         borderBottomStyle: 'solid',
-        borderBottomWidth: 3,
-        borderBottomColor: '#F1F2F5'
+        borderBottomWidth: 1,
+        borderBottomColor: '#D9D9D9',
+        height: 40,
     },
     icon: {
         fontSize: 24
     },
     root: {
         overflow: 'auto',
-        height: '100%'
+        height: '100%',
+        borderStyle: 'solid',
+        borderWidth: 1,
+        borderColor: '#D9D9D9',
     },
     main: {
         overflow: 'auto',
-        height: 'calc(100% - 172px)'
+        height: 'calc(100% - 190px)'
     },
     textarea: {
-        padding: '5px 10px 0 10px'
-        // borderTopStyle: 'solid',
-        // borderTopWidth: 3,
-        // borderTopColor: '#F1F2F5'
+        height: 150,
+        padding: '10px 10px 0 10px',
+        borderTopStyle: 'solid',
+        borderTopWidth: 1,
+        borderTopColor: '#D9D9D9'
     },
     btnBar: {
-        textAlign: 'right', marginTop: 5
+        textAlign: 'right', marginTop: 10
     }
 }

@@ -5,10 +5,11 @@ import UpdateTaskView from './UpdateTaskView'
 import moment from 'moment'
 import { getDuration } from '../../util/Tool';
 import { AppDataContext } from '../../../redux/AppRedux'
+import { BUGLOOPTIME } from '../../util/AppData'
 
 var storage = window.localStorage;
 var userinfo = JSON.parse(storage.getItem("userinfo"))
-var currentTime = moment().toDate().getTime();
+// var currentTime = moment().toDate().getTime();
 var task_status_filter = [{ text: '未完成', value: 0 }, { text: '待检', value: 1 }, { text: '完结', value: 2 }];///用于筛选任务状态的数据 选项
 /**
  * 给我的任务界面
@@ -19,6 +20,7 @@ export default props => {
     const [userlist, setUserlist] = useState([])
     const [updateTaskVisible, setUpdateTaskVisible] = useState(false)
     const [updateTaskData, setUpdateTaskData] = useState(null)
+    const [currentTime, setCurrentTime] = useState(null);///当前时刻
     const init = useCallback(async () => {
         let sql_task = `select * from tasks where tasks.to like '%,${userinfo.id},%' and effective = 1 order by id DESC`;
         let res_task = await HttpApi.obs({ sql: sql_task })
@@ -35,6 +37,7 @@ export default props => {
         if (res_user.data.code === 0) {
             setUserlist(res_user.data.data)
         }
+        setCurrentTime(moment().toDate().getTime())
     }, [appDispatch])
     const sendMessageToLeader = useCallback(async (taskInfo) => {
         const userid = taskInfo.form;
@@ -59,7 +62,23 @@ export default props => {
     useEffect(() => {
         init();
     }, [init, updateTaskData])
+    useEffect(() => {
+        let loop_for_timestamp;
+        if (loop_for_timestamp) { clearInterval(loop_for_timestamp) }
+        loop_for_timestamp = setInterval(() => {
+            setCurrentTime(moment().toDate().getTime())
+        }, BUGLOOPTIME);////1秒循环一次 刷新计时
+        return () => {
+            clearInterval(loop_for_timestamp)
+        }
+    }, [])
     const columns = [
+        {
+            title: '编号',
+            dataIndex: 'id',
+            align: 'center',
+            width: 120,
+        },
         {
             title: '任务发起时间',
             dataIndex: 'createdAt',

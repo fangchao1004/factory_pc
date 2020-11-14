@@ -1,45 +1,79 @@
-import { Avatar, Button, Icon, List, Tag } from 'antd';
-import React, { useContext, useState } from 'react';
+import { Avatar, Button, List, message, Tag } from 'antd';
+import React, { useCallback, useContext, useState } from 'react';
 import { AppDataContext } from '../../../../redux/AppRedux';
-// import taskIcon from '../../../../assets/taskIcon.png';
+import taskIcon from '../../../../assets/taskIcon.png';
 import fixIcon from '../../../../assets/fixIcon.png';
 import fixIcon_red from '../../../../assets/fixIcon_red.png';
 import fixIcon_pause from '../../../../assets/fixIcon_pause.png';
-import { omitTextLength } from '../../../util/Tool'
+import { omitTextLength, sortById_desc } from '../../../util/Tool'
 
 import moment from 'moment';
 import BugInfoPanelPage from './BugInfoPanelPage';
+import UpdateTaskView from '../../taskMode/UpdateTaskView';
+import HttpApi from '../../../util/HttpApi';
+var storage = window.localStorage;
+var userinfo = JSON.parse(storage.getItem("userinfo"))
 export default props => {
-    const { appState } = useContext(AppDataContext)
+    const { appState, appDispatch } = useContext(AppDataContext)
     const [bugPanelVisible, setBugPanelVisible] = useState(false)
     const [selectBugItem, setSelectBugItem] = useState(null)
+    const [updateTaskVisible, setUpdateTaskVisible] = useState(false)
+    const [updateTaskData, setUpdateTaskData] = useState(null)
+    ///操作任务代码
+    const updateTaskOnOk = useCallback(async (newtaskInfo, taskVisible_param = false) => {
+        let res = await HttpApi.updateTaskInfo({ query: { id: updateTaskData.id }, update: { ...newtaskInfo } })
+        if (res.data.code === 0) {
+            setUpdateTaskVisible(false)
+            // init()///改变task数据源
+            message.success('操作成功')
+            ///获取任务数据🌟
+            var res_task = await HttpApi.getTaskInfo({ to: { $like: `%,${userinfo.id},%` }, status: 0, effective: 1 });
+            if (res_task.data.code === 0) {
+                let taskList = res_task.data.data
+                appDispatch({ type: 'aboutMeTaskList', data: sortById_desc(taskList) })
+            }
+            if (newtaskInfo.isMessage === 1) {
+                const userid = newtaskInfo.form;
+                let res_one_user = await HttpApi.getUserInfo({ id: userid })
+                if (res_one_user.data.code === 0 && res_one_user.data.data.length > 0) {
+                    let leaderInfo = res_one_user.data.data[0]
+                    let param = { phonenumber: leaderInfo.phonenumber, name: leaderInfo.name, name_to: userinfo.name }
+                    HttpApi.sendMessageToLeader(param)
+                }
+            }
+        } else { message.error(res.data.data) }
+    }, [updateTaskData, appDispatch])
+
     return <div style={styles.root}>
-        {/* <List
+        <List
             size="small"
             style={{ maxHeight: 380, overflow: 'scroll', borderRadius: 2, backgroundColor: '#FFFFFF', marginBottom: 10, }}
             header={<div style={styles.title}>
-                <span>我的任务</span>
+                <span>我的任务【待处理】</span>
                 {appState.aboutMeTaskList.length > 0 ? <Tag color='blue'>{'# ' + appState.aboutMeTaskList.length}</Tag> : null}
             </div>}
             bordered
             dataSource={appState.aboutMeTaskList}
             renderItem={item => (
                 <List.Item
-                    extra={<Button size="small" type={'link'}>查看</Button>}
+                    extra={<Button size="small" type={'link'} onClick={() => {
+                        setUpdateTaskVisible(true)
+                        setUpdateTaskData(item)
+                    }}>查看</Button>}
                 >
                     <List.Item.Meta
                         avatar={<Avatar shape="square" src={taskIcon} />}
-                        title={<><Tag color='#ff7a45'>{moment(item.createdAt).format('YYYY-MM-DD')}</Tag><Tag color='blue'>{'编号:' + item.id}</Tag></>}
+                        title={<><Tag color='#52c41a'>{'编号:' + item.id}</Tag><Tag color='#1890ff'>{moment(item.createdAt).format('YYYY-MM-DD')}</Tag></>}
                         description={item.content}
                     />
                 </List.Item>
             )}
-        /> */}
+        />
         <List
             style={{ maxHeight: 380, overflow: 'scroll', borderRadius: 2, backgroundColor: '#FFFFFF' }}
             size="small"
             header={<div style={styles.title}>
-                <span>相关缺陷</span>
+                <span>相关缺陷【待处理】</span>
                 {appState.allAboutMeBugList.length > 0 ? <Tag style={styles.tag} color='blue'>{'# ' + appState.allAboutMeBugList.length}</Tag> : null}
             </div>}
             bordered
@@ -63,6 +97,8 @@ export default props => {
             )}
         />
         <BugInfoPanelPage bug={selectBugItem} visible={bugPanelVisible} onCancel={() => { setBugPanelVisible(false) }} />
+        <UpdateTaskView task={updateTaskData} onOk={updateTaskOnOk}
+            onCancel={() => { setUpdateTaskVisible(false) }} visible={updateTaskVisible} />
     </div>
 }
 const styles = {
