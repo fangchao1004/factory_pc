@@ -23,6 +23,7 @@ class EquipmentView extends Component {
             drawerVisible1: false,
             drawerVisible2: false,
             drawerVisible3: false,
+            loading: false,
             deviceRecords: [],
             oneRecordData: {},
             recordView: null,
@@ -251,14 +252,14 @@ class EquipmentView extends Component {
                 width: 80,
                 render: (text, record) => (
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <Button size="small" type='primary' onClick={() => this.openModalHandler(record)} >查看</Button>
+                        <Button icon='search' size="small" type='primary' onClick={() => this.openModalHandler(record)} >查看</Button>
                         {this.state.isAdmin ?
                             <Fragment>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                                <Button size="small" type='ghost' onClick={() => { this.changeDeviceInfo(record) }} >修改</Button>
+                                <Button icon='edit' size="small" type='ghost' onClick={() => { this.changeDeviceInfo(record) }} >修改</Button>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                 <Popconfirm title="确定要删除该巡检点吗?" onConfirm={() => { this.deleteEquipmentConfirm(record) }}>
-                                    <Button size="small" type="danger">删除</Button>
+                                    <Button icon='delete' size="small" type="danger">删除</Button>
                                 </Popconfirm>
                             </Fragment>
                             : null}
@@ -273,7 +274,7 @@ class EquipmentView extends Component {
                     {
                         this.state.isAdmin ? (<Row>
                             <Col span={6}>
-                                <Button size="small" onClick={this.addEquipment} type="primary">
+                                <Button icon='plus' size="small" onClick={this.addEquipment} type="primary">
                                     添加巡检点
                              </Button>
                             </Col>
@@ -305,7 +306,7 @@ class EquipmentView extends Component {
                     }}
                 />
                 <Drawer
-                    destroyOnClose
+                    destroyOnClose={true}
                     title="巡检点状态历史记录"
                     placement="left"
                     onClose={this.onCloseDrawer}
@@ -384,13 +385,18 @@ class EquipmentView extends Component {
     }
     ///查询某个巡检点的所有record记录数据
     openModalHandler = async (record) => {
+        this.setState({
+            loading: true,
+            pieDeviceId: record.id,
+            drawerVisible1: true,
+        })
+
         ///查询数据库中某个巡检点的所有record记录
         let OneDeviceAllRecords = await HttpApi.getOneDeviceAllRecords(record.id);
         OneDeviceAllRecords.map((item) => item.key = item.id + '')
         ///获取了当前的巡检点id
         this.setState({
-            pieDeviceId: record.id,
-            drawerVisible1: true,
+            loading: false,
             deviceRecords: OneDeviceAllRecords,
         })
     }
@@ -398,7 +404,8 @@ class EquipmentView extends Component {
 
     onCloseDrawer = () => {
         this.setState({
-            drawerVisible1: false
+            drawerVisible1: false,
+            deviceRecords: []
         })
     }
     closeDrawer2 = () => {
@@ -475,7 +482,7 @@ class EquipmentView extends Component {
                             <Tag color='#51C41B' style={{ marginLeft: 15 }}>消缺</Tag>
                         </div>
                     }
-                    return <div>{text}</div>
+                    return <div>{text || '-'}</div>
                 }
             },
             {
@@ -490,6 +497,7 @@ class EquipmentView extends Component {
             }
         ]
         return <Table
+            loading={this.state.loading}
             bordered
             dataSource={this.state.deviceRecords}
             columns={columns}

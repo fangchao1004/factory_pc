@@ -3,13 +3,13 @@ import { Card } from 'antd';
 import HomePageView from './HomePageView';
 import BugsPageView from './BugsPageView';
 import MonitorView from './MonitorView';
-import WorkTable from './workTable/WorkTable';
+// import WorkTable from './workTable/WorkTable';
 
 const tabListNoTitle = [
-    {
-        key: 'WorkTable',
-        tab: '工作台',
-    },
+    // {
+    //     key: 'WorkTable',
+    //     tab: '工作台',
+    // },
     {
         key: 'MonitorView',
         tab: '数据监控',
@@ -27,14 +27,14 @@ class HomePageRoot extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            key: 'WorkTable',
-            noTitleKey: 'WorkTable',
+            key: 'MonitorView',
+            noTitleKey: 'MonitorView',
         }
         contentListNoTitle = {
             HomePageView: <HomePageView {...props} />,
             BugsPageView: <BugsPageView />,
             MonitorView: <MonitorView />,
-            WorkTable: <WorkTable />
+            // WorkTable: <WorkTable />
         };
     }
     onTabChange = (key) => {

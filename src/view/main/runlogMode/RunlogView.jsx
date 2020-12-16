@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Table, Popconfirm, Divider, message } from 'antd';
+import { Button, Table, Popconfirm, message } from 'antd';
 import AddRunlogView from './AddRunlogView';
 import HttpApi from '../../util/HttpApi';
 import UpdateRunlogView from './UpdateRunlogView';
@@ -98,22 +98,22 @@ class RunlogView extends Component {
             }, {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 150,
+                width: 80,
                 render: (text, record) => {
                     let disable = this.state.isAdmin ? false : (this.state.myId === record.upid ? false : true);
-                    return <div style={{ textAlign: 'center' }}>
+                    return <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Button icon='edit' disabled={disable} size="small" type="primary" onClick={() => { this.setState({ updateVisible: true, record: record }) }}>修改</Button>
+                        <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                         <Popconfirm disabled={disable} title={<div>确定要删除该日志吗？</div>} onConfirm={() => { this.deleteConfirm(record) }}>
-                            <Button disabled={disable} size="small" type="danger">删除</Button>
+                            <Button icon='delete' disabled={disable} size="small" type="danger">删除</Button>
                         </Popconfirm>
-                        <Divider type="vertical" />
-                        <Button disabled={disable} size="small" type="primary" onClick={() => { this.setState({ updateVisible: true, record: record }) }}>修改</Button>
                     </div>
                 }
             }
         ]
         return (
             <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
-                <Button size="small" type='primary' onClick={() => { this.setState({ addVisible: true }) }}>添加日志</Button>
+                <Button icon='plus' size="small" type='primary' onClick={() => { this.setState({ addVisible: true }) }}>添加日志</Button>
                 <Table
                     size="small"
                     style={{ marginTop: 10 }}

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import HttpApi from '../../../util/HttpApi';
-import { Popconfirm, Button, Divider, Table, Row, Col, message, Alert } from 'antd'
+import { Popconfirm, Button, Table, Row, Col, message, Alert } from 'antd'
 import AddArea0View from './AddArea0View';
 import UpdateArea0View from './UpdateArea0View';
 import moment from 'moment'
@@ -164,15 +164,15 @@ class EquipmentArea0View extends Component {
             }, {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 150,
+                width: 80,
                 align: 'center',
                 render: (text, record) => {
-                    return <div style={{ textAlign: 'center' }}>
+                    return <div style={{ display: 'flex', flexDirection: 'column' }}>
                         {record.deletable === 1 ?
                             <><Popconfirm title={<div>确定要删除该片区吗?<br />如果当前片区已经正常使用切勿删除</div>} onConfirm={() => { this.deleteArea0Confirm(record) }} okText='确定删除' >
-                                <Button size="small" type="danger">删除</Button>
-                            </Popconfirm><Divider type="vertical" /></> : null}
-                        <Button size="small" type="primary" onClick={() => { this.setState({ updateVisible: true, areaRecord: record }) }}>修改</Button>
+                                <Button icon='delete' size="small" type="danger">删除</Button>
+                            </Popconfirm><div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} /></> : null}
+                        <Button icon='edit' size="small" type="primary" onClick={() => { this.setState({ updateVisible: true, areaRecord: record }) }}>修改</Button>
                     </div>
                 }
             }
@@ -182,7 +182,7 @@ class EquipmentArea0View extends Component {
                 <Alert message={'因左侧菜单栏会根据片区数据动态生成, 所以当片区数据发生变动时, 会触发页面刷新; 且请勿随意变动片区数据; 因为数据安全问题默认不可删除, 如果要删除测试数据请联系管理员'} />
                 <Row>
                     <Col span={6}>
-                        <Button size="small" onClick={() => { this.setState({ addVisible: true }) }} type="primary" style={{ marginBottom: 10, marginTop: 10 }}>
+                        <Button icon='plus' size="small" onClick={() => { this.setState({ addVisible: true }) }} type="primary" style={{ marginBottom: 10, marginTop: 10 }}>
                             添加片区
                          </Button>
                     </Col>

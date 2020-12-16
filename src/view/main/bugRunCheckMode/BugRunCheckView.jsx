@@ -194,9 +194,9 @@ export default props => {
             title: '编号',
             align: 'center',
             width: 120,
-            render: (text, record) => {
-                return <Tag color={record.is_red ? '#f5222d' : '#1890ff'}>{text}</Tag>
-            }
+            // render: (text, record) => {
+            //     return <Tag color={record.is_red ? '#f5222d' : '#1890ff'}>{text}</Tag>
+            // }
         },
         {
             key: 'checkedAt', dataIndex: 'checkedAt', title: '时间',

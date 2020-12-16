@@ -14,6 +14,7 @@ export default () => {
     const [selectItem, setSelectedItem] = useState(null)
     const [switchData, setSwitchData] = useState([])
     const [isAdmin] = useState(JSON.parse(localUserInfo).isadmin || 0)
+    const [hasP1] = useState(JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('1') !== -1);///运行权限
     const setDataHandler = useCallback((data_obj) => {
         // console.log('data_obj:', data_obj)
         let temp_list = [];
@@ -46,7 +47,7 @@ export default () => {
         })
     }, [])
     const getDataHandler = useCallback(async () => {
-        setLoading(true)
+        // setLoading(true)
         // console.log('getDataHandler')
         let monitorlevelRes = await HttpApi.getMonitorLevel();
         if (monitorlevelRes.data.code === 0) {
@@ -96,10 +97,10 @@ export default () => {
         }, {
             dataIndex: 'value', title: <div><Icon type="hdd" /> 设备</div>, children: [
                 {
-                    dataIndex: 'device1', title: <div>{switchData.length > 0 ? (switchData[0].iswork ? <Icon type="dashboard" theme="twoTone" /> : <Icon type="dashboard" />) : <Icon type="dashboard" />} 1号炉 {isAdmin ? <Switch size='small' checked={switchData.length > 0 ? (switchData[0].iswork ? true : false) : false} onChange={(v) => { changeSwitch(v, 1) }} /> : null}</div>, align: 'center', render: (text, record) => {
+                    dataIndex: 'device1', title: <div>{switchData.length > 0 ? (switchData[0].iswork ? <Icon type="dashboard" theme="twoTone" /> : <Icon type="dashboard" />) : <Icon type="dashboard" />} 1号炉 {isAdmin || hasP1 ? <Switch size='small' checked={switchData.length > 0 ? (switchData[0].iswork ? true : false) : false} onChange={(v) => { changeSwitch(v, 1) }} /> : null}</div>, align: 'center', render: (text, record) => {
                         const temp = record['value']['device_list'].filter((item) => item.device_no === 1)[0];
                         if (!temp) { return '-' }
-                        let value = temp['value_list'][0]['value'] || '/'
+                        let value = temp['value_list'][0]['value'] || '-'
                         let status = temp['value_list'][0]['status']
                         if (status === 1) {
                             return <Tag color={'#f5222d'}>{value}</Tag>
@@ -108,10 +109,10 @@ export default () => {
                     }
                 },
                 {
-                    dataIndex: 'device2', title: <div>{switchData.length > 0 ? (switchData[1].iswork ? <Icon type="dashboard" theme="twoTone" /> : <Icon type="dashboard" />) : <Icon type="dashboard" />} 2号炉 {isAdmin ? <Switch size='small' checked={switchData.length > 0 ? (switchData[1].iswork ? true : false) : false} onChange={(v) => { changeSwitch(v, 2) }} /> : null}</div>, align: 'center', render: (text, record) => {
+                    dataIndex: 'device2', title: <div>{switchData.length > 0 ? (switchData[1].iswork ? <Icon type="dashboard" theme="twoTone" /> : <Icon type="dashboard" />) : <Icon type="dashboard" />} 2号炉 {isAdmin || hasP1 ? <Switch size='small' checked={switchData.length > 0 ? (switchData[1].iswork ? true : false) : false} onChange={(v) => { changeSwitch(v, 2) }} /> : null}</div>, align: 'center', render: (text, record) => {
                         const temp = record['value']['device_list'].filter((item) => item.device_no === 2)[0];
                         if (!temp) { return '-' }
-                        let value = temp['value_list'][0]['value'] || '/'
+                        let value = temp['value_list'][0]['value'] || '-'
                         let status = temp['value_list'][0]['status']
                         if (status === 1) {
                             return <Tag color={'#f5222d'}>{value}</Tag>
@@ -120,10 +121,10 @@ export default () => {
                     }
                 },
                 {
-                    dataIndex: 'device3', title: <div>{switchData.length > 0 ? (switchData[2].iswork ? <Icon type="dashboard" theme="twoTone" /> : <Icon type="dashboard" />) : <Icon type="dashboard" />} 3号炉 {isAdmin ? <Switch size='small' checked={switchData.length > 0 ? (switchData[2].iswork ? true : false) : false} onChange={(v) => { changeSwitch(v, 3) }} /> : null}</div>, align: 'center', render: (text, record) => {
+                    dataIndex: 'device3', title: <div>{switchData.length > 0 ? (switchData[2].iswork ? <Icon type="dashboard" theme="twoTone" /> : <Icon type="dashboard" />) : <Icon type="dashboard" />} 3号炉 {isAdmin || hasP1 ? <Switch size='small' checked={switchData.length > 0 ? (switchData[2].iswork ? true : false) : false} onChange={(v) => { changeSwitch(v, 3) }} /> : null}</div>, align: 'center', render: (text, record) => {
                         const temp = record['value']['device_list'].filter((item) => item.device_no === 3)[0];
                         if (!temp) { return '-' }
-                        let value = temp['value_list'][0]['value'] || '/'
+                        let value = temp['value_list'][0]['value'] || '-'
                         let status = temp['value_list'][0]['status']
                         if (status === 1) {
                             return <Tag color={'#f5222d'}>{value}</Tag>
@@ -132,10 +133,10 @@ export default () => {
                     }
                 },
                 {
-                    dataIndex: 'device4', title: <div>{switchData.length > 0 ? (switchData[3].iswork ? <Icon type="dashboard" theme="twoTone" /> : <Icon type="dashboard" />) : <Icon type="dashboard" />} 4号炉 {isAdmin ? <Switch size='small' checked={switchData.length > 0 ? (switchData[3].iswork ? true : false) : false} onChange={(v) => { changeSwitch(v, 4) }} /> : null}</div>, align: 'center', render: (text, record) => {
+                    dataIndex: 'device4', title: <div>{switchData.length > 0 ? (switchData[3].iswork ? <Icon type="dashboard" theme="twoTone" /> : <Icon type="dashboard" />) : <Icon type="dashboard" />} 4号炉 {isAdmin || hasP1 ? <Switch size='small' checked={switchData.length > 0 ? (switchData[3].iswork ? true : false) : false} onChange={(v) => { changeSwitch(v, 4) }} /> : null}</div>, align: 'center', render: (text, record) => {
                         const temp = record['value']['device_list'].filter((item) => item.device_no === 4)[0];
                         if (!temp) { return '-' }
-                        let value = temp['value_list'][0]['value'] || '/'
+                        let value = temp['value_list'][0]['value'] || '-'
                         let status = temp['value_list'][0]['status']
                         if (status === 1) {
                             return <Tag color={'#f5222d'}>{value}</Tag>

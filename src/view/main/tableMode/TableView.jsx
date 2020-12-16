@@ -51,6 +51,7 @@ class TableView extends Component {
             cellsArr.push(
                 <Col span={8} key={element.key}>
                     <Card
+                        hoverable={true}
                         title={(<div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                             <div style={{ width: '70%' }}>{omitTextLength(element.table_name, 15)}</div>
                             <Popconfirm title="确定删除吗?" onConfirm={() => this.onConfirmDeleteHandler(element)}>

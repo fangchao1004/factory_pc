@@ -306,7 +306,7 @@ class TimeView extends Component {
                 align: 'center',
                 render: (text, record) => (
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <Button size="small" type="primary" onClick={() => {
+                        <Button icon='search' size="small" type="primary" onClick={() => {
                             this.setState({
                                 oneRecord: record,
                                 showDrawer: true
@@ -315,7 +315,7 @@ class TimeView extends Component {
                         {this.state.isAdmin ?
                             <Fragment>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                                <Button size="small" type='ghost' onClick={() => { this.setState({ oneRecord: record, showUpdateModal: true }) }}>修改</Button>
+                                <Button icon='edit' size="small" type='ghost' onClick={() => { this.setState({ oneRecord: record, showUpdateModal: true }) }}>修改</Button>
                                 {/* <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                                 <Popconfirm title="确定要删除该时间端吗?" onConfirm={() => { this.deleteTimeHandler(record); }}>
                                     <Button size="small" type="danger">删除</Button>
@@ -332,9 +332,9 @@ class TimeView extends Component {
                 <Alert style={{ marginBottom: 10 }} type='info' message='拥有管理员权限可以编辑巡检点数量, 待检数: 经过方案筛选后的巡检点数量统计 ' />
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     {this.state.isAdmin ?
-                        <Button size="small" type={'primary'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showAddModal: true }) }}>添加时间段</Button>
+                        <Button icon='plus' size="small" type={'primary'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showAddModal: true }) }}>添加时间段</Button>
                         : <span></span>}
-                    <Button size="small" icon={'export'} type={'primary'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showExportRecordView: true }) }}>导出巡检记录</Button>
+                    <Button size="small" icon={'export'} style={{ marginBottom: 10 }} onClick={() => { this.setState({ showExportRecordView: true }) }}>导出文件</Button>
                 </div>
                 <Table
                     size="small"

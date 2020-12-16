@@ -168,7 +168,7 @@ class EquipmentArea1View extends Component {
             <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
                 <Row>
                     <Col span={6}>
-                        <Button size="small" onClick={() => { this.setState({ addVisible: true }) }} type="primary" style={{ marginBottom: 10 }}>
+                        <Button icon='plus' size="small" onClick={() => { this.setState({ addVisible: true }) }} type="primary" style={{ marginBottom: 10 }}>
                             添加一级巡检区域
                          </Button>
                     </Col>

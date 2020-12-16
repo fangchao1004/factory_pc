@@ -296,7 +296,7 @@ export default class BugAboutMeCompletedViewNew extends Component {
                 width: 100,
                 render: (text, record) => (
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <Button size="small" type="default" onClick={() => { this.setState({ stepLogVisible: true, currentRecord: record }) }}>处理记录</Button>
+                        <Button icon='unordered-list' size="small" type="default" onClick={() => { this.setState({ stepLogVisible: true, currentRecord: record }) }}>记录</Button>
                         {/* {JSON.parse(localUserInfo).isadmin === 1 ?
                             <>
                                 <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />

@@ -302,11 +302,11 @@ class ApproveTrans extends Component {
             render: (text, record) => {
                 return <div>
                     <Popconfirm disabled={record.status !== 0} title="确认审批通过吗?" onConfirm={() => { this.okHandler(record) }}>
-                        <Button disabled={record.status !== 0} type={'primary'}>通过</Button>
+                        <Button size="small" disabled={record.status !== 0} type={'primary'}>通过</Button>
                     </Popconfirm>
                     <Divider type="vertical" />
                     <Popconfirm disabled={record.status !== 0} title="确认拒绝吗?" onConfirm={() => { this.refuseHandler(record) }}>
-                        <Button disabled={record.status !== 0} type={'danger'}>拒绝</Button>
+                        <Button size="small" disabled={record.status !== 0} type={'danger'}>拒绝</Button>
                     </Popconfirm>
                 </div>
             }

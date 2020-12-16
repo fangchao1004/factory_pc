@@ -177,9 +177,9 @@ export default props => {
             title: '编号',
             align: 'center',
             width: 120,
-            render: (text, record) => {
-                return <Tag color={record.is_red ? '#f5222d' : '#1890ff'}>{text}</Tag>
-            }
+            // render: (text, record) => {
+            //     return <Tag color={record.is_red ? '#f5222d' : '#1890ff'}>{text}</Tag>
+            // }
         },
         {
             key: 'checkedAt', dataIndex: 'checkedAt', title: '时间',
@@ -385,12 +385,12 @@ export default props => {
             width: 100,
             render: (_, record) => {
                 return <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <Button size="small" type="default" onClick={() => { setStepLogVisible(true); setcurrentRecord(record); }}>处理记录</Button>
+                    <Button icon='unordered-list' size="small" type="default" onClick={() => { setStepLogVisible(true); setcurrentRecord(record); }}>记录</Button>
                     {isAdmin ?
                         <>
                             <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                             <Popconfirm title="确定要删除该缺陷吗?" onConfirm={() => { deleteBugsHandler(record); removeOneBugIdFromList(record.id) }}>
-                                <Button size="small" type="danger">删除</Button>
+                                <Button icon='delete' size="small" type="danger">删除</Button>
                             </Popconfirm>
                         </> : null}
                 </div>

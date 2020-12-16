@@ -158,10 +158,10 @@ class SchemeOfAllowTime extends Component {
                 width: 80,
                 render: (text, record) => {
                     return <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <Button type='primary' size="small" onClick={() => { this.setState({ record, updateVisible: true }) }} >修改</Button>
+                        <Button icon='edit' type='primary' size="small" onClick={() => { this.setState({ record, updateVisible: true }) }} >修改</Button>
                         <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                         <Popconfirm title="确定要删除该方案吗?" onConfirm={() => { this.deleteScheme(record); }}>
-                            <Button type="danger" size="small" >删除</Button>
+                            <Button icon='delete' type="danger" size="small" >删除</Button>
                         </Popconfirm>
                     </div>
                 }
@@ -169,7 +169,7 @@ class SchemeOfAllowTime extends Component {
         ]
         return (
             <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
-                <Button size="small" type='primary' onClick={() => { this.setState({ addVisible: true }) }}>添加时间段方案</Button>
+                <Button icon='plus' size="small" type='primary' onClick={() => { this.setState({ addVisible: true }) }}>添加时间段方案</Button>
                 <Table size="small" style={{ marginTop: 10 }} bordered columns={columns} dataSource={this.state.data} pagination={false} />
                 <AddAtmSchemeView visible={this.state.addVisible} onOk={this.addSchemeOk} onCancel={this.addSchemeCancel} {...this.props} />
                 <UpdateAtmSchemeView visible={this.state.updateVisible} onOk={this.updateSchemeOk} onCancel={this.updateSchemeCancel} record={this.state.record} {...this.props} />

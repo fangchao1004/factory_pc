@@ -17,9 +17,9 @@ export default props => {
                     {localUserInfo.username}
                     <Button size="small" type='link' icon='edit' style={{ padding: 0 }} onClick={() => { setPasswordVIsible(true) }}>密码修改</Button>
                 </div>}</Descriptions.Item>
-                <Descriptions.Item label="专业">{localUserInfo.major_name_all}</Descriptions.Item>
-                <Descriptions.Item label="部门">{localUserInfo.level_name}</Descriptions.Item>
-                <Descriptions.Item label="角色">{localUserInfo.role_id_all.length > 0 ? localUserInfo.role_name_all.split(',').map((item, index) => <Tag key={index} color='blue'>{item}</Tag>) : '-'}</Descriptions.Item>
+                <Descriptions.Item label="专业">{localUserInfo.major_name_all || '-'}</Descriptions.Item>
+                <Descriptions.Item label="部门">{localUserInfo.level_name || '-'}</Descriptions.Item>
+                <Descriptions.Item label="角色">{localUserInfo.role_id_all && localUserInfo.role_id_all.length > 0 ? localUserInfo.role_name_all.split(',').map((item, index) => <Tag key={index} color='blue'>{item}</Tag>) : '-'}</Descriptions.Item>
                 <Descriptions.Item label="管理">{localUserInfo.isadmin ? <Icon type="check-circle" theme="twoTone" /> : '-'}</Descriptions.Item>
                 <Descriptions.Item label="备注">{localUserInfo.remark || '-'}</Descriptions.Item>
                 <Descriptions.Item label="版本">{

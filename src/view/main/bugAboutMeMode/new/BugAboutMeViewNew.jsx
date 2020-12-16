@@ -89,7 +89,9 @@ export default props => {
                 originalData = bug_list;
                 autoFixHandler(bug_list);
                 setBugList(bug_list);
-                appDispatch({ type: 'aboutMeBugCount', data: bug_list.length })
+                ///这里要根据个人的专业、权限，和当前缺陷的状态、进行过滤，得到实际的当前用户待处理的缺陷数量
+                let afterFilterByNeedHandler = checkActuallyNeedDoBugs(JSON.parse(localUserInfo), bug_list, hasP0, hasP1, hasP3)
+                appDispatch({ type: 'aboutMeBugCount', data: afterFilterByNeedHandler.length })
             }
         }
         setCurrentTime(moment().toDate().getTime())
@@ -213,9 +215,9 @@ export default props => {
             title: '编号',
             align: 'center',
             width: 120,
-            render: (text, record) => {
-                return <Tag color={record.is_red ? '#f5222d' : '#1890ff'}>{text}</Tag>
-            }
+            // render: (text, record) => {
+            //     return <Tag color={record.is_red ? '#f5222d' : '#1890ff'}>{text}</Tag>
+            // }
         },
         {
             key: 'checkedAt', dataIndex: 'checkedAt', title: '时间',
@@ -425,7 +427,7 @@ export default props => {
                 let engable = majorHasFlag && (record.status < 3 || record.status > 4);
                 let runable = record.status === 3;
                 return <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <Button size="small" type="default" onClick={() => { setStepLogVisible(true); setcurrentRecord(record); }}>处理记录</Button>
+                    <Button size="small" icon='unordered-list' type="default" onClick={() => { setStepLogVisible(true); setcurrentRecord(record); }}>记录</Button>
                     {hasP3 && fixable ?
                         <>
                             <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
@@ -543,4 +545,27 @@ const styles = {
         width: '100%',
         padding: 10,
     }
+}
+function checkActuallyNeedDoBugs(userinfoObj, bugList, hasP0, hasP1, hasP3) {
+    bugList.forEach((bug) => {
+        bug.majorMatch = false
+        bug.needHandler = false
+        if (userinfoObj.major_id_all.split(',').indexOf(String(bug.major_id)) !== -1) {
+            bug.majorMatch = true;///缺陷的专业与当前用户的专业匹配
+            let fixable = (bug.status < 2 || bug.status === 6 || bug.status === 7);///可维修
+            let engable = (bug.status < 3 || bug.status > 4);///可专工
+            let runable = bug.status === 3;///可运行
+            if (hasP3 && fixable) {
+                bug.needHandler = true;
+            }
+            if (hasP0 && engable) {
+                bug.needHandler = true;
+            }
+            if (hasP1 && runable) {
+                bug.needHandler = true;
+            }
+        }
+    })
+    let afterFilterByneedHandler = bugList.filter((bug) => bug.needHandler === true)
+    return afterFilterByneedHandler;
 }

@@ -29,6 +29,7 @@ import DetailModal from './noticeMenu/DetailModal';
 import { AppDataContext } from '../../redux/AppRedux'
 import { useMemo } from 'react';
 import UserCenterView from './userCenter/UserCenterView';
+import UserLoginLogsView from './userLoginLogMode/UserLoginLogsView';
 
 const { Header, Content, Sider } = Layout;
 const SubMenu = Menu.SubMenu
@@ -317,6 +318,11 @@ export default props => {
                 path={`${props.match.path}/schedule`}
                 component={() => (localUserInfo ? <ScheduleRoot /> : <Redirect to='/' />)}
             />
+            <Route
+                exact
+                path={`${props.match.path}/userloginlogs`}
+                component={() => (localUserInfo ? <UserLoginLogsView /> : <Redirect to='/' />)}
+            />
         </Content>
     }, [getRouteByArea0, props, localUserInfo])
     return <Layout style={{ minHeight: '100vh' }}>
@@ -423,16 +429,21 @@ export default props => {
                 </Menu.Item>
                 <SubMenu key="设置" title={<span><Icon type="setting" /><span>设置</span></span>}>
                     <Menu.Item key="/mainView/usersetting"><Icon type="switcher" /><span>个人中心</span><Link to={`${props.match.url}/usersetting`} /></Menu.Item>
+                    <Menu.Item key="/mainView/userloginlogs"><Icon type="unordered-list" /><span>登录日志</span><Link to={`${props.match.url}/userloginlogs`} /></Menu.Item>
                 </SubMenu>
             </Menu>
         </Sider>
         <Layout style={{ marginLeft: collapsed ? 80 : 220 }}>
-            <Header style={{ zIndex: 10, width: '100%', backgroundColor: '#fff', padding: 0, borderBottomStyle: 'solid', borderBottomWidth: 1, borderBottomColor: '#e8e8e8' }}>
+            <Header style={{ width: '100%', backgroundColor: '#FFFFFF', padding: 0, borderBottomStyle: 'solid', borderBottomWidth: 1, borderBottomColor: '#e8e8e8' }}>
                 <Row>
                     <Col span={3}>
                         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%' }}>
-                            <Icon className="trigger" style={{ fontSize: 24, marginLeft: 10 }} type={collapsed ? 'menu-unfold' : 'menu-fold'} onClick={() => { setCollapsed(!collapsed); }} />
-                            <div id="tp-weather-widget" style={{ marginLeft: 10 }} ></div>
+                            <div style={{ width: 24, height: 24, display: 'flex', marginLeft: 10 }}>
+                                <Icon style={{ fontSize: 24 }} type={collapsed ? 'menu-unfold' : 'menu-fold'} onClick={() => { setCollapsed(!collapsed); }} />
+                            </div>
+                            <div style={{ marginLeft: 20, height: 64 }}>
+                                <div id="tp-weather-widget" style={{ marginLeft: 10 }} ></div>
+                            </div>
                         </div>
                     </Col>
                     <Col span={21} style={{ textAlign: 'right', paddingRight: 24 }}>

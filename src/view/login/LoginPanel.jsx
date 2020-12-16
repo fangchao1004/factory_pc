@@ -13,7 +13,6 @@ export default props => {
       message.error('禁止访问,请联系管理员')
       return
     }
-
     let sql = `select users.* ,group_concat(u_m_j.mj_id) as major_id_all, group_concat(majors.name) as major_name_all,levels.name as level_name from users
         left join (select * from user_map_major where effective = 1) u_m_j on u_m_j.user_id = users.id
         left join (select * from majors  where effective = 1) majors on majors.id = u_m_j.mj_id
@@ -40,9 +39,9 @@ export default props => {
       const new_user = { ...user, ...tempObj }
       storage[USERINFO] = JSON.stringify(new_user)
       props.history.push('/mainView/home')
-      setTimeout(() => {
-        window.location.reload()
-      }, 100)
+      // setTimeout(() => {
+      //   window.location.reload()
+      // }, 100)
     } else {
       message.error('用户名/密码错误')
     }

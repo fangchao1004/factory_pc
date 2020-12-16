@@ -8,7 +8,7 @@ import Background2 from '../../assets/bg2.jpg';
 import { USERINFO } from '../util/AppData'
 const LoginFrom = Form.create({ name: 'normal_login' })(LoginFromClass)
 var storage = window.localStorage;
-///废弃
+///废弃废弃废弃废弃
 export default class LoginView extends React.Component {
   constructor(props) {
     super(props);

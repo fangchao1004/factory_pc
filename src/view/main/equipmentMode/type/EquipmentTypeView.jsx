@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, Button, message, Popconfirm, Divider } from 'antd'
+import { Table, Button, message, Popconfirm } from 'antd'
 import HttpApi from '../../../util/HttpApi';
 import AddDeviceTypeView from './AddDeviceTypeView';
 import UpdateDeviceTypeView from './UpdateDeviceTypeView';
@@ -104,15 +104,16 @@ class EquipmentTypeView extends Component {
             {
                 title: '操作',
                 dataIndex: 'actions',
-                width: 150,
+                width: 80,
                 align: 'center',
                 render: (text, record) => (
-                    <div style={{ textAlign: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Button icon='edit' size="small" onClick={this.updateStaff.bind(this, record)}>修改</Button>
+                        <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                         <Popconfirm title="确定要删除该巡检点类型吗?" onConfirm={this.deleteStaffConfirm.bind(null, record)}>
-                            <Button size="small" type="danger">删除</Button>
+                            <Button icon='delete' size="small" type="danger">删除</Button>
                         </Popconfirm>
-                        <Divider type="vertical" />
-                        <Button size="small" type="primary" onClick={this.updateStaff.bind(this, record)}>修改</Button></div>
+                    </div>
                 )
             }
 
@@ -120,7 +121,7 @@ class EquipmentTypeView extends Component {
 
         return (
             <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
-                <Button size="small" onClick={this.addStaff} type="primary" style={{ marginBottom: 10 }}>添加巡检点类型</Button>
+                <Button icon='plus' size="small" onClick={this.addStaff} type="primary" style={{ marginBottom: 10 }}>添加巡检点类型</Button>
                 <Table
                     size="small"
                     rowClassName={() => 'editable-row'}
