@@ -1,6 +1,7 @@
 import React, { useReducer } from 'react'
 
 const initialState = {
+    userinfo: null,
     version: 'v1.5.5 beta',
     unreadBugCount: 0,
     unreadWarnCount: 0,

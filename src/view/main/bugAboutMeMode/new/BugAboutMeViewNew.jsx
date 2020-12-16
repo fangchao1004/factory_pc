@@ -13,7 +13,7 @@ import { AppDataContext } from '../../../../redux/AppRedux';
 
 
 const storage = window.localStorage;
-const localUserInfo = storage.getItem('userinfo');
+var localUserInfo = storage.getItem('userinfo');
 var major_filter = [];///用于筛选任务专业的数据 选项
 var status_filter = [];///用于筛选状态的数据
 var bug_level_filter = [];///用于筛选缺陷等级 一二三级 选项
@@ -21,7 +21,7 @@ var uploader_filter = [];///用于筛选上传者的数据 选项
 var originalData = [];
 
 export default props => {
-    // console.log('localUserInfo:', localUserInfo)
+    localUserInfo = storage.getItem('userinfo');
     const { appState, appDispatch } = useContext(AppDataContext)
     const [searchKey, setSearchKey] = useState('');///搜索关键字
     const [bugList, setBugList] = useState([]);///数据
