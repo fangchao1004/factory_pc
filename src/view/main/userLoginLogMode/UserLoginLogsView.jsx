@@ -44,6 +44,7 @@ export default () => {
         <div style={styles.root}>
             <div style={styles.body}>
                 <Table
+                    size="small"
                     bordered
                     loading={isLoading}
                     columns={[

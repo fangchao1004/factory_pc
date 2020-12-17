@@ -30,6 +30,7 @@ import { AppDataContext } from '../../redux/AppRedux'
 import { useMemo } from 'react';
 import UserCenterView from './userCenter/UserCenterView';
 import UserLoginLogsView from './userLoginLogMode/UserLoginLogsView';
+import AccessView from './accessMode/AccessView';
 
 const { Header, Content, Sider } = Layout;
 const SubMenu = Menu.SubMenu
@@ -146,10 +147,10 @@ export default props => {
                 }
             }
         }
-        console.log('runBugList:', runBugList)
-        console.log('myBugList:', myBugList)
+        // console.log('runBugList:', runBugList)
+        // console.log('myBugList:', myBugList)
         let result = combin2BugList(runBugList, myBugList)
-        console.log('result:', result)
+        // console.log('result:', result)
         // console.log('myBugList:', myBugList)
         // console.log('未读的缺陷信息:', unreadBugs)///🌟
         checkLocalStorageBugIdList(unreadBugs, audio1.current) ///🌟 temp
@@ -326,6 +327,11 @@ export default props => {
                 path={`${props.match.path}/userloginlogs`}
                 component={() => (localUserInfo ? <UserLoginLogsView /> : <Redirect to='/' />)}
             />
+            <Route
+                exact
+                path={`${props.match.path}/accesslogs`}
+                component={() => (localUserInfo ? <AccessView /> : <Redirect to='/' />)}
+            />
         </Content>
     }, [getRouteByArea0, props, localUserInfo])
     return <Layout style={{ minHeight: '100vh' }}>
@@ -425,11 +431,10 @@ export default props => {
                         <Link to={`${props.match.url}/schedule`} />
                     </Menu.Item>
                 </SubMenu>
-                <Menu.Item key="/mainView/car">
-                    <Icon type="car" />
-                    <span>车辆</span>
-                    <Link to={`${props.match.url}/car`} />
-                </Menu.Item>
+                <SubMenu key="通行" title={<span><Icon type="block" /><span>通行</span></span>}>
+                    <Menu.Item key="/mainView/car"><Icon type="car" /><span>车辆</span><Link to={`${props.match.url}/car`} /></Menu.Item>
+                    <Menu.Item key="/mainView/accesslogs"><Icon type="key" /><span>门禁</span><Link to={`${props.match.url}/accesslogs`} /></Menu.Item>
+                </SubMenu>
                 <SubMenu key="设置" title={<span><Icon type="setting" /><span>设置</span></span>}>
                     <Menu.Item key="/mainView/usersetting"><Icon type="switcher" /><span>个人中心</span><Link to={`${props.match.url}/usersetting`} /></Menu.Item>
                     <Menu.Item key="/mainView/userloginlogs"><Icon type="unordered-list" /><span>登录日志</span><Link to={`${props.match.url}/userloginlogs`} /></Menu.Item>
