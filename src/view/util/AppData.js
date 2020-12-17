@@ -94,4 +94,5 @@ export const VersionlistData = [
     // { title: '更新', description: '1.5.3 beta 角色功能添加' }
     // { title: '更新', description: '1.5.4 beta UI整体调整，hook化改造，移除原有store' }
     // { title: '更新', description: '1.5.5 beta 工作台添加相关缺陷操作列表，修复缺陷模块超时不标红的问题' }
+    // { title: '更新', description: '1.5.6 功能整合' }
 ]
