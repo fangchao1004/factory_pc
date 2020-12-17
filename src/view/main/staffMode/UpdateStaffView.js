@@ -31,90 +31,96 @@ import HttpApi from '../../util/HttpApi'
  * @returns
  */
 function UpdateStaffForm(props) {
-    const { getFieldDecorator } = props.form
-    // const levelOptions = props.levels.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
-    const nfcOptions = props.nfcs.map(nfc => <Select.Option value={nfc.id} key={nfc.id}>{nfc.name}</Select.Option>)
-    const majorOptions = props.majors.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
-    // console.log('props:', props)
-    // let treeData = getTreeData(props.levels) ///部门 选项数据
-    let levelOptions = props.levels.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
+  const { getFieldDecorator } = props.form
+  // const levelOptions = props.levels.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
+  const nfcOptions = props.nfcs.map(nfc => <Select.Option value={nfc.id} key={nfc.id}>{nfc.name}</Select.Option>)
+  const majorOptions = props.majors.map(major => <Select.Option value={major.id} key={major.id}>{major.name}</Select.Option>)
+  // console.log('props:', props)
+  // let treeData = getTreeData(props.levels) ///部门 选项数据
+  let levelOptions = props.levels.map(level => <Select.Option value={level.id} key={level.id}>{level.name}</Select.Option>)
 
-    return <Form>
-        <Form.Item label="登陆账户" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('username', {
-                initialValue: props.staff.username,
-                rules: [{ required: true, message: '请输入员工登陆账户' }]
-            })(<Input></Input>)}
-        </Form.Item>
-        <Form.Item label="姓名" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('name', {
-                initialValue: props.staff.name,
-                rules: [{ required: true, message: '请输入员工姓名' }]
-            })(<Input></Input>)}
-        </Form.Item>
-        <Form.Item label="部门" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('level_id', {
-                // initialValue: props.staff.group_id ? props.staff.level_id + '_' + props.staff.group_id : props.staff.level_id,
-                initialValue: props.staff.level_id,
-                rules: [{ required: true, message: '请选择员工部门' }]
-            })(
-                // <TreeSelect
-                //     treeNodeFilterProp="title"
-                //     showSearch
-                //     dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-                //     treeData={treeData}
-                // />
-                <Select showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{levelOptions}</Select>)}
-        </Form.Item>
-        <Form.Item label="密码" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('password', {
-                initialValue: props.staff.password,
-                rules: [{ required: true, message: '请输入员工密码' }]
-            })(<Input></Input>)}
-        </Form.Item>
-        <Form.Item label="联系方式" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('phonenumber', {
-                initialValue: props.staff.phonenumber,
-                rules: [{ required: true, message: '请输入员工联系方式' }]
-            })(<Input></Input>)}
-        </Form.Item>
-        <Form.Item label="员工工卡" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('nfc_id', {
-                initialValue: props.staff.nfc_id,
-                rules: [{ required: false, message: '请选择员工工卡' }]
-            })(<Select showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{nfcOptions}</Select>)}
-        </Form.Item>
-        {/* <Form.Item label="员工权限" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+  return <Form>
+    <Form.Item label="登陆账户" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+      {getFieldDecorator('username', {
+        initialValue: props.staff.username,
+        rules: [{ required: true, message: '请输入员工登陆账户' }]
+      })(<Input></Input>)}
+    </Form.Item>
+    <Form.Item label="姓名" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+      {getFieldDecorator('name', {
+        initialValue: props.staff.name,
+        rules: [{ required: true, message: '请输入员工姓名' }]
+      })(<Input></Input>)}
+    </Form.Item>
+    <Form.Item label="部门" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+      {getFieldDecorator('level_id', {
+        // initialValue: props.staff.group_id ? props.staff.level_id + '_' + props.staff.group_id : props.staff.level_id,
+        initialValue: props.staff.level_id,
+        rules: [{ required: true, message: '请选择员工部门' }]
+      })(
+        // <TreeSelect
+        //     treeNodeFilterProp="title"
+        //     showSearch
+        //     dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+        //     treeData={treeData}
+        // />
+        <Select showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{levelOptions}</Select>)}
+    </Form.Item>
+    <Form.Item label="密码" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+      {getFieldDecorator('password', {
+        initialValue: props.staff.password,
+        rules: [{ required: true, message: '请输入员工密码' }]
+      })(<Input></Input>)}
+    </Form.Item>
+    <Form.Item label="联系方式" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+      {getFieldDecorator('phonenumber', {
+        initialValue: props.staff.phonenumber,
+        rules: [{ required: true, message: '请输入员工联系方式' }]
+      })(<Input></Input>)}
+    </Form.Item>
+    <Form.Item label="员工工卡" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+      {getFieldDecorator('nfc_id', {
+        initialValue: props.staff.nfc_id,
+        rules: [{ required: false, message: '请选择员工工卡' }]
+      })(<Select showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{nfcOptions}</Select>)}
+    </Form.Item>
+    {/* <Form.Item label="员工权限" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             {getFieldDecorator('permission', {
                 initialValue: props.staff.permission ? props.staff.permission.split(',').map(permission => parseInt(permission)) : undefined,
                 rules: [{ required: false, message: '请选择员工权限' }]
             })(<Select mode="multiple" showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{permissionOptions}</Select>)}
         </Form.Item> */}
-        <Form.Item label="所属专业" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('major_id', {
-                initialValue: props.staff.major_id_all ? props.staff.major_id_all.split(',').map(major => parseInt(major)) : undefined,
-                rules: [{ required: false, message: '请选择员工专业' }]
-            })(<Select mode="multiple" showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{majorOptions}</Select>)}
-        </Form.Item>
-        <Form.Item label="员工备注" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('remark', {
-                initialValue: props.staff.remark,
-                rules: [{ required: false, message: '请输入员工备注' }]
-            })(<Input.TextArea autosize={{ minRows: 4, maxRows: 6 }}></Input.TextArea>)}
-        </Form.Item>
-        <Form.Item label="管理员" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('isadmin', {
-                initialValue: props.staff.isadmin === 1,
-                valuePropName: 'checked'
-            })(<Switch checkedChildren="是" unCheckedChildren="否"></Switch>)}
-        </Form.Item>
-        <Form.Item label="值长" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('isGroupLeader', {
-                initialValue: props.staff.isGroupLeader === 1,
-                valuePropName: 'checked'
-            })(<Switch checkedChildren="是" unCheckedChildren="否"></Switch>)}
-        </Form.Item>
-    </Form>
+    <Form.Item label="所属专业" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+      {getFieldDecorator('major_id', {
+        initialValue: props.staff.major_id_all ? props.staff.major_id_all.split(',').map(major => parseInt(major)) : undefined,
+        rules: [{ required: false, message: '请选择员工专业' }]
+      })(<Select mode="multiple" showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{majorOptions}</Select>)}
+    </Form.Item>
+    <Form.Item label="员工备注" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+      {getFieldDecorator('remark', {
+        initialValue: props.staff.remark,
+        rules: [{ required: false, message: '请输入员工备注' }]
+      })(<Input.TextArea autosize={{ minRows: 4, maxRows: 6 }}></Input.TextArea>)}
+    </Form.Item>
+    <Form.Item label="管理员" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+      {getFieldDecorator('isadmin', {
+        initialValue: props.staff.isadmin === 1,
+        valuePropName: 'checked'
+      })(<Switch checkedChildren="是" unCheckedChildren="否"></Switch>)}
+    </Form.Item>
+    <Form.Item label="值长" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+      {getFieldDecorator('isGroupLeader', {
+        initialValue: props.staff.isGroupLeader === 1,
+        valuePropName: 'checked'
+      })(<Switch checkedChildren="是" unCheckedChildren="否"></Switch>)}
+    </Form.Item>
+    <Form.Item label='厂外登录权限' labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+      {getFieldDecorator('use_whitelist', {
+        initialValue: props.staff.use_whitelist === 0,
+        valuePropName: 'checked'
+      })(<Switch checkedChildren='是' unCheckedChildren='否'></Switch>)}
+    </Form.Item>
+  </Form>
 }
 
 const StaffForm = Form.create({ name: 'staffForm' })(UpdateStaffForm)
@@ -128,45 +134,45 @@ const StaffForm = Form.create({ name: 'staffForm' })(UpdateStaffForm)
  * @returns
  */
 export default function UpdateStaffView(props) {
-    const staffFormRef = React.useRef(null)
-    const [levels, setLevels] = React.useState(null)
-    const [nfcs, setNfcs] = React.useState(null)
-    const [majors, setMajors] = React.useState(null)
-    React.useEffect(() => {
-        HttpApi.getUserLevel({}, data => {
-            if (data.data.code === 0) {
-                setLevels(data.data.data)
-            }
-        })
-        HttpApi.getNFCInfo({ type: 1, effective: 1 }, data => {
-            if (data.data.code === 0) {
-                setNfcs(data.data.data)
-            }
-        })
-        HttpApi.getUserMajor({ effective: 1 }, data => {
-            if (data.data.code === 0) {
-                setMajors(data.data.data)
-            }
-        })
-    }, [])
+  const staffFormRef = React.useRef(null)
+  const [levels, setLevels] = React.useState(null)
+  const [nfcs, setNfcs] = React.useState(null)
+  const [majors, setMajors] = React.useState(null)
+  React.useEffect(() => {
+    HttpApi.getUserLevel({}, data => {
+      if (data.data.code === 0) {
+        setLevels(data.data.data)
+      }
+    })
+    HttpApi.getNFCInfo({ type: 1, effective: 1 }, data => {
+      if (data.data.code === 0) {
+        setNfcs(data.data.data)
+      }
+    })
+    HttpApi.getUserMajor({ effective: 1 }, data => {
+      if (data.data.code === 0) {
+        setMajors(data.data.data)
+      }
+    })
+  }, [])
 
-    React.useEffect(() => {
-        if (staffFormRef.current) {
-            staffFormRef.current.resetFields()
-        }
-    }, [props.staff])
-
-    const handlerOk = () => {
-        staffFormRef.current.validateFields((error, values) => {
-            if (!error) {
-                props.onOk(values)
-            }
-        })
+  React.useEffect(() => {
+    if (staffFormRef.current) {
+      staffFormRef.current.resetFields()
     }
+  }, [props.staff])
 
-    return <Modal maskClosable={true} destroyOnClose centered onOk={handlerOk} title="修改员工"
-        onCancel={props.onCancel}
-        visible={props.visible}>
-        <StaffForm ref={staffFormRef} staff={props.staff} levels={levels} nfcs={nfcs} majors={majors}></StaffForm>
-    </Modal>
+  const handlerOk = () => {
+    staffFormRef.current.validateFields((error, values) => {
+      if (!error) {
+        props.onOk(values)
+      }
+    })
+  }
+
+  return <Modal maskClosable={true} destroyOnClose centered onOk={handlerOk} title="修改员工"
+    onCancel={props.onCancel}
+    visible={props.visible}>
+    <StaffForm ref={staffFormRef} staff={props.staff} levels={levels} nfcs={nfcs} majors={majors}></StaffForm>
+  </Modal>
 }
