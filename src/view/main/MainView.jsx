@@ -146,7 +146,10 @@ export default props => {
                 }
             }
         }
+        console.log('runBugList:', runBugList)
+        console.log('myBugList:', myBugList)
         let result = combin2BugList(runBugList, myBugList)
+        console.log('result:', result)
         // console.log('myBugList:', myBugList)
         // console.log('未读的缺陷信息:', unreadBugs)///🌟
         checkLocalStorageBugIdList(unreadBugs, audio1.current) ///🌟 temp
