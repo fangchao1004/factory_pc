@@ -15,6 +15,7 @@ var task_status_filter = [{ text: '未完成', value: 0 }, { text: '待检', val
  * 给我的任务界面
  */
 export default props => {
+    userinfo = JSON.parse(storage.getItem("userinfo"))
     const { appDispatch } = useContext(AppDataContext)
     const [tasklist, setTasklist] = useState([])
     const [userlist, setUserlist] = useState([])

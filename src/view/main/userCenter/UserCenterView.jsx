@@ -5,8 +5,9 @@ import { adminPermission, permisstionWithDes } from '../../util/AppData';
 import { environmentIsTest } from '../../util/HttpApi';
 import UpdatePasswordView from './UpdatePasswordView'
 const storage = window.localStorage;
-const localUserInfo = JSON.parse(storage.getItem('userinfo'));
+var localUserInfo = JSON.parse(storage.getItem('userinfo'));
 export default props => {
+    localUserInfo = JSON.parse(storage.getItem('userinfo'));
     const { appState } = useContext(AppDataContext)
     const [passwordVIsible, setPasswordVIsible] = useState(false)
     return <div style={styles.root}>

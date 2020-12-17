@@ -3,12 +3,13 @@ import { Button, Select, InputNumber, message, Input, Card, Form, Modal } from '
 import moment from 'moment';
 import HttpApi from '../../util/HttpApi'
 const storage = window.localStorage;
-const localUserInfo = storage.getItem('userinfo');
+var localUserInfo = storage.getItem('userinfo');
 const { Option } = Select;
 /**
  * 发起申请消费-界面
  */
 export default _ => {
+    localUserInfo = storage.getItem('userinfo');
     const [foodList, setFoodList] = useState([])
     const init = useCallback(async () => {
         // console.log('init')
