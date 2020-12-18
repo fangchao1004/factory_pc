@@ -24,13 +24,13 @@ class CarModeRoot extends Component {
         isAdmin = JSON.parse(userinfo).isadmin === 1;
         tabListNoTitle = isAdmin ? [{
             key: 'CarView',
-            tab: '个人车辆信息',
+            tab: '个人车辆',
         }, {
             key: 'AllCarView',
-            tab: '全部车辆信息'
+            tab: '全部车辆'
         }] : [{
             key: 'CarView',
-            tab: '个人车辆信息',
+            tab: '个人车辆',
         }]
         this.forceUpdate();
     }

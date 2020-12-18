@@ -78,7 +78,7 @@ class CarView extends Component {
         return (
             <div style={{ backgroundColor: '#FFFFFF', padding: 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>个人车辆出入信息</h2>
+                    <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>个人车辆出入记录</h2>
                     <DatePicker.RangePicker size="small" disabledDate={this.disabledDate} value={this.state.dateRange} ranges={{
                         '今日': [moment(), moment()],
                         '本月': [moment().startOf('month'), moment().endOf('day')],

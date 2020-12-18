@@ -57,7 +57,7 @@ export default function AccessView() {
         <div style={styles.root}>
             <div style={styles.body}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>门禁信息</h2>
+                    <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>通行记录</h2>
                     <RangePicker size="small" value={dateList} allowClear={false} disabledDate={(current) => current > moment().endOf('day')} ranges={{
                         '今日': [moment(), moment()],
                         '本月': [moment().startOf('month'), moment().endOf('day')],
