@@ -16,6 +16,7 @@ class DeviceInfoView extends Component {
             deviceObj: null,
             drawerVisible2: false,
             oneRecordData: {},
+            loading: false,
         }
     }
     componentWillReceiveProps(nextProps) {
@@ -25,12 +26,13 @@ class DeviceInfoView extends Component {
 
     }
     init = async (deviceObj) => {
+        this.setState({ loading: true, showTable: true })
         let OneDeviceAllRecords = await HttpApi.getOneDeviceAllRecords(deviceObj.id);
         OneDeviceAllRecords.map((item) => item.key = item.id + '')
         ///获取了当前的巡检点id
         this.setState({
             deviceRecords: OneDeviceAllRecords,
-            showTable: true,
+            loading: false,
             deviceObj
         })
     }
@@ -116,6 +118,7 @@ class DeviceInfoView extends Component {
                     <div>
                         <h2 style={{ borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16 }}>巡检点巡检记录</h2>
                         <Table
+                            loading={this.state.loading}
                             size="small"
                             bordered
                             dataSource={this.state.deviceRecords}
