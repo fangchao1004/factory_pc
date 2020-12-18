@@ -73,8 +73,7 @@ export default props => {
     ///初始化数据
     const init = useCallback(async () => {
         console.log('初始化')
-        if (JSON.parse(localUserInfo).major_id_all) {
-            let sql_get_bug = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,
+        let sql_get_bug = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,
             area_1.name as area1_name,area_1.id as area1_id,
             area_2.name as area2_name,area_2.id as area3_id,
             area_3.name as area3_name,area_3.id as area3_id,
@@ -101,15 +100,14 @@ export default props => {
 						left join (select * from bug_freeze_status where effective = 1) bug_freeze_status on bug_freeze_status.id = t2.freeze_id
 						) tmp_freeze_table on tmp_freeze_table.bug_id = bugs.id
             where bugs.status = 3 and bugs.effective = 1 order by bugs.id desc`
-            let res_bug_list = await HttpApi.obs({ sql: sql_get_bug });///从数据库中获取最新的bugs数据
-            if (res_bug_list.data.code === 0) {
-                let bug_list = res_bug_list.data.data
-                bug_list = bug_list.map((item) => { item.key = item.id; return item })
-                // console.log('run_bug_list:', bug_list)
-                originalData = bug_list;
-                setBugList(bug_list);
-                appDispatch({ type: 'runBugCount', data: bug_list.length })
-            }
+        let res_bug_list = await HttpApi.obs({ sql: sql_get_bug });///从数据库中获取最新的bugs数据
+        if (res_bug_list.data.code === 0) {
+            let bug_list = res_bug_list.data.data
+            bug_list = bug_list.map((item) => { item.key = item.id; return item })
+            // console.log('run_bug_list:', bug_list)
+            originalData = bug_list;
+            setBugList(bug_list);
+            appDispatch({ type: 'runBugCount', data: bug_list.length })
         }
         setCurrentTime(moment().toDate().getTime())
         // eslint-disable-next-line 
@@ -404,7 +402,7 @@ export default props => {
             render: (_, record) => {
                 let runable = record.status === 3;
                 return <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <Button size="small" type="default" onClick={() => { setStepLogVisible(true); setcurrentRecord(record); }}>处理记录</Button>
+                    <Button icon='unordered-list' size="small" type="default" onClick={() => { setStepLogVisible(true); setcurrentRecord(record); }}>记录</Button>
                     {hasP1 ?
                         <>
                             <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />

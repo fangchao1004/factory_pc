@@ -15,7 +15,7 @@ export const TesturiForcar = 'http://ixiaomu.cn:3006/' ///小木服务器数据�
 // export const TesturiForcar = 'http://localhost:3006/'///本地服务器测试用
 
 export const TesturiForks = 'http://ixiaomu.cn:3005/' ///小木服务器数据库 mysql server 服务独立地址 考勤信息
-export const TesturiForAccess = 'http://ixiaomu.cn:3004/' ///小木服务器数据库 mysql server 服务独立地址 门禁信息
+export const TesturiForAccess = 'http://60.174.196.158:3004/' ///60服务器数据库 mysql server 服务独立地址 门禁信息
 class HttpApi {
     static verify(params) {
         return Axios.post(Testuri + 'verify', params)

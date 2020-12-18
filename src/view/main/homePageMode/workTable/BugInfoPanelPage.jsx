@@ -275,7 +275,7 @@ export function RenderTimeLine(stepList, setImguuidHandler) {
                 <div>{item.imgs ? item.imgs.split(',').map((img, i) =>
                     <img alt='' style={{ width: 50, height: 50, marginTop: 10, marginRight: 10, cursor: "pointer" }} key={img} src={Testuri + 'get_jpg?uuid=' + img}
                         onClick={() => {
-                            setImguuidHandler(item.uuid)
+                            setImguuidHandler(img)
                         }}
                     />
                 )
