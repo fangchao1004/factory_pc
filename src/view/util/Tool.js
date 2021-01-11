@@ -1031,3 +1031,12 @@ export function sortById_desc(list_params) {
     })
     return list
 }
+
+// export function printHandler(viewRef) {
+//     let printView = viewRef  //获取待打印元素
+//     document.querySelector('#root').className = 'print-hide'  //将根元素隐藏
+//     document.body.appendChild(printView) //将待打印元素追加到body中
+//     window.print() //调用浏览器的打印预览
+//     document.body.removeChild(printView) //将待打印元素从body中移除
+//     document.querySelector('#root').className = '' //将原始页面恢复
+// }

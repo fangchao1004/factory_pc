@@ -1,7 +1,7 @@
 import Axios from 'axios'
 import moment from 'moment';
 
-export const Testuri = 'http://ixiaomu.cn:3008/'///小木服务器数据库 3008正式 3010测试
+export const Testuri = 'http://ixiaomu.cn:3010/'///小木服务器数据库 3008正式 3010测试
 const TesturiM = 'http://ixiaomu.cn:3099/'
 // export const Testuri = 'http://localhost:3008/' ///本地服务器测试用
 // export const Testuri = 'http://localhost:2019/'///本地服务器测试用 socket.io 服务测试
@@ -958,6 +958,14 @@ class HttpApi {
         left join (select * from bug_tag_status where effective = 1) bug_tag_status on bug_tag_status.id = bug_step_log.tag_id
         left join (select * from bug_freeze_status where effective = 1) bug_freeze_status on bug_freeze_status.id = bug_step_log.freeze_id
         where bug_step_log.effective = 1 and bug_step_log.bug_id = ${bugId}`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    static getJobTicketsOptionList = () => {
+        let sql = `select id,name from job_tickets where isdelete = 0`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    static getJobTicketsList = ({ id }) => {
+        let sql = `select * from job_tickets where isdelete = 0 and id = ${id}`
         return Axios.post(Testuri + 'obs', { sql })
     }
 }
