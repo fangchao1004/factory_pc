@@ -70,8 +70,8 @@ export default props => {
                             storage.removeItem('userinfo');
                             props.history.replace('/')
                             setTimeout(() => {
-                                window.location.href = environmentIsTest ? '/test/' : '/';
-                            }, 1000);
+                                window.location.href = environmentIsTest ? '/job/' : '/';
+                            }, 500);
                         }
                     })
                     break;

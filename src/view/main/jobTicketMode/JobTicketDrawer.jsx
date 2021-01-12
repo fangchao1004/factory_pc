@@ -76,6 +76,12 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
             }
         }
     }, [record])
+    const resetHandler = useCallback(() => {
+        setCurentPageIndex(0)
+        onClose()
+        resetData()
+        setSelectValue(null)
+    }, [onClose, resetData])
     useEffect(() => {
         init();
     }, [init])
@@ -100,7 +106,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                         </div>
                     </div>
                     <div style={{ marginTop: 10, ...styles.bar }}><Tag color='blue'>处理</Tag>
-                        <Select placeholder='请选择处理项' allowClear size='small' style={{ width: 200 }} disabled={selectDisable}
+                        <Select value={selectValue} placeholder='请选择处理项' allowClear size='small' style={{ width: 200 }} disabled={selectDisable}
                             onChange={(v) => { setSelectValue(v) }}
                         >
                             <Select.Option value='1'>{record && record.status >= 0 ? changeShowLabByStauts(record.status) : '通过'}</Select.Option>
@@ -120,9 +126,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                         let res = await HttpApi.updateJTApplyRecord({ id: record.id, is_stop: 1 })
                                         if (res.data.code === 0) {
                                             message.success('已经作废')
-                                            setCurentPageIndex(0)
-                                            onClose()
-                                            resetData()
+                                            resetHandler()
                                         }
                                     }
                                 })
@@ -138,9 +142,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                         let res = await HttpApi.updateJTApplyRecord({ id: record.id, is_delete: 1 })
                                         if (res.data.code === 0) {
                                             message.success('已经删除')
-                                            setCurentPageIndex(0)
-                                            onClose()
-                                            resetData()
+                                            resetHandler()
                                         }
                                     }
                                 })
@@ -171,9 +173,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                         let res2 = await HttpApi.updateJTApplyRecord({ id: record.id, status: new_status })
                                         if (res2.data.code === 0) {
                                             message.success('提交成功')
-                                            setCurentPageIndex(0)
-                                            onClose()
-                                            resetData()
+                                            resetHandler()
                                         }
                                     }
                                 },
