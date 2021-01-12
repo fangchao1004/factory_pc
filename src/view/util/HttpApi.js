@@ -961,11 +961,66 @@ class HttpApi {
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getJobTicketsOptionList = () => {
-        let sql = `select id,name from job_tickets where isdelete = 0`
+        let sql = `select id,ticket_name from job_tickets where isdelete = 0`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getJobTicketsList = ({ id }) => {
         let sql = `select * from job_tickets where isdelete = 0 and id = ${id}`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    static createJTRecord = ({ ticket_name, pages, major_id }) => {
+        let sql = `insert into job_tickets_records (ticket_name, pages, major_id) values ('${ticket_name}','${pages}',${major_id})`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    static getLastJTRecordId = () => {
+        let sql = `select max(id) as max_id from job_tickets_records`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    static getJTRecords = ({ id }) => {
+        let sql = `select * from job_tickets_records where id = ${id}`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    static updateJTRecord = ({ id, pages }) => {
+        let sql = `update job_tickets_records set pages = '${pages}' where id = ${id}`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    /**
+     * job_t_r_id 工作票记录id
+     * job_s_t_r_id 副票记录id
+     * @param {*} param0 
+     */
+    static createJTApplyRecord = ({ job_t_r_id, job_s_t_r_id, user_id, user_name, time, major_id, ticket_name }) => {
+        let sql = `insert into job_tickets_apply_records (job_t_r_id, job_s_t_r_id, user_id, user_name, time, major_id, ticket_name) values (${job_t_r_id}, ${job_s_t_r_id ? job_s_t_r_id : null}, ${user_id}, '${user_name}', '${time}', ${major_id}, '${ticket_name}')`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    /**
+     * 后期要分页查询
+     * 根据个人所属专业或是自己提交的，查询相关的工作票
+     * 如果有运行权限查询所有
+     */
+    static getJTApplyRecords = ({ major_id, is_stop = 0, user_id, is_all }) => {
+        let sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = ${is_stop} and (major_id in (${major_id}) or user_id = ${user_id})order by id desc`
+        if (is_all) {
+            sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = ${is_stop} order by id desc`
+        }
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    static updateJTApplyRecord = ({ id, status, is_delete, is_stop }) => {
+        let block_status = ''
+        if (status >= 0) {
+            block_status = ` status = ${status},`
+        }
+        let block_delete = ''
+        if (is_delete >= 0) {
+            block_delete = ` is_delete = ${is_delete},`
+        }
+        let block_stop = ''
+        if (is_stop >= 0) {
+            block_stop = ` is_stop = ${is_stop},`
+        }
+        let set_sql = block_status + block_delete + block_stop
+        set_sql = set_sql.substring(0, set_sql.length - 1)
+        let sql = `update job_tickets_apply_records set ${set_sql} where id = ${id}`
         return Axios.post(Testuri + 'obs', { sql })
     }
 }

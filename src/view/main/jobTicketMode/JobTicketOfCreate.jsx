@@ -1,15 +1,19 @@
-import { Button, Col, Empty, Row, Select, Tag, Affix } from 'antd'
+import { Button, Col, Empty, Row, Select, Tag, Affix, Modal, message } from 'antd'
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
+import { createNewJobTicketApply } from '../../util/Tool';
+const { confirm } = Modal;
 const storage = window.localStorage;
 export default function JobTicketOfCreate() {
     const [currentPageIndex, setCurentPageIndex] = useState(0)///当前页面索引 0 为第一页
     const [jobTicketsOption, setJobTicketsOption] = useState([])
     const [currentJobTicket, setCurrentJobTicket] = useState({})
+    const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})
     const [userList, setUserList] = useState([])
     const [currentUserId, setCurrentUserId] = useState(null)
     const [scaleNum, setScaleNum] = useState(1)
+    const [ticketSampleId, setTicketSampleId] = useState(null)
     const getJobTicketByid = useCallback(async (id) => {
         if (id !== null) {
             let res = await HttpApi.getJobTicketsList({ id })
@@ -20,8 +24,10 @@ export default function JobTicketOfCreate() {
             }
         } else {
             setCurrentJobTicket({})
+            setCurrentJobTicketValue({})
             setScaleNum(1)
         }
+        setTicketSampleId(id)
     }, [])
     const init = useCallback(async () => {
         const localUserInfo = storage.getItem('userinfo');
@@ -53,7 +59,9 @@ export default function JobTicketOfCreate() {
                     <Col span={18}>
                         <div style={styles.rightpart}>
                             {!currentJobTicket.pages ? <Empty style={{ padding: 36 }} description={'请先选择需要的工作票'} /> :
-                                <RenderEngine jsonlist={currentJobTicket} userList={userList} currentUserId={currentUserId} currentPageIndex={currentPageIndex} scaleNum={scaleNum} />
+                                <RenderEngine jsonlist={currentJobTicket} userList={userList} currentUserId={currentUserId} currentPageIndex={currentPageIndex} scaleNum={scaleNum} callbackValue={(v) => {
+                                    setCurrentJobTicketValue(v)
+                                }} />
                             }
                         </div>
                     </Col>
@@ -70,6 +78,7 @@ export default function JobTicketOfCreate() {
                                         placeholder='请选择工作票'
                                         showSearch
                                         optionFilterProp="children"
+                                        value={ticketSampleId}
                                         onChange={(value) => {
                                             if (value >= 0) { getJobTicketByid(value) }
                                             else { getJobTicketByid(null) }
@@ -79,7 +88,7 @@ export default function JobTicketOfCreate() {
                                         }
                                     >
                                         {jobTicketsOption.map((item, index) => {
-                                            return <Select.Option key={index} value={item.id}>{item.name}</Select.Option>
+                                            return <Select.Option key={index} value={item.id}>{item.ticket_name}</Select.Option>
                                         })}
                                     </Select>
                                 </div>
@@ -99,7 +108,25 @@ export default function JobTicketOfCreate() {
                                 <div style={{ display: 'flex', flexDirection: 'row', width: "100%", alignItems: 'center', marginTop: 10 }}>
                                     <Tag color='blue'>操作</Tag>
                                     <div style={{ display: 'flex', flexDirection: 'row-reverse', width: "100%", padding: 5, }}>
-                                        <Button type='danger' size='small'>提交</Button>
+                                        <Button type='danger' size='small' disabled={!currentJobTicket.pages} onClick={() => {
+                                            confirm({
+                                                title: '确认提交当前的工作票吗?',
+                                                content: '请确保所填信息的准确和完整',
+                                                okText: '确认',
+                                                okType: 'danger',
+                                                cancelText: '取消',
+                                                onOk: async function () {
+                                                    if (!currentJobTicketValue.pages) { message.error('请填写好工作票后，再进行提交'); return }
+                                                    let res = await createNewJobTicketApply(currentJobTicketValue)
+                                                    console.log('提交:', res);
+                                                    if (res) {
+                                                        message.success('提交成功')
+                                                        getJobTicketByid(null)
+                                                        setCurentPageIndex(0)
+                                                    }
+                                                },
+                                            });
+                                        }}>提交</Button>
                                     </div>
                                 </div>
                             </div>

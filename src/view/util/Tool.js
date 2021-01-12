@@ -2,7 +2,7 @@ import React from "react";
 import { Icon, message } from 'antd'
 import HttpApi from './HttpApi'
 import moment from 'moment';
-import { BROWERTYPE, NOTICEMUSICOPEN, MAXBUGIDMY, MAXTASKIDMY, OLDRUNBUGIDLIST, BUGIDLIST } from "./AppData";
+import { BROWERTYPE, NOTICEMUSICOPEN, MAXBUGIDMY, MAXTASKIDMY, OLDRUNBUGIDLIST, BUGIDLIST, JOB_TICKETS_STATUS } from "./AppData";
 var storage = window.localStorage;
 /**
  * Tool 工具类 
@@ -1032,11 +1032,68 @@ export function sortById_desc(list_params) {
     return list
 }
 
-// export function printHandler(viewRef) {
-//     let printView = viewRef  //获取待打印元素
-//     document.querySelector('#root').className = 'print-hide'  //将根元素隐藏
-//     document.body.appendChild(printView) //将待打印元素追加到body中
-//     window.print() //调用浏览器的打印预览
-//     document.body.removeChild(printView) //将待打印元素从body中移除
-//     document.querySelector('#root').className = '' //将原始页面恢复
-// }
+/**
+ * 
+ * @param {*} jobTicketValue 工作票数据
+ */
+export async function createNewJobTicketApply(jobTicketValue) {
+    jobTicketValue.pages = JSON.stringify(jobTicketValue.pages)
+    console.log('jobTicketValue:', jobTicketValue)
+    let res = await HttpApi.createJTRecord(jobTicketValue)
+    if (res.data.code === 0) {
+        let res_max_id = await HttpApi.getLastJTRecordId()
+        if (res_max_id.data.code === 0) {
+            let max_id = res_max_id.data.data[0].max_id;
+            const localUserInfo = storage.getItem('userinfo');
+            let userObj = JSON.parse(localUserInfo);
+            let obj = {};///暂时不考虑副票
+            obj['job_t_r_id'] = max_id;
+            obj['user_id'] = userObj.id;
+            obj['user_name'] = userObj.name;
+            obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss');
+            obj['major_id'] = jobTicketValue['major_id'];
+            obj['ticket_name'] = jobTicketValue['ticket_name'];
+            let res2 = await HttpApi.createJTApplyRecord(obj)
+            if (res2.data.code === 0) {
+                return true
+            } else {
+                return false
+            }
+        }
+    }
+    return false
+}
+
+export function changeJobTicketStatusToText(status) {
+    try {
+        let res = JOB_TICKETS_STATUS.filter((item) => { return item.value === status })[0]
+        return res.text || '-'
+    } catch (error) {
+        return '/'
+    }
+}
+
+/**
+ * 根据工作票当前的状态；显示功能上通往下一步status+1的选择的名称
+ * @param {*} status 
+ */
+export function changeShowLabByStauts(status) {
+    let res = ''
+    switch (status) {
+        case 0:
+            res = '签发'
+            break;
+        case 1:
+            res = '接票'
+            break;
+        case 2:
+            res = '回填'
+            break;
+        case 3:
+            res = '确认'
+            break;
+        default:
+            break;
+    }
+    return res
+}

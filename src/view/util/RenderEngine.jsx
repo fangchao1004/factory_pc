@@ -1,9 +1,9 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { DatePicker, Checkbox, Select } from 'antd';
 import moment from 'moment'
 import "antd/dist/antd.css";
 const testuri = 'http://60.174.196.158:12345/'
-export function RenderEngine({ jsonlist, userList, currentUserId, currentPageIndex, scaleNum = 1 }) {
+export function RenderEngine({ jsonlist, userList, currentUserId, currentPageIndex, scaleNum = 1, callbackValue }) {
     const pagediv = useRef(null)
     const [list, setList] = useState(jsonlist);
     // const printHandler = useCallback((viewRef) => {
@@ -15,7 +15,8 @@ export function RenderEngine({ jsonlist, userList, currentUserId, currentPageInd
         copylist.pages[currentPageIndex].components[index].attribute.value = value
         console.log('最新表单json数据:', copylist);
         setList(copylist)
-    }, [list, currentPageIndex])
+        if (callbackValue) callbackValue(copylist)
+    }, [list, currentPageIndex, callbackValue])
     const componentsRender = useCallback((item, index) => {
         if (!item) { return null }
         switch (item.type) {
@@ -60,14 +61,18 @@ export function RenderEngine({ jsonlist, userList, currentUserId, currentPageInd
                 return null
         }
     }, [changeComponetsValue, userList])
-
-
+    const init = useCallback(() => {
+        setList(jsonlist)
+    }, [jsonlist])
+    useEffect(() => {
+        init()
+    }, [init])
     return <div style={{ display: 'flex', alignItems: "center", justifyContent: 'center', flexDirection: 'column', padding: 10, overflow: 'auto', }}>
         <div ref={pagediv}
             style={{
                 height: 1188,
                 width: 840,
-                backgroundImage: `url(${testuri + list.pages[currentPageIndex].background})`,///这里写成 url(../assets/img/热控1.png) 不行 用import
+                backgroundImage: list.pages ? `url(${testuri + list.pages[currentPageIndex].background})` : '',///这里写成 url(../assets/img/热控1.png) 不行 用import
                 backgroundSize: "cover",
                 position: "relative",
                 transform: `scale(${scaleNum})`///整体缩放比例
