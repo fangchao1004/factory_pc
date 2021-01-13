@@ -968,8 +968,13 @@ class HttpApi {
         let sql = `select * from job_tickets where isdelete = 0 and id = ${id}`
         return Axios.post(Testuri + 'obs', { sql })
     }
-    static createJTRecord = ({ ticket_name, pages, major_id }) => {
-        let sql = `insert into job_tickets_records (ticket_name, pages, major_id) values ('${ticket_name}','${pages}',${major_id})`
+    static getJobTicketsCount = ({ type_id, timeRange }) => {
+        let sql = `select count(id) as count from job_tickets_records where type_id = ${type_id} and time >= '${timeRange[0]}' and time <= '${timeRange[1]}' `
+        console.log('sql:', sql)
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    static createJTRecord = ({ id, ticket_name, pages, major_id, title, time }) => {
+        let sql = `insert into job_tickets_records (type_id, ticket_name, pages, major_id, title, time) values (${id},'${ticket_name}','${pages}',${major_id},'${title}','${time}')`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getLastJTRecordId = () => {
@@ -989,8 +994,8 @@ class HttpApi {
      * job_s_t_r_id 副票记录id
      * @param {*} param0 
      */
-    static createJTApplyRecord = ({ job_t_r_id, job_s_t_r_id, user_id, user_name, time, major_id, ticket_name }) => {
-        let sql = `insert into job_tickets_apply_records (job_t_r_id, job_s_t_r_id, user_id, user_name, time, major_id, ticket_name) values (${job_t_r_id}, ${job_s_t_r_id ? job_s_t_r_id : null}, ${user_id}, '${user_name}', '${time}', ${major_id}, '${ticket_name}')`
+    static createJTApplyRecord = ({ no, job_t_r_id, job_s_t_r_id, user_id, user_name, time, major_id, ticket_name }) => {
+        let sql = `insert into job_tickets_apply_records (no, job_t_r_id, job_s_t_r_id, user_id, user_name, time, major_id, ticket_name) values ('${no}',${job_t_r_id}, ${job_s_t_r_id ? job_s_t_r_id : null}, ${user_id}, '${user_name}', '${time}', ${major_id}, '${ticket_name}')`
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**

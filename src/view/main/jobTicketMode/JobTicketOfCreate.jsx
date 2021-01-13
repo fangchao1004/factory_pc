@@ -58,7 +58,7 @@ export default function JobTicketOfCreate() {
                 <Row gutter={10}>
                     <Col span={18}>
                         <div style={styles.rightpart}>
-                            {!currentJobTicket.pages ? <Empty style={{ padding: 36 }} description={'请先选择需要的工作票'} /> :
+                            {!currentJobTicket.pages ? <Empty style={{ padding: 10 }} description={'请先选择需要的工作票'} /> :
                                 <RenderEngine jsonlist={currentJobTicket} userList={userList} currentUserId={currentUserId} currentPageIndex={currentPageIndex} scaleNum={scaleNum} callbackValue={(v) => {
                                     setCurrentJobTicketValue(v)
                                 }} />
@@ -117,8 +117,10 @@ export default function JobTicketOfCreate() {
                                                 cancelText: '取消',
                                                 onOk: async function () {
                                                     if (!currentJobTicketValue.pages) { message.error('请填写好工作票后，再进行提交'); return }
+                                                    ///获取当前
+                                                    // console.log('currentJobTicketValue:', currentJobTicketValue);
                                                     let res = await createNewJobTicketApply(currentJobTicketValue)
-                                                    console.log('提交:', res);
+                                                    // console.log('提交:', res);
                                                     if (res) {
                                                         message.success('提交成功')
                                                         getJobTicketByid(null)

@@ -4,6 +4,7 @@ import HttpApi from './HttpApi'
 import moment from 'moment';
 import { BROWERTYPE, NOTICEMUSICOPEN, MAXBUGIDMY, MAXTASKIDMY, OLDRUNBUGIDLIST, BUGIDLIST, JOB_TICKETS_STATUS } from "./AppData";
 var storage = window.localStorage;
+const FORMAT = 'YYYY-MM-DD HH:mm:ss'
 /**
  * Tool 工具类 
  * 将可以重复利用的函数，或是代码量很大的函数进行封装
@@ -1032,14 +1033,61 @@ export function sortById_desc(list_params) {
     return list
 }
 
+export function addCharToHead({ originString = '', targetString = '', Targetlength = 5 }) {
+    let count = 0
+    let result = originString
+    while (count < Targetlength - originString.length) {
+        result = targetString + result
+        count++;
+    }
+    return result
+}
+/**
+ * 获取自动编号
+ * @param {*} param0 
+ */
+export async function getAutoJTARecordNo({ id, title }) {
+    let timeRange = [moment().startOf('year').format(FORMAT), moment().endOf('year').format(FORMAT)]///今年区间
+    let res = await HttpApi.getJobTicketsCount({ type_id: id, timeRange })
+    if (res.data.code === 0) {
+        let new_count = res.data.data[0].count + 1 || 1
+        let no_str = addCharToHead({ originString: String(new_count), targetString: '0', Targetlength: 5 })
+        let year_str = moment().format('YYYY')
+        let temp_str = title + year_str + no_str
+        return temp_str;
+    }
+    return ''
+}
+/**
+ * 替换票中的编号值
+ * @param {*} param0 
+ */
+export function changeNoInputValue({ auto_no, pages }) {
+    try {
+        pages.forEach((page) => {
+            const components = page.components
+            components.forEach((cmp) => {
+                if (cmp.is_no === 1) {
+                    cmp.attribute.value = auto_no
+                }
+            })
+        })
+    } catch (error) {
+        console.log('error:', error)
+    }
+    return pages
+}
+
 /**
  * 
  * @param {*} jobTicketValue 工作票数据
  */
 export async function createNewJobTicketApply(jobTicketValue) {
+    let auto_no = await getAutoJTARecordNo(jobTicketValue)
+    // console.log('auto_no:::', auto_no)
+    jobTicketValue.pages = changeNoInputValue({ auto_no, pages: jobTicketValue.pages })
     jobTicketValue.pages = JSON.stringify(jobTicketValue.pages)
-    console.log('jobTicketValue:', jobTicketValue)
-    let res = await HttpApi.createJTRecord(jobTicketValue)
+    let res = await HttpApi.createJTRecord({ ...jobTicketValue, time: moment().format(FORMAT) })
     if (res.data.code === 0) {
         let res_max_id = await HttpApi.getLastJTRecordId()
         if (res_max_id.data.code === 0) {
@@ -1047,6 +1095,7 @@ export async function createNewJobTicketApply(jobTicketValue) {
             const localUserInfo = storage.getItem('userinfo');
             let userObj = JSON.parse(localUserInfo);
             let obj = {};///暂时不考虑副票
+            obj['no'] = auto_no
             obj['job_t_r_id'] = max_id;
             obj['user_id'] = userObj.id;
             obj['user_name'] = userObj.name;

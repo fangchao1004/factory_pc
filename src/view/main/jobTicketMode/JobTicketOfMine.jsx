@@ -22,7 +22,8 @@ export default function JobTicketOfMine() {
         init();
     }, [init])
     const columns = [
-        { title: '编号', dataIndex: 'id', key: 'id', width: 100 },
+        { title: '序号', dataIndex: 'id', key: 'id', width: 100 },
+        { title: '编号', dataIndex: 'no', key: 'no', width: 120 },
         { title: '时间', dataIndex: 'time', key: 'time', width: 180 },
         { title: '票名', dataIndex: 'ticket_name', key: 'ticket_name' },
         { title: '申请人', dataIndex: 'user_name', key: 'user_name' },
