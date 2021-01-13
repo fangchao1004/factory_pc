@@ -94,7 +94,10 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
             onClose={onClose}
             visible={visible}
         >
-            <div style={{ backgroundColor: '#F1F2F5', padding: '10px 10px 0 10px', }}>
+            <div style={{ backgroundColor: '#F1F2F5', padding: '0px 10px 10px 10px', }}>
+                <RenderEngine jsonlist={currentJobTicket} userList={userList} currentUserId={currentUserId} currentPageIndex={currentPageIndex} callbackValue={(v) => {
+                    setCurrentJobTicketValue(v)///数据改动后的回调
+                }} />
                 <div style={styles.panel}>
                     <Alert message='处理栏选择后点击提交上传数据；工作票进入下一状态' type='info' showIcon />
                     <div style={{ marginTop: 10, ...styles.bar }}><Tag color='blue'>操作</Tag>
@@ -180,10 +183,12 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                             });
                         }}>提交</Button>
                     </div>
+                    <div style={{ marginTop: 10, ...styles.bar }}>
+                        <Button icon='file-text' size='small' type='danger' onClick={() => {
+                            window.open(`http://60.174.196.158:12345/print/index.html?id=${record.job_t_r_id}&page=${currentPageIndex}`)
+                        }}>打印当前页</Button>
+                    </div>
                 </div>
-                <RenderEngine jsonlist={currentJobTicket} userList={userList} currentUserId={currentUserId} currentPageIndex={currentPageIndex} callbackValue={(v) => {
-                    setCurrentJobTicketValue(v)///数据改动后的回调
-                }} />
             </div>
         </Drawer >
     )

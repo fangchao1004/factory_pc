@@ -165,18 +165,6 @@ export default function JobTicketOfCreate() {
                       }}>
                       提交
                     </Button>
-                    <Button
-                      type='primary'
-                      onClick={_ => {
-                        let renderEngine = document.getElementById('renderEngine')
-                        let p = '<html><head><title>工作票打印</title></head><body><div>' + renderEngine.innerHTML + '</div></body></html>'
-                        let w = window.open('about:blank')
-                        w.document.write(p)
-                        w.document.close()
-                        w.print()
-                      }}>
-                      Print
-                    </Button>
                   </div>
                 </div>
               </div>

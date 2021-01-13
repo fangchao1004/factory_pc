@@ -156,7 +156,7 @@ export function RenderEngine({ jsonlist, userList, currentUserId, currentPageInd
           transform: `scale(${scaleNum})` ///整体缩放比例
         }}>
         <img
-          src={testuri + list.pages[currentPageIndex].background}
+          src={list.pages ? testuri + list.pages[currentPageIndex].background : ''}
           style={{
             height: 1188,
             width: 840
@@ -165,8 +165,8 @@ export function RenderEngine({ jsonlist, userList, currentUserId, currentPageInd
         />
         {list.pages
           ? list.pages[currentPageIndex].components.map((item, index) => {
-              return componentsRender(item, index)
-            })
+            return componentsRender(item, index)
+          })
           : null}
       </div>
     </div>
