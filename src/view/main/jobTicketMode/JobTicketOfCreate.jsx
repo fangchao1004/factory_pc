@@ -1,8 +1,9 @@
 import { Button, Col, Empty, Row, Select, Tag, Affix, Modal, message } from 'antd'
 import React, { useCallback, useEffect, useState } from 'react'
+// import { testData } from '../../../assets/testJson'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { createNewJobTicketApply } from '../../util/Tool'
+import { checkDataIsLostValue, createNewJobTicketApply } from '../../util/Tool'
 const { confirm } = Modal
 const storage = window.localStorage
 export default function JobTicketOfCreate() {
@@ -11,7 +12,7 @@ export default function JobTicketOfCreate() {
   const [currentJobTicket, setCurrentJobTicket] = useState({})
   const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})
   const [userList, setUserList] = useState([])
-  const [currentUserId, setCurrentUserId] = useState(null)
+  const [currentUser] = useState(JSON.parse(storage.getItem('userinfo')))
   const [scaleNum, setScaleNum] = useState(1)
   const [ticketSampleId, setTicketSampleId] = useState(null)
   const getJobTicketByid = useCallback(async id => {
@@ -20,6 +21,7 @@ export default function JobTicketOfCreate() {
       if (res.data.code === 0) {
         let tempObj = JSON.parse(JSON.stringify(res.data.data[0]))
         tempObj.pages = JSON.parse(tempObj.pages)
+        // tempObj.pages = testData
         setCurrentJobTicket(tempObj)
       }
     } else {
@@ -30,8 +32,6 @@ export default function JobTicketOfCreate() {
     setTicketSampleId(id)
   }, [])
   const init = useCallback(async () => {
-    const localUserInfo = storage.getItem('userinfo')
-    setCurrentUserId(JSON.parse(localUserInfo).id)
     let res = await HttpApi.getJobTicketsOptionList()
     if (res.data.code === 0) {
       setJobTicketsOption(res.data.data)
@@ -69,17 +69,18 @@ export default function JobTicketOfCreate() {
               {!currentJobTicket.pages ? (
                 <Empty style={{ padding: 36 }} description={'请先选择需要的工作票'} />
               ) : (
-                <RenderEngine
-                  jsonlist={currentJobTicket}
-                  userList={userList}
-                  currentUserId={currentUserId}
-                  currentPageIndex={currentPageIndex}
-                  scaleNum={scaleNum}
-                  callbackValue={v => {
-                    setCurrentJobTicketValue(v)
-                  }}
-                />
-              )}
+                  <RenderEngine
+                    jsonlist={currentJobTicket}
+                    userList={userList}
+                    currentUser={currentUser}
+                    currentStatus={0}
+                    currentPageIndex={currentPageIndex}
+                    scaleNum={scaleNum}
+                    callbackValue={v => {
+                      setCurrentJobTicketValue(v)
+                    }}
+                  />
+                )}
             </div>
           </Col>
           <Col span={6}>
@@ -153,6 +154,12 @@ export default function JobTicketOfCreate() {
                               message.error('请填写好工作票后，再进行提交')
                               return
                             }
+                            let needValueButIsEmpty = checkDataIsLostValue(currentJobTicketValue)
+                            if (needValueButIsEmpty) {
+                              message.error('请填写好工作票后，再进行提交')
+                              return
+                            }
+                            // return;
                             let res = await createNewJobTicketApply(currentJobTicketValue)
                             console.log('提交:', res)
                             if (res) {

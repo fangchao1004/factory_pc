@@ -3,7 +3,7 @@ import { DatePicker, Checkbox, Select } from 'antd'
 import moment from 'moment'
 import 'antd/dist/antd.css'
 const testuri = 'http://60.174.196.158:12345/'
-export function RenderEngine({ jsonlist, userList, currentUserId, currentPageIndex, scaleNum = 1, callbackValue }) {
+export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, currentPageIndex, scaleNum = 1, callbackValue }) {
   const pagediv = useRef(null)
   const [list, setList] = useState(jsonlist)
   // const printHandler = useCallback((viewRef) => {
@@ -131,6 +131,7 @@ export function RenderEngine({ jsonlist, userList, currentUserId, currentPageInd
     [changeComponetsValue, userList]
   )
   const init = useCallback(() => {
+    console.log('init:');
     setList(jsonlist)
   }, [jsonlist])
   useEffect(() => {
@@ -165,6 +166,10 @@ export function RenderEngine({ jsonlist, userList, currentUserId, currentPageInd
         />
         {list.pages
           ? list.pages[currentPageIndex].components.map((item, index) => {
+            let disabled = checkCellDisable(item.attribute.able_list, currentStatus, currentUser.permission)
+            item.attribute.disabled = disabled
+            let isempty = checkCellIsEmpty(item.attribute, currentStatus)
+            item.attribute.isempty = isempty
             return componentsRender(item, index)
           })
           : null}
@@ -190,4 +195,45 @@ function changeMomentFormat(timelistOrStr) {
     return item.replace(/年/g, '-').replace(/月/g, '-').replace(/日/g, '').replace(/时/g, ':').replace(/分/g, '')
   })
   return res
+}
+
+/**
+ * 判断当前状态下，当前元素组件是否禁用
+ * @param {*} able_list  [{ "status": 0, "per": [0,3] }],
+ * @param {*} currentStatus 0or1or2or3
+ * @param {*} currentUserPermissionList "0,1,3"
+ */
+function checkCellDisable(able_list, currentStatus, currentUserPermission) {
+  if (!able_list) { return true }
+  if (!currentUserPermission) { return true }
+  let currentUserPermissionList = currentUserPermission.split(',')
+  let disabled = true;
+  able_list.forEach((item) => {
+    if (item.status === currentStatus) {
+      item.per.forEach((needPer) => {
+        if (currentUserPermissionList) {
+          currentUserPermissionList.forEach((hasPer) => {
+            if (String(needPer) === String(hasPer)) { disabled = false }
+          })
+        }
+      })
+    }
+  })
+  return disabled
+}
+
+/**
+ * 判断当前状态下，当前元素组件是否缺少值
+ * @param {*} attribute 
+ * @param {*} currentStatus 
+ */
+function checkCellIsEmpty(attribute, currentStatus) {
+  let isEmpty = false
+  const { value, no_null_status_list } = attribute
+  if (value !== 0) {
+    if (no_null_status_list && no_null_status_list.indexOf(currentStatus) !== -1 && (!value || value.length === 0)) {
+      isEmpty = true
+    }
+  }
+  return isEmpty
 }

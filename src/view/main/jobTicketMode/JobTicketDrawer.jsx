@@ -2,14 +2,14 @@ import { Alert, Button, Drawer, Tag, Select, message, Modal } from 'antd'
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { changeShowLabByStauts } from '../../util/Tool';
+import { changeShowLabByStauts, checkDataIsLostValue } from '../../util/Tool';
 const { confirm } = Modal;
 const storage = window.localStorage;
 export default function JobTicketDrawer({ visible, onClose, record, resetData }) {
     const [currentJobTicket, setCurrentJobTicket] = useState({})///当前票的数据
     const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})///填写改动后的数值-二者区分开 提交时使用
     const [currentPageIndex, setCurentPageIndex] = useState(0)///当前页面索引 0 为第一页
-    const [currentUserId, setCurrentUserId] = useState(null)
+    const [currentUser] = useState(JSON.parse(storage.getItem('userinfo')))
     const [userList, setUserList] = useState([])
     const [selectValue, setSelectValue] = useState(null)
     const [selectDisable, setSelectDisable] = useState(true)///默认不可操作
@@ -28,7 +28,8 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
             if (res.data.code === 0) {
                 let tempObj = JSON.parse(JSON.stringify(res.data.data[0]))
                 tempObj.pages = JSON.parse(tempObj.pages)
-                // console.log('tempObj:', tempObj);
+                // tempObj.pages = testData
+                // console.log('testData:', testData);
                 setCurrentJobTicket(tempObj)///票数据初始化
                 setCurrentJobTicketValue(tempObj)///票数据初始化
             }
@@ -37,15 +38,15 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                 let user_list = res_user.data.data.map((item) => { return { id: item.id, name: item.name } })
                 setUserList(user_list)
             }
-            const localUserInfo = storage.getItem('userinfo');
-            const userObj = JSON.parse(localUserInfo)
-            setCurrentUserId(userObj.id)
-            if ((record.status === 0 || record.status === 1 || record.status === 2) && userObj.id === record.user_id) {
-                ///0待审核 1待接票 2待回填 状态时，申请人可以操作
+            // const localUserInfo = storage.getItem('userinfo');
+            // const currentUser = JSON.parse(localUserInfo)
+            // setCurrentUser(currentUser)
+            if (record.status === 1 && currentUser.id === record.user_id) {
+                ///1待签发  状态时，申请人可以操作
                 setSelectDisable(false)
-                if (record.status === 0) {
+                if (record.status === 1) {
                     setShowDeleteBtn(true)
-                    if (userObj.permission.split(',').indexOf("0") === -1) {
+                    if (currentUser.permission.split(',').indexOf("0") === -1) {
                         setSelectDisable(true)
                         setShowStopBtn(false)
                     }
@@ -54,17 +55,17 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                     setShowStopBtn(true)
                 }
             }
-            console.log('userObj:', userObj);
-            console.log('专工权限:', userObj.permission.split(',').indexOf("0") !== -1);
-            console.log('运行权限:', userObj.permission.split(',').indexOf("1") !== -1);
-            if (record.status === 0 && userObj.major_id_all && userObj.major_id_all.split(',').indexOf(String(record.major_id)) !== -1 && userObj.permission && userObj.permission.split(',').indexOf("0") !== -1) {
-                ///0待审核 状态时，对应专业的专工可以操作
+            console.log('currentUser:', currentUser);
+            console.log('专工权限:', currentUser.permission.split(',').indexOf("0") !== -1);
+            console.log('运行权限:', currentUser.permission.split(',').indexOf("1") !== -1);
+            if (record.status === 1 && currentUser.major_id_all && currentUser.major_id_all.split(',').indexOf(String(record.major_id)) !== -1 && currentUser.permission && currentUser.permission.split(',').indexOf("0") !== -1) {
+                ///1待审核 状态时，对应专业的专工可以操作
                 setSelectDisable(false)
                 setShowStopBtn(true)
 
             }
-            if (record.status === 3 && userObj.major_id_all && userObj.permission && userObj.permission.split(',').indexOf("1") !== -1) {
-                ///0待确认 状态时，运行可以操作
+            if ((record.status === 2 || record.status === 3) && currentUser.major_id_all && currentUser.permission && currentUser.permission.split(',').indexOf("1") !== -1) {
+                ///2待接票 3待完结 状态时，运行可以操作
                 setSelectDisable(false)
                 setShowDeleteBtn(false)
                 setShowStopBtn(true)
@@ -75,7 +76,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                 setShowStopBtn(false)
             }
         }
-    }, [record])
+    }, [record, currentUser])
     const resetHandler = useCallback(() => {
         setCurentPageIndex(0)
         onClose()
@@ -95,7 +96,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
             visible={visible}
         >
             <div style={{ backgroundColor: '#F1F2F5', padding: '0px 10px 10px 10px', }}>
-                <RenderEngine jsonlist={currentJobTicket} userList={userList} currentUserId={currentUserId} currentPageIndex={currentPageIndex} callbackValue={(v) => {
+                <RenderEngine jsonlist={currentJobTicket} currentStatus={record ? record.status : 1} userList={userList} currentUser={currentUser} currentPageIndex={currentPageIndex} callbackValue={(v) => {
                     setCurrentJobTicketValue(v)///数据改动后的回调
                 }} />
                 <div style={styles.panel}>
@@ -112,8 +113,8 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                         <Select value={selectValue} placeholder='请选择处理项' allowClear size='small' style={{ width: 200 }} disabled={selectDisable}
                             onChange={(v) => { setSelectValue(v) }}
                         >
-                            <Select.Option value='1'>{record && record.status >= 0 ? changeShowLabByStauts(record.status) : '通过'}</Select.Option>
-                            {record && record.status !== 2 && record.status !== 0 ? <Select.Option value='-1'>打回</Select.Option> : null}
+                            <Select.Option value='1'>{record && record.status >= 1 ? changeShowLabByStauts(record.status) : '通过'}</Select.Option>
+                            {record && record.status !== 3 && record.status !== 1 ? <Select.Option value='-1'>打回</Select.Option> : null}
                         </Select>
                     </div>
                     <div style={{ marginTop: 10, ...styles.bar }}>
@@ -160,6 +161,12 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                 okType: 'danger',
                                 cancelText: '取消',
                                 onOk: async () => {
+                                    let needValueButIsEmpty = checkDataIsLostValue(currentJobTicketValue)
+                                    if (selectValue === "1" && needValueButIsEmpty) {///前往下一步时，数据不全
+                                        message.error('请填写好工作票后，再进行提交')
+                                        return
+                                    }
+                                    // return;
                                     // console.log('selectValue:', selectValue);
                                     // console.log('值:', currentJobTicketValue);
                                     // console.log('record:', record);

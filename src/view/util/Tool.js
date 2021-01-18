@@ -1129,20 +1129,32 @@ export function changeJobTicketStatusToText(status) {
 export function changeShowLabByStauts(status) {
     let res = ''
     switch (status) {
-        case 0:
+        case 1:
             res = '签发'
             break;
-        case 1:
+        case 2:
             res = '接票'
             break;
-        case 2:
-            res = '回填'
-            break;
         case 3:
-            res = '确认'
+            res = '完结'
             break;
         default:
             break;
     }
     return res
+}
+
+/**
+ * 判断提交的表单是否缺少必要的数据
+ * @param {*} currentJobTicketValue 
+ */
+export function checkDataIsLostValue(currentJobTicketValue) {
+    let needValueButIsEmpty = false;
+    currentJobTicketValue.pages.forEach((page) => {
+        const components = page.components
+        components.forEach((cpt) => {
+            if (cpt.attribute.isempty) { needValueButIsEmpty = true }
+        })
+    })
+    return needValueButIsEmpty
 }
