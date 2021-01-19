@@ -1,28 +1,23 @@
-import { Alert, Button, Drawer, Tag, Select, message, Modal } from 'antd'
+import { Button, Drawer, Select, message, Modal, Affix } from 'antd'
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { changeShowLabByStauts, checkDataIsLostValue } from '../../util/Tool';
+import { changeShowLabByStauts, checkCellWhichIsEmpty, checkDataIsLostValue } from '../../util/Tool';
 const { confirm } = Modal;
 const storage = window.localStorage;
 export default function JobTicketDrawer({ visible, onClose, record, resetData }) {
-    const [currentJobTicket, setCurrentJobTicket] = useState({})///当前票的数据
+    // const [currentJobTicket, setCurrentJobTicket] = useState({})///当前票的数据
     const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})///填写改动后的数值-二者区分开 提交时使用
-    const [currentPageIndex, setCurentPageIndex] = useState(0)///当前页面索引 0 为第一页
     const [currentUser] = useState(JSON.parse(storage.getItem('userinfo')))
     const [userList, setUserList] = useState([])
     const [selectValue, setSelectValue] = useState(null)
     const [selectDisable, setSelectDisable] = useState(true)///默认不可操作
     const [showDeleteBtn, setShowDeleteBtn] = useState(false)///是否显示删除按钮
     const [showStopBtn, setShowStopBtn] = useState(false)///是否显示终止作废按钮
-    const perpage = useCallback(() => {
-        if (currentPageIndex > 0) { setCurentPageIndex(currentPageIndex - 1) }
-    }, [currentPageIndex])
-    const nextpage = useCallback(() => {
-        if (currentPageIndex < currentJobTicket.pages.length - 1) { setCurentPageIndex(currentPageIndex + 1) }
-    }, [currentPageIndex, currentJobTicket])
+    const [takeTicketAndPrint, setTakeTicketAndPrint] = useState(false)///是否接票并且打印
 
     const init = useCallback(async () => {
+        // console.log('init');
         if (record && record.job_t_r_id) {
             let res = await HttpApi.getJTRecords({ id: record.job_t_r_id })
             if (res.data.code === 0) {
@@ -30,7 +25,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                 tempObj.pages = JSON.parse(tempObj.pages)
                 // tempObj.pages = testData
                 // console.log('testData:', testData);
-                setCurrentJobTicket(tempObj)///票数据初始化
+                // setCurrentJobTicket(tempObj)///票数据初始化
                 setCurrentJobTicketValue(tempObj)///票数据初始化
             }
             let res_user = await HttpApi.getUserInfo({ effective: 1 })
@@ -78,48 +73,57 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
         }
     }, [record, currentUser])
     const resetHandler = useCallback(() => {
-        setCurentPageIndex(0)
         onClose()
         resetData()
         setSelectValue(null)
     }, [onClose, resetData])
+    const init2 = useCallback(() => {
+        // console.log('init2--判断是否为运行的接票并且打印操作');
+        if (record && record.status === 2 && selectValue === '1') {
+            setTakeTicketAndPrint(true)
+        } else { setTakeTicketAndPrint(false) }
+    }, [record, selectValue])
+    const renderAllPage = useCallback(() => {
+        if (record && currentJobTicketValue && currentJobTicketValue.pages) {
+            return currentJobTicketValue.pages.map((_, index) => {
+                return <RenderEngine
+                    key={index}
+                    jsonlist={currentJobTicketValue}
+                    currentStatus={record ? record.status : 1}
+                    userList={userList}
+                    currentUser={currentUser}
+                    currentPageIndex={index}
+                    callbackValue={v => {
+                        setCurrentJobTicketValue(v)
+                    }}
+                />
+            })
+        }
+    }, [record, currentJobTicketValue, currentUser, userList])
     useEffect(() => {
         init();
     }, [init])
+    useEffect(() => {
+        init2();
+    }, [init2])
     return (
         <Drawer
             destroyOnClose={true}
-            width={900}
+            width={1020}
             title="工作票处理"
             placement='left'
             onClose={onClose}
             visible={visible}
         >
-            <div style={{ backgroundColor: '#F1F2F5', padding: '0px 10px 10px 10px', }}>
-                <RenderEngine jsonlist={currentJobTicket} currentStatus={record ? record.status : 1} userList={userList} currentUser={currentUser} currentPageIndex={currentPageIndex} callbackValue={(v) => {
-                    setCurrentJobTicketValue(v)///数据改动后的回调
-                }} />
-                <div style={styles.panel}>
-                    <Alert message='处理栏选择后点击提交上传数据；工作票进入下一状态' type='info' showIcon />
-                    <div style={{ marginTop: 10, ...styles.bar }}><Tag color='blue'>操作</Tag>
-                        <div style={{ width: 200, ...styles.bar }}>
-                            <Button type='primary' size='small' disabled={currentPageIndex === 0} onClick={perpage}>上一页</Button>
-                            <Button type='primary' size='small' disabled={!currentJobTicket.pages || currentPageIndex === currentJobTicket.pages.length - 1}
-                                onClick={nextpage}
-                            >下一页</Button>
-                        </div>
-                    </div>
-                    <div style={{ marginTop: 10, ...styles.bar }}><Tag color='blue'>处理</Tag>
-                        <Select value={selectValue} placeholder='请选择处理项' allowClear size='small' style={{ width: 200 }} disabled={selectDisable}
-                            onChange={(v) => { setSelectValue(v) }}
-                        >
-                            <Select.Option value='1'>{record && record.status >= 1 ? changeShowLabByStauts(record.status) : '通过'}</Select.Option>
-                            {record && record.status !== 3 && record.status !== 1 ? <Select.Option value='-1'>打回</Select.Option> : null}
-                        </Select>
-                    </div>
-                    <div style={{ marginTop: 10, ...styles.bar }}>
-                        <span>
-                            {showStopBtn ? <Button type='danger' size='small' icon='stop' style={{ marginRight: 10 }} onClick={() => {
+            <div style={{ display: 'flex', flexDirection: 'row', backgroundColor: '#F1F2F5', padding: '10px 10px 0px 10px', }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    {renderAllPage()}
+                </div>
+                <Affix offsetTop={100}>
+                    <div style={styles.panel}>
+                        {/* <Alert message='处理栏选择后点击提交上传数据；工作票进入下一状态' type='info' showIcon /> */}
+                        {showStopBtn ?
+                            <Button type='danger' size='small' icon='stop' onClick={() => {
                                 confirm({
                                     title: '确认作废当前工作票吗?',
                                     content: '请自行保证准确性',
@@ -135,7 +139,8 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                     }
                                 })
                             }}>作废</Button> : null}
-                            {showDeleteBtn ? <Button type='danger' size='small' icon='delete' onClick={() => {
+                        {showDeleteBtn ?
+                            <Button type='danger' size='small' icon='delete' style={{ marginTop: 10 }} onClick={() => {
                                 confirm({
                                     title: '确认删除当前工作票吗?',
                                     content: '请自行保证准确性',
@@ -151,8 +156,15 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                     }
                                 })
                             }}>删除</Button> : null}
-                        </span>
-                        <Button disabled={selectDisable} type='danger' size='small' icon='upload' onClick={async () => {
+                        <div style={{ marginTop: 10, ...styles.bar }}>
+                            <Select value={selectValue} placeholder='请选择处理项' allowClear size='small' style={{ width: 66 }} disabled={selectDisable}
+                                onChange={(v) => { setSelectValue(v) }}
+                            >
+                                <Select.Option value='1'>{record && record.status >= 1 ? changeShowLabByStauts(record.status) : '通过'}</Select.Option>
+                                {record && record.status !== 3 && record.status !== 1 ? <Select.Option value='-1'>打回</Select.Option> : null}
+                            </Select>
+                        </div>
+                        <Button disabled={selectDisable} type='primary' size='small' icon={takeTicketAndPrint ? '' : 'upload'} style={{ marginTop: 10 }} onClick={async () => {
                             if (!selectValue) { message.error('请先选择处理项'); return }
                             confirm({
                                 title: '确认提交吗?',
@@ -161,7 +173,10 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                 okType: 'danger',
                                 cancelText: '取消',
                                 onOk: async () => {
-                                    let needValueButIsEmpty = checkDataIsLostValue(currentJobTicketValue)
+                                    let afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, record.status)
+                                    // console.log('afterCheckObj:', afterCheckObj);
+                                    let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
+                                    console.log('是否数据缺少:', needValueButIsEmpty);
                                     if (selectValue === "1" && needValueButIsEmpty) {///前往下一步时，数据不全
                                         message.error('请填写好工作票后，再进行提交')
                                         return
@@ -176,26 +191,24 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                         let new_status = record.status;
                                         if (selectValue === "1") {
                                             new_status = record.status + 1
-                                        }
-                                        else {
+                                        } else {
                                             new_status = record.status - 1
                                         }
                                         let res2 = await HttpApi.updateJTApplyRecord({ id: record.id, status: new_status })
                                         if (res2.data.code === 0) {
                                             message.success('提交成功')
                                             resetHandler()
+                                            if (takeTicketAndPrint) {
+                                                console.log('打印');
+                                                // window.open(`http://60.174.196.158:12345/print/index.html?id=${record.job_t_r_id}`)
+                                            }
                                         }
                                     }
                                 },
                             });
-                        }}>提交</Button>
+                        }}>{takeTicketAndPrint ? '提交打印' : '提交'}</Button>
                     </div>
-                    <div style={{ marginTop: 10, ...styles.bar }}>
-                        <Button icon='file-text' size='small' type='danger' onClick={() => {
-                            window.open(`http://60.174.196.158:12345/print/index.html?id=${record.job_t_r_id}&page=${currentPageIndex}`)
-                        }}>打印当前页</Button>
-                    </div>
-                </div>
+                </Affix>
             </div>
         </Drawer >
     )
@@ -203,7 +216,8 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
 const styles = {
     panel: {
         backgroundColor: '#FFFFFF',
-        padding: 10
+        padding: 10,
+        width: 90,
     },
     bar: {
         display: 'flex',

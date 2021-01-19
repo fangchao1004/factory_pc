@@ -1158,3 +1158,28 @@ export function checkDataIsLostValue(currentJobTicketValue) {
     })
     return needValueButIsEmpty
 }
+
+
+/**
+ * 判断当前状态下，当前表单中哪些元素缺少值
+ * @param {*} attribute 
+ * @param {*} currentStatus 
+ */
+export function checkCellWhichIsEmpty(currentJobTicketValue, currentStatus) {
+    console.log('currentStatus:', currentStatus)
+    currentJobTicketValue.pages.forEach((page) => {
+        const components = page.components;
+        components.forEach((cpt) => {
+            const { value, no_null_status_list } = cpt.attribute
+            cpt.attribute.isempty = false
+            if (value !== 0) {
+                // console.log('value:', value, 'name:', name, 'flag:', no_null_status_list && no_null_status_list.indexOf(currentStatus) !== -1 && (!value || value.length === 0))
+                if (no_null_status_list && no_null_status_list.indexOf(currentStatus) !== -1 && (!value || value.length === 0)) {
+                    console.log('空 名称：',cpt.attribute.name)
+                    cpt.attribute.isempty = true
+                }
+            }
+        })
+    })
+    return currentJobTicketValue
+}

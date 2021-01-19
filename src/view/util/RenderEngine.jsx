@@ -14,7 +14,7 @@ export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, c
     (index, value) => {
       let copylist = JSON.parse(JSON.stringify(list))
       copylist.pages[currentPageIndex].components[index].attribute.value = value
-      console.log('最新表单json数据:', copylist)
+      // console.log('最新表单json数据:', copylist)
       setList(copylist)
       if (callbackValue) callbackValue(copylist)
     },
@@ -168,8 +168,8 @@ export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, c
           ? list.pages[currentPageIndex].components.map((item, index) => {
             let disabled = checkCellDisable(item.attribute.able_list, currentStatus, currentUser.permission)
             item.attribute.disabled = disabled
-            let isempty = checkCellIsEmpty(item.attribute, currentStatus)
-            item.attribute.isempty = isempty
+            // let isempty = checkCellIsEmpty(item.attribute, currentStatus)
+            // item.attribute.isempty = isempty
             return componentsRender(item, index)
           })
           : null}
@@ -222,18 +222,18 @@ function checkCellDisable(able_list, currentStatus, currentUserPermission) {
   return disabled
 }
 
-/**
- * 判断当前状态下，当前元素组件是否缺少值
- * @param {*} attribute 
- * @param {*} currentStatus 
- */
-function checkCellIsEmpty(attribute, currentStatus) {
-  let isEmpty = false
-  const { value, no_null_status_list } = attribute
-  if (value !== 0) {
-    if (no_null_status_list && no_null_status_list.indexOf(currentStatus) !== -1 && (!value || value.length === 0)) {
-      isEmpty = true
-    }
-  }
-  return isEmpty
-}
+// /**
+//  * 判断当前状态下，当前元素组件是否缺少值
+//  * @param {*} attribute 
+//  * @param {*} currentStatus 
+//  */
+// function checkCellIsEmpty(attribute, currentStatus) {
+//   let isEmpty = false
+//   const { value, no_null_status_list } = attribute
+//   if (value !== 0) {
+//     if (no_null_status_list && no_null_status_list.indexOf(currentStatus) !== -1 && (!value || value.length === 0)) {
+//       isEmpty = true
+//     }
+//   }
+//   return isEmpty
+// }
