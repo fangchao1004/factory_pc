@@ -6,8 +6,7 @@ import { changeShowLabByStauts, checkCellWhichIsEmpty, checkDataIsLostValue } fr
 const { confirm } = Modal;
 const storage = window.localStorage;
 export default function JobTicketDrawer({ visible, onClose, record, resetData }) {
-    // const [currentJobTicket, setCurrentJobTicket] = useState({})///当前票的数据
-    const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})///填写改动后的数值-二者区分开 提交时使用
+    const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})///填写改动后的数值- 提交时使用
     const [currentUser] = useState(JSON.parse(storage.getItem('userinfo')))
     const [userList, setUserList] = useState([])
     const [selectValue, setSelectValue] = useState(null)
@@ -25,7 +24,6 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                 tempObj.pages = JSON.parse(tempObj.pages)
                 // tempObj.pages = testData
                 // console.log('testData:', testData);
-                // setCurrentJobTicket(tempObj)///票数据初始化
                 setCurrentJobTicketValue(tempObj)///票数据初始化
             }
             let res_user = await HttpApi.getUserInfo({ effective: 1 })
@@ -33,9 +31,6 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                 let user_list = res_user.data.data.map((item) => { return { id: item.id, name: item.name } })
                 setUserList(user_list)
             }
-            // const localUserInfo = storage.getItem('userinfo');
-            // const currentUser = JSON.parse(localUserInfo)
-            // setCurrentUser(currentUser)
             if (record.status === 1 && currentUser.id === record.user_id) {
                 ///1待签发  状态时，申请人可以操作
                 setSelectDisable(false)
@@ -121,7 +116,6 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                 </div>
                 <Affix offsetTop={100}>
                     <div style={styles.panel}>
-                        {/* <Alert message='处理栏选择后点击提交上传数据；工作票进入下一状态' type='info' showIcon /> */}
                         {showStopBtn ?
                             <Button type='danger' size='small' icon='stop' onClick={() => {
                                 confirm({
@@ -182,9 +176,6 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                         return
                                     }
                                     // return;
-                                    // console.log('selectValue:', selectValue);
-                                    // console.log('值:', currentJobTicketValue);
-                                    // console.log('record:', record);
                                     ///修改 job_tickets_records 中的pages 和 job_tickets_apply_records 中的status
                                     let res1 = await HttpApi.updateJTRecord({ id: currentJobTicketValue.id, pages: JSON.stringify(currentJobTicketValue.pages) })
                                     if (res1.data.code === 0) {

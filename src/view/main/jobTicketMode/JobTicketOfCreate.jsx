@@ -1,15 +1,14 @@
-import {Button, Col, Empty, Row, Select, Tag, Affix, Modal, message} from 'antd'
-import React, {useCallback, useEffect, useState} from 'react'
+import { Button, Col, Empty, Row, Select, Tag, Affix, Modal, message } from 'antd'
+import React, { useCallback, useEffect, useState } from 'react'
 // import { testData } from '../../../assets/testJson'
 import HttpApi from '../../util/HttpApi'
-import {RenderEngine} from '../../util/RenderEngine'
-import {checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty} from '../../util/Tool'
+import { RenderEngine } from '../../util/RenderEngine'
+import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty } from '../../util/Tool'
 
-const {confirm} = Modal
+const { confirm } = Modal
 const storage = window.localStorage
 export default function JobTicketOfCreate() {
     const [jobTicketsOption, setJobTicketsOption] = useState([])
-    // const [currentJobTicket, setCurrentJobTicket] = useState({})
     const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})
     const [userList, setUserList] = useState([])
     const [currentUser] = useState(JSON.parse(storage.getItem('userinfo')))
@@ -17,16 +16,14 @@ export default function JobTicketOfCreate() {
     const [ticketSampleId, setTicketSampleId] = useState(null)
     const getJobTicketById = useCallback(async id => {
         if (id !== null) {
-            let res = await HttpApi.getJobTicketsList({id})
+            let res = await HttpApi.getJobTicketsList({ id })
             if (res.data.code === 0) {
                 let tempObj = JSON.parse(JSON.stringify(res.data.data[0]))
                 tempObj.pages = JSON.parse(tempObj.pages)
                 // tempObj.pages = testData
-                // setCurrentJobTicket(tempObj)
                 setCurrentJobTicketValue(tempObj)
             }
         } else {
-            // setCurrentJobTicket({})
             setCurrentJobTicketValue({})
             setScaleNum(1)
         }
@@ -37,10 +34,10 @@ export default function JobTicketOfCreate() {
         if (res.data.code === 0) {
             setJobTicketsOption(res.data.data)
         }
-        let res_user = await HttpApi.getUserInfo({effective: 1})
+        let res_user = await HttpApi.getUserInfo({ effective: 1 })
         if (res_user.data.code === 0) {
             let user_list = res_user.data.data.map(item => {
-                return {id: item.id, name: item.name}
+                return { id: item.id, name: item.name }
             })
             setUserList(user_list)
         }
@@ -76,22 +73,7 @@ export default function JobTicketOfCreate() {
                 <Row gutter={10}>
                     <Col span={18}>
                         <div style={styles.rightPart}>
-                            {!currentJobTicketValue.pages ? (
-                                <Empty style={{padding: 36}} description={'请先选择需要的工作票'}/>
-                            ) : (
-                                // <RenderEngine
-                                //   jsonlist={currentJobTicket}
-                                //   userList={userList}
-                                //   currentUser={currentUser}
-                                //   currentStatus={0}
-                                //   currentPageIndex={currentPageIndex}
-                                //   scaleNum={scaleNum}
-                                //   callbackValue={v => {
-                                //     setCurrentJobTicketValue(v)
-                                //   }}
-                                // />
-                                renderAllPage()
-                            )}
+                            {!currentJobTicketValue.pages ? <Empty style={{ padding: 36 }} description={'请先选择需要的工作票'} /> : renderAllPage()}
                         </div>
                     </Col>
                     <Col span={6}>
@@ -105,7 +87,7 @@ export default function JobTicketOfCreate() {
                                 }}>
                                     <Tag color='blue'>选择</Tag>
                                     <Select
-                                        style={{width: '100%'}}
+                                        style={{ width: '100%' }}
                                         bordered={false}
                                         allowClear={true}
                                         placeholder='请选择工作票'

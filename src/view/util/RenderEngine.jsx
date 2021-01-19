@@ -6,10 +6,6 @@ const testuri = 'http://60.174.196.158:12345/'
 export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, currentPageIndex, scaleNum = 1, callbackValue }) {
   const pagediv = useRef(null)
   const [list, setList] = useState(jsonlist)
-  // const printHandler = useCallback((viewRef) => {
-  //     let printView = viewRef.current  //获取待打印元素
-  //     console.log('printDiv:', printView);
-  // }, [])
   const changeComponetsValue = useCallback(
     (index, value) => {
       let copylist = JSON.parse(JSON.stringify(list))
@@ -131,7 +127,6 @@ export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, c
     [changeComponetsValue, userList]
   )
   const init = useCallback(() => {
-    console.log('init:');
     setList(jsonlist)
   }, [jsonlist])
   useEffect(() => {
@@ -221,19 +216,3 @@ function checkCellDisable(able_list, currentStatus, currentUserPermission) {
   })
   return disabled
 }
-
-// /**
-//  * 判断当前状态下，当前元素组件是否缺少值
-//  * @param {*} attribute 
-//  * @param {*} currentStatus 
-//  */
-// function checkCellIsEmpty(attribute, currentStatus) {
-//   let isEmpty = false
-//   const { value, no_null_status_list } = attribute
-//   if (value !== 0) {
-//     if (no_null_status_list && no_null_status_list.indexOf(currentStatus) !== -1 && (!value || value.length === 0)) {
-//       isEmpty = true
-//     }
-//   }
-//   return isEmpty
-// }
