@@ -52,7 +52,6 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                 ///1待审核 状态时，对应专业的专工可以操作
                 setSelectDisable(false)
                 setShowStopBtn(true)
-
             }
             if ((record.status === 2 || record.status === 3) && currentUser.major_id_all && currentUser.permission && currentUser.permission.split(',').indexOf("1") !== -1) {
                 ///2待接票 3待完结 状态时，运行可以操作
@@ -191,7 +190,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                             resetHandler()
                                             if (takeTicketAndPrint) {
                                                 console.log('打印');
-                                                // window.open(`http://60.174.196.158:12345/print/index.html?id=${record.job_t_r_id}`)
+                                                window.open(`http://60.174.196.158:12345/print/index.html?id=${record.job_t_r_id}`)
                                             }
                                         }
                                     }
