@@ -27,6 +27,7 @@ export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, c
             <input
               key={index}
               {...item.attribute}
+              style={{ ...item.attribute.style, borderStyle: item.attribute.isempty ? 'solid' : 'none', borderWidth: 1, borderColor: 'red' }}
               onChange={e => {
                 changeComponetsValue(index, e.target.value)
               }}
@@ -37,6 +38,7 @@ export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, c
             <textarea
               key={index}
               {...item.attribute}
+              style={{ ...item.attribute.style, borderStyle: item.attribute.isempty ? 'solid' : 'none', borderWidth: 1, borderColor: 'red' }}
               onChange={e => {
                 changeComponetsValue(index, e.target.value)
               }}
@@ -49,6 +51,7 @@ export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, c
               size='small'
               key={index}
               {...item.attribute}
+              style={{ ...item.attribute.style, borderStyle: item.attribute.isempty ? 'solid' : 'none', borderWidth: 1, borderColor: 'red' }}
               format='YYYY年MM月DD日 HH时mm分'
               showTime={{ format: 'HH时mm分' }}
               value={
@@ -68,6 +71,7 @@ export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, c
               size='small'
               key={index}
               {...item.attribute}
+              style={{ ...item.attribute.style, borderStyle: item.attribute.isempty ? 'solid' : 'none', borderWidth: 1, borderColor: 'red' }}
               format='YYYY年MM月DD日 HH时mm分'
               showTime={{ format: 'HH时mm分' }}
               value={item.attribute.value ? moment(item.attribute.value) : null}
@@ -81,6 +85,7 @@ export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, c
             <Checkbox
               key={index}
               {...item.attribute}
+              style={{ ...item.attribute.style, borderStyle: item.attribute.isempty ? 'solid' : 'none', borderWidth: 1, borderColor: 'red' }}
               checked={item.attribute.value ? true : false}
               onChange={e => {
                 changeComponetsValue(index, e.target.checked)
@@ -92,6 +97,7 @@ export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, c
             <Checkbox.Group
               key={index}
               {...item.attribute}
+              style={{ ...item.attribute.style, borderStyle: item.attribute.isempty ? 'solid' : 'none', borderWidth: 1, borderColor: 'red' }}
               onChange={checkedValues => {
                 changeComponetsValue(index, checkedValues)
               }}
@@ -102,6 +108,7 @@ export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, c
             <Select
               key={index}
               {...item.attribute}
+              style={{ ...item.attribute.style, borderStyle: item.attribute.isempty ? 'solid' : 'none', borderWidth: 1, borderColor: 'red' }}
               size='small'
               allowClear={true}
               placeholder=''

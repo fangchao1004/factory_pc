@@ -138,7 +138,8 @@ export default function JobTicketOfCreate() {
                                                     cancelText: '取消',
                                                     onOk: async function () {
                                                         let afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, 0)
-                                                        console.log('afterCheckObj:', afterCheckObj);
+                                                        // console.log('afterCheckObj:', afterCheckObj);
+                                                        setCurrentJobTicketValue(JSON.parse(JSON.stringify(afterCheckObj)))
                                                         let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
                                                         if (needValueButIsEmpty) {
                                                             message.error('请填写好工作票后，再进行提交')

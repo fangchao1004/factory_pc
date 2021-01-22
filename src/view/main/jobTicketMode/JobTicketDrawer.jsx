@@ -168,6 +168,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                 onOk: async () => {
                                     let afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, record.status)
                                     // console.log('afterCheckObj:', afterCheckObj);
+                                    setCurrentJobTicketValue(JSON.parse(JSON.stringify(afterCheckObj)))
                                     let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
                                     console.log('是否数据缺少:', needValueButIsEmpty);
                                     if (selectValue === "1" && needValueButIsEmpty) {///前往下一步时，数据不全
