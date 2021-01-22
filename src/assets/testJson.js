@@ -5,7 +5,7 @@ export const testData = [
         "components": [
             {
                 "type": "input",
-                "is_no": 1,
+                "is_no": true,
                 "attribute": {
                     "disabled": true,
                     "value": "",

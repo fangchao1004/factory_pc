@@ -1067,7 +1067,7 @@ export function changeNoInputValue({ auto_no, pages }) {
         pages.forEach((page) => {
             const components = page.components
             components.forEach((cmp) => {
-                if (cmp.is_no === 1) {
+                if (cmp.is_no === true) {
                     cmp.attribute.value = auto_no
                 }
             })
@@ -1079,6 +1079,28 @@ export function changeNoInputValue({ auto_no, pages }) {
 }
 
 /**
+ * 提取出job_ticket_record中的 计划工作内容 和 计划工作时间段 数据
+ * @param {*} param0 
+ */
+export function getJTRecordContentAndPlanTime({ pages }) {
+    let job_content = '';
+    let time_list = ['', ''];
+    let pagesList = JSON.parse(pages)
+    pagesList.forEach((page) => {
+        const cpts = page.components
+        cpts.forEach((cpt) => {
+            if (cpt.is_time) {
+                time_list = cpt.attribute.value
+            }
+            if (cpt.is_content) {
+                job_content = cpt.attribute.value
+            }
+        })
+    })
+    return { job_content, time_list }
+}
+
+/**
  * 
  * @param {*} jobTicketValue 工作票数据
  */
@@ -1087,6 +1109,7 @@ export async function createNewJobTicketApply(jobTicketValue) {
     // console.log('auto_no:::', auto_no)
     jobTicketValue.pages = changeNoInputValue({ auto_no, pages: jobTicketValue.pages })
     jobTicketValue.pages = JSON.stringify(jobTicketValue.pages)
+    let { job_content, time_list } = getJTRecordContentAndPlanTime({ pages: jobTicketValue.pages })
     let res = await HttpApi.createJTRecord({ ...jobTicketValue, time: moment().format(FORMAT) })
     if (res.data.code === 0) {
         let res_max_id = await HttpApi.getLastJTRecordId()
@@ -1102,6 +1125,10 @@ export async function createNewJobTicketApply(jobTicketValue) {
             obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss');
             obj['major_id'] = jobTicketValue['major_id'];
             obj['ticket_name'] = jobTicketValue['ticket_name'];
+            obj['job_content'] = job_content;
+            obj['time_begin'] = time_list[0]
+            obj['time_end'] = time_list[1]
+            /////
             let res2 = await HttpApi.createJTApplyRecord(obj)
             if (res2.data.code === 0) {
                 return true
@@ -1175,7 +1202,7 @@ export function checkCellWhichIsEmpty(currentJobTicketValue, currentStatus) {
             if (value !== 0) {
                 // console.log('value:', value, 'name:', name, 'flag:', no_null_status_list && no_null_status_list.indexOf(currentStatus) !== -1 && (!value || value.length === 0))
                 if (no_null_status_list && no_null_status_list.indexOf(currentStatus) !== -1 && (!value || value.length === 0)) {
-                    console.log('空 名称：',cpt.attribute.name)
+                    console.log('空 名称：', cpt.attribute.name)
                     cpt.attribute.isempty = true
                 }
             }

@@ -1,4 +1,4 @@
-import { Button, Table } from 'antd';
+import { Button, Table, Tooltip } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import { changeJobTicketStatusToText } from '../../util/Tool';
@@ -22,13 +22,21 @@ export default function JobTicketOfMine() {
         init();
     }, [init])
     const columns = [
-        { title: '序号', dataIndex: 'id', key: 'id', width: 100 },
+        { title: '序号', dataIndex: 'id', key: 'id', width: 60 },
         { title: '编号', dataIndex: 'no', key: 'no', width: 120 },
-        { title: '时间', dataIndex: 'time', key: 'time', width: 180 },
-        { title: '票名', dataIndex: 'ticket_name', key: 'ticket_name' },
-        { title: '申请人', dataIndex: 'user_name', key: 'user_name' },
+        { title: '发起时间', dataIndex: 'time', key: 'time', width: 180 },
+        { title: '计划开始', dataIndex: 'time_begin', key: 'time_begin', width: 150 },
+        { title: '计划结束', dataIndex: 'time_end', key: 'time_end', width: 150 },
         {
-            title: '状态', dataIndex: 'status', key: 'status', render: (text) => {
+            title: '内容', dataIndex: 'job_content', key: 'job_content', render: (text) => {
+                return <Tooltip title={text} placement="topLeft">
+                    <div className='hideText lineClamp2'>{text}</div>
+                </Tooltip>
+            }
+        },
+        { title: '申请人', dataIndex: 'user_name', key: 'user_name', width: 100 },
+        {
+            title: '状态', dataIndex: 'status', key: 'status', width: 100, render: (text) => {
                 return changeJobTicketStatusToText(text)
             }
         },

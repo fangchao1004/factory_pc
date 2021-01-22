@@ -994,8 +994,8 @@ class HttpApi {
      * job_s_t_r_id 副票记录id
      * @param {*} param0 
      */
-    static createJTApplyRecord = ({ no, job_t_r_id, job_s_t_r_id, user_id, user_name, time, major_id, ticket_name }) => {
-        let sql = `insert into job_tickets_apply_records (no, job_t_r_id, job_s_t_r_id, user_id, user_name, time, major_id, ticket_name) values ('${no}',${job_t_r_id}, ${job_s_t_r_id ? job_s_t_r_id : null}, ${user_id}, '${user_name}', '${time}', ${major_id}, '${ticket_name}')`
+    static createJTApplyRecord = ({ no, job_t_r_id, job_s_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end }) => {
+        let sql = `insert into job_tickets_apply_records (no, job_t_r_id, job_s_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end) values ('${no}',${job_t_r_id}, ${job_s_t_r_id ? job_s_t_r_id : null}, ${user_id}, '${user_name}', '${time}', ${major_id}, '${ticket_name}', '${job_content}' ,'${time_begin}' ,'${time_end}')`
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**
@@ -1010,7 +1010,7 @@ class HttpApi {
         }
         return Axios.post(Testuri + 'obs', { sql })
     }
-    static updateJTApplyRecord = ({ id, status, is_delete, is_stop }) => {
+    static updateJTApplyRecord = ({ id, status, is_delete, is_stop, job_content, time_begin, time_end }) => {
         let block_status = ''
         if (status >= 0) {
             block_status = ` status = ${status},`
@@ -1023,7 +1023,8 @@ class HttpApi {
         if (is_stop >= 0) {
             block_stop = ` is_stop = ${is_stop},`
         }
-        let set_sql = block_status + block_delete + block_stop
+        let block_contet_time = ` job_content = '${job_content}',time_begin = '${time_begin}',time_end = '${time_end}',`
+        let set_sql = block_status + block_delete + block_stop + block_contet_time
         set_sql = set_sql.substring(0, set_sql.length - 1)
         let sql = `update job_tickets_apply_records set ${set_sql} where id = ${id}`
         return Axios.post(Testuri + 'obs', { sql })

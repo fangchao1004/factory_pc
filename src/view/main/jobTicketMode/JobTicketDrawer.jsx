@@ -2,7 +2,7 @@ import { Button, Drawer, Select, message, Modal, Affix } from 'antd'
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { changeShowLabByStauts, checkCellWhichIsEmpty, checkDataIsLostValue } from '../../util/Tool';
+import { changeShowLabByStauts, checkCellWhichIsEmpty, checkDataIsLostValue, getJTRecordContentAndPlanTime } from '../../util/Tool';
 const { confirm } = Modal;
 const storage = window.localStorage;
 export default function JobTicketDrawer({ visible, onClose, record, resetData }) {
@@ -190,7 +190,8 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                         } else {
                                             new_status = record.status - 1
                                         }
-                                        let res2 = await HttpApi.updateJTApplyRecord({ id: record.id, status: new_status })
+                                        let { job_content, time_list } = getJTRecordContentAndPlanTime({ pages: JSON.stringify(currentJobTicketValue.pages) })
+                                        let res2 = await HttpApi.updateJTApplyRecord({ id: record.id, status: new_status, job_content, time_begin: time_list[0], time_end: time_list[1] })
                                         if (res2.data.code === 0) {
                                             message.success('提交成功')
                                             resetHandler()
