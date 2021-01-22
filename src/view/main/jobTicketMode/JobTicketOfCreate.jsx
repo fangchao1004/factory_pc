@@ -130,6 +130,15 @@ export default function JobTicketOfCreate() {
                                             size='small'
                                             disabled={!currentJobTicketValue.pages}
                                             onClick={() => {
+                                                let afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, 0)
+                                                // console.log('afterCheckObj:', afterCheckObj);
+                                                setCurrentJobTicketValue(JSON.parse(JSON.stringify(afterCheckObj)))
+                                                let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
+                                                if (needValueButIsEmpty) {
+                                                    message.error('请填写好工作票后，再进行提交')
+                                                    return
+                                                }
+                                                // return;
                                                 confirm({
                                                     title: '确认提交当前的工作票吗?',
                                                     content: '请确保所填信息的准确和完整',
@@ -137,15 +146,6 @@ export default function JobTicketOfCreate() {
                                                     okType: 'danger',
                                                     cancelText: '取消',
                                                     onOk: async function () {
-                                                        let afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, 0)
-                                                        // console.log('afterCheckObj:', afterCheckObj);
-                                                        setCurrentJobTicketValue(JSON.parse(JSON.stringify(afterCheckObj)))
-                                                        let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
-                                                        if (needValueButIsEmpty) {
-                                                            message.error('请填写好工作票后，再进行提交')
-                                                            return
-                                                        }
-                                                        // return;
                                                         let res = await createNewJobTicketApply(currentJobTicketValue)
                                                         console.log('提交:', res)
                                                         if (res) {

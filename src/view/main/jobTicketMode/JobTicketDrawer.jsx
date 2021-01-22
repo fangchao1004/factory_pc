@@ -14,7 +14,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
     const [showDeleteBtn, setShowDeleteBtn] = useState(false)///是否显示删除按钮
     const [showStopBtn, setShowStopBtn] = useState(false)///是否显示终止作废按钮
     const [takeTicketAndPrint, setTakeTicketAndPrint] = useState(false)///是否接票并且打印
-
+    const [canPrint, setCanPrint] = useState(false)///是否可以打印
     const init = useCallback(async () => {
         // console.log('init');
         if (record && record.job_t_r_id) {
@@ -75,7 +75,12 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
         // console.log('init2--判断是否为运行的接票并且打印操作');
         if (record && record.status === 2 && selectValue === '1') {
             setTakeTicketAndPrint(true)
-        } else { setTakeTicketAndPrint(false) }
+        } else if (record && record.status === 3) {
+            setCanPrint(true)
+        } else {
+            setTakeTicketAndPrint(false)
+            setCanPrint(false)
+        }
     }, [record, selectValue])
     const renderAllPage = useCallback(() => {
         if (record && currentJobTicketValue && currentJobTicketValue.pages) {
@@ -159,6 +164,16 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                         </div>
                         <Button disabled={selectDisable} type='primary' size='small' icon={takeTicketAndPrint ? '' : 'upload'} style={{ marginTop: 10 }} onClick={async () => {
                             if (!selectValue) { message.error('请先选择处理项'); return }
+                            let afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, record.status)
+                            // console.log('afterCheckObj:', afterCheckObj);
+                            setCurrentJobTicketValue(JSON.parse(JSON.stringify(afterCheckObj)))
+                            let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
+                            console.log('是否数据缺少:', needValueButIsEmpty);
+                            if (selectValue === "1" && needValueButIsEmpty) {///前往下一步时，数据不全
+                                message.error('请填写好工作票后，再进行提交')
+                                return
+                            }
+                            // return;
                             confirm({
                                 title: '确认提交吗?',
                                 content: '请自行保证准确性',
@@ -166,16 +181,6 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                 okType: 'danger',
                                 cancelText: '取消',
                                 onOk: async () => {
-                                    let afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, record.status)
-                                    // console.log('afterCheckObj:', afterCheckObj);
-                                    setCurrentJobTicketValue(JSON.parse(JSON.stringify(afterCheckObj)))
-                                    let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
-                                    console.log('是否数据缺少:', needValueButIsEmpty);
-                                    if (selectValue === "1" && needValueButIsEmpty) {///前往下一步时，数据不全
-                                        message.error('请填写好工作票后，再进行提交')
-                                        return
-                                    }
-                                    // return;
                                     ///修改 job_tickets_records 中的pages 和 job_tickets_apply_records 中的status
                                     let res1 = await HttpApi.updateJTRecord({ id: currentJobTicketValue.id, pages: JSON.stringify(currentJobTicketValue.pages) })
                                     if (res1.data.code === 0) {
@@ -198,6 +203,9 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                 },
                             });
                         }}>{takeTicketAndPrint ? '提交打印' : '提交'}</Button>
+                        {canPrint ? <Button type='danger' icon='file' size='small' style={{ marginTop: 10 }} onClick={() => {
+                            window.open(`http://60.174.196.158:12345/print/index.html?id=${record.job_t_r_id}`)
+                        }}>打印</Button> : null}
                     </div>
                 </Affix>
             </div>
