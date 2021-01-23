@@ -8,11 +8,12 @@ import { USERINFO } from '../util/AppData'
 const storage = window.localStorage
 export default props => {
   const loginHandler = useCallback(async values => {
-    const verfiyResult = await HttpApi.verify(values)
-    if (!verfiyResult || !verfiyResult.data || verfiyResult.data.code !== 0) {
-      message.error('禁止访问,请联系管理员')
-      return
-    }
+    // 测试时注释掉
+    // const verfiyResult = await HttpApi.verify(values)
+    // if (!verfiyResult || !verfiyResult.data || verfiyResult.data.code !== 0) {
+    //   message.error('禁止访问,请联系管理员')
+    //   return
+    // }
     let sql = `select users.* ,group_concat(u_m_j.mj_id) as major_id_all, group_concat(majors.name) as major_name_all,levels.name as level_name from users
         left join (select * from user_map_major where effective = 1) u_m_j on u_m_j.user_id = users.id
         left join (select * from majors  where effective = 1) majors on majors.id = u_m_j.mj_id

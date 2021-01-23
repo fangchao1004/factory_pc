@@ -12,7 +12,7 @@ export default () => {
   const [showAdd, setShowAdd] = useState(false)
 
   const getLevelList = useCallback(async () => {
-    let result = await HttpApi.getUserLevel()
+    let result = await HttpApi.getUserLevel({ effective: 1 })
     if (result.data.code === 0) {
       setLevelOptions(result.data.data.map((item) => {
         let data = {};
