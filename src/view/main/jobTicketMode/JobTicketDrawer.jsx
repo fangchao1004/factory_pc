@@ -164,14 +164,20 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                         </div>
                         <Button disabled={selectDisable} type='primary' size='small' icon={takeTicketAndPrint ? '' : 'upload'} style={{ marginTop: 10 }} onClick={async () => {
                             if (!selectValue) { message.error('请先选择处理项'); return }
-                            let afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, record.status)
-                            // console.log('afterCheckObj:', afterCheckObj);
-                            setCurrentJobTicketValue(JSON.parse(JSON.stringify(afterCheckObj)))
-                            let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
-                            console.log('是否数据缺少:', needValueButIsEmpty);
-                            if (selectValue === "1" && needValueButIsEmpty) {///前往下一步时，数据不全
-                                message.error('请填写好工作票后，再进行提交')
-                                return
+                            let afterCheckObj;
+                            if (selectValue === "1") {///前往下一步时，数据不全
+                                afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, record.status)
+                                // console.log('afterCheckObj:', afterCheckObj);
+                                setCurrentJobTicketValue(afterCheckObj)
+                                let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
+                                console.log('是否数据缺少:', needValueButIsEmpty);
+                                if (needValueButIsEmpty) {
+                                    message.error('请填写好工作票后，再进行提交')
+                                    return
+                                }
+                            } else {///返回上一步时，重新检查一边数据。状态-1
+                                afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, record.status - 1)
+                                setCurrentJobTicketValue(afterCheckObj)
                             }
                             // return;
                             confirm({
@@ -182,7 +188,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                 cancelText: '取消',
                                 onOk: async () => {
                                     ///修改 job_tickets_records 中的pages 和 job_tickets_apply_records 中的status
-                                    let res1 = await HttpApi.updateJTRecord({ id: currentJobTicketValue.id, pages: JSON.stringify(currentJobTicketValue.pages) })
+                                    let res1 = await HttpApi.updateJTRecord({ id: currentJobTicketValue.id, pages: JSON.stringify(afterCheckObj.pages) })
                                     if (res1.data.code === 0) {
                                         let new_status = record.status;
                                         if (selectValue === "1") {

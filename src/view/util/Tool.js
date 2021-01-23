@@ -1186,15 +1186,14 @@ export function checkDataIsLostValue(currentJobTicketValue) {
     return needValueButIsEmpty
 }
 
-
 /**
  * 判断当前状态下，当前表单中哪些元素缺少值
  * @param {*} attribute 
  * @param {*} currentStatus 
  */
 export function checkCellWhichIsEmpty(currentJobTicketValue, currentStatus) {
-    console.log('currentStatus:', currentStatus)
-    currentJobTicketValue.pages.forEach((page) => {
+    let copyTicketValue = JSON.parse(JSON.stringify(currentJobTicketValue))
+    copyTicketValue.pages.forEach((page) => {
         const components = page.components;
         components.forEach((cpt) => {
             const { value, no_null_status_list } = cpt.attribute
@@ -1208,5 +1207,5 @@ export function checkCellWhichIsEmpty(currentJobTicketValue, currentStatus) {
             }
         })
     })
-    return currentJobTicketValue
+    return copyTicketValue
 }

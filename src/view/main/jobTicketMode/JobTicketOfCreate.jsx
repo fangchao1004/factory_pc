@@ -146,7 +146,7 @@ export default function JobTicketOfCreate() {
                                                     okType: 'danger',
                                                     cancelText: '取消',
                                                     onOk: async function () {
-                                                        let res = await createNewJobTicketApply(currentJobTicketValue)
+                                                        let res = await createNewJobTicketApply(afterCheckObj)
                                                         console.log('提交:', res)
                                                         if (res) {
                                                             message.success('提交成功')

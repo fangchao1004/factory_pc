@@ -495,7 +495,7 @@ class HttpApi {
                     }
                 })
         } else {
-            return Axios.post(Testuri + 'find_level')
+            return Axios.post(Testuri + 'find_level', params)
         }
     }
     static removeUserLevel(params, f1, f2) {
