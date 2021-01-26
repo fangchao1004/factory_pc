@@ -1046,12 +1046,11 @@ class HttpApi {
     /**
      * 获取运行人员
      */
-    static geRunnerIdList = () => {
+    static getRunnerIdList = () => {
         let sql = `select user_id from role_map_user
         where role_map_user.effective = 1 and role_id = 2`
         return Axios.post(Testuri + 'obs', { sql })
     }
-
     /**
      * 添加工作票操作日志
      */
@@ -1060,8 +1059,21 @@ class HttpApi {
         console.log('addJbTStepLog sql:', sql)
         return Axios.post(Testuri + 'obs', { sql })
     }
-
-
+    /**
+     * 获取运行人员
+     */
+    static getJTStepLogs = ({ jbtar_id }) => {
+        let sql = `select * from job_tickets_step_log
+        where jbtar_id = ${jbtar_id} and is_delete = 0`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    /**
+     * 获取最新添加的工作票申请记录id
+     */
+    static getLastJTApplyRecordId = () => {
+        let sql = `select max(id) as max_id from job_tickets_apply_records where is_delete = 0`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
 }
 
 export default HttpApi

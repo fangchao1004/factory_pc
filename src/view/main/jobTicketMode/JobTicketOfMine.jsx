@@ -3,11 +3,13 @@ import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import { changeJobTicketStatusToText } from '../../util/Tool';
 import JobTicketDrawer from './JobTicketDrawer';
+import JobTicketStepLogView from './JobTicketStepLogView';
 const storage = window.localStorage;
 export default function JobTicketOfMine() {
     const [list, setList] = useState([])
     const [drawerVisible, setDrawerVisible] = useState(false)
     const [currentSelectRecord, setCurrentSelectRecord] = useState(null)
+    const [stepLogVisible, setStepLogVisible] = useState(false);///展示步骤界面
     const init = useCallback(async () => {
         const localUserInfo = storage.getItem('userinfo');
         let userinfo = JSON.parse(localUserInfo);
@@ -35,14 +37,19 @@ export default function JobTicketOfMine() {
             }
         },
         { title: '申请人', dataIndex: 'user_name', key: 'user_name', width: 100 },
+        { title: '上步处理人', dataIndex: 'user_name', key: 'per_step_user_name', width: 100 },
         {
-            title: '状态', dataIndex: 'status', key: 'status', width: 100, render: (text) => {
+            title: '状态', dataIndex: 'status', key: 'status', width: 80, render: (text) => {
                 return changeJobTicketStatusToText(text)
             }
         },
         {
-            title: '操作', dataIndex: 'action', key: 'action', width: 100, render: (_, record) => {
-                return <div><Button size='small' type='primary' icon='edit' onClick={() => { setCurrentSelectRecord(record); setDrawerVisible(true) }}>处理</Button></div>
+            title: '操作', dataIndex: 'action', key: 'action', align: 'center', width: 100, render: (_, record) => {
+                return <div>
+                    <Button size='small' type='primary' icon='edit' onClick={() => { setCurrentSelectRecord(record); setDrawerVisible(true) }}>处理</Button>
+                    <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                    <Button icon='unordered-list' size="small" type="default" onClick={() => { setStepLogVisible(true); setCurrentSelectRecord(record); }}>记录</Button>
+                </div>
             }
         },
     ]
@@ -60,6 +67,7 @@ export default function JobTicketOfMine() {
                 />
             </div>
             <JobTicketDrawer visible={drawerVisible} onClose={() => { setDrawerVisible(false); setCurrentSelectRecord(null) }} record={currentSelectRecord} resetData={init} />
+            <JobTicketStepLogView record={currentSelectRecord} visible={stepLogVisible} onCancel={() => { setStepLogVisible(false) }} />
         </div>
     )
 }

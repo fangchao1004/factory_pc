@@ -4,9 +4,11 @@ import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
 import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty } from '../../util/Tool'
+import moment from 'moment'
 const { OptGroup, Option } = Select
 const { confirm } = Modal
 const storage = window.localStorage
+var ticketNextUserNameList = [];
 export default function JobTicketOfCreate() {
     const [jobTicketsOption, setJobTicketsOption] = useState([])
     const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})
@@ -24,7 +26,7 @@ export default function JobTicketOfCreate() {
                 // tempObj.pages = testData
                 setCurrentJobTicketValue(tempObj)
                 const major_id = tempObj.major_id
-                console.log('major_id', major_id);
+                // console.log('major_id', major_id);
                 let managerList_res = await HttpApi.getManagerIdListByMajorId({ major_id })
                 if (managerList_res.data.code === 0) {
                     const managerlist = managerList_res.data.data;
@@ -68,12 +70,13 @@ export default function JobTicketOfCreate() {
                 manager_list.push(item)
             } else { other_list.push(item) }
         })
-        return [<OptGroup label={<div style={{ width: '100%', justifyContent: 'space-between', display: 'flex', justifyItems: 'center' }}><span>当前专业专工</span><Button type='link' size='small' onClick={() => {
+        return [<OptGroup key='a' label={<div style={{ width: '100%', justifyContent: 'space-between', display: 'flex', justifyItems: 'center' }}><span>当前专业专工</span><Button type='link' size='small' onClick={() => {
             setTicketNextUserList(manager_list.map((item) => item.id))
+            ticketNextUserNameList = manager_list.map((item) => item.name)
         }}>全选</Button></div>}>
             {manager_list.map((item, index) => { return <Option value={item.id}>{item.name}</Option> })}
         </OptGroup>,
-        <OptGroup label="其他">
+        <OptGroup key='b' label="其他">
             {other_list.map((item, index) => { return <Option value={item.id}>{item.name}</Option> })}
         </OptGroup>]
     }, [userList])
@@ -165,8 +168,9 @@ export default function JobTicketOfCreate() {
                                         showSearch
                                         optionFilterProp='children'
                                         value={ticketNextUserList}
-                                        onChange={value => {
+                                        onChange={(value, option) => {
                                             setTicketNextUserList(value)
+                                            ticketNextUserNameList = option.map((item) => { return item.props.children })
                                         }}
                                     >
                                         {getUserGroupList()}
@@ -193,7 +197,8 @@ export default function JobTicketOfCreate() {
                                             onClick={() => {
                                                 if (ticketNextUserList.toString().length === 0) { message.error('请选择好处理人员，再进行提交'); return }
                                                 let user_str = ',' + ticketNextUserList.toString() + ','
-                                                console.log('user_str:', user_str);
+                                                // console.log('user_str:', user_str);
+                                                // console.log('ticketNextUserNameList:', ticketNextUserNameList);
                                                 // return;
                                                 let afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, 0)
                                                 // console.log('afterCheckObj:', afterCheckObj);
@@ -212,10 +217,23 @@ export default function JobTicketOfCreate() {
                                                     cancelText: '取消',
                                                     onOk: async function () {
                                                         let res = await createNewJobTicketApply(afterCheckObj, user_str)
-                                                        console.log('提交:', res)
                                                         if (res) {
                                                             message.success('提交成功')
                                                             getJobTicketById(null)
+                                                            ///获取最新提交的记录id
+                                                            let res = await HttpApi.getLastJTApplyRecordId()
+                                                            if (res.data.code === 0) {
+                                                                const jbtar_id = res.data.data[0]['max_id']
+                                                                let obj = {};
+                                                                obj['jbtar_id'] = jbtar_id
+                                                                obj['user_id'] = currentUser.id
+                                                                obj['user_name'] = currentUser.name
+                                                                obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
+                                                                obj['step_des'] = '创建工作票 提交至 ' + ticketNextUserNameList.join(',')
+                                                                obj['remark'] = ''
+                                                                HttpApi.addJbTStepLog(obj)///添加log
+                                                            }
+
                                                         }
                                                     }
                                                 })

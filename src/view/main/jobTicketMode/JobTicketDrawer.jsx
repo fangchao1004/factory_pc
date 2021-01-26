@@ -9,7 +9,7 @@ const { TextArea } = Input;
 const { Option, OptGroup } = Select
 const storage = window.localStorage;
 var step_des = '';
-var ticketNextUserNameList = '';
+var ticketNextUserNameList = [];
 export default function JobTicketDrawer({ visible, onClose, record, resetData }) {
     const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})///填写改动后的数值- 提交时使用
     const [currentUser] = useState(JSON.parse(storage.getItem('userinfo')))
@@ -27,7 +27,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
 
 
     const runUserlist = useCallback(async (user_list) => {
-        let res = await HttpApi.geRunnerIdList()
+        let res = await HttpApi.getRunnerIdList()
         if (res.data.code === 0) {
             let runner_list1 = res.data.data;
             // console.log('res:', res.data.data);
@@ -84,15 +84,15 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                     setShowStopBtn(true)
                 }
             }
-            console.log('currentUser:', currentUser);
-            console.log('专工权限:', currentUser.permission.split(',').indexOf("0") !== -1);
-            console.log('运行权限:', currentUser.permission.split(',').indexOf("1") !== -1);
+            // console.log('currentUser:', currentUser);
+            // console.log('专工权限:', currentUser.permission.split(',').indexOf("0") !== -1);
+            // console.log('运行权限:', currentUser.permission.split(',').indexOf("1") !== -1);
             if (record.status === 1 && currentUser.major_id_all && currentUser.major_id_all.split(',').indexOf(String(record.major_id)) !== -1 && currentUser.permission && currentUser.permission.split(',').indexOf("0") !== -1) {
                 ///1待审核 状态时，对应专业的专工可以操作
                 setSelectDisable(false)
                 setShowStopBtn(true)
                 ///1待审核 状态时 专工要有运行人员名单
-                console.log('1待审核 状态时 专工要有运行人员名单');
+                // console.log('1待审核 状态时 专工要有运行人员名单');
                 runUserlist(user_list)
             }
             if ((record.status === 2 || record.status === 3) && currentUser.major_id_all && currentUser.permission && currentUser.permission.split(',').indexOf("1") !== -1) {
@@ -102,7 +102,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                 setShowStopBtn(true)
                 ///2待接票 状态时 运行要有运行人员名单
                 if (record.status === 2) {
-                    console.log('2待接票 状态时 运行要有运行人员名单');
+                    // console.log('2待接票 状态时 运行要有运行人员名单');
                     runUserlist(user_list)
                 }
             }
@@ -245,7 +245,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                         </div>
                         <div style={{ marginTop: 10, ...styles.bar }}>
                             <span><Tag size='small' color='blue'>备注</Tag></span>
-                            <TextArea rows={4} value={remark} onChange={(e) => { setRemark(e.target.value) }} />
+                            <TextArea disabled={record && record.status === 4} rows={4} value={remark} onChange={(e) => { setRemark(e.target.value) }} />
                         </div>
                         <Button disabled={selectDisable} type='primary' size='small' icon={takeTicketAndPrint ? '' : 'upload'} style={{ marginTop: 10, marginRight: 10 }} onClick={async () => {
                             // console.log('step_des:', step_des);
@@ -262,7 +262,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                 // console.log('afterCheckObj:', afterCheckObj);
                                 setCurrentJobTicketValue(afterCheckObj)
                                 let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
-                                console.log('是否数据缺少:', needValueButIsEmpty);
+                                // console.log('是否数据缺少:', needValueButIsEmpty);
                                 if (needValueButIsEmpty) {
                                     message.error('请填写好工作票后，再进行提交')
                                     return
@@ -303,7 +303,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                             obj['user_id'] = currentUser.id
                                             obj['user_name'] = currentUser.name
                                             obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
-                                            obj['step_des'] = record.status === 3 ? step_des : (step_des + ' ' + (selectValue === '1' ? ticketNextUserNameList.join(',') : record.per_step_user_name
+                                            obj['step_des'] = record.status === 3 ? step_des : (step_des + '至 ' + (selectValue === '1' ? ticketNextUserNameList.join(',') : record.per_step_user_name
                                             ))
                                             obj['remark'] = remark
                                             HttpApi.addJbTStepLog(obj)///添加log
