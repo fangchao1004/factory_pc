@@ -449,7 +449,7 @@ export default props => {
                 </SubMenu>
                 <SubMenu key="工作票" title={<span><Icon type="block" /><span>工作票</span></span>}>
                     <Menu.Item key="/mainView/jobticketcreate"><Icon type="key" /><span>创建工作票</span><Link to={`${props.match.url}/jobticketcreate`} /></Menu.Item>
-                    <Menu.Item key="/mainView/jobticketmine"><Icon type="car" /><span>我的工作票</span><Link to={`${props.match.url}/jobticketmine`} /></Menu.Item>
+                    <Menu.Item key="/mainView/jobticketmine"><Icon type="car" /><span>所有工作票</span><Link to={`${props.match.url}/jobticketmine`} /></Menu.Item>
                 </SubMenu>
                 <SubMenu key="设置" title={<span><Icon type="setting" /><span>设置</span></span>}>
                     <Menu.Item key="/mainView/usersetting"><Icon type="switcher" /><span>个人中心</span><Link to={`${props.match.url}/usersetting`} /></Menu.Item>

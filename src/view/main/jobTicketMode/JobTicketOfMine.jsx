@@ -37,7 +37,7 @@ export default function JobTicketOfMine() {
     useEffect(() => {
         let loop = setInterval(() => {
             init();
-        }, 5 * 60 * 1000)
+        }, 10 * 1000)
         return () => {
             clearInterval(loop)
         }
@@ -79,7 +79,7 @@ export default function JobTicketOfMine() {
     return (
         <div style={styles.root}>
             <div style={styles.head}>
-                <h2 style={styles.title}>我的工作票</h2>
+                <h2 style={styles.title}>所有工作票</h2>
             </div>
             <div style={styles.body}>
                 <Table
