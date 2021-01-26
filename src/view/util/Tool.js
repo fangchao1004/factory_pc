@@ -1103,8 +1103,9 @@ export function getJTRecordContentAndPlanTime({ pages }) {
 /**
  * 
  * @param {*} jobTicketValue 工作票数据
+ * @param {String} user_list_str 当前哪些人可以处理 ,0,1,
  */
-export async function createNewJobTicketApply(jobTicketValue) {
+export async function createNewJobTicketApply(jobTicketValue, user_list_str) {
     let auto_no = await getAutoJTARecordNo(jobTicketValue)
     // console.log('auto_no:::', auto_no)
     jobTicketValue.pages = changeNoInputValue({ auto_no, pages: jobTicketValue.pages })
@@ -1126,8 +1127,11 @@ export async function createNewJobTicketApply(jobTicketValue) {
             obj['major_id'] = jobTicketValue['major_id'];
             obj['ticket_name'] = jobTicketValue['ticket_name'];
             obj['job_content'] = job_content;
-            obj['time_begin'] = time_list[0]
-            obj['time_end'] = time_list[1]
+            obj['time_begin'] = time_list[0];
+            obj['time_end'] = time_list[1];
+            obj['per_step_user_id'] = userObj.id;
+            obj['per_step_user_name'] = userObj.name;
+            obj['current_step_user_id_list'] = user_list_str;
             /////
             let res2 = await HttpApi.createJTApplyRecord(obj)
             if (res2.data.code === 0) {

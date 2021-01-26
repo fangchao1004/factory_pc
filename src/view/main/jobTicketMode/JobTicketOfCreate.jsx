@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
 import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty } from '../../util/Tool'
-
+const { OptGroup, Option } = Select
 const { confirm } = Modal
 const storage = window.localStorage
 export default function JobTicketOfCreate() {
@@ -14,6 +14,7 @@ export default function JobTicketOfCreate() {
     const [currentUser] = useState(JSON.parse(storage.getItem('userinfo')))
     const [scaleNum, setScaleNum] = useState(1)
     const [ticketSampleId, setTicketSampleId] = useState(null)
+    const [ticketNextUserList, setTicketNextUserList] = useState([])
     const getJobTicketById = useCallback(async id => {
         if (id !== null) {
             let res = await HttpApi.getJobTicketsList({ id })
@@ -22,13 +23,29 @@ export default function JobTicketOfCreate() {
                 tempObj.pages = JSON.parse(tempObj.pages)
                 // tempObj.pages = testData
                 setCurrentJobTicketValue(tempObj)
+                const major_id = tempObj.major_id
+                console.log('major_id', major_id);
+                let managerList_res = await HttpApi.getManagerIdListByMajorId({ major_id })
+                if (managerList_res.data.code === 0) {
+                    const managerlist = managerList_res.data.data;
+                    // console.log('managerlist:', managerlist);
+                    userList.forEach((item) => {
+                        item.is_current_major_manager = false
+                        managerlist.forEach((manager) => {
+                            if (item.id === manager.user_id) {
+                                item.is_current_major_manager = true
+                            }
+                        })
+                    })
+                    setUserList(userList)
+                }
             }
         } else {
             setCurrentJobTicketValue({})
             setScaleNum(1)
         }
         setTicketSampleId(id)
-    }, [])
+    }, [userList])
     const init = useCallback(async () => {
         let res = await HttpApi.getJobTicketsOptionList()
         if (res.data.code === 0) {
@@ -42,6 +59,24 @@ export default function JobTicketOfCreate() {
             setUserList(user_list)
         }
     }, [])
+    const getUserGroupList = useCallback(() => {
+        if (!userList) { return null }
+        let manager_list = [];
+        let other_list = [];
+        userList.forEach((item) => {
+            if (item.is_current_major_manager) {
+                manager_list.push(item)
+            } else { other_list.push(item) }
+        })
+        return [<OptGroup label={<div style={{ width: '100%', justifyContent: 'space-between', display: 'flex', justifyItems: 'center' }}><span>当前专业专工</span><Button type='link' size='small' onClick={() => {
+            setTicketNextUserList(manager_list.map((item) => item.id))
+        }}>全选</Button></div>}>
+            {manager_list.map((item, index) => { return <Option value={item.id}>{item.name}</Option> })}
+        </OptGroup>,
+        <OptGroup label="其他">
+            {other_list.map((item, index) => { return <Option value={item.id}>{item.name}</Option> })}
+        </OptGroup>]
+    }, [userList])
     const renderAllPage = useCallback(() => {
         if (currentJobTicketValue && currentJobTicketValue.pages) {
             return currentJobTicketValue.pages.map((_, index) => {
@@ -104,11 +139,37 @@ export default function JobTicketOfCreate() {
                                         filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
                                         {jobTicketsOption.map((item, index) => {
                                             return (
-                                                <Select.Option key={index} value={item.id}>
+                                                <Option key={index} value={item.id}>
                                                     {item.ticket_name}
-                                                </Select.Option>
+                                                </Option>
                                             )
                                         })}
+                                    </Select>
+                                </div>
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    width: '100%',
+                                    alignItems: 'center',
+                                    marginTop: 10
+                                }}>
+                                    <Tag color='blue'>人员</Tag>
+                                    <Select
+                                        maxTagCount={5}
+                                        disabled={!currentJobTicketValue.pages}
+                                        mode="multiple"
+                                        style={{ width: '100%' }}
+                                        bordered={false}
+                                        allowClear={true}
+                                        placeholder='请选择下一步处理人'
+                                        showSearch
+                                        optionFilterProp='children'
+                                        value={ticketNextUserList}
+                                        onChange={value => {
+                                            setTicketNextUserList(value)
+                                        }}
+                                    >
+                                        {getUserGroupList()}
                                     </Select>
                                 </div>
                                 <div style={{
@@ -130,6 +191,10 @@ export default function JobTicketOfCreate() {
                                             size='small'
                                             disabled={!currentJobTicketValue.pages}
                                             onClick={() => {
+                                                if (ticketNextUserList.toString().length === 0) { message.error('请选择好处理人员，再进行提交'); return }
+                                                let user_str = ',' + ticketNextUserList.toString() + ','
+                                                console.log('user_str:', user_str);
+                                                // return;
                                                 let afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, 0)
                                                 // console.log('afterCheckObj:', afterCheckObj);
                                                 setCurrentJobTicketValue(JSON.parse(JSON.stringify(afterCheckObj)))
@@ -146,7 +211,7 @@ export default function JobTicketOfCreate() {
                                                     okType: 'danger',
                                                     cancelText: '取消',
                                                     onOk: async function () {
-                                                        let res = await createNewJobTicketApply(afterCheckObj)
+                                                        let res = await createNewJobTicketApply(afterCheckObj, user_str)
                                                         console.log('提交:', res)
                                                         if (res) {
                                                             message.success('提交成功')

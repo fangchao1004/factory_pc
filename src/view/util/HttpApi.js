@@ -961,11 +961,11 @@ class HttpApi {
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getJobTicketsOptionList = () => {
-        let sql = `select id,ticket_name from job_tickets where isdelete = 0`
+        let sql = `select id,ticket_name from job_tickets where is_delete = 0`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getJobTicketsList = ({ id }) => {
-        let sql = `select * from job_tickets where isdelete = 0 and id = ${id}`
+        let sql = `select * from job_tickets where is_delete = 0 and id = ${id}`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getJobTicketsCount = ({ type_id, timeRange }) => {
@@ -994,8 +994,8 @@ class HttpApi {
      * job_s_t_r_id 副票记录id
      * @param {*} param0 
      */
-    static createJTApplyRecord = ({ no, job_t_r_id, job_s_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end }) => {
-        let sql = `insert into job_tickets_apply_records (no, job_t_r_id, job_s_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end) values ('${no}',${job_t_r_id}, ${job_s_t_r_id ? job_s_t_r_id : null}, ${user_id}, '${user_name}', '${time}', ${major_id}, '${ticket_name}', '${job_content}' ,'${time_begin}' ,'${time_end}')`
+    static createJTApplyRecord = ({ no, job_t_r_id, job_s_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list }) => {
+        let sql = `insert into job_tickets_apply_records (no, job_t_r_id, job_s_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list) values ('${no}',${job_t_r_id}, ${job_s_t_r_id ? job_s_t_r_id : null}, ${user_id}, '${user_name}', '${time}', ${major_id}, '${ticket_name}', '${job_content}' ,'${time_begin}' ,'${time_end}','${per_step_user_id}', '${per_step_user_name}', '${current_step_user_id_list}' )`
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**
@@ -1010,7 +1010,7 @@ class HttpApi {
         }
         return Axios.post(Testuri + 'obs', { sql })
     }
-    static updateJTApplyRecord = ({ id, status, is_delete, is_stop, job_content, time_begin, time_end }) => {
+    static updateJTApplyRecord = ({ id, status, is_delete, is_stop, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list }) => {
         let block_status = ''
         if (status >= 0) {
             block_status = ` status = ${status},`
@@ -1023,12 +1023,45 @@ class HttpApi {
         if (is_stop >= 0) {
             block_stop = ` is_stop = ${is_stop},`
         }
+        let block_user = ` per_step_user_id = ${per_step_user_id},per_step_user_name = '${per_step_user_name}',current_step_user_id_list = '${current_step_user_id_list}',`
         let block_contet_time = ` job_content = '${job_content}',time_begin = '${time_begin}',time_end = '${time_end}',`
-        let set_sql = block_status + block_delete + block_stop + block_contet_time
+        let set_sql = block_status + block_delete + block_stop + block_contet_time + block_user
         set_sql = set_sql.substring(0, set_sql.length - 1)
         let sql = `update job_tickets_apply_records set ${set_sql} where id = ${id}`
+        console.log('1sql:', sql)
         return Axios.post(Testuri + 'obs', { sql })
     }
+    /**
+     * 获取哪个专业的专工user_id
+     * @param {*} param0 
+     */
+    static getManagerIdListByMajorId = ({ major_id }) => {
+        let sql = `select t1.user_id from
+        (select * from role_map_user where role_map_user.effective = 1 and role_id = 1) t1
+        inner join
+        (select * from user_map_major where user_map_major.effective = 1 and mj_id = ${major_id}) t2
+        on t1.user_id = t2.user_id`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    /**
+     * 获取运行人员
+     */
+    static geRunnerIdList = () => {
+        let sql = `select user_id from role_map_user
+        where role_map_user.effective = 1 and role_id = 2`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+
+    /**
+     * 添加工作票操作日志
+     */
+    static addJbTStepLog = ({ jbtar_id, user_id, user_name, time, step_des, remark }) => {
+        let sql = `insert into job_tickets_step_log (jbtar_id, user_id, user_name, time, step_des, remark) values (${jbtar_id},${user_id},'${user_name}','${time}','${step_des}','${remark}') `
+        console.log('addJbTStepLog sql:', sql)
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+
+
 }
 
 export default HttpApi
