@@ -74,10 +74,10 @@ export default function JobTicketOfCreate() {
             setTicketNextUserList(manager_list.map((item) => item.id))
             ticketNextUserNameList = manager_list.map((item) => item.name)
         }}>全选</Button></div>}>
-            {manager_list.map((item, index) => { return <Option value={item.id}>{item.name}</Option> })}
+            {manager_list.map((item, index) => { return <Option key={'a' + index} value={item.id}>{item.name}</Option> })}
         </OptGroup>,
         <OptGroup key='b' label="其他">
-            {other_list.map((item, index) => { return <Option value={item.id}>{item.name}</Option> })}
+            {other_list.map((item, index) => { return <Option key={'b' + index} value={item.id}>{item.name}</Option> })}
         </OptGroup>]
     }, [userList])
     const renderAllPage = useCallback(() => {

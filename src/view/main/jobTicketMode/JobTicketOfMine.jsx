@@ -34,6 +34,14 @@ export default function JobTicketOfMine() {
     useEffect(() => {
         init();
     }, [init])
+    useEffect(() => {
+        let loop = setInterval(() => {
+            init();
+        }, 5 * 60 * 1000)
+        return () => {
+            clearInterval(loop)
+        }
+    }, [init])
     const columns = [
         {
             title: '序号', dataIndex: 'id', key: 'id', width: 80, render: (text, record) => {
