@@ -1010,7 +1010,7 @@ class HttpApi {
         }
         return Axios.post(Testuri + 'obs', { sql })
     }
-    static updateJTApplyRecord = ({ id, status, is_delete, is_stop, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list }) => {
+    static updateJTApplyRecord = ({ id, status, is_delete, is_stop, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, is_read }) => {
         let block_status = ''
         if (status >= 0) {
             block_status = ` status = ${status},`
@@ -1023,12 +1023,21 @@ class HttpApi {
         if (is_stop >= 0) {
             block_stop = ` is_stop = ${is_stop},`
         }
-        let block_user = ` per_step_user_id = ${per_step_user_id},per_step_user_name = '${per_step_user_name}',current_step_user_id_list = '${current_step_user_id_list}',`
-        let block_contet_time = ` job_content = '${job_content}',time_begin = '${time_begin}',time_end = '${time_end}',`
-        let set_sql = block_status + block_delete + block_stop + block_contet_time + block_user
+        let block_read = ''
+        if (is_read >= 0) {
+            block_read = ` is_read = ${is_read},`
+        }
+        let block_user = ''
+        if (per_step_user_id >= 0) {
+            block_user = ` per_step_user_id = ${per_step_user_id},per_step_user_name = '${per_step_user_name}',current_step_user_id_list = '${current_step_user_id_list}',`
+        }
+        let block_contet_time = ''
+        if (job_content) {
+            block_contet_time = ` job_content = '${job_content}',time_begin = '${time_begin}',time_end = '${time_end}',`
+        }
+        let set_sql = block_status + block_delete + block_stop + block_contet_time + block_user + block_read
         set_sql = set_sql.substring(0, set_sql.length - 1)
         let sql = `update job_tickets_apply_records set ${set_sql} where id = ${id}`
-        console.log('1sql:', sql)
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**
@@ -1056,7 +1065,6 @@ class HttpApi {
      */
     static addJbTStepLog = ({ jbtar_id, user_id, user_name, time, step_des, remark }) => {
         let sql = `insert into job_tickets_step_log (jbtar_id, user_id, user_name, time, step_des, remark) values (${jbtar_id},${user_id},'${user_name}','${time}','${step_des}','${remark}') `
-        console.log('addJbTStepLog sql:', sql)
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**

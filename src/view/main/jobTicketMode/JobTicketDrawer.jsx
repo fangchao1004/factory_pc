@@ -289,11 +289,13 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                             new_status = record.status - 1
                                         }
                                         let { job_content, time_list } = getJTRecordContentAndPlanTime({ pages: JSON.stringify(currentJobTicketValue.pages) })
+                                        ///每次处理 未读重置
                                         let newJTAR_data = {
+                                            is_read: record.status === 3 ? 1 : 0,
                                             id: record.id,
                                             status: new_status,
                                             job_content, time_begin: time_list[0], time_end: time_list[1],
-                                            per_step_user_id: currentUser.id, per_step_user_name: currentUser.name, current_step_user_id_list: selectValue === '1' ? ',' + ticketNextUserList.join(',') + ',' : ',' + record.per_step_user_id + ','
+                                            per_step_user_id: currentUser.id, per_step_user_name: currentUser.name, current_step_user_id_list: selectValue === '1' ? (record.status === 3 ? '' : ',' + ticketNextUserList.join(',') + ',') : ',' + record.per_step_user_id + ','
                                         }
                                         let res2 = await HttpApi.updateJTApplyRecord(newJTAR_data)
                                         if (res2.data.code === 0) {

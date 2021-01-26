@@ -232,8 +232,9 @@ export default function JobTicketOfCreate() {
                                                                 obj['step_des'] = '创建工作票 提交至 ' + ticketNextUserNameList.join(',')
                                                                 obj['remark'] = ''
                                                                 HttpApi.addJbTStepLog(obj)///添加log
+                                                                setTicketNextUserList([])
+                                                                ticketNextUserNameList = []
                                                             }
-
                                                         }
                                                     }
                                                 })
