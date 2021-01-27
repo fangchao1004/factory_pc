@@ -1000,13 +1000,13 @@ class HttpApi {
     }
     /**
      * 后期要分页查询
-     * 根据个人所属专业或是自己提交的，查询相关的工作票
+     * 根据个人是否在当前处理人数组中或是自己提交的，查询相关的工作票
      * 如果有运行权限查询所有
      */
-    static getJTApplyRecords = ({ major_id, is_stop = 0, user_id, is_all }) => {
-        let sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = ${is_stop} and (major_id in (${major_id}) or user_id = ${user_id})order by id desc`
+    static getJTApplyRecords = ({ user_id, is_all }) => {
+        let sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = 0 and (user_id = ${user_id} || current_step_user_id_list like '%,${user_id},%')order by id desc`
         if (is_all) {
-            sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = ${is_stop} order by id desc`
+            sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = 0 order by id desc`
         }
         return Axios.post(Testuri + 'obs', { sql })
     }
