@@ -31,7 +31,7 @@ import { useMemo } from 'react';
 import UserCenterView from './userCenter/UserCenterView';
 import UserLoginLogsView from './userLoginLogMode/UserLoginLogsView';
 import AccessView from './accessMode/AccessView';
-import JobTicketOfMine from './jobTicketMode/JobTicketOfMine';
+import JobTicketOfAll from './jobTicketMode/JobTicketOfAll';
 import JobTicketOfCreate from './jobTicketMode/JobTicketOfCreate';
 
 const { Header, Content, Sider } = Layout;
@@ -337,7 +337,7 @@ export default props => {
             <Route
                 exact
                 path={`${props.match.path}/jobticketmine`}
-                component={() => (localUserInfo ? <JobTicketOfMine /> : <Redirect to='/' />)}
+                component={() => (localUserInfo ? <JobTicketOfAll /> : <Redirect to='/' />)}
             />
             <Route
                 exact

@@ -5,7 +5,7 @@ import { changeJobTicketStatusToText } from '../../util/Tool';
 import JobTicketDrawer from './JobTicketDrawer';
 import JobTicketStepLogView from './JobTicketStepLogView';
 const storage = window.localStorage;
-export default function JobTicketOfMine() {
+export default function JobTicketOfAll() {
     const [list, setList] = useState([])
     const [drawerVisible, setDrawerVisible] = useState(false)
     const [currentSelectRecord, setCurrentSelectRecord] = useState(null)
