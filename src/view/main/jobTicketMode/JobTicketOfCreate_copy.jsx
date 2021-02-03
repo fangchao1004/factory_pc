@@ -5,13 +5,12 @@ import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
 import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty } from '../../util/Tool'
 import moment from 'moment'
-import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer'
 const { OptGroup, Option } = Select
 const { confirm } = Modal
 const storage = window.localStorage
 var ticketNextUserNameList = [];
 let per_list = []///上次副票的选择项
-export default function JobTicketOfCreate() {
+export default function JobTicketOfCreate_copy() {
     const [jobTicketsOption, setJobTicketsOption] = useState([])
     const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})
     const [userList, setUserList] = useState([])
@@ -20,8 +19,6 @@ export default function JobTicketOfCreate() {
     const [ticketSampleId, setTicketSampleId] = useState(null)
     const [ticketNextUserList, setTicketNextUserList] = useState([])
     const [allSubTicketList, setAllSubTicketList] = useState([])
-    const [sbtvisible, setSbtvisible] = useState(false)
-    const [currentSubJBT, setCurrentSubJBT] = useState({})
     const getJobTicketById = useCallback(async id => {
         if (id !== null) {
             let res = await HttpApi.getJobTicketsList({ id })
@@ -133,8 +130,7 @@ export default function JobTicketOfCreate() {
             let res = await HttpApi.getSubJobTicketsList({ type_name: add_list[0] })
             if (res.data.code === 0) {
                 // console.log('数据库查询到:', res.data.data);
-                let parse_res = res.data.data.map((item) => { item.pages = JSON.parse(item.pages); return item })
-                let after_add_sub = [...allSubTicketList, ...parse_res]
+                let after_add_sub = [...allSubTicketList, ...res.data.data]
                 // console.log('after_add_sub:', after_add_sub);
                 setAllSubTicketList(after_add_sub.map((item, index) => { item.key = index; return item }))
             }
@@ -166,11 +162,8 @@ export default function JobTicketOfCreate() {
         init()
     }, [init])
     const columns = [{ title: '类型', dataIndex: 'type_name', key: 'type_name' }, {
-        title: '操作', dataIndex: 'action', key: 'action', width: 90, render: (_, record) => {
-            return <Button icon='edit' size='small' type='link' onClick={() => {
-                setSbtvisible(true)
-                setCurrentSubJBT(record)
-            }}>编辑</Button>
+        title: '类型', dataIndex: 'action', key: 'action', width: 90, render: () => {
+            return <Button icon='edit' size='small' type='link'>编辑</Button>
         }
     }]
     return (
@@ -266,16 +259,13 @@ export default function JobTicketOfCreate() {
                                             size='small'
                                             disabled={!currentJobTicketValue.pages}
                                             onClick={() => {
-                                                console.log('allsbj:', allSubTicketList);
-                                                // return;
                                                 if (ticketNextUserList.toString().length === 0) { message.error('请选择好处理人员，再进行提交'); return }
                                                 let user_str = ',' + ticketNextUserList.toString() + ','
                                                 // console.log('user_str:', user_str);
                                                 // console.log('ticketNextUserNameList:', ticketNextUserNameList);
                                                 // return;
                                                 let afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, 0)
-                                                console.log('afterCheckObj:', afterCheckObj);
-                                                // return;
+                                                // console.log('afterCheckObj:', afterCheckObj);
                                                 setCurrentJobTicketValue(JSON.parse(JSON.stringify(afterCheckObj)))
                                                 let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
                                                 if (needValueButIsEmpty) {
@@ -308,16 +298,6 @@ export default function JobTicketOfCreate() {
                                                                 HttpApi.addJbTStepLog(obj)///添加log
                                                                 setTicketNextUserList([])
                                                                 ticketNextUserNameList = []
-
-                                                                ///添加副票记录
-                                                                for (let index = 0; index < allSubTicketList.length; index++) {
-                                                                    let element = allSubTicketList[index];///每个副票
-                                                                    element.p_id = jbtar_id;
-                                                                    let res = await createNewJobTicketApply(element, user_str)
-                                                                    console.log('添加副票记录:', res);
-                                                                }
-                                                                setAllSubTicketList([])
-                                                                setCurrentSubJBT({})
                                                             }
                                                         }
                                                     }
@@ -337,21 +317,6 @@ export default function JobTicketOfCreate() {
                         </Affix>
                     </Col>
                 </Row>
-                <SubJobTicketOfCreateDrawer
-                    visible={sbtvisible}
-                    onClose={() => { setSbtvisible(false); }}
-                    currentSubJBT={currentSubJBT}
-                    userList={userList}
-                    currentUser={currentUser}
-                    sbjtvalueChangeCallback={(v) => {
-                        allSubTicketList.forEach((oneSubTicket) => {
-                            if (oneSubTicket.id === currentSubJBT.id) {
-                                oneSubTicket.pages = v.pages
-                            }
-                        })
-                        setAllSubTicketList(allSubTicketList)
-                    }}
-                />
             </div>
         </div>
     )

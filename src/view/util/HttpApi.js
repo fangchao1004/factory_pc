@@ -961,20 +961,23 @@ class HttpApi {
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getJobTicketsOptionList = () => {
-        let sql = `select id,ticket_name from job_tickets where is_delete = 0`
+        let sql = `select id,ticket_name from job_tickets where is_delete = 0 and is_sub = 0`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getJobTicketsList = ({ id }) => {
         let sql = `select * from job_tickets where is_delete = 0 and id = ${id}`
         return Axios.post(Testuri + 'obs', { sql })
     }
-    static getJobTicketsCount = ({ type_id, timeRange }) => {
-        let sql = `select count(id) as count from job_tickets_records where type_id = ${type_id} and time >= '${timeRange[0]}' and time <= '${timeRange[1]}' `
-        console.log('sql:', sql)
+    static getSubJobTicketsList = ({ type_name }) => {
+        let sql = `select * from job_tickets where is_delete = 0 and is_sub = 1 and type_name = '${type_name}'`
         return Axios.post(Testuri + 'obs', { sql })
     }
-    static createJTRecord = ({ id, ticket_name, pages, major_id, title, time }) => {
-        let sql = `insert into job_tickets_records (type_id, ticket_name, pages, major_id, title, time) values (${id},'${ticket_name}','${pages}',${major_id},'${title}','${time}')`
+    static getJobTicketsCount = ({ type_id, timeRange }) => {
+        let sql = `select count(id) as count from job_tickets_records where type_id = ${type_id} and time >= '${timeRange[0]}' and time <= '${timeRange[1]}' `
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    static createJTRecord = ({ id, ticket_name, pages, major_id, title, time, scal }) => {
+        let sql = `insert into job_tickets_records (type_id, ticket_name, pages, major_id, title, time, scal) values (${id},'${ticket_name}','${pages}',${major_id},'${title}','${time}',${scal ? "'" + scal + "'" : null})`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getLastJTRecordId = () => {
@@ -991,11 +994,10 @@ class HttpApi {
     }
     /**
      * job_t_r_id 工作票记录id
-     * job_s_t_r_id 副票记录id
      * @param {*} param0 
      */
-    static createJTApplyRecord = ({ no, job_t_r_id, job_s_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list }) => {
-        let sql = `insert into job_tickets_apply_records (no, job_t_r_id, job_s_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list) values ('${no}',${job_t_r_id}, ${job_s_t_r_id ? job_s_t_r_id : null}, ${user_id}, '${user_name}', '${time}', ${major_id}, '${ticket_name}', '${job_content}' ,'${time_begin}' ,'${time_end}','${per_step_user_id}', '${per_step_user_name}', '${current_step_user_id_list}' )`
+    static createJTApplyRecord = ({ no, job_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, is_sub, p_id }) => {
+        let sql = `insert into job_tickets_apply_records (no, job_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list,is_sub,p_id) values ('${no}',${job_t_r_id},  ${user_id}, '${user_name}', '${time}', ${major_id}, '${ticket_name}', '${job_content}' ,${time_begin ? "'" + time_begin + "'" : null} ,${time_end ? "'" + time_end + "'" : null},'${per_step_user_id}', '${per_step_user_name}', '${current_step_user_id_list}',${is_sub},${p_id ? p_id : null} )`
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**

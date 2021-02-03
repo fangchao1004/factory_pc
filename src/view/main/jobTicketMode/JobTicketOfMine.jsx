@@ -18,7 +18,7 @@ export default function JobTicketOfMine() {
         let res = await HttpApi.getJTApplyRecords({ user_id: userinfo.id });
         if (res.data.code === 0) {
             let templist = res.data.data.map((item, index) => { item.key = index; return item })
-            console.log('templist:', templist);
+            // console.log('templist:', templist);
             setList(templist)
         }
     }, [])

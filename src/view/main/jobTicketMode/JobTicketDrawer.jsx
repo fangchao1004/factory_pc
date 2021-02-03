@@ -93,7 +93,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                 setShowStopBtn(true)
                 ///1待审核 状态时 专工要有运行人员名单
                 // console.log('1待审核 状态时 专工要有运行人员名单');
-                runUserlist(user_list)
+                // runUserlist(user_list)
             }
             if ((record.status === 2 || record.status === 3) && currentUser.major_id_all && currentUser.permission && currentUser.permission.split(',').indexOf("1") !== -1) {
                 ///2待接票 3待完结 状态时，运行可以操作
@@ -101,16 +101,19 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                 setShowDeleteBtn(false)
                 setShowStopBtn(true)
                 ///2待接票 状态时 运行要有运行人员名单
-                if (record.status === 2) {
-                    // console.log('2待接票 状态时 运行要有运行人员名单');
-                    runUserlist(user_list)
-                }
+                // if (record.status === 2) {
+                //     // console.log('2待接票 状态时 运行要有运行人员名单');
+                //     runUserlist(user_list)
+                // }
             }
             if (record.status === 4) {
                 setSelectDisable(true)
                 setShowDeleteBtn(false)
                 setShowStopBtn(false)
+            } else if (record.status === 1 || record.status === 2) {
+                runUserlist(user_list)
             }
+
         }
     }, [record, currentUser, runUserlist])
 
@@ -136,6 +139,11 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
     }, [record, selectValue])
     const renderAllPage = useCallback(() => {
         if (record && currentJobTicketValue && currentJobTicketValue.pages) {
+            // console.log('aaaa:', currentJobTicketValue);
+            let scalObj = {}
+            if (currentJobTicketValue.scal) {
+                scalObj = JSON.parse(currentJobTicketValue.scal)
+            }
             return currentJobTicketValue.pages.map((_, index) => {
                 return <RenderEngine
                     key={index}
@@ -144,6 +152,8 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                     userList={userList}
                     currentUser={currentUser}
                     currentPageIndex={index}
+                    scaleNum={scalObj.scaleNum || 1}
+                    bgscaleNum={scalObj.bgscalNum || 1}
                     callbackValue={v => {
                         setCurrentJobTicketValue(v)
                     }}
@@ -228,7 +238,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                     if (v === '-1' || step_des === '完结') { setTicketNextUserList([]) }
                                 }}
                             >
-                                <Option value='1'>{record && record.status >= 1 ? changeShowLabByStauts(record.status) : '通过'}</Option>
+                                <Option value='1'>{record && record.status >= 1 ? changeShowLabByStauts(record.status, record.is_sub) : '通过'}</Option>
                                 {record && record.status !== 3 && record.status !== 1 ? <Option value='-1'>打回</Option> : null}
                             </Select>
                         </div>

@@ -1,4 +1,4 @@
-import { Badge, Button, Table, Tooltip } from 'antd';
+import { Badge, Button, Icon, Table, Tag, Tooltip } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import { changeJobTicketStatusToText } from '../../util/Tool';
@@ -19,7 +19,22 @@ export default function JobTicketOfAll() {
         let res = await HttpApi.getJTApplyRecords({ major_id: userinfo.major_id_all, user_id: userinfo.id, is_all: run_permission });
         if (res.data.code === 0) {
             let templist = res.data.data.map((item, index) => { item.key = index; return item })
-            setList(templist)
+            // console.log('templist:', templist);
+            let main_list = []
+            let sub_list = []
+            templist.forEach((item) => {
+                if (item.is_sub === 1) {
+                    sub_list.push(item)
+                } else { main_list.push(item) }
+            })
+            main_list.forEach((item_m) => {
+                if (item_m.is_sub !== 1) { item_m.sub_tickets = [] }
+                sub_list.forEach((item_s) => {
+                    if (item_m.id === item_s.p_id) { item_m.sub_tickets.push(item_s) }
+                })
+            })
+            // console.log('main_list:', main_list);
+            setList(main_list)
         }
     }, [])
     const readLocalRecord = useCallback(async (record) => {
@@ -37,7 +52,7 @@ export default function JobTicketOfAll() {
     useEffect(() => {
         let loop = setInterval(() => {
             init();
-        }, 10 * 1000)
+        }, 10000 * 1000)
         return () => {
             clearInterval(loop)
         }
@@ -69,9 +84,9 @@ export default function JobTicketOfAll() {
         {
             title: '操作', dataIndex: 'action', key: 'action', align: 'center', width: 100, render: (_, record) => {
                 return <div>
-                    <Button disabled={record.current_step_user_id_list.indexOf(`,${currentUser.id},`) === -1} size='small' type='primary' icon='edit' onClick={() => { setCurrentSelectRecord(record); setDrawerVisible(true); readLocalRecord(record); }}>处理</Button>
+                    <Button disabled={record.current_step_user_id_list.indexOf(`,${currentUser.id},`) === -1} size='small' type='primary' icon='edit' onClick={(e) => { e.stopPropagation(); setCurrentSelectRecord(record); setDrawerVisible(true); readLocalRecord(record); }}>处理</Button>
                     <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
-                    <Button icon='unordered-list' size="small" type="default" onClick={() => { setStepLogVisible(true); setCurrentSelectRecord(record); }}>记录</Button>
+                    <Button icon='unordered-list' size="small" type="default" onClick={(e) => { e.stopPropagation(); setStepLogVisible(true); setCurrentSelectRecord(record); }}>记录</Button>
                 </div>
             }
         },
@@ -87,6 +102,35 @@ export default function JobTicketOfAll() {
                     size='small'
                     columns={columns}
                     dataSource={list}
+                    expandIcon={(props) => {
+                        if (props.record && props.record.sub_tickets.length > 0) {
+                            return <Icon type="unordered-list" />
+                        } else { return null }
+                    }}
+                    expandRowByClick={true}
+                    expandedRowRender={(record) => {
+                        if (record.is_sub !== 1 && record.sub_tickets.length > 0) {
+                            return record.sub_tickets.map((item, index) => {
+                                return <div key={index}>
+                                    {item.is_read ? null : <Badge status="processing" />}
+                                    <span>{item.no + "  " + item.ticket_name}</span>
+                                    <Tag color='blue' style={{ marginLeft: 10 }}>{changeJobTicketStatusToText(item.status, 1)}</Tag>
+                                    <Button icon='edit' size='small' type='link' onClick={() => {
+                                        // console.log('选择的副票数据:', item);
+                                        setCurrentSelectRecord(item)
+                                        setDrawerVisible(true);
+                                        readLocalRecord(item);
+                                    }}>处理</Button>
+                                    <Button icon='unordered-list' size='small' type='link' onClick={() => {
+                                        // console.log('选择的副票数据:', item);
+                                        setCurrentSelectRecord(item);
+                                        setStepLogVisible(true);
+                                    }}>记录</Button>
+                                </div>
+                            })
+                        }
+                        return null
+                    }}
                 />
             </div>
             <JobTicketDrawer visible={drawerVisible} onClose={() => { setDrawerVisible(false); setCurrentSelectRecord(null) }} record={currentSelectRecord} resetData={init} />

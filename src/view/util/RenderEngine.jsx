@@ -3,7 +3,7 @@ import { DatePicker, Checkbox, Select } from 'antd'
 import moment from 'moment'
 import 'antd/dist/antd.css'
 const testuri = 'http://60.174.196.158:12345/'
-export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, currentPageIndex, scaleNum = 1, callbackValue }) {
+export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, currentPageIndex, scaleNum = 1, bgscaleNum = 1, callbackValue }) {
   const pagediv = useRef(null)
   const [list, setList] = useState(jsonlist)
   const changeComponetsValue = useCallback(
@@ -148,21 +148,24 @@ export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, c
         justifyContent: 'center',
         flexDirection: 'column',
         padding: 10,
-        overflow: 'auto'
+        overflow: 'auto',
+        height: 1208,
+        width: 860,
+        // backgroundColor:'blue'
       }}>
       <div
         ref={pagediv}
         style={{
-          height: 1188,
-          width: 840,
+          height: 1188 * bgscaleNum,
+          width: 840 * bgscaleNum,
           position: 'relative',
           transform: `scale(${scaleNum})` ///整体缩放比例
         }}>
         <img
           src={list.pages ? testuri + list.pages[currentPageIndex].background : ''}
           style={{
-            height: 1188,
-            width: 840
+            height: 1188 * bgscaleNum,
+            width: 840 * bgscaleNum,
           }}
           alt=''
         />

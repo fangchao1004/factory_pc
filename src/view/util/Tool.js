@@ -2,7 +2,7 @@ import React from "react";
 import { Icon, message } from 'antd'
 import HttpApi from './HttpApi'
 import moment from 'moment';
-import { BROWERTYPE, NOTICEMUSICOPEN, MAXBUGIDMY, MAXTASKIDMY, OLDRUNBUGIDLIST, BUGIDLIST, JOB_TICKETS_STATUS } from "./AppData";
+import { BROWERTYPE, NOTICEMUSICOPEN, MAXBUGIDMY, MAXTASKIDMY, OLDRUNBUGIDLIST, BUGIDLIST, JOB_TICKETS_STATUS, SUB_JOB_TICKETS_STATUS } from "./AppData";
 var storage = window.localStorage;
 const FORMAT = 'YYYY-MM-DD HH:mm:ss'
 /**
@@ -1111,6 +1111,7 @@ export async function createNewJobTicketApply(jobTicketValue, user_list_str) {
     jobTicketValue.pages = changeNoInputValue({ auto_no, pages: jobTicketValue.pages })
     jobTicketValue.pages = JSON.stringify(jobTicketValue.pages)
     let { job_content, time_list } = getJTRecordContentAndPlanTime({ pages: jobTicketValue.pages })
+    console.log('提交：', jobTicketValue)
     let res = await HttpApi.createJTRecord({ ...jobTicketValue, time: moment().format(FORMAT) })
     if (res.data.code === 0) {
         let res_max_id = await HttpApi.getLastJTRecordId()
@@ -1132,6 +1133,8 @@ export async function createNewJobTicketApply(jobTicketValue, user_list_str) {
             obj['per_step_user_id'] = userObj.id;
             obj['per_step_user_name'] = userObj.name;
             obj['current_step_user_id_list'] = user_list_str;
+            obj['is_sub'] = jobTicketValue['is_sub'];
+            obj['p_id'] = jobTicketValue['p_id'];
             /////
             let res2 = await HttpApi.createJTApplyRecord(obj)
             if (res2.data.code === 0) {
@@ -1144,9 +1147,15 @@ export async function createNewJobTicketApply(jobTicketValue, user_list_str) {
     return false
 }
 
-export function changeJobTicketStatusToText(status) {
+export function changeJobTicketStatusToText(status, is_sub = 0) {
     try {
-        let res = JOB_TICKETS_STATUS.filter((item) => { return item.value === status })[0]
+        let target_List = []
+        if (is_sub) {
+            target_List = SUB_JOB_TICKETS_STATUS
+        } else {
+            target_List = JOB_TICKETS_STATUS
+        }
+        let res = target_List.filter((item) => { return item.value === status })[0]
         return res.text || '-'
     } catch (error) {
         return '/'
@@ -1157,20 +1166,42 @@ export function changeJobTicketStatusToText(status) {
  * 根据工作票当前的状态；显示功能上通往下一步status+1的选择的名称
  * @param {*} status 
  */
-export function changeShowLabByStauts(status) {
+export function changeShowLabByStauts(status, is_sub) {
     let res = ''
-    switch (status) {
-        case 1:
-            res = '签发'
-            break;
-        case 2:
-            res = '接票'
-            break;
-        case 3:
-            res = '完结'
-            break;
-        default:
-            break;
+    if (is_sub === 1) {
+        switch (status) {
+            case 1:
+                res = '给审核人一'
+                break;
+            case 2:
+                res = '给审核人二'
+                break;
+            case 3:
+                res = '给批准人'
+                break;
+            case 4:
+                res = '批准'
+                break;
+            case 5:
+                res = '完结'
+                break;
+            default:
+                break;
+        }
+    } else {
+        switch (status) {
+            case 1:
+                res = '签发'
+                break;
+            case 2:
+                res = '接票'
+                break;
+            case 3:
+                res = '完结'
+                break;
+            default:
+                break;
+        }
     }
     return res
 }
