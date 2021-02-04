@@ -1057,9 +1057,9 @@ class HttpApi {
     /**
      * 获取运行人员
      */
-    static getRunnerIdList = () => {
+    static getRunnerIdList = ({ role_id }) => {
         let sql = `select user_id from role_map_user
-        where role_map_user.effective = 1 and role_id = 2`
+        where role_map_user.effective = 1 and role_id = ${role_id}`
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**

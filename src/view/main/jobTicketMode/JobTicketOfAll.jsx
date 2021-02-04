@@ -11,9 +11,11 @@ export default function JobTicketOfAll() {
     const [currentSelectRecord, setCurrentSelectRecord] = useState(null)
     const [stepLogVisible, setStepLogVisible] = useState(false);///展示步骤界面
     const [currentUser, setCurrentUser] = useState({})
+    const [hasRunP, setHasRunP] = useState(false)///是否有运行权限
     const init = useCallback(async () => {
         const localUserInfo = storage.getItem('userinfo');
         let userinfo = JSON.parse(localUserInfo);
+        setHasRunP(userinfo.permission.split(',').indexOf("1") !== -1)
         setCurrentUser(userinfo)
         let run_permission = userinfo.permission && userinfo.permission.split(',').indexOf("1") !== -1;
         let res = await HttpApi.getJTApplyRecords({ major_id: userinfo.major_id_all, user_id: userinfo.id, is_all: run_permission });
@@ -111,11 +113,17 @@ export default function JobTicketOfAll() {
                     expandedRowRender={(record) => {
                         if (record.is_sub !== 1 && record.sub_tickets.length > 0) {
                             return record.sub_tickets.map((item, index) => {
+                                let actionBtnAbleFlag = false
+                                if (item.status === 1 && hasRunP) {
+                                    actionBtnAbleFlag = true
+                                } else if (item.status > 1) {
+                                    actionBtnAbleFlag = item.current_step_user_id_list.indexOf(`,${currentUser.id},`) !== -1
+                                }
                                 return <div key={index}>
                                     {item.is_read ? null : <Badge status="processing" />}
                                     <span>{item.no + "  " + item.ticket_name}</span>
                                     <Tag color='blue' style={{ marginLeft: 10 }}>{changeJobTicketStatusToText(item.status, 1)}</Tag>
-                                    <Button icon='edit' size='small' type='link' onClick={() => {
+                                    <Button disabled={!actionBtnAbleFlag} icon='edit' size='small' type='link' onClick={() => {
                                         // console.log('选择的副票数据:', item);
                                         setCurrentSelectRecord(item)
                                         setDrawerVisible(true);

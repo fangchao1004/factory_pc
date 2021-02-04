@@ -1171,19 +1171,16 @@ export function changeShowLabByStauts(status, is_sub) {
     if (is_sub === 1) {
         switch (status) {
             case 1:
-                res = '给审核人一'
+                res = '安措'
                 break;
             case 2:
-                res = '给审核人二'
+                res = '初审'
                 break;
             case 3:
-                res = '给批准人'
+                res = '复审'
                 break;
             case 4:
                 res = '批准'
-                break;
-            case 5:
-                res = '完结'
                 break;
             default:
                 break;

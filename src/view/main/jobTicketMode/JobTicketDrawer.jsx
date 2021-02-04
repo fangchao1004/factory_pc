@@ -11,13 +11,16 @@ const storage = window.localStorage;
 var step_des = '';
 var ticketNextUserNameList = [];
 export default function JobTicketDrawer({ visible, onClose, record, resetData }) {
+    // console.log('record:', record);
     const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})///填写改动后的数值- 提交时使用
     const [currentUser] = useState(JSON.parse(storage.getItem('userinfo')))
     const [userList, setUserList] = useState([])
     const [selectValue, setSelectValue] = useState(null)
-    const [selectDisable, setSelectDisable] = useState(true)///默认不可操作
+    const [selectDisable, setSelectDisable] = useState(true)///操作项默认不可操作
+    const [userSelectDisable, setUserSelectDisable] = useState(true)///人员项默认不可操作
     const [showDeleteBtn, setShowDeleteBtn] = useState(false)///是否显示删除按钮
     const [showStopBtn, setShowStopBtn] = useState(false)///是否显示终止作废按钮
+    const [showBackOption, setShowBackOption] = useState(false)///是否显示打回按钮
     const [takeTicketAndPrint, setTakeTicketAndPrint] = useState(false)///是否接票并且打印
     const [canPrint, setCanPrint] = useState(false)///是否可以打印
     const [runnerList, setRunnerList] = useState([])
@@ -26,8 +29,8 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
     const [remark, setRemark] = useState('')
 
 
-    const runUserlist = useCallback(async (user_list) => {
-        let res = await HttpApi.getRunnerIdList()
+    const runUserlist = useCallback(async (user_list, role_id) => {
+        let res = await HttpApi.getRunnerIdList({ role_id })
         if (res.data.code === 0) {
             let runner_list1 = res.data.data;
             // console.log('res:', res.data.data);
@@ -70,50 +73,68 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                 var user_list = res_user.data.data.map((item) => { return { id: item.id, name: item.name } })
                 setUserList(user_list)
             }
-            if (record.status === 1 && currentUser.id === record.user_id) {
-                ///1待签发  状态时，申请人可以操作
-                setSelectDisable(false)
-                if (record.status === 1) {
-                    setShowDeleteBtn(true)
-                    if (currentUser.permission.split(',').indexOf("0") === -1) {
-                        setSelectDisable(true)
-                        setShowStopBtn(false)
-                    }
-                } else {
-                    setShowDeleteBtn(false)
-                    setShowStopBtn(true)
-                }
-            }
-            // console.log('currentUser:', currentUser);
-            // console.log('专工权限:', currentUser.permission.split(',').indexOf("0") !== -1);
-            // console.log('运行权限:', currentUser.permission.split(',').indexOf("1") !== -1);
-            if (record.status === 1 && currentUser.major_id_all && currentUser.major_id_all.split(',').indexOf(String(record.major_id)) !== -1 && currentUser.permission && currentUser.permission.split(',').indexOf("0") !== -1) {
-                ///1待审核 状态时，对应专业的专工可以操作
-                setSelectDisable(false)
-                setShowStopBtn(true)
-                ///1待审核 状态时 专工要有运行人员名单
-                // console.log('1待审核 状态时 专工要有运行人员名单');
-                // runUserlist(user_list)
-            }
-            if ((record.status === 2 || record.status === 3) && currentUser.major_id_all && currentUser.permission && currentUser.permission.split(',').indexOf("1") !== -1) {
-                ///2待接票 3待完结 状态时，运行可以操作
-                setSelectDisable(false)
-                setShowDeleteBtn(false)
-                setShowStopBtn(true)
-                ///2待接票 状态时 运行要有运行人员名单
-                // if (record.status === 2) {
-                //     // console.log('2待接票 状态时 运行要有运行人员名单');
-                //     runUserlist(user_list)
-                // }
-            }
-            if (record.status === 4) {
-                setSelectDisable(true)
+            if (record.is_sub === 1) {
+                console.log('副票');
+                // console.log('record:', record);
                 setShowDeleteBtn(false)
                 setShowStopBtn(false)
-            } else if (record.status === 1 || record.status === 2) {
-                runUserlist(user_list)
+                setSelectDisable(false)
+                if (record.status === 1 && currentUser.permission && currentUser.permission.split(',').indexOf("1") !== -1) {
+                    ///副票 状态1 待安措时 运行可以操作
+                    runUserlist(user_list, 8)///初审人名单
+                } else if (record.status === 2 && currentUser.permission && currentUser.permission.split(',').indexOf("7") !== -1) {
+                    runUserlist(user_list, 9)///复审人名单
+                } else if (record.status === 3 && currentUser.permission && currentUser.permission.split(',').indexOf("8") !== -1) {
+                    runUserlist(user_list, 10)///批准人名单
+                } else if (record.status === 5) {
+                    setSelectDisable(true)
+                }
+            } else {
+                console.log('主票');
+                if (record.status === 1 && currentUser.id === record.user_id) {
+                    ///1待签发  状态时，申请人可以操作
+                    setSelectDisable(false)
+                    if (record.status === 1) {
+                        setShowDeleteBtn(true)
+                        if (currentUser.permission.split(',').indexOf("0") === -1) {
+                            setSelectDisable(true)
+                            setShowStopBtn(false)
+                        }
+                    } else {
+                        setShowDeleteBtn(false)
+                        setShowStopBtn(true)
+                    }
+                }
+                // console.log('currentUser:', currentUser);
+                // console.log('专工权限:', currentUser.permission.split(',').indexOf("0") !== -1);
+                // console.log('运行权限:', currentUser.permission.split(',').indexOf("1") !== -1);
+                if (record.status === 1 && currentUser.major_id_all && currentUser.major_id_all.split(',').indexOf(String(record.major_id)) !== -1 && currentUser.permission && currentUser.permission.split(',').indexOf("0") !== -1) {
+                    ///1待审核 状态时，对应专业的专工可以操作
+                    setSelectDisable(false)
+                    setShowStopBtn(true)
+                    ///1待审核 状态时 专工要有运行人员名单
+                    // console.log('1待审核 状态时 专工要有运行人员名单');
+                    // runUserlist(user_list)
+                }
+                if ((record.status === 2 || record.status === 3) && currentUser.major_id_all && currentUser.permission && currentUser.permission.split(',').indexOf("1") !== -1) {
+                    ///2待接票 3待完结 状态时，运行可以操作
+                    setSelectDisable(false)
+                    setShowDeleteBtn(false)
+                    setShowStopBtn(true)
+                    ///2待接票 状态时 运行要有运行人员名单
+                    // if (record.status === 2) {
+                    //     // console.log('2待接票 状态时 运行要有运行人员名单');
+                    //     runUserlist(user_list)
+                    // }
+                }
+                if (record.status === 4) {
+                    setSelectDisable(true)
+                    setShowDeleteBtn(false)
+                    setShowStopBtn(false)
+                } else if (record.status === 1 || record.status === 2) {
+                    runUserlist(user_list, 2)
+                }
             }
-
         }
     }, [record, currentUser, runUserlist])
 
@@ -128,13 +149,34 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
     }, [onClose, resetData])
     const init2 = useCallback(() => {
         // console.log('init2--判断是否为运行的接票并且打印操作');
-        if (record && record.status === 2 && selectValue === '1') {
-            setTakeTicketAndPrint(true)
-        } else if (record && record.status === 3) {
-            setCanPrint(true)
-        } else {
+        if (record && record.is_sub === 1) {
             setTakeTicketAndPrint(false)
-            setCanPrint(false)
+            setCanPrint(true)
+            if (record.status === 4) {
+                setUserSelectDisable(true)
+            } else if (record.status < 4) {
+                setUserSelectDisable(false)
+            }
+            if (record.status < 5 && record.status > 1) {
+                setShowBackOption(true)
+            } else { setShowBackOption(false) }
+        } else {
+            if (record && record.status === 2 && selectValue === '1') {
+                setTakeTicketAndPrint(true)
+            } else if (record && record.status === 3) {
+                setCanPrint(true)
+            } else {
+                setTakeTicketAndPrint(false)
+                setCanPrint(false)
+            }
+            if (record && record.status === 3) {
+                setUserSelectDisable(true)
+            } else if (record && record.status < 3) {
+                setUserSelectDisable(false)
+            }
+            if (record && record.status !== 3 && record.status !== 1) {
+                setShowBackOption(true)
+            } else { setShowBackOption(false) }
         }
     }, [record, selectValue])
     const renderAllPage = useCallback(() => {
@@ -163,7 +205,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
     }, [record, currentJobTicketValue, currentUser, userList])
     const getUserGroupList = useCallback(() => {
         if (otherList.length > 0) {
-            return [<OptGroup key='1' label={<div style={{ width: '100%', justifyContent: 'space-between', display: 'flex', justifyItems: 'center' }}><span>运行人员</span><Button type='link' size='small' onClick={() => {
+            return [<OptGroup key='1' label={<div style={{ width: '100%', justifyContent: 'space-between', display: 'flex', justifyItems: 'center' }}><span>对应权限人员</span><Button type='link' size='small' onClick={() => {
                 setTicketNextUserList(runnerList.map((item) => item.id))
                 ticketNextUserNameList = runnerList.map((item) => item.name)
             }}>全选</Button></div>}>
@@ -183,7 +225,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
     return (
         <Drawer
             destroyOnClose={true}
-            width={1120}
+            width={1200}
             title="工作票处理"
             placement='left'
             onClose={resetHandler}
@@ -239,12 +281,12 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                 }}
                             >
                                 <Option value='1'>{record && record.status >= 1 ? changeShowLabByStauts(record.status, record.is_sub) : '通过'}</Option>
-                                {record && record.status !== 3 && record.status !== 1 ? <Option value='-1'>打回</Option> : null}
+                                {showBackOption ? <Option value='-1'>打回</Option> : null}
                             </Select>
                         </div>
                         <div style={{ marginTop: 10, ...styles.bar }}>
                             <span><Tag size='small' color='blue'>人员</Tag></span>
-                            <Select showSearch mode='multiple' optionFilterProp='children' maxTagCount={5} value={ticketNextUserList} placeholder='请选择处理人员' allowClear size='small' style={{ width: '100%' }} disabled={selectDisable || selectValue === '-1' || (record && record.status === 3)}
+                            <Select showSearch mode='multiple' optionFilterProp='children' maxTagCount={5} value={ticketNextUserList} placeholder='下一步处理人员' allowClear size='small' style={{ width: '100%' }} disabled={selectValue === '-1' || userSelectDisable}
                                 onChange={(v, option) => {
                                     setTicketNextUserList(v)
                                     ticketNextUserNameList = option.map((item) => { return item.props.children })
@@ -255,7 +297,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                         </div>
                         <div style={{ marginTop: 10, ...styles.bar }}>
                             <span><Tag size='small' color='blue'>备注</Tag></span>
-                            <TextArea disabled={record && record.status === 4} rows={4} value={remark} onChange={(e) => { setRemark(e.target.value) }} />
+                            <TextArea disabled={selectDisable} rows={4} value={remark} onChange={(e) => { setRemark(e.target.value) }} />
                         </div>
                         <Button disabled={selectDisable} type='primary' size='small' icon={takeTicketAndPrint ? '' : 'upload'} style={{ marginTop: 10, marginRight: 10 }} onClick={async () => {
                             // console.log('step_des:', step_des);
@@ -299,13 +341,32 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                             new_status = record.status - 1
                                         }
                                         let { job_content, time_list } = getJTRecordContentAndPlanTime({ pages: JSON.stringify(currentJobTicketValue.pages) })
+                                        let current_step_user_id_list_temp = ''
+                                        if (selectValue === '1') {
+                                            if (record.is_sub === 1) {///副票情况
+                                                if (record.status === 4) {
+                                                    current_step_user_id_list_temp = ''
+                                                } else {
+                                                    current_step_user_id_list_temp = ',' + ticketNextUserList.join(',') + ','
+                                                }
+                                            } else {///主票情况
+                                                if (record.status === 3) {
+                                                    current_step_user_id_list_temp = ''
+                                                } else {
+                                                    current_step_user_id_list_temp = ',' + ticketNextUserList.join(',') + ','
+                                                }
+                                            }
+                                        } else {
+                                            current_step_user_id_list_temp = ',' + record.per_step_user_id + ','
+                                        }
                                         ///每次处理 未读重置
                                         let newJTAR_data = {
                                             is_read: record.status === 3 ? 1 : 0,
                                             id: record.id,
                                             status: new_status,
                                             job_content, time_begin: time_list[0], time_end: time_list[1],
-                                            per_step_user_id: currentUser.id, per_step_user_name: currentUser.name, current_step_user_id_list: selectValue === '1' ? (record.status === 3 ? '' : ',' + ticketNextUserList.join(',') + ',') : ',' + record.per_step_user_id + ','
+                                            per_step_user_id: currentUser.id, per_step_user_name: currentUser.name,
+                                            current_step_user_id_list: current_step_user_id_list_temp
                                         }
                                         let res2 = await HttpApi.updateJTApplyRecord(newJTAR_data)
                                         if (res2.data.code === 0) {
@@ -315,9 +376,29 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                             obj['user_id'] = currentUser.id
                                             obj['user_name'] = currentUser.name
                                             obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
-                                            obj['step_des'] = record.status === 3 ? step_des : (step_des + '至 ' + (selectValue === '1' ? ticketNextUserNameList.join(',') : record.per_step_user_name
-                                            ))
+                                            if (record.is_sub === 1) {///副票
+                                                if (selectValue === '1') {///下一步
+                                                    if (record.status === 4) {///当前是4 下一步就是5
+                                                        obj['step_des'] = step_des
+                                                    } else {
+                                                        obj['step_des'] = step_des + '至 ' + ticketNextUserNameList.join(',')
+                                                    }
+                                                } else {///打回
+                                                    obj['step_des'] = step_des + '至 ' + record.per_step_user_name
+                                                }
+                                            } else {///主票
+                                                if (selectValue === '1') {///下一步
+                                                    if (record.status === 3) {///当前是3 下一步就是4
+                                                        obj['step_des'] = step_des
+                                                    } else {
+                                                        obj['step_des'] = step_des + '至 ' + ticketNextUserNameList.join(',')
+                                                    }
+                                                } else {///打回
+                                                    obj['step_des'] = step_des + '至 ' + record.per_step_user_name
+                                                }
+                                            }
                                             obj['remark'] = remark
+                                            console.log('log obj:', obj);
                                             HttpApi.addJbTStepLog(obj)///添加log
                                             resetHandler()
                                             if (takeTicketAndPrint) {
@@ -342,7 +423,7 @@ const styles = {
     panel: {
         backgroundColor: '#FFFFFF',
         padding: 10,
-        width: 190,
+        width: 260,
     },
     bar: {
         display: 'flex',
