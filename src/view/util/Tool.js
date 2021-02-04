@@ -1182,6 +1182,9 @@ export function changeShowLabByStauts(status, is_sub) {
             case 4:
                 res = '批准'
                 break;
+            case 5:
+                res = '完结'
+                break;
             default:
                 break;
         }

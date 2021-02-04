@@ -20,7 +20,7 @@ export const tableCellOptionsData = [
     { "value": "6", "text": "图片选择器" }, { "value": "2", "text": "数字输入框" },
     { "value": "13", "text": "副标题" }];
 export const JOB_TICKETS_STATUS = [{ value: 1, text: "待签发" }, { value: 2, text: "待接票" }, { value: 3, text: "待完结" }, { value: 4, text: "完结" }]
-export const SUB_JOB_TICKETS_STATUS = [{ value: 1, text: "待安措" }, { value: 2, text: "待初审" }, { value: 3, text: "待复审" }, { value: 4, text: "待批准" }, { value: 5, text: "完结" }]
+export const SUB_JOB_TICKETS_STATUS = [{ value: 1, text: "待安措" }, { value: 2, text: "待初审" }, { value: 3, text: "待复审" }, { value: 4, text: "待批准" }, { value: 5, text: "待完结" }, { value: 6, text: "完结" }]
 export const NOTIFY_MP3 = 'http://60.174.196.158:12345/assets/notice.mp3'
 export const WARN_MP3 = 'http://60.174.196.158:12345/assets/warn.mp3'
 export const BUGLOOPTIME = 1000;///毫秒，缺陷模块每隔1秒去刷新时间 不请求数据

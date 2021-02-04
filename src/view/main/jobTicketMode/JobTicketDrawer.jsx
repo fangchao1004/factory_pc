@@ -86,7 +86,10 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                     runUserlist(user_list, 9)///复审人名单
                 } else if (record.status === 3 && currentUser.permission && currentUser.permission.split(',').indexOf("8") !== -1) {
                     runUserlist(user_list, 10)///批准人名单
-                } else if (record.status === 5) {
+                } else if (record.status === 4 && currentUser.permission && currentUser.permission.split(',').indexOf("9") !== -1) {
+                    runUserlist(user_list, 2)///运行人名单
+                }
+                else if (record.status === 6) {
                     setSelectDisable(true)
                 }
             } else {
@@ -152,9 +155,9 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
         if (record && record.is_sub === 1) {
             setTakeTicketAndPrint(false)
             setCanPrint(true)
-            if (record.status === 4) {
+            if (record.status === 5) {
                 setUserSelectDisable(true)
-            } else if (record.status < 4) {
+            } else if (record.status < 5) {
                 setUserSelectDisable(false)
             }
             if (record.status < 5 && record.status > 1) {
@@ -309,7 +312,11 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                             if (!selectValue) { message.error('请先选择处理项'); return }
                             let afterCheckObj;
                             if (selectValue === "1") {///前往下一步时，数据不全
-                                if (record.status < 3 && ticketNextUserNameList.length === 0) { message.error('请选择下一步的处理人员'); return }
+                                if (record.is_sub === 1) {
+                                    if (record.status < 5 && ticketNextUserNameList.length === 0) { message.error('请选择下一步的处理人员'); return }
+                                } else {
+                                    if (record.status < 3 && ticketNextUserNameList.length === 0) { message.error('请选择下一步的处理人员'); return }
+                                }
                                 afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, record.status)
                                 // console.log('afterCheckObj:', afterCheckObj);
                                 setCurrentJobTicketValue(afterCheckObj)
@@ -341,10 +348,10 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                             new_status = record.status - 1
                                         }
                                         let { job_content, time_list } = getJTRecordContentAndPlanTime({ pages: JSON.stringify(currentJobTicketValue.pages) })
-                                        let current_step_user_id_list_temp = ''
+                                        let current_step_user_id_list_temp = ''///下一步要给哪些人
                                         if (selectValue === '1') {
                                             if (record.is_sub === 1) {///副票情况
-                                                if (record.status === 4) {
+                                                if (record.status === 5) {
                                                     current_step_user_id_list_temp = ''
                                                 } else {
                                                     current_step_user_id_list_temp = ',' + ticketNextUserList.join(',') + ','
@@ -378,7 +385,7 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                             obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
                                             if (record.is_sub === 1) {///副票
                                                 if (selectValue === '1') {///下一步
-                                                    if (record.status === 4) {///当前是4 下一步就是5
+                                                    if (record.status === 5) {///当前是5 下一步就是6
                                                         obj['step_des'] = step_des
                                                     } else {
                                                         obj['step_des'] = step_des + '至 ' + ticketNextUserNameList.join(',')
