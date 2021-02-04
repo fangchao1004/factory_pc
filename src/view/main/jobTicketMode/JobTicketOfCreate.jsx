@@ -282,6 +282,15 @@ export default function JobTicketOfCreate() {
                                                     message.error('请填写好工作票后，再进行提交')
                                                     return
                                                 }
+                                                for (let index = 0; index < allSubTicketList.length; index++) {
+                                                    let element = allSubTicketList[index];///每个副票
+                                                    let afterCheckObj_sub = checkCellWhichIsEmpty(element, 0)
+                                                    let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj_sub)
+                                                    if (needValueButIsEmpty) {
+                                                        message.error('请填写好工作副票后，再进行提交')
+                                                        return
+                                                    }
+                                                }
                                                 // return;
                                                 confirm({
                                                     title: '确认提交当前的工作票吗?',
