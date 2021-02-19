@@ -961,11 +961,15 @@ class HttpApi {
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getJobTicketsOptionList = () => {
-        let sql = `select id,ticket_name from job_tickets where is_delete = 0 and is_sub = 0`
+        let sql = `select id,ticket_name from job_tickets where is_delete = 0 and is_sub = 0 and is_extra = 0`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getJobTicketsList = ({ id }) => {
         let sql = `select * from job_tickets where is_delete = 0 and id = ${id}`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    static getExtraJobTicketsList = ({ p_id }) => {
+        let sql = `select * from job_tickets where is_delete = 0 and p_id = ${p_id}`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getSubJobTicketsList = ({ type_name }) => {

@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 // import { testData } from '../../../assets/testJson'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty } from '../../util/Tool'
+import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty, copyArrayItem } from '../../util/Tool'
 import moment from 'moment'
 import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer'
 const { OptGroup, Option } = Select
@@ -11,6 +11,8 @@ const { confirm } = Modal
 const storage = window.localStorage
 var ticketNextUserNameList = [];
 let per_list = []///上次副票的选择项
+var currentJTExtraPageSample = []
+var per_page_value = 0///上次附页的数量
 export default function JobTicketOfCreate() {
     const [jobTicketsOption, setJobTicketsOption] = useState([])
     const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})
@@ -30,8 +32,17 @@ export default function JobTicketOfCreate() {
                 tempObj.pages = JSON.parse(tempObj.pages)
                 // tempObj.pages = testData
                 setCurrentJobTicketValue(tempObj)
+                let currentJBT_id = tempObj.id;
+                let res_extra = await HttpApi.getExtraJobTicketsList({ p_id: currentJBT_id })
+                if (res_extra.data.code === 0) {
+                    let pages_extra = JSON.parse(res_extra.data.data[0].pages)
+                    // console.log(pages_extra);///额外的附页
+                    pages_extra.forEach((page_extra) => { page_extra.is_extra = true })
+                    currentJTExtraPageSample = pages_extra
+                }
                 const major_id = tempObj.major_id
                 // console.log('major_id', major_id);
+                if (!major_id) { message.error('请为当前工作票配置对应专业'); return }
                 let managerList_res = await HttpApi.getManagerIdListByMajorId({ major_id })
                 if (managerList_res.data.code === 0) {
                     const managerlist = managerList_res.data.data;
@@ -53,6 +64,7 @@ export default function JobTicketOfCreate() {
         }
         setTicketSampleId(id)
         per_list = []
+        per_page_value = 0
     }, [userList])
     const init = useCallback(async () => {
         let res = await HttpApi.getJobTicketsOptionList()
@@ -86,6 +98,9 @@ export default function JobTicketOfCreate() {
             {other_list.map((item, index) => { return <Option key={'b' + index} value={item.id}>{item.name}</Option> })}
         </OptGroup>]
     }, [userList])
+    /**
+     * 提取出措施票的选项
+     */
     const pickupcheckgroupvalue = useCallback(async (ticketvalue) => {
         let checkgroup_list = []
         ticketvalue.pages.forEach((page) => {
@@ -142,6 +157,38 @@ export default function JobTicketOfCreate() {
         }
         per_list = JSON.parse(JSON.stringify(checkgroup_list))
     }, [allSubTicketList])
+    /**
+     * 提取出附页的数值
+     */
+    const pickupextrapagevalue = useCallback((ticketvalue) => {
+        ticketvalue.pages.forEach((page) => {
+            const cpts = page.components
+            cpts.forEach((cpt) => {
+                if (cpt.is_extra === true) {///找出代表附页的数字输入组件【只能有一个】
+                    let diff_page_value = (parseInt(cpt.attribute.value) || 0) - per_page_value
+                    // console.log('diff_page_value:', diff_page_value);///差值 +x 还是 -x
+                    if (diff_page_value > 0) {///增
+                        let after_copy = copyArrayItem(currentJTExtraPageSample, diff_page_value)
+                        let after_combine = [...ticketvalue.pages, ...after_copy]
+                        after_combine.forEach((page, index) => {
+                            page.index = index
+                        })
+                        // console.log('after_combine:', after_combine);
+                        ticketvalue.pages = after_combine
+                        setCurrentJobTicketValue(ticketvalue)
+                        // ticketvalue.pages.push()
+                    } else if (diff_page_value < 0) {///减
+                        // console.log('ticketvalue.pages:', ticketvalue.pages);
+                        let after_cut = ticketvalue.pages.slice(0, ticketvalue.pages.length + diff_page_value)
+                        // console.log('after_cut:', after_cut);
+                        ticketvalue.pages = after_cut
+                        setCurrentJobTicketValue(ticketvalue)
+                    }
+                    per_page_value = (parseInt(cpt.attribute.value) || 0)
+                }
+            })
+        })
+    }, [])
     const renderAllPage = useCallback(() => {
         if (currentJobTicketValue && currentJobTicketValue.pages) {
             return currentJobTicketValue.pages.map((_, index) => {
@@ -155,13 +202,14 @@ export default function JobTicketOfCreate() {
                     currentPageIndex={index}
                     scaleNum={scaleNum}
                     callbackValue={v => {
+                        pickupextrapagevalue(v)
                         pickupcheckgroupvalue(v)
                         setCurrentJobTicketValue(v)
                     }}
                 />
             })
         }
-    }, [currentJobTicketValue, currentUser, scaleNum, userList, pickupcheckgroupvalue])
+    }, [currentJobTicketValue, currentUser, scaleNum, userList, pickupcheckgroupvalue, pickupextrapagevalue])
     useEffect(() => {
         init()
     }, [init])
