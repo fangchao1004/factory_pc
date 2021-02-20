@@ -1059,7 +1059,7 @@ class HttpApi {
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**
-     * 获取运行人员
+     * 获取某个角色的人员id
      */
     static getRunnerIdList = ({ role_id }) => {
         let sql = `select user_id from role_map_user
@@ -1074,7 +1074,7 @@ class HttpApi {
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**
-     * 获取运行人员
+     * 获取工作票处理日志
      */
     static getJTStepLogs = ({ jbtar_id }) => {
         let sql = `select * from job_tickets_step_log

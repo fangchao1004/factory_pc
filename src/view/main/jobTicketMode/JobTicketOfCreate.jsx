@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 // import { testData } from '../../../assets/testJson'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty, copyArrayItem } from '../../util/Tool'
+import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty, copyArrayItem, checkDataIsLostUserlist } from '../../util/Tool'
 import moment from 'moment'
 import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer'
 const { OptGroup, Option } = Select
@@ -43,11 +43,13 @@ export default function JobTicketOfCreate() {
                 const major_id = tempObj.major_id
                 // console.log('major_id', major_id);
                 if (!major_id) { message.error('请为当前工作票配置对应专业'); return }
+                ///首先判断出哪些人员是当前专业的专工 和 运行
                 let managerList_res = await HttpApi.getManagerIdListByMajorId({ major_id })
+                let runnerList_res = await HttpApi.getRunnerIdList({ role_id: 2 })
                 if (managerList_res.data.code === 0) {
+                    let copy_userList = JSON.parse(JSON.stringify(userList))
                     const managerlist = managerList_res.data.data;
-                    // console.log('managerlist:', managerlist);
-                    userList.forEach((item) => {
+                    copy_userList.forEach((item) => {
                         item.is_current_major_manager = false
                         managerlist.forEach((manager) => {
                             if (item.id === manager.user_id) {
@@ -55,7 +57,18 @@ export default function JobTicketOfCreate() {
                             }
                         })
                     })
-                    setUserList(userList)
+                    if (runnerList_res.data.code === 0) {
+                        const runnerList = runnerList_res.data.data;
+                        copy_userList.forEach((item) => {
+                            item.is_runner = false
+                            runnerList.forEach((manager) => {
+                                if (item.id === manager.user_id) {
+                                    item.is_runner = true
+                                }
+                            })
+                        })
+                        setUserList(copy_userList)
+                    }
                 }
             }
         } else {
@@ -314,28 +327,36 @@ export default function JobTicketOfCreate() {
                                             size='small'
                                             disabled={!currentJobTicketValue.pages}
                                             onClick={() => {
-                                                console.log('allsbj:', allSubTicketList);
+                                                // console.log('allsbj:', allSubTicketList);
                                                 // return;
-                                                if (ticketNextUserList.toString().length === 0) { message.error('请选择好处理人员，再进行提交'); return }
+                                                if (ticketNextUserList.toString().length === 0) { message.error('请选择好主工作票处理人员，再进行提交'); return }
                                                 let user_str = ',' + ticketNextUserList.toString() + ','
                                                 // console.log('user_str:', user_str);
                                                 // console.log('ticketNextUserNameList:', ticketNextUserNameList);
                                                 // return;
                                                 let afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, 0)
-                                                console.log('afterCheckObj:', afterCheckObj);
+                                                // console.log('afterCheckObj:', afterCheckObj);
                                                 // return;
                                                 setCurrentJobTicketValue(JSON.parse(JSON.stringify(afterCheckObj)))
                                                 let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
                                                 if (needValueButIsEmpty) {
-                                                    message.error('请填写好工作票后，再进行提交')
+                                                    message.error('请填写好主工作票后，再进行提交')
                                                     return
                                                 }
                                                 for (let index = 0; index < allSubTicketList.length; index++) {
                                                     let element = allSubTicketList[index];///每个副票
                                                     let afterCheckObj_sub = checkCellWhichIsEmpty(element, 0)
                                                     let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj_sub)
+                                                    let copyAllSubTicketList = JSON.parse(JSON.stringify(allSubTicketList))
+                                                    copyAllSubTicketList[index] = afterCheckObj_sub
+                                                    setAllSubTicketList(copyAllSubTicketList)
                                                     if (needValueButIsEmpty) {
-                                                        message.error('请填写好工作副票后，再进行提交')
+                                                        message.error('请填写好措施票后，再进行提交')
+                                                        return
+                                                    }
+                                                    let user_id_is_lost = checkDataIsLostUserlist(element)
+                                                    if (user_id_is_lost) {
+                                                        message.error('请选择好措施票处理人后，再进行提交')
                                                         return
                                                     }
                                                 }
@@ -347,6 +368,7 @@ export default function JobTicketOfCreate() {
                                                     okType: 'danger',
                                                     cancelText: '取消',
                                                     onOk: async function () {
+                                                        ///添加主票
                                                         let res = await createNewJobTicketApply(afterCheckObj, user_str)
                                                         if (res) {
                                                             message.success('提交成功')
@@ -365,13 +387,25 @@ export default function JobTicketOfCreate() {
                                                                 HttpApi.addJbTStepLog(obj)///添加log
                                                                 setTicketNextUserList([])
                                                                 ticketNextUserNameList = []
-
-                                                                ///添加副票记录
+                                                                ///循环添加多个措施票记录
                                                                 for (let index = 0; index < allSubTicketList.length; index++) {
                                                                     let element = allSubTicketList[index];///每个副票
                                                                     element.p_id = jbtar_id;
-                                                                    let res = await createNewJobTicketApply(element, user_str)
-                                                                    console.log('添加副票记录:', res);
+                                                                    let user_str = ',' + element.userInfo.user_id_list.toString() + ','
+                                                                    await createNewJobTicketApply(element, user_str)
+                                                                    // console.log('添加副票记录:', res);
+                                                                    let res1 = await HttpApi.getLastJTApplyRecordId()
+                                                                    if (res1.data.code === 0) {
+                                                                        let jbtar_id_sub = res1.data.data[0]['max_id']
+                                                                        let obj = {};
+                                                                        obj['jbtar_id'] = jbtar_id_sub /// 添加副票记录 的id
+                                                                        obj['user_id'] = currentUser.id
+                                                                        obj['user_name'] = currentUser.name
+                                                                        obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
+                                                                        obj['step_des'] = '创建措施票 提交至 ' + element.userInfo.user_name_list.join(',')
+                                                                        obj['remark'] = ''
+                                                                        await HttpApi.addJbTStepLog(obj)///添加log
+                                                                    }
                                                                 }
                                                                 setAllSubTicketList([])
                                                                 setCurrentSubJBT({})

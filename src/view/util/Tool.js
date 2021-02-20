@@ -1047,13 +1047,13 @@ export function addCharToHead({ originString = '', targetString = '', Targetleng
  * @param {*} param0 
  */
 export async function getAutoJTARecordNo({ id, title }) {
-    let timeRange = [moment().startOf('year').format(FORMAT), moment().endOf('year').format(FORMAT)]///今年区间
+    let timeRange = [moment().startOf('day').format(FORMAT), moment().endOf('day').format(FORMAT)]///今天区间
     let res = await HttpApi.getJobTicketsCount({ type_id: id, timeRange })
     if (res.data.code === 0) {
         let new_count = res.data.data[0].count + 1 || 1
         let no_str = addCharToHead({ originString: String(new_count), targetString: '0', Targetlength: 5 })
-        let year_str = moment().format('YYYY')
-        let temp_str = title + year_str + no_str
+        let date_str = moment().format('YYYYMMDD')
+        let temp_str = title + '-' + date_str + '-' + no_str
         return temp_str;
     }
     return ''
@@ -1107,11 +1107,9 @@ export function getJTRecordContentAndPlanTime({ pages }) {
  */
 export async function createNewJobTicketApply(jobTicketValue, user_list_str) {
     let auto_no = await getAutoJTARecordNo(jobTicketValue)
-    // console.log('auto_no:::', auto_no)
     jobTicketValue.pages = changeNoInputValue({ auto_no, pages: jobTicketValue.pages })
     jobTicketValue.pages = JSON.stringify(jobTicketValue.pages)
     let { job_content, time_list } = getJTRecordContentAndPlanTime({ pages: jobTicketValue.pages })
-    console.log('提交：', jobTicketValue)
     let res = await HttpApi.createJTRecord({ ...jobTicketValue, time: moment().format(FORMAT) })
     if (res.data.code === 0) {
         let res_max_id = await HttpApi.getLastJTRecordId()
@@ -1251,4 +1249,12 @@ export function copyArrayItem(array, times = 1) {
         temp = [...temp, ...JSON.parse(JSON.stringify(array))]
     }
     return temp
+}
+
+export function checkDataIsLostUserlist(currentJobTicketValue) {
+    let user_id_is_lost = true;
+    if (currentJobTicketValue.userInfo && currentJobTicketValue.userInfo.user_id_list) {
+        user_id_is_lost = false
+    }
+    return user_id_is_lost
 }
