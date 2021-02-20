@@ -26,7 +26,6 @@ export default function SubJobTicketOfCreateDrawer({ visible, onClose, currentSu
                     scaleNum={scalObj.scaleNum || 1}
                     bgscaleNum={scalObj.bgscalNum || 1}
                     callbackValue={v => {
-                        console.log('callbackValue v:', v);
                         sbjtvalueChangeCallback(v)
                     }}
                 />

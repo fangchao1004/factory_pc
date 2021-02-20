@@ -1051,7 +1051,7 @@ export async function getAutoJTARecordNo({ id, title }) {
     let res = await HttpApi.getJobTicketsCount({ type_id: id, timeRange })
     if (res.data.code === 0) {
         let new_count = res.data.data[0].count + 1 || 1
-        let no_str = addCharToHead({ originString: String(new_count), targetString: '0', Targetlength: 5 })
+        let no_str = addCharToHead({ originString: String(new_count), targetString: '0', Targetlength: 3 })
         let date_str = moment().format('YYYYMMDD')
         let temp_str = title + '-' + date_str + '-' + no_str
         return temp_str;
