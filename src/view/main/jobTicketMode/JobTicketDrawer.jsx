@@ -2,7 +2,7 @@ import { Button, Drawer, Select, message, Modal, Affix, Tag, Input } from 'antd'
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { changeShowLabByStauts, checkCellWhichIsEmpty, checkDataIsLostValue, getJTRecordContentAndPlanTime, getPingYin } from '../../util/Tool';
+import { changeShowLabByStauts, checkCellWhichIsEmpty, checkDataIsLostValue, getJTRecordContentAndPlanTime, getPinYin } from '../../util/Tool';
 import moment from 'moment'
 const { confirm } = Modal;
 const { TextArea } = Input;
@@ -212,10 +212,10 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                 setTicketNextUserList(runnerList.map((item) => item.id))
                 ticketNextUserNameList = runnerList.map((item) => item.name)
             }}>全选</Button></div>}>
-                {runnerList.map((item, index) => { return <Option key={'1' + index} value={item.id} short_lab={getPingYin(item.name)[0] || ''}>{item.name}</Option> })}
+                {runnerList.map((item, index) => { return <Option key={'1' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
             </OptGroup>,
             <OptGroup key='2' label="其他">
-                {otherList.map((item, index) => { return <Option key={'2' + index} value={item.id} short_lab={getPingYin(item.name)[0] || ''}>{item.name}</Option> })}
+                {otherList.map((item, index) => { return <Option key={'2' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
             </OptGroup>]
         }
     }, [runnerList, otherList])
