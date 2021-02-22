@@ -446,6 +446,24 @@ export default function JobTicketOfCreate() {
                     userList={userList}
                     currentUser={currentUser}
                     sbjtvalueChangeCallback={(v) => {
+                        v.pages.forEach((page) => {
+                            const cpts = page.components
+                            cpts.forEach((cpt) => {
+                                if (cpt.is_active) {
+                                    const active_value = cpt.attribute.value;
+                                    const twins_id = cpt.twins_id
+                                    cpts.forEach((cpt2) => {
+                                        if (cpt2.is_response && cpt2.twins_id === twins_id) {
+                                            if (active_value) {
+                                                cpt2.attribute.value = cpt2.default_value
+                                            } else {
+                                                cpt2.attribute.value = ''
+                                            }
+                                        }
+                                    })
+                                }
+                            })
+                        })
                         allSubTicketList.forEach((oneSubTicket) => {
                             if (oneSubTicket.id === currentSubJBT.id) {
                                 oneSubTicket.pages = v.pages
