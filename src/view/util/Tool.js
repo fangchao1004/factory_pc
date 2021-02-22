@@ -1258,3 +1258,30 @@ export function checkDataIsLostUserlist(currentJobTicketValue) {
     }
     return user_id_is_lost
 }
+
+export function autoCalculateFootPageValue(pagelist) {
+    let allpagelist = JSON.parse(JSON.stringify(pagelist))
+    let all_extra_page_count = 0;
+    let main_page_count = 0;
+    allpagelist.forEach((page) => {
+        if (page.is_extra) {
+            all_extra_page_count++;
+        } else {
+            main_page_count++;
+        }
+    })
+    allpagelist.forEach((page, index) => {
+        if (page.is_extra) {
+            const cpts = page.components
+            cpts.forEach((cpt) => {
+                if (cpt.is_foot_page_num) {
+                    cpt.attribute.value = index - main_page_count + 1
+                }
+                if (cpt.is_foot_page_all) {
+                    cpt.attribute.value = all_extra_page_count
+                }
+            })
+        }
+    })
+    return allpagelist;
+}

@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 // import { testData } from '../../../assets/testJson'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty, copyArrayItem, checkDataIsLostUserlist } from '../../util/Tool'
+import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty, copyArrayItem, checkDataIsLostUserlist, autoCalculateFootPageValue } from '../../util/Tool'
 import moment from 'moment'
 import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer'
 const { OptGroup, Option } = Select
@@ -187,14 +187,15 @@ export default function JobTicketOfCreate() {
                             page.index = index
                         })
                         // console.log('after_combine:', after_combine);
-                        ticketvalue.pages = after_combine
+                        //  autoCalculateFootPageValue(after_combine)
+                        ticketvalue.pages = autoCalculateFootPageValue(after_combine)
                         setCurrentJobTicketValue(ticketvalue)
                         // ticketvalue.pages.push()
                     } else if (diff_page_value < 0) {///减
                         // console.log('ticketvalue.pages:', ticketvalue.pages);
                         let after_cut = ticketvalue.pages.slice(0, ticketvalue.pages.length + diff_page_value)
                         // console.log('after_cut:', after_cut);
-                        ticketvalue.pages = after_cut
+                        ticketvalue.pages = autoCalculateFootPageValue(after_cut)
                         setCurrentJobTicketValue(ticketvalue)
                     }
                     per_page_value = (parseInt(cpt.attribute.value) || 0)
