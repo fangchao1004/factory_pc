@@ -1,6 +1,7 @@
 import { Drawer, Select, Tag, Button, Affix } from 'antd'
 import React, { useCallback, useState } from 'react'
 import { RenderEngine } from '../../util/RenderEngine';
+import { getPingYin } from '../../util/Tool';
 const { OptGroup, Option } = Select
 var copy_currentSubJBT = {}
 var ticketNextUserNameList = []
@@ -67,10 +68,10 @@ export default function SubJobTicketOfCreateDrawer({ visible, onClose, currentSu
             let name_list = manager_list.map((item) => item.name)
             callbackHandler(id_list, name_list)
         }}>全选</Button></div>}>
-            {manager_list.map((item, index) => { return <Option key={'a' + index} value={item.id}>{item.name}</Option> })}
+            {manager_list.map((item, index) => { return <Option key={'a' + index} value={item.id} short_lab={getPingYin(item.name)[0] || ''}>{item.name}</Option> })}
         </OptGroup>,
         <OptGroup key='b' label="其他">
-            {other_list.map((item, index) => { return <Option key={'b' + index} value={item.id}>{item.name}</Option> })}
+            {other_list.map((item, index) => { return <Option key={'b' + index} value={item.id} short_lab={getPingYin(item.name)[0] || ''}>{item.name}</Option> })}
         </OptGroup>]
     }, [userList, callbackHandler, currentSubJBT.is_sub])
 
@@ -108,7 +109,14 @@ export default function SubJobTicketOfCreateDrawer({ visible, onClose, currentSu
                             allowClear={true}
                             placeholder='请选择下一步处理人'
                             showSearch
-                            optionFilterProp='children'
+                            filterOption={(input, option) => {
+                                if (option.props.short_lab) {
+                                    let res = option.props.short_lab.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                    return res
+                                } else {
+                                    return false
+                                }
+                            }}
                             value={ticketNextUserList.length > 0 ? ticketNextUserList : currentSubJBT.userInfo ? currentSubJBT.userInfo.user_id_list : []}
                             onChange={(value, option) => {
                                 setTicketNextUserList(value)///当前页面先变动

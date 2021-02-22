@@ -2,7 +2,7 @@ import { Button, Drawer, Select, message, Modal, Affix, Tag, Input } from 'antd'
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { changeShowLabByStauts, checkCellWhichIsEmpty, checkDataIsLostValue, getJTRecordContentAndPlanTime } from '../../util/Tool';
+import { changeShowLabByStauts, checkCellWhichIsEmpty, checkDataIsLostValue, getJTRecordContentAndPlanTime, getPingYin } from '../../util/Tool';
 import moment from 'moment'
 const { confirm } = Modal;
 const { TextArea } = Input;
@@ -212,10 +212,10 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                 setTicketNextUserList(runnerList.map((item) => item.id))
                 ticketNextUserNameList = runnerList.map((item) => item.name)
             }}>全选</Button></div>}>
-                {runnerList.map((item, index) => { return <Option key={'1' + index} value={item.id}>{item.name}</Option> })}
+                {runnerList.map((item, index) => { return <Option key={'1' + index} value={item.id} short_lab={getPingYin(item.name)[0] || ''}>{item.name}</Option> })}
             </OptGroup>,
             <OptGroup key='2' label="其他">
-                {otherList.map((item, index) => { return <Option key={'2' + index} value={item.id}>{item.name}</Option> })}
+                {otherList.map((item, index) => { return <Option key={'2' + index} value={item.id} short_lab={getPingYin(item.name)[0] || ''}>{item.name}</Option> })}
             </OptGroup>]
         }
     }, [runnerList, otherList])
@@ -289,7 +289,16 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                         </div>
                         <div style={{ marginTop: 10, ...styles.bar }}>
                             <span><Tag size='small' color='blue'>人员</Tag></span>
-                            <Select showSearch mode='multiple' optionFilterProp='children' maxTagCount={5} value={ticketNextUserList} placeholder='下一步处理人员' allowClear size='small' style={{ width: '100%' }} disabled={selectValue === '-1' || userSelectDisable}
+                            <Select showSearch mode='multiple'
+                                filterOption={(input, option) => {
+                                    if (option.props.short_lab) {
+                                        let res = option.props.short_lab.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                        return res
+                                    } else {
+                                        return false
+                                    }
+                                }}
+                                maxTagCount={5} value={ticketNextUserList} placeholder='下一步处理人员' allowClear size='small' style={{ width: '100%' }} disabled={selectValue === '-1' || userSelectDisable}
                                 onChange={(v, option) => {
                                     setTicketNextUserList(v)
                                     ticketNextUserNameList = option.map((item) => { return item.props.children })

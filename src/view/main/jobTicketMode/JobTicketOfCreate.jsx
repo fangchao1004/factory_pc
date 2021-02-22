@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 // import { testData } from '../../../assets/testJson'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty, copyArrayItem, checkDataIsLostUserlist, autoCalculateFootPageValue } from '../../util/Tool'
+import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty, copyArrayItem, checkDataIsLostUserlist, autoCalculateFootPageValue, getPingYin } from '../../util/Tool'
 import moment from 'moment'
 import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer'
 const { OptGroup, Option } = Select
@@ -105,10 +105,10 @@ export default function JobTicketOfCreate() {
             setTicketNextUserList(manager_list.map((item) => item.id))
             ticketNextUserNameList = manager_list.map((item) => item.name)
         }}>全选</Button></div>}>
-            {manager_list.map((item, index) => { return <Option key={'a' + index} value={item.id}>{item.name}</Option> })}
+            {manager_list.map((item, index) => { return <Option key={'a' + index} value={item.id} short_lab={getPingYin(item.name)[0] || ''}>{item.name}</Option> })}
         </OptGroup>,
         <OptGroup key='b' label="其他">
-            {other_list.map((item, index) => { return <Option key={'b' + index} value={item.id}>{item.name}</Option> })}
+            {other_list.map((item, index) => { return <Option key={'b' + index} value={item.id} short_lab={getPingYin(item.name)[0] || ''}>{item.name}</Option> })}
         </OptGroup>]
     }, [userList])
     /**
@@ -263,7 +263,7 @@ export default function JobTicketOfCreate() {
                                         allowClear={true}
                                         placeholder='请选择工作票'
                                         showSearch
-                                        optionFilterProp='children'
+                                        // optionFilterProp='children'
                                         value={ticketSampleId}
                                         onChange={value => {
                                             if (value >= 0) {
@@ -272,10 +272,13 @@ export default function JobTicketOfCreate() {
                                                 getJobTicketById(null)
                                             }
                                         }}
-                                        filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+                                        filterOption={(input, option) => {
+                                            let res = option.props.short_lab.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                            return res
+                                        }}>
                                         {jobTicketsOption.map((item, index) => {
                                             return (
-                                                <Option key={index} value={item.id}>
+                                                <Option key={index} value={item.id} short_lab={getPingYin(item.ticket_name)[0] || ''}>
                                                     {item.ticket_name}
                                                 </Option>
                                             )
@@ -299,8 +302,15 @@ export default function JobTicketOfCreate() {
                                         allowClear={true}
                                         placeholder='请选择下一步处理人'
                                         showSearch
-                                        optionFilterProp='children'
                                         value={ticketNextUserList}
+                                        filterOption={(input, option) => {
+                                            if (option.props.short_lab) {
+                                                let res = option.props.short_lab.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                                return res
+                                            } else {
+                                                return false
+                                            }
+                                        }}
                                         onChange={(value, option) => {
                                             setTicketNextUserList(value)
                                             ticketNextUserNameList = option.map((item) => { return item.props.children })
