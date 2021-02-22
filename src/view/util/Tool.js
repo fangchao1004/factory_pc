@@ -1169,16 +1169,16 @@ export function changeShowLabByStauts(status, is_sub) {
     if (is_sub === 1) {
         switch (status) {
             case 1:
-                res = '安措'
+                res = '待作业单位审核'
                 break;
             case 2:
-                res = '初审'
+                res = '待安全部门审核'
                 break;
             case 3:
-                res = '复审'
+                res = '待分管副总批准'
                 break;
             case 4:
-                res = '批准'
+                res = '待完结'
                 break;
             case 5:
                 res = '完结'
@@ -1189,10 +1189,10 @@ export function changeShowLabByStauts(status, is_sub) {
     } else {
         switch (status) {
             case 1:
-                res = '签发'
+                res = '待安措'
                 break;
             case 2:
-                res = '接票'
+                res = '待完结'
                 break;
             case 3:
                 res = '完结'
