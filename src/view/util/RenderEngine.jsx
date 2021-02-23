@@ -207,6 +207,7 @@ export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, c
           transform: `scale(${scaleNum})` ///整体缩放比例
         }}>
         <img
+          draggable="false"
           src={list.pages ? testuri + list.pages[currentPageIndex].background : ''}
           style={{
             height: 1188 * bgscaleNum,
