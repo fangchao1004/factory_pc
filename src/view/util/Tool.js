@@ -1131,6 +1131,7 @@ export async function createNewJobTicketApply(jobTicketValue, user_list_str) {
             obj['per_step_user_id'] = userObj.id;
             obj['per_step_user_name'] = userObj.name;
             obj['current_step_user_id_list'] = user_list_str;
+            obj['history_step_user_id_list'] = user_list_str;
             obj['is_sub'] = jobTicketValue['is_sub'];
             obj['p_id'] = jobTicketValue['p_id'];
             /////

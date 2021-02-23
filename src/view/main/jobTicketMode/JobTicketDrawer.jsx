@@ -394,7 +394,8 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                                 status: new_status,
                                                 job_content, time_begin: time_list[0], time_end: time_list[1],
                                                 per_step_user_id: currentUser.id, per_step_user_name: currentUser.name,
-                                                current_step_user_id_list: current_step_user_id_list_temp
+                                                current_step_user_id_list: current_step_user_id_list_temp,///当前处理人id ,0,1,
+                                                history_step_user_id_list: record.history_step_user_id_list + (current_step_user_id_list_temp.length > 1 ? current_step_user_id_list_temp.substring(1) : '')
                                             }
                                             let res2 = await HttpApi.updateJTApplyRecord(newJTAR_data)
                                             if (res2.data.code === 0) {
@@ -426,7 +427,6 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                                     }
                                                 }
                                                 obj['remark'] = remark
-                                                console.log('log obj:', obj);
                                                 HttpApi.addJbTStepLog(obj)///添加log
                                                 resetHandler()
                                                 if (takeTicketAndPrint) {

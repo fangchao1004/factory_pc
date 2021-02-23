@@ -1000,8 +1000,8 @@ class HttpApi {
      * job_t_r_id 工作票记录id
      * @param {*} param0 
      */
-    static createJTApplyRecord = ({ no, job_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, is_sub, p_id }) => {
-        let sql = `insert into job_tickets_apply_records (no, job_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list,is_sub,p_id) values ('${no}',${job_t_r_id},  ${user_id}, '${user_name}', '${time}', ${major_id}, '${ticket_name}', '${job_content}' ,${time_begin ? "'" + time_begin + "'" : null} ,${time_end ? "'" + time_end + "'" : null},'${per_step_user_id}', '${per_step_user_name}', '${current_step_user_id_list}',${is_sub},${p_id ? p_id : null} )`
+    static createJTApplyRecord = ({ no, job_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_sub, p_id }) => {
+        let sql = `insert into job_tickets_apply_records (no, job_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_sub,p_id) values ('${no}',${job_t_r_id},  ${user_id}, '${user_name}', '${time}', ${major_id}, '${ticket_name}', '${job_content}' ,${time_begin ? "'" + time_begin + "'" : null} ,${time_end ? "'" + time_end + "'" : null},'${per_step_user_id}', '${per_step_user_name}', '${current_step_user_id_list}', '${history_step_user_id_list}', ${is_sub}, ${p_id ? p_id : null} )`
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**
@@ -1016,7 +1016,7 @@ class HttpApi {
         }
         return Axios.post(Testuri + 'obs', { sql })
     }
-    static updateJTApplyRecord = ({ id, status, is_delete, is_stop, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, is_read }) => {
+    static updateJTApplyRecord = ({ id, status, is_delete, is_stop, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_read }) => {
         let block_status = ''
         if (status >= 0) {
             block_status = ` status = ${status},`
@@ -1035,8 +1035,9 @@ class HttpApi {
         }
         let block_user = ''
         if (per_step_user_id >= 0) {
-            block_user = ` per_step_user_id = ${per_step_user_id},per_step_user_name = '${per_step_user_name}',current_step_user_id_list = '${current_step_user_id_list}',`
+            block_user = ` per_step_user_id = ${per_step_user_id},per_step_user_name = '${per_step_user_name}',current_step_user_id_list = '${current_step_user_id_list}',history_step_user_id_list = '${history_step_user_id_list}',`
         }
+        console.log('block_user:', block_user)
         let block_contet_time = ''
         if (job_content) {
             block_contet_time = ` job_content = '${job_content}',time_begin = '${time_begin}',time_end = '${time_end}',`
