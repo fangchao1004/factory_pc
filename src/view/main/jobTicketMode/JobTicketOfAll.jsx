@@ -3,11 +3,13 @@ import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import { changeJobTicketStatusToText } from '../../util/Tool';
 import JobTicketDrawer from './JobTicketDrawer';
+import JobTicketDrawerForShowEdit from './JobTicketDrawerForShowEdit';
 import JobTicketStepLogView from './JobTicketStepLogView';
 const storage = window.localStorage;
 export default function JobTicketOfAll() {
     const [list, setList] = useState([])
     const [drawerVisible, setDrawerVisible] = useState(false)
+    const [drawer2Visible, setDrawer2Visible] = useState(false)
     const [currentSelectRecord, setCurrentSelectRecord] = useState(null)
     const [stepLogVisible, setStepLogVisible] = useState(false);///展示步骤界面
     const [currentUser, setCurrentUser] = useState({})
@@ -85,8 +87,13 @@ export default function JobTicketOfAll() {
         },
         {
             title: '操作', dataIndex: 'action', key: 'action', align: 'center', width: 100, render: (_, record) => {
+                let actionBtnAbleFlag = record.current_step_user_id_list.indexOf(`,${currentUser.id},`) !== -1;
                 return <div>
-                    <Button disabled={record.current_step_user_id_list.indexOf(`,${currentUser.id},`) === -1} size='small' type='primary' icon='file-search' onClick={(e) => { e.stopPropagation(); setCurrentSelectRecord(record); setDrawerVisible(true); readLocalRecord(record); }}>处理</Button>
+                    {actionBtnAbleFlag ?
+                        <Button disabled={!actionBtnAbleFlag} size='small' type='primary' icon='file-search' onClick={(e) => { e.stopPropagation(); setCurrentSelectRecord(record); setDrawerVisible(true); readLocalRecord(record); }}>处理</Button>
+                        :
+                        <Button size='small' icon='eye' onClick={() => { setDrawer2Visible(true); setCurrentSelectRecord(record) }}>查看</Button>
+                    }
                     <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                     <Button icon='unordered-list' size="small" type="default" onClick={(e) => { e.stopPropagation(); setStepLogVisible(true); setCurrentSelectRecord(record); }}>记录</Button>
                 </div>
@@ -124,12 +131,15 @@ export default function JobTicketOfAll() {
                                     {item.is_read ? null : <Badge status="processing" />}
                                     <span>{item.no + "  " + item.ticket_name}</span>
                                     <Tag color='blue' style={{ marginLeft: 10 }}>{changeJobTicketStatusToText(item.status, 1)}</Tag>
-                                    <Button disabled={!actionBtnAbleFlag} icon='file-search' size='small' type='primary' onClick={() => {
-                                        // console.log('选择的副票数据:', item);
-                                        setCurrentSelectRecord(item)
-                                        setDrawerVisible(true);
-                                        readLocalRecord(item);
-                                    }}>处理</Button>
+                                    {actionBtnAbleFlag ?
+                                        <Button disabled={!actionBtnAbleFlag} icon='file-search' size='small' type='primary' onClick={() => {
+                                            // console.log('选择的副票数据:', item);
+                                            setCurrentSelectRecord(item)
+                                            setDrawerVisible(true);
+                                            readLocalRecord(item);
+                                        }}>处理</Button> :
+                                        <Button size='small' icon='eye' onClick={() => { setDrawer2Visible(true); setCurrentSelectRecord(item) }}>查看</Button>
+                                    }
                                     <Button style={{ marginLeft: 10 }} icon='unordered-list' size='small' type='default' onClick={() => {
                                         // console.log('选择的副票数据:', item);
                                         setCurrentSelectRecord(item);
@@ -142,6 +152,7 @@ export default function JobTicketOfAll() {
                     }}
                 />
             </div>
+            <JobTicketDrawerForShowEdit visible={drawer2Visible} onClose={() => { setDrawer2Visible(false); setCurrentSelectRecord(null) }} record={currentSelectRecord} resetData={init} />
             <JobTicketDrawer visible={drawerVisible} onClose={() => { setDrawerVisible(false); setCurrentSelectRecord(null) }} record={currentSelectRecord} resetData={init} />
             <JobTicketStepLogView record={currentSelectRecord} visible={stepLogVisible} onCancel={() => { setStepLogVisible(false) }} />
         </div>

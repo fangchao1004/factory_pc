@@ -358,7 +358,7 @@ export default function JobTicketOfCreate() {
                                                     let element = allSubTicketList[index];///每个副票
                                                     let afterCheckObj_sub = checkCellWhichIsEmpty(element, 0)
                                                     let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj_sub)
-                                                    let copyAllSubTicketList = JSON.parse(JSON.stringify(allSubTicketList))
+                                                    var copyAllSubTicketList = JSON.parse(JSON.stringify(allSubTicketList))
                                                     copyAllSubTicketList[index] = afterCheckObj_sub
                                                     setAllSubTicketList(copyAllSubTicketList)
                                                     if (needValueButIsEmpty) {
@@ -399,8 +399,8 @@ export default function JobTicketOfCreate() {
                                                                 setTicketNextUserList([])
                                                                 ticketNextUserNameList = []
                                                                 ///循环添加多个措施票记录
-                                                                for (let index = 0; index < allSubTicketList.length; index++) {
-                                                                    let element = allSubTicketList[index];///每个副票
+                                                                for (let index = 0; index < copyAllSubTicketList.length; index++) {
+                                                                    let element = copyAllSubTicketList[index];///每个副票
                                                                     element.p_id = jbtar_id;
                                                                     let user_str = ',' + element.userInfo.user_id_list.toString() + ','
                                                                     await createNewJobTicketApply(element, user_str)
