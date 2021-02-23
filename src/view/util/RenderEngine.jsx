@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { DatePicker, Checkbox, Select } from 'antd'
 import moment from 'moment'
 import 'antd/dist/antd.css'
+import { getPinYin } from './Tool'
 const testuri = 'http://60.174.196.158:12345/'
 export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, currentPageIndex, scaleNum = 1, bgscaleNum = 1, callbackValue }) {
   const pagediv = useRef(null)
@@ -153,10 +154,18 @@ export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, c
               onChange={value => {
                 changeComponetsValue(index, value)
               }}
-              filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+              filterOption={(input, option) => {
+                if (option.props.short_lab) {
+                  let res = option.props.short_lab.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  return res
+                } else {
+                  return false
+                }
+              }}
+            >
               {userList.map((item, index) => {
                 return (
-                  <Select.Option key={index} value={item.id}>
+                  <Select.Option key={index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>
                     {item.name}
                   </Select.Option>
                 )
