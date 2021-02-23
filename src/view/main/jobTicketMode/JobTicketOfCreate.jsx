@@ -501,6 +501,9 @@ const styles = {
         padding: 15
     },
     rightPart: {
-        backgroundColor: '#FFFFFF'
+        backgroundColor: '#FFFFFF',
+        display:'flex',
+        flexDirection:'column',
+        alignItems: 'center',
     }
 }
