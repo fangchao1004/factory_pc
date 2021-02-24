@@ -92,7 +92,7 @@ export default function JobTicketOfAll() {
                     {actionBtnAbleFlag ?
                         <Button disabled={!actionBtnAbleFlag} size='small' type='primary' icon='file-search' onClick={(e) => { e.stopPropagation(); setCurrentSelectRecord(record); setDrawerVisible(true); readLocalRecord(record); }}>处理</Button>
                         :
-                        <Button size='small' icon='eye' onClick={() => { setDrawer2Visible(true); setCurrentSelectRecord(record) }}>查看</Button>
+                        <Button size='small' icon='eye' onClick={(e) => { e.stopPropagation(); setDrawer2Visible(true); setCurrentSelectRecord(record) }}>查看</Button>
                     }
                     <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                     <Button icon='unordered-list' size="small" type="default" onClick={(e) => { e.stopPropagation(); setStepLogVisible(true); setCurrentSelectRecord(record); }}>记录</Button>

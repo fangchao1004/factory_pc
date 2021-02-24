@@ -980,8 +980,8 @@ class HttpApi {
         let sql = `select count(id) as count from job_tickets_records where type_id = ${type_id} and time >= '${timeRange[0]}' and time <= '${timeRange[1]}' `
         return Axios.post(Testuri + 'obs', { sql })
     }
-    static createJTRecord = ({ id, ticket_name, pages, major_id, title, time, scal }) => {
-        let sql = `insert into job_tickets_records (type_id, ticket_name, pages, major_id, title, time, scal) values (${id},'${ticket_name}','${pages}',${major_id},'${title}','${time}',${scal ? "'" + scal + "'" : null})`
+    static createJTRecord = ({ id, ticket_name, pages, major_id, title, time, scal, print_num }) => {
+        let sql = `insert into job_tickets_records (type_id, ticket_name, pages, major_id, title, time, scal, print_num) values (${id},'${ticket_name}','${pages}',${major_id},'${title}','${time}',${scal ? "'" + scal + "'" : null}, ${print_num ? print_num : null})`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getLastJTRecordId = () => {
