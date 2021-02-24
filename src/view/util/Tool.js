@@ -1079,6 +1079,26 @@ export function changeNoInputValue({ auto_no, pages }) {
 }
 
 /**
+ * 替换措施票中的父编号值
+ * @param {*} param0 
+ */
+export function changePNoInputValue({ p_no, pages }) {
+    try {
+        pages.forEach((page) => {
+            const components = page.components
+            components.forEach((cmp) => {
+                if (cmp.is_p_no === true) {
+                    cmp.attribute.value = p_no
+                }
+            })
+        })
+    } catch (error) {
+        console.log('error:', error)
+    }
+    return pages
+}
+
+/**
  * 提取出job_ticket_record中的 计划工作内容 和 计划工作时间段 数据
  * @param {*} param0 
  */
@@ -1104,10 +1124,14 @@ export function getJTRecordContentAndPlanTime({ pages }) {
  * 
  * @param {*} jobTicketValue 工作票数据
  * @param {String} user_list_str 当前哪些人可以处理 ,0,1,
+ * @param {String} p_no 措施票中的 主票编号
  */
-export async function createNewJobTicketApply(jobTicketValue, user_list_str) {
+export async function createNewJobTicketApply(jobTicketValue, user_list_str, p_no = '') {
     let auto_no = await getAutoJTARecordNo(jobTicketValue)
     jobTicketValue.pages = changeNoInputValue({ auto_no, pages: jobTicketValue.pages })
+    if (p_no) {
+        jobTicketValue.pages = changePNoInputValue({ p_no, pages: jobTicketValue.pages })
+    }
     jobTicketValue.pages = JSON.stringify(jobTicketValue.pages)
     let { job_content, time_list } = getJTRecordContentAndPlanTime({ pages: jobTicketValue.pages })
     let res = await HttpApi.createJTRecord({ ...jobTicketValue, time: moment().format(FORMAT) })
@@ -1118,7 +1142,7 @@ export async function createNewJobTicketApply(jobTicketValue, user_list_str) {
             const localUserInfo = storage.getItem('userinfo');
             let userObj = JSON.parse(localUserInfo);
             let obj = {};///暂时不考虑副票
-            obj['no'] = auto_no
+            obj['no'] = auto_no;///自生成编号（个体编号）
             obj['job_t_r_id'] = max_id;
             obj['user_id'] = userObj.id;
             obj['user_name'] = userObj.name;

@@ -386,8 +386,9 @@ export default function JobTicketOfCreate() {
                                                             getJobTicketById(null)
                                                             ///获取最新提交的记录id
                                                             let res = await HttpApi.getLastJTApplyRecordId()
-                                                            if (res.data.code === 0) {
-                                                                const jbtar_id = res.data.data[0]['max_id']
+                                                            if (res.data.code === 0 && res.data.data.length > 0) {
+                                                                const jbtar_id = res.data.data[0]['id']
+                                                                const p_no = res.data.data[0]['no']///主票的编号
                                                                 let obj = {};
                                                                 obj['jbtar_id'] = jbtar_id
                                                                 obj['user_id'] = currentUser.id
@@ -403,11 +404,11 @@ export default function JobTicketOfCreate() {
                                                                     let element = copyAllSubTicketList[index];///每个副票
                                                                     element.p_id = jbtar_id;
                                                                     let user_str = ',' + element.userInfo.user_id_list.toString() + ','
-                                                                    await createNewJobTicketApply(element, user_str)
+                                                                    await createNewJobTicketApply(element, user_str, p_no)
                                                                     // console.log('添加副票记录:', res);
                                                                     let res1 = await HttpApi.getLastJTApplyRecordId()
-                                                                    if (res1.data.code === 0) {
-                                                                        let jbtar_id_sub = res1.data.data[0]['max_id']
+                                                                    if (res1.data.code === 0 && res.data.data.length > 0) {
+                                                                        const jbtar_id_sub = res1.data.data[0]['id']
                                                                         let obj = {};
                                                                         obj['jbtar_id'] = jbtar_id_sub /// 添加副票记录 的id
                                                                         obj['user_id'] = currentUser.id

@@ -1086,7 +1086,8 @@ class HttpApi {
      * 获取最新添加的工作票申请记录id
      */
     static getLastJTApplyRecordId = () => {
-        let sql = `select max(id) as max_id from job_tickets_apply_records where is_delete = 0`
+        // let sql = `select max(id) as max_id from job_tickets_apply_records where is_delete = 0`
+        let sql = `select id,no from job_tickets_apply_records order by id desc limit 1`
         return Axios.post(Testuri + 'obs', { sql })
     }
 }
