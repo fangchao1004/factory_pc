@@ -244,7 +244,7 @@ export default function JobTicketOfCreate() {
                 <Row gutter={10}>
                     <Col span={18}>
                         <div style={styles.rightPart}>
-                            {!currentJobTicketValue.pages ? <Empty style={{ padding: 36 }} description={'请先选择需要的工作票'} /> : renderAllPage()}
+                            {!currentJobTicketValue.pages ? <Empty style={{ padding: 9, width: '100%', backgroundColor: '#FFFFFF' }} description={'请先选择需要的工作票'} /> : <div style={{ marginTop: -10 }}>{renderAllPage()}</div>}
                         </div>
                     </Col>
                     <Col span={6}>
@@ -501,9 +501,9 @@ const styles = {
         padding: 15
     },
     rightPart: {
-        backgroundColor: '#FFFFFF',
-        display:'flex',
-        flexDirection:'column',
+        backgroundColor: '#F1F2F5',
+        display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
     }
 }
