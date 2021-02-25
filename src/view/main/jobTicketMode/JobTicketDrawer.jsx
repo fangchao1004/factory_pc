@@ -450,9 +450,6 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                                     if (takeTicketAndPrint) {
                                                         console.log('打印1');
                                                         setPrinting(true)
-                                                        setTimeout(() => {
-                                                            setPrinting(false)
-                                                        }, 10000);
                                                         // window.open(`http://60.174.196.158:12345/print/index.html?id=${record.job_t_r_id}`)
                                                         if (window.electron) { window.electron.ipcRenderer.send('message', { content: 'printStart', id: record.job_t_r_id }) }
                                                         else { window.open(`http://60.174.196.158:12345/print/index.html?id=${record.job_t_r_id}`) }
@@ -465,9 +462,6 @@ export default function JobTicketDrawer({ visible, onClose, record, resetData })
                                 {canPrint ? <Button type='danger' icon='file' size='small' style={{ marginTop: 10 }} onClick={() => {
                                     console.log('打印2');
                                     setPrinting(true)
-                                    setTimeout(() => {
-                                        setPrinting(false)
-                                    }, 10000);
                                     // window.open(`http://60.174.196.158:12345/print/index.html?id=${record.job_t_r_id}`)
                                     if (window.electron) { window.electron.ipcRenderer.send('message', { content: 'printStart', id: record.job_t_r_id }) }
                                     else { window.open(`http://60.174.196.158:12345/print/index.html?id=${record.job_t_r_id}`) }
