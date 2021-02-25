@@ -46,41 +46,6 @@ export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, c
             />
           )
         case 'daterange':
-          return (
-            <DatePicker.RangePicker
-              placeholder=''
-              size='small'
-              key={index}
-              {...item.attribute}
-              style={{ ...item.attribute.style, borderStyle: item.attribute.isempty ? 'solid' : 'none', borderWidth: 1, borderColor: 'red' }}
-              format='YYYY年MM月DD日 HH时mm分'
-              showTime={{ format: 'HH时mm分' }}
-              value={
-                item.attribute.value.length > 1
-                  ? [moment(item.attribute.value[0]), moment(item.attribute.value[1])]
-                  : null
-              }
-              onChange={(_, dateString) => {
-                changeComponetsValue(index, changeMomentFormat(dateString))
-              }}
-            />
-          )
-        case 'datepicker':
-          return (
-            <DatePicker
-              placeholder=''
-              size='small'
-              key={index}
-              {...item.attribute}
-              style={{ ...item.attribute.style, borderStyle: item.attribute.isempty ? 'solid' : 'none', borderWidth: 1, borderColor: 'red' }}
-              format='YYYY年MM月DD日 HH时mm分'
-              showTime={{ format: 'HH时mm分' }}
-              value={item.attribute.value ? moment(item.attribute.value) : null}
-              onChange={(_, dateString) => {
-                changeComponetsValue(index, changeMomentFormat(dateString))
-              }}
-            />
-          )
         case 'daterange1':
           return (
             <DatePicker.RangePicker
@@ -101,6 +66,7 @@ export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, c
               }}
             />
           )
+        case 'datepicker':
         case 'datepicker1':
           return (
             <DatePicker
