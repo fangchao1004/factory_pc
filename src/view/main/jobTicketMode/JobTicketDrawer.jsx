@@ -150,6 +150,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                 return <RenderEngine
                     key={index}
                     jsonlist={currentJobTicketValue}
+                    isAgent={record.is_agent}
                     currentStatus={record ? record.status : 1}
                     userList={userList}
                     currentUser={currentUser}
@@ -164,7 +165,6 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
         }
     }, [record, currentJobTicketValue, currentUser, userList])
     const getUserGroupList = useCallback(() => {
-        // console.log('isAgent:', isAgent);
         let result = []
         if (otherList.length > 0) {
             result = [<OptGroup key='1' label={<div style={{ width: '100%', justifyContent: 'space-between', display: 'flex', justifyItems: 'center' }}><span>对应权限人员</span><Button type='link' size='small' onClick={() => {
@@ -323,7 +323,8 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                     per_step_user_id: currentUser.id,
                                                     per_step_user_name: currentUser.name,
                                                     current_step_user_id_list: current_step_user_id_list_temp,///当前处理人id ,0,1,
-                                                    history_step_user_id_list: record.history_step_user_id_list + (current_step_user_id_list_temp.length > 1 ? current_step_user_id_list_temp.substring(1) : '')
+                                                    history_step_user_id_list: record.history_step_user_id_list + (current_step_user_id_list_temp.length > 1 ? current_step_user_id_list_temp.substring(1) : ''),
+                                                    is_agent: 1
                                                 }
                                                 let res2 = await HttpApi.updateJTApplyRecord(newJTAR_data)
                                                 if (res2.data.code === 0) {
@@ -414,7 +415,8 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                     job_content, time_begin: time_list[0], time_end: time_list[1],
                                                     per_step_user_id: currentUser.id, per_step_user_name: currentUser.name,
                                                     current_step_user_id_list: current_step_user_id_list_temp,///当前处理人id ,0,1,
-                                                    history_step_user_id_list: record.history_step_user_id_list + (current_step_user_id_list_temp.length > 1 ? current_step_user_id_list_temp.substring(1) : '')
+                                                    history_step_user_id_list: record.history_step_user_id_list + (current_step_user_id_list_temp.length > 1 ? current_step_user_id_list_temp.substring(1) : ''),
+                                                    is_agent: 0
                                                 }
                                                 let res2 = await HttpApi.updateJTApplyRecord(newJTAR_data)
                                                 if (res2.data.code === 0) {

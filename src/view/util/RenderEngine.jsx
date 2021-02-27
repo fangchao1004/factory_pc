@@ -4,7 +4,7 @@ import moment from 'moment'
 import 'antd/dist/antd.css'
 import { getPinYin } from './Tool'
 const testuri = 'http://60.174.196.158:12345/'
-export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, currentPageIndex, scaleNum = 1, bgscaleNum = 1, callbackValue }) {
+export function RenderEngine({ isAgent, jsonlist, userList, currentUser, currentStatus, currentPageIndex, scaleNum = 1, bgscaleNum = 1, callbackValue }) {
   const pagediv = useRef(null)
   const [list, setList] = useState(jsonlist)
   const changeComponetsValue = useCallback(
@@ -183,7 +183,8 @@ export function RenderEngine({ jsonlist, userList, currentUser, currentStatus, c
         />
         {list.pages
           ? list.pages[currentPageIndex].components.map((item, index) => {
-            let disabled = checkCellDisable(item.attribute.able_list, currentStatus, currentUser.permission)
+            // console.log("isAgent:", isAgent);
+            let disabled = checkCellDisable(item.attribute.able_list, currentStatus, currentUser.permission, isAgent)
             item.attribute.disabled = disabled
             // let isempty = checkCellIsEmpty(item.attribute, currentStatus)
             // item.attribute.isempty = isempty
@@ -219,21 +220,26 @@ function changeMomentFormat(timelistOrStr) {
  * @param {*} able_list  [{ "status": 0, "per": [0,3] }],
  * @param {*} currentStatus 0or1or2or3
  * @param {*} currentUserPermissionList "0,1,3"
+ * @param {*} isAgent 0 或 1
  */
-function checkCellDisable(able_list, currentStatus, currentUserPermission) {
+function checkCellDisable(able_list, currentStatus, currentUserPermission, isAgent) {
   if (!able_list) { return true }
   if (!currentUserPermission) { return true }
   let currentUserPermissionList = currentUserPermission.split(',')
   let disabled = true;
   able_list.forEach((item) => {
     if (item.status === currentStatus) {
-      item.per.forEach((needPer) => {
-        if (currentUserPermissionList) {
-          currentUserPermissionList.forEach((hasPer) => {
-            if (String(needPer) === String(hasPer)) { disabled = false }
-          })
-        }
-      })
+      if (isAgent) {///临时代理的情况下 只需要比对组件是否和当前状态匹配
+        disabled = false
+      } else {///正常情况下；要再判断权限是否对应
+        item.per.forEach((needPer) => {
+          if (currentUserPermissionList) {
+            currentUserPermissionList.forEach((hasPer) => {
+              if (String(needPer) === String(hasPer)) { disabled = false }
+            })
+          }
+        })
+      }
     }
   })
   return disabled

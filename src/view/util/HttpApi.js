@@ -1016,7 +1016,7 @@ class HttpApi {
         }
         return Axios.post(Testuri + 'obs', { sql })
     }
-    static updateJTApplyRecord = ({ id, status, is_delete, is_stop, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_read }) => {
+    static updateJTApplyRecord = ({ id, status, is_delete, is_stop, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_read, is_agent = 0 }) => {
         let block_status = ''
         if (status >= 0) {
             block_status = ` status = ${status},`
@@ -1035,7 +1035,7 @@ class HttpApi {
         }
         let block_user = ''
         if (per_step_user_id >= 0) {
-            block_user = ` per_step_user_id = ${per_step_user_id},per_step_user_name = '${per_step_user_name}',current_step_user_id_list = '${current_step_user_id_list}',history_step_user_id_list = '${history_step_user_id_list}',`
+            block_user = ` per_step_user_id = ${per_step_user_id},per_step_user_name = '${per_step_user_name}',current_step_user_id_list = '${current_step_user_id_list}',history_step_user_id_list = '${history_step_user_id_list}',is_agent = ${is_agent},`
         }
         let block_contet_time = ''
         if (job_content) {
