@@ -45,7 +45,7 @@ export default function JobTicketOfCreate() {
                 if (!major_id) { message.error('请为当前工作票配置对应专业'); return }
                 ///首先判断出哪些人员是当前专业的专工 和 运行
                 let managerList_res = await HttpApi.getManagerIdListByMajorId({ major_id })
-                let runnerList_res = await HttpApi.getRunnerIdList({ role_id: 2 })
+                let runnerList_res = await HttpApi.getRunnerIdList({ role_id: 11 })///运行值长
                 if (managerList_res.data.code === 0) {
                     let copy_userList = JSON.parse(JSON.stringify(userList))
                     const managerlist = managerList_res.data.data;

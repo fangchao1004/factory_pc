@@ -51,17 +51,18 @@ export default function SubJobTicketOfCreateDrawer({ visible, onClose, currentSu
         let manager_list = [];
         let other_list = [];
         userList.forEach((item) => {
-            if (currentSubJBT.is_sub === 1) {///措施票-就根据是否为运行人员来分组
+            if (currentSubJBT.is_sub === 1) {///措施票-就根据是否为运行值长人员来分组
                 if (item.is_runner) {
                     manager_list.push(item)
                 } else { other_list.push(item) }
-            } else {///主票-就根据是否为当前专业的专工来分组
-                if (item.is_current_major_manager) {
-                    manager_list.push(item)
-                } else { other_list.push(item) }
             }
+            // else {///主票-就根据是否为当前专业的专工来分组
+            //     if (item.is_current_major_manager) {
+            //         manager_list.push(item)
+            //     } else { other_list.push(item) }
+            // }
         })
-        return [<OptGroup key='a' label={<div style={{ width: '100%', justifyContent: 'space-between', display: 'flex', justifyItems: 'center' }}><span>{currentSubJBT.is_sub === 1 ? '运行人员' : '当前专业专工'}</span><Button type='link' size='small' onClick={() => {
+        return [<OptGroup key='a' label={<div style={{ width: '100%', justifyContent: 'space-between', display: 'flex', justifyItems: 'center' }}><span>{currentSubJBT.is_sub === 1 ? '运行值长' : '当前专业专工'}</span><Button type='link' size='small' onClick={() => {
             setTicketNextUserList(manager_list.map((item) => item.id))
             ticketNextUserNameList = manager_list.map((item) => item.name)
             let id_list = manager_list.map((item) => item.id)
@@ -69,10 +70,12 @@ export default function SubJobTicketOfCreateDrawer({ visible, onClose, currentSu
             callbackHandler(id_list, name_list)
         }}>全选</Button></div>}>
             {manager_list.map((item, index) => { return <Option key={'a' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
-        </OptGroup>,
-        <OptGroup key='b' label="其他">
-            {other_list.map((item, index) => { return <Option key={'b' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
-        </OptGroup>]
+        </OptGroup>
+            // ,
+            // <OptGroup key='b' label="其他">
+            //     {other_list.map((item, index) => { return <Option key={'b' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
+            // </OptGroup>
+        ]
     }, [userList, callbackHandler, currentSubJBT.is_sub])
 
     const resetUserSelectValue = useCallback(() => {

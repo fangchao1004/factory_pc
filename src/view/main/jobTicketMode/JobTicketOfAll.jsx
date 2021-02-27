@@ -13,14 +13,16 @@ export default function JobTicketOfAll() {
     const [currentSelectRecord, setCurrentSelectRecord] = useState(null)
     const [stepLogVisible, setStepLogVisible] = useState(false);///展示步骤界面
     const [currentUser, setCurrentUser] = useState({})
+    const [isAgent, setIsAgent] = useState(false)
     // const [hasRunP, setHasRunP] = useState(false)///是否有运行权限
     const init = useCallback(async () => {
         const localUserInfo = storage.getItem('userinfo');
         let userinfo = JSON.parse(localUserInfo);
         // setHasRunP(userinfo.permission.split(',').indexOf("1") !== -1)
         setCurrentUser(userinfo)
-        let run_permission = userinfo.permission && userinfo.permission.split(',').indexOf("1") !== -1;
-        let res = await HttpApi.getJTApplyRecords({ major_id: userinfo.major_id_all, user_id: userinfo.id, is_all: run_permission });
+        // let run_permission = userinfo.permission && userinfo.permission.split(',').indexOf("1") !== -1;
+        // console.log('userinfo:', userinfo);
+        let res = await HttpApi.getJTApplyRecords({ major_id: userinfo.major_id_all, user_id: userinfo.id, is_all: 1 });
         if (res.data.code === 0) {
             let templist = res.data.data.map((item, index) => { item.key = index; return item })
             // console.log('templist:', templist);
@@ -37,7 +39,6 @@ export default function JobTicketOfAll() {
                     if (item_m.id === item_s.p_id) { item_m.sub_tickets.push(item_s) }
                 })
             })
-            // console.log('main_list:', main_list);
             setList(main_list)
         }
     }, [])
@@ -87,12 +88,23 @@ export default function JobTicketOfAll() {
         },
         {
             title: '操作', dataIndex: 'action', key: 'action', align: 'center', width: 100, render: (_, record) => {
-                let actionBtnAbleFlag = record.current_step_user_id_list.indexOf(`,${currentUser.id},`) !== -1;
+                let is_over = false
+                if (record.is_sub !== 1 && record.status === 4) { is_over = true }
+                else if (record.is_sub === 1 && record.status === 5) { is_over = true }///是否完结
+                let inCurrentUserList = false
+                inCurrentUserList = record.current_step_user_id_list.indexOf(`,${currentUser.id},`) !== -1;///是否为当前处理人
                 return <div>
-                    {actionBtnAbleFlag ?
-                        <Button disabled={!actionBtnAbleFlag} size='small' type='primary' icon='file-search' onClick={(e) => { e.stopPropagation(); setCurrentSelectRecord(record); setDrawerVisible(true); readLocalRecord(record); }}>处理</Button>
+                    {inCurrentUserList ?
+                        <Button disabled={!inCurrentUserList} size='small' type='primary' icon='file-search' onClick={(e) => { e.stopPropagation(); setIsAgent(false); setCurrentSelectRecord(record); setDrawerVisible(true); readLocalRecord(record); }}>处理</Button>
                         :
                         <Button size='small' icon='eye' onClick={(e) => { e.stopPropagation(); setDrawer2Visible(true); setCurrentSelectRecord(record) }}>查看</Button>
+                    }
+                    {
+                        currentUser.isadmin === 1 ?
+                            <>
+                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                                <Button disabled={is_over} icon='audit' size="small" type="danger" onClick={(e) => { e.stopPropagation(); setIsAgent(true); setDrawerVisible(true); readLocalRecord(record); setCurrentSelectRecord(record); }}>调度</Button>
+                            </> : null
                     }
                     <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
                     <Button icon='unordered-list' size="small" type="default" onClick={(e) => { e.stopPropagation(); setStepLogVisible(true); setCurrentSelectRecord(record); }}>记录</Button>
@@ -120,25 +132,29 @@ export default function JobTicketOfAll() {
                     expandedRowRender={(record) => {
                         if (record.is_sub !== 1 && record.sub_tickets.length > 0) {
                             return record.sub_tickets.map((item, index) => {
-                                let actionBtnAbleFlag = false
-                                // if (item.status === 1 && hasRunP) {
-                                //     actionBtnAbleFlag = true
-                                // } else if (item.status > 1) {
-                                //     actionBtnAbleFlag = item.current_step_user_id_list.indexOf(`,${currentUser.id},`) !== -1
-                                // }
-                                actionBtnAbleFlag = item.current_step_user_id_list.indexOf(`,${currentUser.id},`) !== -1
+                                let is_over = false
+                                if (item.is_sub === 0 && item.status === 4) { is_over = true }///主票完结
+                                else if (item.is_sub === 1 && item.status === 6) { is_over = true }///副票是否完结
+                                let inCurrentUserList = false
+                                inCurrentUserList = item.current_step_user_id_list.indexOf(`,${currentUser.id},`) !== -1///是否为当前处理人
                                 return <div key={index}>
                                     {item.is_read ? null : <Badge status="processing" />}
                                     <span>{item.no + "  " + item.ticket_name}</span>
                                     <Tag color='blue' style={{ marginLeft: 10 }}>{changeJobTicketStatusToText(item.status, 1)}</Tag>
-                                    {actionBtnAbleFlag ?
-                                        <Button disabled={!actionBtnAbleFlag} icon='file-search' size='small' type='primary' onClick={() => {
+                                    {inCurrentUserList ?
+                                        <Button disabled={!inCurrentUserList} icon='file-search' size='small' type='primary' onClick={() => {
                                             // console.log('选择的副票数据:', item);
+                                            setIsAgent(false);
                                             setCurrentSelectRecord(item)
                                             setDrawerVisible(true);
                                             readLocalRecord(item);
                                         }}>处理</Button> :
                                         <Button size='small' icon='eye' onClick={() => { setDrawer2Visible(true); setCurrentSelectRecord(item) }}>查看</Button>
+                                    }
+                                    {
+                                        currentUser.isadmin === 1 ?
+                                            <Button style={{ marginLeft: 10 }} disabled={is_over} icon='audit' size="small" type="danger" onClick={(e) => { e.stopPropagation(); setIsAgent(true); setDrawerVisible(true); readLocalRecord(item); setCurrentSelectRecord(item); }}>调度</Button>
+                                            : null
                                     }
                                     <Button style={{ marginLeft: 10 }} icon='unordered-list' size='small' type='default' onClick={() => {
                                         // console.log('选择的副票数据:', item);
@@ -153,7 +169,7 @@ export default function JobTicketOfAll() {
                 />
             </div>
             <JobTicketDrawerForShowEdit visible={drawer2Visible} onClose={() => { setDrawer2Visible(false); setCurrentSelectRecord(null) }} record={currentSelectRecord} resetData={init} />
-            <JobTicketDrawer visible={drawerVisible} onClose={() => { setDrawerVisible(false); setCurrentSelectRecord(null) }} record={currentSelectRecord} resetData={init} />
+            <JobTicketDrawer isAgent={isAgent} visible={drawerVisible} onClose={() => { setDrawerVisible(false); setCurrentSelectRecord(null) }} record={currentSelectRecord} resetData={init} />
             <JobTicketStepLogView record={currentSelectRecord} visible={stepLogVisible} onCancel={() => { setStepLogVisible(false) }} />
         </div>
     )

@@ -54,7 +54,7 @@ export default function JobTicketDrawerForShowEdit({ visible, onClose, record, r
                 setUserList(user_list)
             }
             if (record.is_sub === 1) {
-                console.log('副票');
+                // console.log('副票');
                 // console.log('record:', record);
                 if (record.status === 1 && currentUser.permission && currentUser.permission.split(',').indexOf("1") !== -1) {
                     ///副票 状态1 待安措时 运行可以操作

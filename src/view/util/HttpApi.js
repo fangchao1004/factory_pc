@@ -1037,7 +1037,6 @@ class HttpApi {
         if (per_step_user_id >= 0) {
             block_user = ` per_step_user_id = ${per_step_user_id},per_step_user_name = '${per_step_user_name}',current_step_user_id_list = '${current_step_user_id_list}',history_step_user_id_list = '${history_step_user_id_list}',`
         }
-        console.log('block_user:', block_user)
         let block_contet_time = ''
         if (job_content) {
             block_contet_time = ` job_content = '${job_content}',time_begin = '${time_begin}',time_end = '${time_end}',`
@@ -1070,8 +1069,8 @@ class HttpApi {
     /**
      * 添加工作票操作日志
      */
-    static addJbTStepLog = ({ jbtar_id, user_id, user_name, time, step_des, remark }) => {
-        let sql = `insert into job_tickets_step_log (jbtar_id, user_id, user_name, time, step_des, remark) values (${jbtar_id},${user_id},'${user_name}','${time}','${step_des}','${remark}') `
+    static addJbTStepLog = ({ jbtar_id, user_id, user_name, time, step_des, remark, is_agent = 0 }) => {
+        let sql = `insert into job_tickets_step_log (jbtar_id, user_id, user_name, time, step_des, remark, is_agent) values (${jbtar_id},${user_id},'${user_name}','${time}','${step_des}','${remark}',${is_agent}) `
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**
