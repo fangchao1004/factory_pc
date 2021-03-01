@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { DatePicker, Checkbox, Select } from 'antd'
+import { DatePicker, Checkbox, Select, message } from 'antd'
 import moment from 'moment'
 import 'antd/dist/antd.css'
 import { getPinYin } from './Tool'
@@ -50,8 +50,8 @@ export function RenderEngine({ isAgent, jsonlist, userList, currentUser, current
           return (
             <DatePicker.RangePicker
               allowClear={false}
-              disabledDate={(date) => { return disabledDate(date) }}
-              disabledTime={(dates, partial) => { return disabledRangeTime(dates, partial, item.attribute.max_hour) }}
+              disabledDate={disabledDate}
+              disabledTime={disabledRangeTime}
               placeholder=''
               size='small'
               key={index}
@@ -65,6 +65,17 @@ export function RenderEngine({ isAgent, jsonlist, userList, currentUser, current
                   : null
               }
               onChange={(_, dateString) => {
+                if (dateString.length > 1) {
+                  if (item.attribute.max_hour) {
+                    let start_time = moment(changeMomentFormat(dateString[0]))
+                    let end_time = moment(changeMomentFormat(dateString[1]))
+                    if (end_time - start_time > (item.attribute.max_hour) * 3600000) {
+                      message.error(`工作票有效期为${item.attribute.max_hour}小时，请在规定时间内完成`)
+                      changeComponetsValue(index, '')
+                      return
+                    }
+                  }
+                }
                 changeComponetsValue(index, changeMomentFormat(dateString))
               }}
             />
@@ -250,36 +261,6 @@ function checkCellDisable(able_list, currentStatus, currentUserPermission, isAge
   })
   return disabled
 }
-function disabledRangeTime(dates, type, max_hour) {
-  if (!max_hour) {
-    max_hour = 24
-  }
-  if (dates instanceof Array && dates.length > 1) {
-    let copyDates = JSON.parse(JSON.stringify(dates))
-    let start_date = copyDates[0]
-    var start_select_hour = moment(start_date).hour()
-  }
-  let current = moment()
-  let hour = current.hour()///当前小时
-  if (type === 'start') {
-    return {
-      disabledHours: () => range(0, 24).splice(0, hour),
-    };
-  }
-  return {
-    disabledHours: () => {
-      return range(0, 24).splice(start_select_hour + max_hour + 1, 24)
-    },
-  };
-}
-
-function range(start, end) {
-  const result = [];
-  for (let i = start; i < end; i++) {
-    result.push(i);
-  }
-  return result;
-}
 
 function disabledDate(current) {
   return current < moment().startOf('day')
@@ -294,4 +275,20 @@ function disabledDateTime(date) {
     disabledHours: () => range(0, 24).splice(0, hour),
     disabledMinutes: () => range(0, than_one_hour ? 0 : minute)
   };
+}
+
+function disabledRangeTime() {
+  let current = moment()
+  let hour = current.hour()///当前小时
+  return {
+    disabledHours: () => range(0, 24).splice(0, hour),
+  };
+}
+
+function range(start, end) {
+  const result = [];
+  for (let i = start; i < end; i++) {
+    result.push(i);
+  }
+  return result;
 }

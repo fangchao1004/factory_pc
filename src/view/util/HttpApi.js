@@ -1005,17 +1005,46 @@ class HttpApi {
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**
-     * 后期要分页查询
-     * 根据个人是否在当前处理人数组中或是自己提交的，查询相关的工作票
-     * 如果有运行权限查询所有
+     * 获取符合条件的主票数量
+     * @param {*} time 创建时间
+     * @param {*} major_id 对应专业
      */
-    static getJTApplyRecords = ({ user_id, is_all }) => {
-        let sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = 0 and (user_id = ${user_id} || current_step_user_id_list like '%,${user_id},%')order by id desc`
-        if (is_all) {
-            sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = 0 order by id desc`
-        }
+    static getMainJTApplyRecordsCountByCondition({ time, major_id, status }) {
+        let sql_time = ` time >= '${time[0]}' and time <= '${time[1]}'`
+        let sql_major_id = !major_id ? `` : ` and major_id = ${major_id}`
+        let sql_status = !status ? `` : ` and status = ${status}`
+        let all_sql_condtion = sql_time + sql_major_id + sql_status
+        let sql = `select count(id) as count from job_tickets_apply_records where is_delete = 0 and is_stop = 0 and p_id is null and ${all_sql_condtion}`
+        // console.log('sql1:', sql)
         return Axios.post(Testuri + 'obs', { sql })
     }
+    /**
+     * 分页获取主票
+     * @param {*} page 当前页码
+     * @param {*} pageSize 当前一页条数 
+     */
+    static getMainJTApplyRecordsByLimit({ time, major_id, page = 1, pageSize = 10, status }) {
+        let start_count = (page - 1) * pageSize
+        let end_count = start_count + pageSize
+        let sql_time = ` time >= '${time[0]}' and time <= '${time[1]}'`
+        let sql_major_id = !major_id ? `` : ` and major_id = ${major_id}`
+        let sql_status = !status ? `` : ` and status = ${status}`
+        let all_sql_condtion = sql_time + sql_major_id + sql_status
+        let sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = 0 and p_id is null and ${all_sql_condtion}
+        order by id desc limit ${start_count},${end_count}`
+        // console.log('sql2:', sql)
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    /**
+     * 分页获取主票
+     */
+    static getSubJTApplyRecordsByPidList({ p_id_list }) {
+        let p_id_str = p_id_list.join(',')
+        let sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = 0 and p_id in (${p_id_str})`
+        // console.log('sql:', sql)
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+
     static updateJTApplyRecord = ({ id, status, is_delete, is_stop, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_read, is_agent = 0 }) => {
         let block_status = ''
         if (status >= 0) {

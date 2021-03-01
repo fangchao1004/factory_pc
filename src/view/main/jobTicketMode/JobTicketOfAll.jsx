@@ -1,12 +1,18 @@
-import { Badge, Button, Icon, Table, Tag, Tooltip } from 'antd';
+import { Badge, Button, Col, DatePicker, Form, Icon, Row, Select, Table, Tag, Tooltip } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import { changeJobTicketStatusToText } from '../../util/Tool';
 import JobTicketDrawer from './JobTicketDrawer';
 import JobTicketDrawerForShowEdit from './JobTicketDrawerForShowEdit';
 import JobTicketStepLogView from './JobTicketStepLogView';
+import moment from 'moment'
+import { JOB_TICKETS_STATUS } from '../../util/AppData';
+const FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const storage = window.localStorage;
+var searchCondition = {};
+var pageCondition = {};
 export default function JobTicketOfAll() {
+    const [defaultTime] = useState([moment().add(-6, 'month').startOf('day'), moment().endOf('day')])
     const [list, setList] = useState([])
     const [drawerVisible, setDrawerVisible] = useState(false)
     const [drawer2Visible, setDrawer2Visible] = useState(false)
@@ -14,33 +20,49 @@ export default function JobTicketOfAll() {
     const [stepLogVisible, setStepLogVisible] = useState(false);///展示步骤界面
     const [currentUser, setCurrentUser] = useState({})
     const [isAgent, setIsAgent] = useState(false)
-    // const [hasRunP, setHasRunP] = useState(false)///是否有运行权限
+    const [currentPage, setCurrentPage] = useState(1)
+    const [listLength, setListLength] = useState(0)
+    const [loading, setLoading] = useState(false)
+    const [majorOptionList, setMajorOptionList] = useState([])
     const init = useCallback(async () => {
+        setLoading(true)
         const localUserInfo = storage.getItem('userinfo');
         let userinfo = JSON.parse(localUserInfo);
-        // setHasRunP(userinfo.permission.split(',').indexOf("1") !== -1)
         setCurrentUser(userinfo)
-        // let run_permission = userinfo.permission && userinfo.permission.split(',').indexOf("1") !== -1;
-        // console.log('userinfo:', userinfo);
-        let res = await HttpApi.getJTApplyRecords({ major_id: userinfo.major_id_all, user_id: userinfo.id, is_all: 1 });
-        if (res.data.code === 0) {
-            let templist = res.data.data.map((item, index) => { item.key = index; return item })
-            // console.log('templist:', templist);
-            let main_list = []
-            let sub_list = []
-            templist.forEach((item) => {
-                if (item.is_sub === 1) {
-                    sub_list.push(item)
-                } else { main_list.push(item) }
-            })
-            main_list.forEach((item_m) => {
-                if (item_m.is_sub !== 1) { item_m.sub_tickets = [] }
-                sub_list.forEach((item_s) => {
-                    if (item_m.id === item_s.p_id) { item_m.sub_tickets.push(item_s) }
-                })
-            })
-            setList(main_list)
+        HttpApi.getUserMajor({ effective: 1 }, data => {
+            if (data.data.code === 0) {
+                let temp_major = data.data.data.map((item) => { return { id: item.id, name: item.name } })
+                setMajorOptionList(temp_major)
+            }
+        })
+        let conditions = { ...searchCondition, ...pageCondition }
+        // console.log('conditions:', conditions);
+        let test_res_count = await HttpApi.getMainJTApplyRecordsCountByCondition(conditions)
+        if (test_res_count.data.code === 0) {
+            setListLength(test_res_count.data.data[0]['count'])
         }
+        let test_res = await HttpApi.getMainJTApplyRecordsByLimit(conditions)
+        var main_list = []
+        if (test_res.data.code === 0) {
+            // console.log('主票:', test_res.data.data);
+            main_list = test_res.data.data.map((item, index) => { item.key = index; return item })
+            let p_id_list = main_list.map((item) => { return item.id })
+            if (p_id_list.length > 0) {
+                let test_sub_res = await HttpApi.getSubJTApplyRecordsByPidList({ p_id_list })
+                if (test_sub_res.data.code === 0) {
+                    var sub_list = test_sub_res.data.data
+                    // console.log('对应措施票:', sub_list);
+                }
+            }
+        }
+        main_list.forEach((item_m) => {
+            if (item_m.is_sub !== 1) { item_m.sub_tickets = [] }
+            sub_list.forEach((item_s) => {
+                if (item_m.id === item_s.p_id) { item_m.sub_tickets.push(item_s) }
+            })
+        })
+        setList(main_list)
+        setLoading(false)
     }, [])
     const readLocalRecord = useCallback(async (record) => {
         if (record.is_read) { return }
@@ -52,8 +74,11 @@ export default function JobTicketOfAll() {
         await HttpApi.updateJTApplyRecord({ id: record.id, is_read: 1 })
     }, [list])
     useEffect(() => {
+        ///初始条件
+        searchCondition = { time: [defaultTime[0].format(FORMAT), defaultTime[1].format(FORMAT)] }
+        pageCondition = { page: 1, pageSize: 10 }
         init();
-    }, [init])
+    }, [init, defaultTime])
     useEffect(() => {
         let loop = setInterval(() => {
             init();
@@ -114,11 +139,19 @@ export default function JobTicketOfAll() {
     ]
     return (
         <div style={styles.root}>
-            <div style={styles.head}>
+            {/* <div style={styles.head}>
                 <h2 style={styles.title}>所有工作票</h2>
-            </div>
+            </div> */}
+            <div style={styles.header}><Searchfrom defaultTime={defaultTime} majorOptionList={majorOptionList} startSearch={async (conditionsValue) => {
+                console.log('conditionsValue:', conditionsValue);
+                searchCondition = conditionsValue;
+                pageCondition = { page: 1, pageSize: 10 }
+                setCurrentPage(1)
+                init();
+            }} /></div>
             <div style={styles.body}>
                 <Table
+                    loading={loading}
                     bordered
                     size='small'
                     columns={columns}
@@ -166,6 +199,26 @@ export default function JobTicketOfAll() {
                         }
                         return null
                     }}
+                    pagination={{
+                        total: listLength,
+                        showTotal: () => {
+                            return <div>共{listLength}条记录</div>
+                        },
+                        current: currentPage,
+                        showSizeChanger: true,
+                        showQuickJumper: true,
+                        pageSizeOptions: ['10', '50', '100'],
+                        onShowSizeChange: (page, pageSize) => {
+                            pageCondition = { page, pageSize }
+                            setCurrentPage(page)
+                            init();
+                        },
+                        onChange: (page, pageSize) => {
+                            pageCondition = { page, pageSize }
+                            setCurrentPage(page)
+                            init();
+                        }
+                    }}
                 />
             </div>
             <JobTicketDrawerForShowEdit visible={drawer2Visible} onClose={() => { setDrawer2Visible(false); setCurrentSelectRecord(null) }} record={currentSelectRecord} resetData={init} />
@@ -174,6 +227,84 @@ export default function JobTicketOfAll() {
         </div>
     )
 }
+
+const Searchfrom = Form.create({ name: 'form' })(props => {
+    const itemProps = { labelCol: { span: 6 }, wrapperCol: { span: 18 } }
+    return <Form onSubmit={(e) => {
+        e.preventDefault();
+        props.form.validateFields((err, values) => {
+            ///values搜寻条件数据过滤
+            let newObj = {};
+            for (const key in values) {
+                if (values.hasOwnProperty(key)) {
+                    const element = values[key];
+                    if (element && (element.length > 0 || element)) {
+                        if (key === 'time') {
+                            newObj[key] = [element[0].startOf('day').format(FORMAT), element[1].endOf('day').format(FORMAT)]
+                        } else {
+                            newObj[key] = element
+                        }
+                    }
+                }
+            }
+            props.startSearch(newObj);
+        });
+    }}>
+        <Row>
+            <Col span={6}>
+                <Form.Item label='发起时间'  {...itemProps}>
+                    {props.form.getFieldDecorator('time', {
+                        initialValue: props.defaultTime,
+                        rules: [{ required: false }]
+                    })(
+                        <DatePicker.RangePicker
+                            allowClear={false}
+                            style={{ width: '100%' }}
+                            disabledDate={(current) => {
+                                return current > moment().endOf('day');
+                            }}
+                            ranges={{
+                                今日: [moment(), moment()],
+                                昨日: [moment().add(-1, 'day'), moment().add(-1, 'day')],
+                                本月: [moment().startOf('month'), moment().endOf('day')],
+                                上月: [moment().add(-1, 'month').startOf('month'), moment().add(-1, 'month').endOf('month')]
+                            }}
+                        />
+                    )}
+                </Form.Item>
+            </Col>
+            <Col span={6}>
+                <Form.Item label='专业' {...itemProps}>
+                    {props.form.getFieldDecorator('major_id', {
+                        rules: [{ required: false }]
+                    })(<Select allowClear placeholder="请选择专业" >
+                        {props.majorOptionList.map((item, index) => {
+                            return <Select.Option value={item.id} key={index} all={item}>{item.name}</Select.Option>
+                        })}
+                    </Select>)}
+                </Form.Item>
+            </Col>
+            <Col span={6}>
+                <Form.Item label='主票状态' {...itemProps}>
+                    {props.form.getFieldDecorator('status', {
+                        rules: [{ required: false }]
+                    })(<Select allowClear placeholder="请选择主票状态" >
+                        {JOB_TICKETS_STATUS.map((item, index) => {
+                            return <Select.Option value={item.value} key={index} all={item}>{item.text}</Select.Option>
+                        })}
+                    </Select>)}
+                </Form.Item>
+            </Col>
+            <Col span={6}>
+                <div style={{ textAlign: 'right', paddingTop: 3 }}>
+                    <Button type="primary" htmlType="submit">查询</Button>
+                    <Button style={{ marginLeft: 8 }} onClick={() => { props.form.resetFields() }}>清除</Button>
+                </div>
+            </Col>
+        </Row>
+    </Form>
+})
+
 const styles = {
     root: {
         padding: 10,
@@ -181,6 +312,10 @@ const styles = {
     head: {
         backgroundColor: '#FFFFFF',
         padding: "10px 10px 5px 10px",
+    },
+    header: {
+        backgroundColor: '#FFFFFF',
+        padding: '24px 24px 0px 24px',
     },
     title: {
         borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16, backgroundColor: '#FFFFFF',

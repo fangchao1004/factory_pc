@@ -95,21 +95,24 @@ export default function JobTicketOfCreate() {
     const getUserGroupList = useCallback(() => {
         if (!userList) { return null }
         let manager_list = [];
-        let other_list = [];
+        // let other_list = [];
         userList.forEach((item) => {
             if (item.is_current_major_manager) {
                 manager_list.push(item)
-            } else { other_list.push(item) }
+            } 
+            // else { other_list.push(item) }
         })
         return [<OptGroup key='a' label={<div style={{ width: '100%', justifyContent: 'space-between', display: 'flex', justifyItems: 'center' }}><span>当前专业专工</span><Button type='link' size='small' onClick={() => {
             setTicketNextUserList(manager_list.map((item) => item.id))
             ticketNextUserNameList = manager_list.map((item) => item.name)
         }}>全选</Button></div>}>
             {manager_list.map((item, index) => { return <Option key={'a' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
-        </OptGroup>,
-        <OptGroup key='b' label="其他">
-            {other_list.map((item, index) => { return <Option key={'b' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
-        </OptGroup>]
+        </OptGroup>
+        // ,
+        // <OptGroup key='b' label="其他">
+        //     {other_list.map((item, index) => { return <Option key={'b' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
+        // </OptGroup>
+        ]
     }, [userList])
     /**
      * 提取出措施票的选项
