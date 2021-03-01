@@ -49,6 +49,9 @@ export function RenderEngine({ isAgent, jsonlist, userList, currentUser, current
         case 'daterange1':
           return (
             <DatePicker.RangePicker
+              allowClear={false}
+              disabledDate={disabledDate}
+              disabledTime={(dates, partial) => { return disabledDateTime(dates, partial, item.attribute.max_hour) }}
               placeholder=''
               size='small'
               key={index}
@@ -70,6 +73,8 @@ export function RenderEngine({ isAgent, jsonlist, userList, currentUser, current
         case 'datepicker1':
           return (
             <DatePicker
+              allowClear={false}
+              disabledDate={disabledDate}
               placeholder=''
               size='small'
               key={index}
@@ -243,4 +248,35 @@ function checkCellDisable(able_list, currentStatus, currentUserPermission, isAge
     }
   })
   return disabled
+}
+function disabledDateTime(dates, type, max_hour = 8) {
+  if (dates instanceof Array && dates.length > 1) {
+    let copyDates = JSON.parse(JSON.stringify(dates))
+    let start_date = copyDates[0]
+    var start_select_hour = moment(start_date).hour()
+  }
+  let current = moment()
+  let hour = current.hour()///当前小时
+  if (type === 'start') {
+    return {
+      disabledHours: () => range(0, 24).splice(0, hour),
+    };
+  }
+  return {
+    disabledHours: () => {
+      return range(0, 24).splice(start_select_hour + max_hour + 1, 24)
+    },
+  };
+}
+
+function range(start, end) {
+  const result = [];
+  for (let i = start; i < end; i++) {
+    result.push(i);
+  }
+  return result;
+}
+
+function disabledDate(current) {
+  return current < moment().startOf('day');
 }
