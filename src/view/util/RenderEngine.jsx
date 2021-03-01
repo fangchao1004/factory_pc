@@ -50,8 +50,8 @@ export function RenderEngine({ isAgent, jsonlist, userList, currentUser, current
           return (
             <DatePicker.RangePicker
               allowClear={false}
-              disabledDate={disabledDate}
-              disabledTime={(dates, partial) => { return disabledDateTime(dates, partial, item.attribute.max_hour) }}
+              disabledDate={(date) => { return disabledDate(date) }}
+              disabledTime={(dates, partial) => { return disabledRangeTime(dates, partial, item.attribute.max_hour) }}
               placeholder=''
               size='small'
               key={index}
@@ -75,6 +75,7 @@ export function RenderEngine({ isAgent, jsonlist, userList, currentUser, current
             <DatePicker
               allowClear={false}
               disabledDate={disabledDate}
+              disabledTime={disabledDateTime}
               placeholder=''
               size='small'
               key={index}
@@ -249,7 +250,10 @@ function checkCellDisable(able_list, currentStatus, currentUserPermission, isAge
   })
   return disabled
 }
-function disabledDateTime(dates, type, max_hour = 8) {
+function disabledRangeTime(dates, type, max_hour) {
+  if (!max_hour) {
+    max_hour = 24
+  }
   if (dates instanceof Array && dates.length > 1) {
     let copyDates = JSON.parse(JSON.stringify(dates))
     let start_date = copyDates[0]
@@ -278,5 +282,16 @@ function range(start, end) {
 }
 
 function disabledDate(current) {
-  return current < moment().startOf('day');
+  return current < moment().startOf('day')
+}
+
+function disabledDateTime(date) {
+  let current = moment()
+  let hour = current.hour()///当前小时
+  let minute = current.minute()///当前分钟
+  let than_one_hour = date - current >= 1800000 ///大于30分钟
+  return {
+    disabledHours: () => range(0, 24).splice(0, hour),
+    disabledMinutes: () => range(0, than_one_hour ? 0 : minute)
+  };
 }
