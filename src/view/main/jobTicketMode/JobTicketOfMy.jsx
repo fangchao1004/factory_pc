@@ -1,5 +1,5 @@
-import { Badge, Button, Col, DatePicker, Form, Row, Select, Table, Tooltip } from 'antd';
-import React, { useCallback, useEffect, useState } from 'react'
+import { Badge, Button, Col, DatePicker, Form, Row, Select, Switch, Table, Tooltip } from 'antd';
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import { changeJobTicketStatusToText } from '../../util/Tool';
 import JobTicketDrawer from './JobTicketDrawer';
@@ -7,11 +7,13 @@ import JobTicketDrawerForShowEdit from './JobTicketDrawerForShowEdit';
 import JobTicketStepLogView from './JobTicketStepLogView';
 import moment from 'moment'
 import { JOB_TICKETS_STATUS, SUB_JOB_TICKETS_STATUS } from '../../util/AppData';
+import { AppDataContext } from '../../../redux/AppRedux';
 const FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const storage = window.localStorage;
 var searchCondition = {};
 var pageCondition = {};
 export default function JobTicketOfMy() {
+    const { appDispatch } = useContext(AppDataContext)
     const [defaultTime] = useState([moment().add(-6, 'month').startOf('day'), moment().endOf('day')])
     const [list, setList] = useState([])
     const [drawerVisible, setDrawerVisible] = useState(false)
@@ -37,6 +39,7 @@ export default function JobTicketOfMy() {
             }
         })
         let conditions = { ...searchCondition, ...pageCondition, user_id: userinfo.id }
+        // console.log('conditions:', conditions);
         let test_res_count = await HttpApi.getMyJTApplyRecordsCountByCondition(conditions)
         if (test_res_count.data.code === 0) {
             setListLength(test_res_count.data.data[0]['count'])
@@ -61,7 +64,7 @@ export default function JobTicketOfMy() {
     }, [list])
     useEffect(() => {
         ///初始条件
-        searchCondition = { time: [defaultTime[0].format(FORMAT), defaultTime[1].format(FORMAT)] }
+        searchCondition = { time: [defaultTime[0].format(FORMAT), defaultTime[1].format(FORMAT)], is_current: true }
         pageCondition = { page: 1, pageSize: 10 }
         init();
     }, [init, defaultTime])
@@ -73,6 +76,15 @@ export default function JobTicketOfMy() {
             clearInterval(loop)
         }
     }, [init])
+    const resetReduxCount = useCallback(async () => {
+        const user_id = currentUser.id
+        const time = [moment().add(-6, 'month').startOf('day').format('YYYY-MM-DD HH:mm:ss'), moment().endOf('day').format('YYYY-MM-DD HH:mm:ss')];
+        let res_jbt_current_is_me = await HttpApi.getMyJTApplyRecordsCountByCondition({ user_id, time, is_current: true })
+        if (res_jbt_current_is_me.data.code === 0) {
+            const jbt_current_is_me_count = res_jbt_current_is_me.data.data[0].count
+            appDispatch({ type: 'currentJBTCount', data: jbt_current_is_me_count })
+        }
+    }, [currentUser, appDispatch])
     const columns = [
         {
             title: '', dataIndex: 'p_id', key: 'p_id', width: 30, render: (text, record) => {
@@ -155,7 +167,6 @@ export default function JobTicketOfMy() {
                 <h2 style={styles.title}>所有工作票</h2>
             </div> */}
             <div style={styles.header}><Searchfrom defaultTime={defaultTime} majorOptionList={majorOptionList} startSearch={async (conditionsValue) => {
-                console.log('conditionsValue:', conditionsValue);
                 searchCondition = conditionsValue;
                 pageCondition = { page: 1, pageSize: 10 }
                 setCurrentPage(1)
@@ -190,8 +201,8 @@ export default function JobTicketOfMy() {
                     }}
                 />
             </div>
-            <JobTicketDrawerForShowEdit onlyShow={onlyShow} visible={drawer2Visible} onClose={() => { setDrawer2Visible(false); setCurrentSelectRecord(null) }} record={currentSelectRecord} resetData={init} />
-            <JobTicketDrawer isAgent={isAgent} visible={drawerVisible} onClose={() => { setDrawerVisible(false); setCurrentSelectRecord(null) }} record={currentSelectRecord} resetData={init} />
+            <JobTicketDrawerForShowEdit onlyShow={onlyShow} visible={drawer2Visible} onClose={() => { setDrawer2Visible(false); }} record={currentSelectRecord} resetData={init} />
+            <JobTicketDrawer isAgent={isAgent} visible={drawerVisible} onClose={() => { setDrawerVisible(false); }} record={currentSelectRecord} resetData={() => { init(); resetReduxCount() }} />
             <JobTicketStepLogView record={currentSelectRecord} visible={stepLogVisible} onCancel={() => { setStepLogVisible(false) }} />
         </div>
     )
@@ -202,12 +213,14 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
     return <Form onSubmit={(e) => {
         e.preventDefault();
         props.form.validateFields((err, values) => {
+            // console.log('values:', values);
+            // return;
             ///values搜寻条件数据过滤
             let newObj = {};
             for (const key in values) {
                 if (values.hasOwnProperty(key)) {
                     const element = values[key];
-                    if (element && (element.length > 0 || element)) {
+                    if (element) {
                         if (key === 'time') {
                             newObj[key] = [element[0].startOf('day').format(FORMAT), element[1].endOf('day').format(FORMAT)]
                         } else {
@@ -275,7 +288,16 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
                     </Select>)}
                 </Form.Item>
             </Col>
-            <Col span={24}>
+            <Col span={6}>
+                <Form.Item label='待我处理' {...itemProps}>
+                    {props.form.getFieldDecorator('is_current', {
+                        initialValue: true,
+                        valuePropName: 'checked',
+                        rules: [{ required: false }]
+                    })(<Switch checkedChildren="是" unCheckedChildren="否" />)}
+                </Form.Item>
+            </Col>
+            <Col span={18}>
                 <div style={{ textAlign: 'right', paddingTop: 3 }}>
                     <Button type="primary" htmlType="submit">查询</Button>
                     <Button style={{ marginLeft: 8 }} onClick={() => { props.form.resetFields() }}>清除</Button>

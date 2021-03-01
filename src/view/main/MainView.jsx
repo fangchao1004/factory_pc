@@ -34,7 +34,7 @@ import AccessView from './accessMode/AccessView';
 import JobTicketOfAll from './jobTicketMode/JobTicketOfAll';
 import JobTicketOfCreate from './jobTicketMode/JobTicketOfCreate';
 import JobTicketOfMy from './jobTicketMode/JobTicketOfMy';
-
+import moment from 'moment'
 const { Header, Content, Sider } = Layout;
 const SubMenu = Menu.SubMenu
 const storage = window.localStorage;
@@ -164,6 +164,14 @@ export default props => {
         appDispatch({ type: 'aboutMeTaskList', data: sortById_desc(taskList) })
         appDispatch({ type: 'runBugCount', data: runBugList.length })
         appDispatch({ type: 'allAboutMeBugList', data: sortById_desc(result) })
+        ///
+        const user_id = JSON.parse(localUserInfo).id
+        const time = [moment().add(-6, 'month').startOf('day').format('YYYY-MM-DD HH:mm:ss'), moment().endOf('day').format('YYYY-MM-DD HH:mm:ss')];
+        let res_jbt_current_is_me = await HttpApi.getMyJTApplyRecordsCountByCondition({ user_id, time, is_current: true })
+        if (res_jbt_current_is_me.data.code === 0) {
+            const jbt_current_is_me_count = res_jbt_current_is_me.data.data[0].count
+            appDispatch({ type: 'currentJBTCount', data: jbt_current_is_me_count })
+        }
     }, [appDispatch, major_id_all, permissionFix, permissionManager, permissionRun, localUserInfo])
     const getArea0List = useCallback(async () => {
         ///获取area0数据动态生成菜单栏
@@ -453,10 +461,14 @@ export default props => {
                     <Menu.Item key="/mainView/car"><Icon type="car" /><span>车辆</span><Link to={`${props.match.url}/car`} /></Menu.Item>
                     <Menu.Item key="/mainView/accesslogs"><Icon type="key" /><span>门禁</span><Link to={`${props.match.url}/accesslogs`} /></Menu.Item>
                 </SubMenu>
-                <SubMenu key="工作票" title={<span><Icon type="snippets" /><span>工作票</span></span>}>
+                <SubMenu key="工作票" title={<span><Icon type="snippets" /><span>工作票</span>
+                <Badge dot={appState.currentJBTCount > 0}style={{ marginLeft: 30 }} />
+                </span>}>
                     <Menu.Item key="/mainView/jobticketcreate"><Icon type="form" /><span>创建工作票</span><Link to={`${props.match.url}/jobticketcreate`} /></Menu.Item>
                     <Menu.Item key="/mainView/jobticketall"><Icon type="file" /><span>所有工作票</span><Link to={`${props.match.url}/jobticketall`} /></Menu.Item>
-                    <Menu.Item key="/mainView/jobticketmy"><Icon type="file-word" /><span>我的工作票</span><Link to={`${props.match.url}/jobticketmy`} /></Menu.Item>
+                    <Menu.Item key="/mainView/jobticketmy"><Icon type="file-word" />
+                    <span>我的工作票</span>
+                    <Badge count={appState.currentJBTCount} overflowCount={99} style={{ marginLeft: 35 }} /><Link to={`${props.match.url}/jobticketmy`} /></Menu.Item>
                 </SubMenu>
                 <SubMenu key="设置" title={<span><Icon type="setting" /><span>设置</span></span>}>
                     <Menu.Item key="/mainView/usersetting"><Icon type="switcher" /><span>个人中心</span><Link to={`${props.match.url}/usersetting`} /></Menu.Item>

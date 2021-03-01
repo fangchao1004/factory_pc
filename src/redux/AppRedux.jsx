@@ -9,6 +9,7 @@ const initialState = {
     heightLightBugId: 0,
     aboutMeTaskList: [],
     allAboutMeBugList: [],///所有与我相关的缺陷【专业相关+运行处理(如果有运行权限的话)去重复】
+    currentJBTCount:0,
 }
 function reducer(state, action) {
     switch (action.type) {
@@ -19,6 +20,7 @@ function reducer(state, action) {
         case 'runBugCount': return { ...state, runBugCount: action.data }
         case 'heightLightBugId': return { ...state, heightLightBugId: action.data }
         case 'allAboutMeBugList': return { ...state, allAboutMeBugList: action.data }
+        case 'currentJBTCount': return { ...state, currentJBTCount: action.data }
         default: return state
     }
 }

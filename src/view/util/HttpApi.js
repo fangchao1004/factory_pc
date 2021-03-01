@@ -1052,10 +1052,15 @@ class HttpApi {
     * @param {*} sub_status 措施票状态
     * @param {*} user_id 当前用户id
     */
-    static getMyJTApplyRecordsCountByCondition({ time, major_id, status, sub_status, user_id }) {
+    static getMyJTApplyRecordsCountByCondition({ time, major_id, status, sub_status, user_id, is_current }) {
         let sql_time = ` time >= '${time[0]}' and time <= '${time[1]}'`
         let sql_major_id = !major_id ? `` : ` and major_id = ${major_id}`
-        let sql_user_id = user_id >= 0 ? ` and history_step_user_id_list like '%,${user_id},%'` : ''
+        let sql_user_id = ''
+        if (is_current) {
+            sql_user_id = user_id >= 0 ? ` and current_step_user_id_list like '%,${user_id},%'` : ''
+        } else {
+            sql_user_id = user_id >= 0 ? ` and history_step_user_id_list like '%,${user_id},%' or user_id = ${user_id}` : ''
+        }
         let sql_status = '';
         if (status && sub_status) {
             sql_status = ` and (is_sub = 0 and status in (${status}) || is_sub = 1 and status in (${sub_status}))`
@@ -1078,11 +1083,16 @@ class HttpApi {
     * @param {*} sub_status 措施票状态
     *  @param {*} user_id 当前用户id
     */
-    static getMyJTApplyRecordsByLimit({ time, major_id, status, sub_status, page = 1, pageSize = 10, user_id }) {
+    static getMyJTApplyRecordsByLimit({ time, major_id, status, sub_status, page = 1, pageSize = 10, user_id, is_current }) {
         let startPage = (page - 1) * pageSize
         let sql_time = ` time >= '${time[0]}' and time <= '${time[1]}'`
         let sql_major_id = !major_id ? `` : ` and major_id = ${major_id}`
-        let sql_user_id = user_id >= 0 ? ` and history_step_user_id_list like '%,${user_id},%'` : ''
+        let sql_user_id = ''
+        if (is_current) {
+            sql_user_id = user_id >= 0 ? ` and current_step_user_id_list like '%,${user_id},%'` : ''
+        } else {
+            sql_user_id = user_id >= 0 ? ` and history_step_user_id_list like '%,${user_id},%' or user_id = ${user_id}` : ''
+        }
         let sql_status = '';
         if (status && sub_status) {
             sql_status = ` and (is_sub = 0 and status in (${status}) || is_sub = 1 and status in (${sub_status}))`

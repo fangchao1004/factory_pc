@@ -105,10 +105,6 @@ export default function JobTicketDrawerForShowEdit({ visible, onClose, record, r
         setLoading(false)
     }, [record, currentUser, runUserlist])
 
-    const resetHandler = useCallback(() => {
-        onClose()
-        resetData()
-    }, [onClose, resetData])
     const renderAllPage = useCallback(() => {
         if (record && currentJobTicketValue && currentJobTicketValue.pages) {
             // console.log('aaaa:', currentJobTicketValue);
@@ -146,7 +142,7 @@ export default function JobTicketDrawerForShowEdit({ visible, onClose, record, r
             width={920}
             title="工作票查看"
             placement='left'
-            onClose={resetHandler}
+            onClose={onClose}
             visible={visible}
         >
             {loading ?

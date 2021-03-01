@@ -11,7 +11,7 @@ const storage = window.localStorage;
 var step_des = '';
 var ticketNextUserNameList = [];
 export default function JobTicketDrawer({ isAgent, visible, onClose, record, resetData }) {
-    console.log('record:', record);
+    // console.log('record:', record);
     const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})///填写改动后的数值- 提交时使用
     const [currentUser] = useState(JSON.parse(storage.getItem('userinfo')))
     const [userList, setUserList] = useState([])
@@ -215,7 +215,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
             width={1200}
             title={isAgent ? "工作票调度" : "工作票处理"}
             placement='left'
-            onClose={resetHandler}
+            onClose={onClose}
             visible={visible}
         >
             {loading ?
