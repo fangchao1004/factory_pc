@@ -1059,7 +1059,7 @@ class HttpApi {
         if (is_current) {
             sql_user_id = user_id >= 0 ? ` and current_step_user_id_list like '%,${user_id},%'` : ''
         } else {
-            sql_user_id = user_id >= 0 ? ` and history_step_user_id_list like '%,${user_id},%' or user_id = ${user_id}` : ''
+            sql_user_id = user_id >= 0 ? ` and (history_step_user_id_list like '%,${user_id},%' or user_id = ${user_id})` : ''
         }
         let sql_status = '';
         if (status && sub_status) {
@@ -1091,7 +1091,7 @@ class HttpApi {
         if (is_current) {
             sql_user_id = user_id >= 0 ? ` and current_step_user_id_list like '%,${user_id},%'` : ''
         } else {
-            sql_user_id = user_id >= 0 ? ` and history_step_user_id_list like '%,${user_id},%' or user_id = ${user_id}` : ''
+            sql_user_id = user_id >= 0 ? ` and (history_step_user_id_list like '%,${user_id},%' or user_id = ${user_id})` : ''
         }
         let sql_status = '';
         if (status && sub_status) {
