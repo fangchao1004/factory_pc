@@ -29,7 +29,7 @@ export default function JobTicketOfAll() {
         const localUserInfo = storage.getItem('userinfo');
         let userinfo = JSON.parse(localUserInfo);
         setCurrentUser(userinfo)
-        let res = await HttpApi.getJobTicketsOptionList({ is_sub: [0, 1] })
+        let res = await HttpApi.getJobTicketsOptionList({ is_sub: [0] })
         if (res.data.code === 0) {
             setTypeOptionList(res.data.data)
         }
