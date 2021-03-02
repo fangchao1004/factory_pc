@@ -4,6 +4,7 @@ import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
 import { changeShowLabByStauts, checkCellWhichIsEmpty, checkDataIsLostValue, getJTRecordContentAndPlanTime, getPinYin } from '../../util/Tool';
 import moment from 'moment'
+import JobTicketStepLogView from './JobTicketStepLogView';
 const { confirm } = Modal;
 const { TextArea } = Input;
 const { Option, OptGroup } = Select
@@ -12,6 +13,7 @@ var step_des = '';
 var ticketNextUserNameList = [];
 export default function JobTicketDrawer({ isAgent, visible, onClose, record, resetData }) {
     // console.log('record:', record);
+    const [stepLogVisible, setStepLogVisible] = useState(false);///展示步骤界面
     const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})///填写改动后的数值- 提交时使用
     const [currentUser] = useState(JSON.parse(storage.getItem('userinfo')))
     const [userList, setUserList] = useState([])
@@ -251,7 +253,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                         })
                                     }}>作废</Button> : null}
                                 {showDeleteBtn && !isAgent ?
-                                    <Button type='danger' size='small' icon='delete' style={{ marginTop: 10 }} onClick={() => {
+                                    <Button type='danger' size='small' icon='delete' style={{ marginTop: 10, marginRight: 10 }} onClick={() => {
                                         confirm({
                                             title: '确认删除当前工作票吗?',
                                             content: '请自行保证准确性',
@@ -267,6 +269,10 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                             }
                                         })
                                     }}>删除</Button> : null}
+                                <Button icon='unordered-list' size='small' type='default' onClick={() => {
+                                    // console.log('选择的副票数据:', item);
+                                    setStepLogVisible(true);
+                                }}>记录</Button>
                                 {!isAgent ?
                                     <div style={{ marginTop: 10, ...styles.bar }}>
                                         <span><Tag size='small' color='blue'>处理</Tag></span>
@@ -453,7 +459,6 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                     resetHandler()
                                                     if (takeTicketAndPrint) {
                                                         console.log('打印1');
-                                                        // window.open(`http://60.174.196.158:12345/print/index.html?id=${record.job_t_r_id}`)
                                                         if (window.electron) {
                                                             setPrinting(true)
                                                             setTimeout(() => {
@@ -461,7 +466,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                             }, 60000);
                                                             window.electron.ipcRenderer.send('message', { content: 'printStart', id: record.job_t_r_id })
                                                         }
-                                                        else { window.open(`http://60.174.196.158:12345/print/index.html?id=${record.job_t_r_id}`) }
+                                                        else { message.warning('请使用桌面版本进行打印操作') }
                                                     }
                                                 }
                                             }
@@ -470,7 +475,6 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                 }}>{takeTicketAndPrint ? '提交打印' : '提交'}</Button>
                                 {showPrintBtn ? <Button type='danger' icon='file' size='small' style={{ marginTop: 10 }} onClick={() => {
                                     console.log('打印2');
-                                    // window.open(`http://60.174.196.158:12345/print/index.html?id=${record.job_t_r_id}`)
                                     if (window.electron) {
                                         setPrinting(true)
                                         setTimeout(() => {
@@ -478,11 +482,12 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                         }, 60000);
                                         window.electron.ipcRenderer.send('message', { content: 'printStart', id: record.job_t_r_id })
                                     }
-                                    else { window.open(`http://60.174.196.158:12345/print/index.html?id=${record.job_t_r_id}`) }
+                                    else { message.warning('请使用桌面版本进行打印操作') }
                                 }}>打印</Button> : null}
                             </div>
                         </Affix>
                     </div>
+                    <JobTicketStepLogView record={record} visible={stepLogVisible} onCancel={() => { setStepLogVisible(false) }} />
                 </Spin>
             }
         </Drawer >
