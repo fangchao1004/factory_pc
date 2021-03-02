@@ -1108,6 +1108,7 @@ export function getJTRecordContentAndPlanTime({ pages }) {
     let pagesList = JSON.parse(pages)
     pagesList.forEach((page) => {
         const cpts = page.components
+        console.log('cpts:', cpts)
         cpts.forEach((cpt) => {
             if (cpt.is_time) {
                 time_list = cpt.attribute.value
@@ -1141,7 +1142,7 @@ export async function createNewJobTicketApply(jobTicketValue, user_list_str, p_n
             let max_id = res_max_id.data.data[0].max_id;
             const localUserInfo = storage.getItem('userinfo');
             let userObj = JSON.parse(localUserInfo);
-            let obj = {};///暂时不考虑副票
+            let obj = {};///暂时不考虑措施票
             obj['no'] = auto_no;///自生成编号（个体编号）
             obj['job_t_r_id'] = max_id;
             obj['user_id'] = userObj.id;
@@ -1158,6 +1159,7 @@ export async function createNewJobTicketApply(jobTicketValue, user_list_str, p_n
             obj['history_step_user_id_list'] = user_list_str;
             obj['is_sub'] = jobTicketValue['is_sub'];
             obj['p_id'] = jobTicketValue['p_id'];
+            obj['type_id'] = jobTicketValue['id']
             /////
             let res2 = await HttpApi.createJTApplyRecord(obj)
             if (res2.data.code === 0) {

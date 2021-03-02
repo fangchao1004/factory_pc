@@ -10,7 +10,7 @@ const { OptGroup, Option } = Select
 const { confirm } = Modal
 const storage = window.localStorage
 var ticketNextUserNameList = [];
-let per_list = []///上次副票的选择项
+let per_list = []///上次措施票的选择项
 var currentJTExtraPageSample = []
 var per_page_value = 0///上次附页的数量
 export default function JobTicketOfCreate() {
@@ -99,7 +99,7 @@ export default function JobTicketOfCreate() {
         userList.forEach((item) => {
             if (item.is_current_major_manager) {
                 manager_list.push(item)
-            } 
+            }
             // else { other_list.push(item) }
         })
         return [<OptGroup key='a' label={<div style={{ width: '100%', justifyContent: 'space-between', display: 'flex', justifyItems: 'center' }}><span>当前专业专工</span><Button type='link' size='small' onClick={() => {
@@ -108,10 +108,10 @@ export default function JobTicketOfCreate() {
         }}>全选</Button></div>}>
             {manager_list.map((item, index) => { return <Option key={'a' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
         </OptGroup>
-        // ,
-        // <OptGroup key='b' label="其他">
-        //     {other_list.map((item, index) => { return <Option key={'b' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
-        // </OptGroup>
+            // ,
+            // <OptGroup key='b' label="其他">
+            //     {other_list.map((item, index) => { return <Option key={'b' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
+            // </OptGroup>
         ]
     }, [userList])
     /**
@@ -358,7 +358,7 @@ export default function JobTicketOfCreate() {
                                                     return
                                                 }
                                                 for (let index = 0; index < allSubTicketList.length; index++) {
-                                                    let element = allSubTicketList[index];///每个副票
+                                                    let element = allSubTicketList[index];///每个措施票
                                                     let afterCheckObj_sub = checkCellWhichIsEmpty(element, 0)
                                                     let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj_sub)
                                                     var copyAllSubTicketList = JSON.parse(JSON.stringify(allSubTicketList))
@@ -404,16 +404,16 @@ export default function JobTicketOfCreate() {
                                                                 ticketNextUserNameList = []
                                                                 ///循环添加多个措施票记录
                                                                 for (let index = 0; index < copyAllSubTicketList.length; index++) {
-                                                                    let element = copyAllSubTicketList[index];///每个副票
+                                                                    let element = copyAllSubTicketList[index];///每个措施票
                                                                     element.p_id = jbtar_id;
                                                                     let user_str = ',' + element.userInfo.user_id_list.toString() + ','
                                                                     await createNewJobTicketApply(element, user_str, p_no)
-                                                                    // console.log('添加副票记录:', res);
+                                                                    // console.log('添加措施票记录:', res);
                                                                     let res1 = await HttpApi.getLastJTApplyRecordId()
                                                                     if (res1.data.code === 0 && res.data.data.length > 0) {
                                                                         const jbtar_id_sub = res1.data.data[0]['id']
                                                                         let obj = {};
-                                                                        obj['jbtar_id'] = jbtar_id_sub /// 添加副票记录 的id
+                                                                        obj['jbtar_id'] = jbtar_id_sub /// 添加措施票记录 的id
                                                                         obj['user_id'] = currentUser.id
                                                                         obj['user_name'] = currentUser.name
                                                                         obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')

@@ -1000,8 +1000,8 @@ class HttpApi {
      * job_t_r_id 工作票记录id
      * @param {*} param0 
      */
-    static createJTApplyRecord = ({ no, job_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_sub, p_id }) => {
-        let sql = `insert into job_tickets_apply_records (no, job_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_sub,p_id) values ('${no}',${job_t_r_id},  ${user_id}, '${user_name}', '${time}', ${major_id}, '${ticket_name}', '${job_content}' ,${time_begin ? "'" + time_begin + "'" : null} ,${time_end ? "'" + time_end + "'" : null},'${per_step_user_id}', '${per_step_user_name}', '${current_step_user_id_list}', '${history_step_user_id_list}', ${is_sub}, ${p_id ? p_id : null} )`
+    static createJTApplyRecord = ({ no, job_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_sub, p_id, type_id }) => {
+        let sql = `insert into job_tickets_apply_records (no, job_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_sub,p_id,type_id) values ('${no}',${job_t_r_id},  ${user_id}, '${user_name}', '${time}', ${major_id}, '${ticket_name}', '${job_content}' ,${time_begin ? "'" + time_begin + "'" : null} ,${time_end ? "'" + time_end + "'" : null},'${per_step_user_id}', '${per_step_user_name}', '${current_step_user_id_list}', '${history_step_user_id_list}', ${is_sub}, ${p_id ? p_id : null},${type_id} )`
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**

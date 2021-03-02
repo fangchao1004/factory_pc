@@ -84,13 +84,13 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
             setActionSelectAble(true)///操作选择项可以选
             setUserSelectAble(true)///人员选择项可以选
             setShowBackOption(false)///不可以打回
-            if (record.is_sub === 1) {///副票情况【一级副票】【后续新增二级情况】
-                console.log('1111副票');
+            if (record.is_sub === 1) {///措施票情况【一级措施票】【后续新增二级情况】
+                console.log('1111措施票');
                 if (record.status === 1) {///当前待安措时
                     if (currentUser.id === record.user_id) {///如果用户是创建者，那么可以删除
                         setShowDeleteBtn(true)///展示删除按钮
                     }
-                    ///副票 状态1 待安措时 运行可以操作
+                    ///措施票 状态1 待安措时 运行可以操作
                     runUserlist(user_list, 8)///初审人名单[针对下一步2-待初审]
                 } else if (record.status === 2) {///当前待初审时
                     setShowBackOption(true)///可以打回
@@ -270,7 +270,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                         })
                                     }}>删除</Button> : null}
                                 <Button icon='unordered-list' size='small' type='default' onClick={() => {
-                                    // console.log('选择的副票数据:', item);
+                                    // console.log('选择的措施票数据:', item);
                                     setStepLogVisible(true);
                                 }}>记录</Button>
                                 {!isAgent ?
@@ -392,7 +392,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                 let { job_content, time_list } = getJTRecordContentAndPlanTime({ pages: JSON.stringify(currentJobTicketValue.pages) })
                                                 let current_step_user_id_list_temp = ''///下一步要给哪些人
                                                 if (selectValue === '1') {
-                                                    if (record.is_sub === 1) {///副票情况
+                                                    if (record.is_sub === 1) {///措施票情况
                                                         if (record.status === 5) {
                                                             current_step_user_id_list_temp = ''
                                                         } else {
@@ -433,7 +433,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                     obj['user_id'] = currentUser.id
                                                     obj['user_name'] = currentUser.name
                                                     obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
-                                                    if (record.is_sub === 1) {///副票
+                                                    if (record.is_sub === 1) {///措施票
                                                         if (selectValue === '1') {///下一步
                                                             if (record.status === 5) {///当前是5 下一步就是6
                                                                 obj['step_des'] = step_des

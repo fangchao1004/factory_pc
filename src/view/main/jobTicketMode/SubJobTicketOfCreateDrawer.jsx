@@ -6,7 +6,7 @@ const { OptGroup, Option } = Select
 var copy_currentSubJBT = {}
 var ticketNextUserNameList = []
 export default function SubJobTicketOfCreateDrawer({ visible, onClose, currentSubJBT, userList, currentUser, sbjtvalueChangeCallback }) {
-    const [ticketNextUserList, setTicketNextUserList] = useState([])/// allSubTicketList 内容每个副票所对应的 某些处理人id[{1,2},{1,2},...]
+    const [ticketNextUserList, setTicketNextUserList] = useState([])/// allSubTicketList 内容每个措施票所对应的 某些处理人id[{1,2},{1,2},...]
     // console.log('新 currentSubJBT:', currentSubJBT);
     const renderAllPage = useCallback(() => {
         if (!currentSubJBT.pages) { return null }

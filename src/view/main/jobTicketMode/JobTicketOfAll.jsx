@@ -163,7 +163,7 @@ export default function JobTicketOfAll() {
                             return record.sub_tickets.map((item, index) => {
                                 let is_over = false
                                 if (item.is_sub === 0 && item.status === 4) { is_over = true }///主票完结
-                                else if (item.is_sub === 1 && item.status === 6) { is_over = true }///副票是否完结
+                                else if (item.is_sub === 1 && item.status === 6) { is_over = true }///措施票是否完结
                                 let inCurrentUserList = false
                                 inCurrentUserList = item.current_step_user_id_list.indexOf(`,${currentUser.id},`) !== -1///是否为当前处理人
                                 return <div key={index}>
@@ -172,7 +172,7 @@ export default function JobTicketOfAll() {
                                     <Tag color='blue' style={{ marginLeft: 10 }}>{changeJobTicketStatusToText(item.status, 1)}</Tag>
                                     {inCurrentUserList ?
                                         <Button disabled={!inCurrentUserList} icon='file-search' size='small' type='primary' onClick={() => {
-                                            // console.log('选择的副票数据:', item);
+                                            // console.log('选择的措施票数据:', item);
                                             setIsAgent(false);
                                             setCurrentSelectRecord(item)
                                             setDrawerVisible(true);
@@ -186,7 +186,7 @@ export default function JobTicketOfAll() {
                                             : null
                                     }
                                     <Button style={{ marginLeft: 10 }} icon='unordered-list' size='small' type='default' onClick={() => {
-                                        // console.log('选择的副票数据:', item);
+                                        // console.log('选择的措施票数据:', item);
                                         setCurrentSelectRecord(item);
                                         setStepLogVisible(true);
                                     }}>记录</Button>

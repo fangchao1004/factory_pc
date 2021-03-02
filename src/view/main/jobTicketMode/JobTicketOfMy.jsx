@@ -281,10 +281,10 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
                 </Form.Item>
             </Col>
             <Col span={6}>
-                <Form.Item label='副票状态' {...itemProps}>
+                <Form.Item label='措施票状态' {...itemProps}>
                     {props.form.getFieldDecorator('sub_status', {
                         rules: [{ required: false }]
-                    })(<Select allowClear placeholder="请选择主票状态" >
+                    })(<Select allowClear placeholder="请选择措施票状态" >
                         {SUB_JOB_TICKETS_STATUS.map((item, index) => {
                             return <Select.Option value={item.value} key={index} all={item}>{item.text}</Select.Option>
                         })}
