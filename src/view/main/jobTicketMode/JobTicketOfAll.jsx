@@ -1,4 +1,4 @@
-import { Badge, Button, Col, DatePicker, Form, Icon, Row, Select, Table, Tag, Tooltip } from 'antd';
+import { Badge, Button, Col, DatePicker, Form, Icon, Input, Row, Select, Table, Tag, Tooltip } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import { changeJobTicketStatusToText } from '../../util/Tool';
@@ -139,11 +139,7 @@ export default function JobTicketOfAll() {
     ]
     return (
         <div style={styles.root}>
-            {/* <div style={styles.head}>
-                <h2 style={styles.title}>所有工作票</h2>
-            </div> */}
             <div style={styles.header}><Searchfrom defaultTime={defaultTime} majorOptionList={majorOptionList} startSearch={async (conditionsValue) => {
-                console.log('conditionsValue:', conditionsValue);
                 searchCondition = conditionsValue;
                 pageCondition = { page: 1, pageSize: 10 }
                 setCurrentPage(1)
@@ -296,6 +292,13 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
                 </Form.Item>
             </Col>
             <Col span={6}>
+                <Form.Item label='编号查询' {...itemProps}>
+                    {props.form.getFieldDecorator('no', {
+                        rules: [{ required: false }]
+                    })(<Input placeholder='请输入编号(模糊查询)'/>)}
+                </Form.Item>
+            </Col>
+            <Col span={24}>
                 <div style={{ textAlign: 'right', paddingTop: 3 }}>
                     <Button type="primary" htmlType="submit">查询</Button>
                     <Button style={{ marginLeft: 8 }} onClick={() => { props.form.resetFields() }}>清除</Button>
@@ -309,13 +312,9 @@ const styles = {
     root: {
         padding: 10,
     },
-    head: {
-        backgroundColor: '#FFFFFF',
-        padding: "10px 10px 5px 10px",
-    },
     header: {
         backgroundColor: '#FFFFFF',
-        padding: '24px 24px 0px 24px',
+        padding: '24px 24px 24px 24px',
     },
     title: {
         borderLeft: 4, borderLeftColor: "#3080fe", borderLeftStyle: 'solid', paddingLeft: 5, fontSize: 16, backgroundColor: '#FFFFFF',

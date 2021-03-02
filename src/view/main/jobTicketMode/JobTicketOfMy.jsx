@@ -1,4 +1,4 @@
-import { Badge, Button, Col, DatePicker, Form, Row, Select, Switch, Table, Tooltip } from 'antd';
+import { Badge, Button, Col, DatePicker, Form, Input, Row, Select, Switch, Table, Tooltip } from 'antd';
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import { changeJobTicketStatusToText } from '../../util/Tool';
@@ -27,6 +27,7 @@ export default function JobTicketOfMy() {
     const [loading, setLoading] = useState(false)
     const [majorOptionList, setMajorOptionList] = useState([])
     const [onlyShow, setOnlyShow] = useState(true)
+    const [isCurrentMe, setIsCurrentMe] = useState(true)
     const init = useCallback(async () => {
         setLoading(true)
         const localUserInfo = storage.getItem('userinfo');
@@ -38,7 +39,7 @@ export default function JobTicketOfMy() {
                 setMajorOptionList(temp_major)
             }
         })
-        let conditions = { ...searchCondition, ...pageCondition, user_id: userinfo.id }
+        let conditions = { ...searchCondition, ...pageCondition, user_id: userinfo.id, is_current: isCurrentMe }
         // console.log('conditions:', conditions);
         let test_res_count = await HttpApi.getMyJTApplyRecordsCountByCondition(conditions)
         if (test_res_count.data.code === 0) {
@@ -52,7 +53,7 @@ export default function JobTicketOfMy() {
         }
         setList(main_list)
         setLoading(false)
-    }, [])
+    }, [isCurrentMe])
     const readLocalRecord = useCallback(async (record) => {
         if (record.is_read) { return }
         let copy_list = JSON.parse(JSON.stringify(list))
@@ -64,10 +65,10 @@ export default function JobTicketOfMy() {
     }, [list])
     useEffect(() => {
         ///初始条件
-        searchCondition = { time: [defaultTime[0].format(FORMAT), defaultTime[1].format(FORMAT)], is_current: true }
+        searchCondition = { time: [defaultTime[0].format(FORMAT), defaultTime[1].format(FORMAT)], is_current: isCurrentMe }
         pageCondition = { page: 1, pageSize: 10 }
         init();
-    }, [init, defaultTime])
+    }, [init, defaultTime, isCurrentMe])
     useEffect(() => {
         let loop = setInterval(() => {
             init();
@@ -163,15 +164,17 @@ export default function JobTicketOfMy() {
     ]
     return (
         <div style={styles.root}>
-            {/* <div style={styles.head}>
-                <h2 style={styles.title}>所有工作票</h2>
-            </div> */}
-            <div style={styles.header}><Searchfrom defaultTime={defaultTime} majorOptionList={majorOptionList} startSearch={async (conditionsValue) => {
-                searchCondition = conditionsValue;
-                pageCondition = { page: 1, pageSize: 10 }
-                setCurrentPage(1)
-                init();
-            }} /></div>
+            <div style={styles.header}>
+                <Searchfrom defaultTime={defaultTime} majorOptionList={majorOptionList} startSearch={async (conditionsValue) => {
+                    searchCondition = conditionsValue;
+                    pageCondition = { page: 1, pageSize: 10 }
+                    setCurrentPage(1)
+                    init();
+                }} />
+                <span style={styles.switch}>
+                    <span>待我处理：</span><Switch checkedChildren="是" unCheckedChildren="否" checked={isCurrentMe} onChange={(v) => { setIsCurrentMe(v) }} />
+                </span>
+            </div>
             <div style={styles.body}>
                 <Table
                     loading={loading}
@@ -289,12 +292,10 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
                 </Form.Item>
             </Col>
             <Col span={6}>
-                <Form.Item label='待我处理' {...itemProps}>
-                    {props.form.getFieldDecorator('is_current', {
-                        initialValue: true,
-                        valuePropName: 'checked',
+                <Form.Item label='编号查询' {...itemProps}>
+                    {props.form.getFieldDecorator('no', {
                         rules: [{ required: false }]
-                    })(<Switch checkedChildren="是" unCheckedChildren="否" />)}
+                    })(<Input placeholder='请输入编号(模糊查询)'/>)}
                 </Form.Item>
             </Col>
             <Col span={18}>
@@ -311,9 +312,8 @@ const styles = {
     root: {
         padding: 10,
     },
-    head: {
-        backgroundColor: '#FFFFFF',
-        padding: "10px 10px 5px 10px",
+    switch: {
+        marginTop: -30,
     },
     header: {
         backgroundColor: '#FFFFFF',
