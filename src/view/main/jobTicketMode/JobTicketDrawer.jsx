@@ -324,6 +324,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                     if (isAgent) {
                                         console.log('调度的情况时');
                                         if (ticketNextUserNameList.length === 0) { message.error('请选择新的处理人员'); return }
+                                        if (!remark) { message.error('调度时，备注必填'); return }
                                         confirm({
                                             title: '确认提交吗?',
                                             content: '请自行保证准确性',
