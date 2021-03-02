@@ -23,20 +23,18 @@ export default function JobTicketOfAll() {
     const [currentPage, setCurrentPage] = useState(1)
     const [listLength, setListLength] = useState(0)
     const [loading, setLoading] = useState(false)
-    const [majorOptionList, setMajorOptionList] = useState([])
+    const [typeOptionList, setTypeOptionList] = useState([])
     const init = useCallback(async () => {
         setLoading(true)
         const localUserInfo = storage.getItem('userinfo');
         let userinfo = JSON.parse(localUserInfo);
         setCurrentUser(userinfo)
-        HttpApi.getUserMajor({ effective: 1 }, data => {
-            if (data.data.code === 0) {
-                let temp_major = data.data.data.map((item) => { return { id: item.id, name: item.name } })
-                setMajorOptionList(temp_major)
-            }
-        })
+        let res = await HttpApi.getJobTicketsOptionList({ is_sub: [0, 1] })
+        if (res.data.code === 0) {
+            setTypeOptionList(res.data.data)
+        }
         let conditions = { ...searchCondition, ...pageCondition }
-        // console.log('conditions:', conditions);
+        console.log('conditions:', conditions);
         let test_res_count = await HttpApi.getMainJTApplyRecordsCountByCondition(conditions)
         if (test_res_count.data.code === 0) {
             setListLength(test_res_count.data.data[0]['count'])
@@ -139,7 +137,7 @@ export default function JobTicketOfAll() {
     ]
     return (
         <div style={styles.root}>
-            <div style={styles.header}><Searchfrom defaultTime={defaultTime} majorOptionList={majorOptionList} startSearch={async (conditionsValue) => {
+            <div style={styles.header}><Searchfrom defaultTime={defaultTime} typeOptionList={typeOptionList} startSearch={async (conditionsValue) => {
                 searchCondition = conditionsValue;
                 pageCondition = { page: 1, pageSize: 10 }
                 setCurrentPage(1)
@@ -270,12 +268,12 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
                 </Form.Item>
             </Col>
             <Col span={6}>
-                <Form.Item label='专业' {...itemProps}>
-                    {props.form.getFieldDecorator('major_id', {
+                <Form.Item label='票类型' {...itemProps}>
+                    {props.form.getFieldDecorator('type_id', {
                         rules: [{ required: false }]
-                    })(<Select allowClear placeholder="请选择专业" >
-                        {props.majorOptionList.map((item, index) => {
-                            return <Select.Option value={item.id} key={index} all={item}>{item.name}</Select.Option>
+                    })(<Select allowClear placeholder="请选择票类型" >
+                        {props.typeOptionList.map((item, index) => {
+                            return <Select.Option value={item.id} key={index} all={item}>{item.ticket_name}</Select.Option>
                         })}
                     </Select>)}
                 </Form.Item>
@@ -295,7 +293,7 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
                 <Form.Item label='编号查询' {...itemProps}>
                     {props.form.getFieldDecorator('no', {
                         rules: [{ required: false }]
-                    })(<Input placeholder='请输入编号(模糊查询)'/>)}
+                    })(<Input placeholder='请输入编号(模糊查询)' />)}
                 </Form.Item>
             </Col>
             <Col span={24}>

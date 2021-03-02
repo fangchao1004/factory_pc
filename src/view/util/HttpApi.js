@@ -960,8 +960,9 @@ class HttpApi {
         where bug_step_log.effective = 1 and bug_step_log.bug_id = ${bugId}`
         return Axios.post(Testuri + 'obs', { sql })
     }
-    static getJobTicketsOptionList = () => {
-        let sql = `select id,ticket_name from job_tickets where is_delete = 0 and is_sub = 0 and is_extra = 0`
+    static getJobTicketsOptionList = ({ is_sub }) => {
+        let is_sub_str = is_sub.join(',')
+        let sql = `select id,ticket_name from job_tickets where is_delete = 0 and is_sub in (${is_sub_str}) and is_extra = 0`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getJobTicketsList = ({ id }) => {
@@ -1007,14 +1008,14 @@ class HttpApi {
     /**
      * 获取符合条件的主票数量
      * @param {*} time 创建时间
-     * @param {*} major_id 对应专业
+     * @param {*} type_id 对应票类型
      */
-    static getMainJTApplyRecordsCountByCondition({ time, major_id, status, no }) {
+    static getMainJTApplyRecordsCountByCondition({ time, type_id, status, no }) {
         let sql_time = ` time >= '${time[0]}' and time <= '${time[1]}'`
-        let sql_major_id = !major_id ? `` : ` and major_id = ${major_id}`
+        let sql_type_id = !type_id ? `` : ` and type_id = ${type_id}`
         let sql_status = !status ? `` : ` and status = ${status}`
         let sql_no = !no ? `` : ` and no like '%${no}%'`
-        let all_sql_condtion = sql_time + sql_major_id + sql_status + sql_no
+        let all_sql_condtion = sql_time + sql_type_id + sql_status + sql_no
         let sql = `select count(id) as count from job_tickets_apply_records where is_delete = 0 and is_stop = 0 and p_id is null and ${all_sql_condtion}`
         // console.log('sql1:', sql)
         return Axios.post(Testuri + 'obs', { sql })
@@ -1024,13 +1025,13 @@ class HttpApi {
      * @param {*} page 当前页码
      * @param {*} pageSize 当前一页条数 
      */
-    static getMainJTApplyRecordsByLimit({ time, major_id, page = 1, pageSize = 10, status, no }) {
+    static getMainJTApplyRecordsByLimit({ time, type_id, page = 1, pageSize = 10, status, no }) {
         let startPage = (page - 1) * pageSize
         let sql_time = ` time >= '${time[0]}' and time <= '${time[1]}'`
-        let sql_major_id = !major_id ? `` : ` and major_id = ${major_id}`
+        let sql_type_id = !type_id ? `` : ` and type_id = ${type_id}`
         let sql_status = !status ? `` : ` and status = ${status}`
         let sql_no = !no ? `` : ` and no like '%${no}%'`
-        let all_sql_condtion = sql_time + sql_major_id + sql_status + sql_no
+        let all_sql_condtion = sql_time + sql_type_id + sql_status + sql_no
         let sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = 0 and p_id is null and ${all_sql_condtion}
         order by id desc limit ${startPage},${pageSize}`
         // console.log('sql2:', sql)
@@ -1049,14 +1050,14 @@ class HttpApi {
     /**
     * 获取符合条件的与我相关的票的数量【不区分主票还是措施票】
     * @param {*} time 创建时间
-    * @param {*} major_id 对应专业
+    * @param {*} type_id 对应票类型
     * @param {*} status 主票状态
     * @param {*} sub_status 措施票状态
     * @param {*} user_id 当前用户id
     */
-    static getMyJTApplyRecordsCountByCondition({ time, major_id, status, sub_status, user_id, is_current, no }) {
+    static getMyJTApplyRecordsCountByCondition({ time, type_id, status, sub_status, user_id, is_current, no }) {
         let sql_time = ` time >= '${time[0]}' and time <= '${time[1]}'`
-        let sql_major_id = !major_id ? `` : ` and major_id = ${major_id}`
+        let sql_type_id = !type_id ? `` : ` and type_id = ${type_id}`
         let sql_no = !no ? `` : ` and no like '%${no}%'`
         let sql_user_id = ''
         if (is_current) {
@@ -1072,7 +1073,7 @@ class HttpApi {
         } else if (status && !sub_status) {
             sql_status = ` and is_sub = 0 and status in (${status})`
         }
-        let all_sql_condtion = sql_time + sql_major_id + sql_status + sql_user_id + sql_no
+        let all_sql_condtion = sql_time + sql_type_id + sql_status + sql_user_id + sql_no
         let sql = `select count(id) as count from job_tickets_apply_records where is_delete = 0 and is_stop = 0  and ${all_sql_condtion}`
         // console.log('sql1:', sql)
         return Axios.post(Testuri + 'obs', { sql })
@@ -1081,15 +1082,15 @@ class HttpApi {
     /**
     * 获取符合条件的与我相关的票【不区分主票还是措施票】
     * @param {*} time 创建时间
-    * @param {*} major_id 对应专业
+    * @param {*} type_id 对应票类型
     * @param {*} status 主票状态
     * @param {*} sub_status 措施票状态
     *  @param {*} user_id 当前用户id
     */
-    static getMyJTApplyRecordsByLimit({ time, major_id, status, sub_status, page = 1, pageSize = 10, user_id, is_current, no }) {
+    static getMyJTApplyRecordsByLimit({ time, type_id, status, sub_status, page = 1, pageSize = 10, user_id, is_current, no }) {
         let startPage = (page - 1) * pageSize
         let sql_time = ` time >= '${time[0]}' and time <= '${time[1]}'`
-        let sql_major_id = !major_id ? `` : ` and major_id = ${major_id}`
+        let sql_type_id = !type_id ? `` : ` and type_id = ${type_id}`
         let sql_no = !no ? `` : ` and no like '%${no}%'`
         let sql_user_id = ''
         if (is_current) {
@@ -1105,9 +1106,9 @@ class HttpApi {
         } else if (status && !sub_status) {
             sql_status = ` and is_sub = 0 and status in (${status})`
         }
-        let all_sql_condtion = sql_time + sql_major_id + sql_status + sql_user_id + sql_no
+        let all_sql_condtion = sql_time + sql_type_id + sql_status + sql_user_id + sql_no
         let sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = 0 and ${all_sql_condtion}  order by id desc limit ${startPage},${pageSize}`
-        // console.log('sql1:', sql)
+        // console.log('sql2:', sql)
         return Axios.post(Testuri + 'obs', { sql })
     }
 

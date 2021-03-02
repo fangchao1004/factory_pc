@@ -80,7 +80,7 @@ export default function JobTicketOfCreate() {
         per_page_value = 0
     }, [userList])
     const init = useCallback(async () => {
-        let res = await HttpApi.getJobTicketsOptionList()
+        let res = await HttpApi.getJobTicketsOptionList({ is_sub: [0] })
         if (res.data.code === 0) {
             setJobTicketsOption(res.data.data)
         }
