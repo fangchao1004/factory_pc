@@ -1377,3 +1377,28 @@ export function getPinYin(target_str) {
     // }
     return getPy(target_str);
 };
+
+export async function getTargetMajorManagerList({ major_id }) {
+    let managerList_res = await HttpApi.getManagerIdListByMajorId({ major_id })
+    if (managerList_res.data.code === 0) {
+        let managerList = managerList_res.data.data
+        let userlist_res = await HttpApi.getUserInfo({ effective: 1 })
+        if (userlist_res.data.code === 0) {
+            let allUserList = userlist_res.data.data.map((item) => { return { id: item.id, name: item.name } })
+            allUserList.forEach((item) => {
+                item.is_current_major_manager = false
+                managerList.forEach((ele) => {
+                    if (item.id === ele.user_id) { item.is_current_major_manager = true }
+                })
+            })
+            let majorManagerList = []
+            let otherList = []
+            allUserList.forEach((item) => {
+                if (item.is_current_major_manager) {
+                    majorManagerList.push({ id: item.id, name: item.name })
+                } else { otherList.push({ id: item.id, name: item.name }) }
+            })
+            return { majorManagerList, otherList }
+        }
+    }
+}

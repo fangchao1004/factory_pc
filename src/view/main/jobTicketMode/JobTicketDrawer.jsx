@@ -2,7 +2,7 @@ import { Button, Drawer, Select, message, Modal, Affix, Tag, Input, Spin, Alert 
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { changeShowLabByStauts, checkCellWhichIsEmpty, checkDataIsLostValue, getJTRecordContentAndPlanTime, getPinYin } from '../../util/Tool';
+import { changeShowLabByStauts, checkCellWhichIsEmpty, checkDataIsLostValue, getJTRecordContentAndPlanTime, getPinYin, getTargetMajorManagerList } from '../../util/Tool';
 import moment from 'moment'
 import JobTicketStepLogView from './JobTicketStepLogView';
 const { confirm } = Modal;
@@ -12,7 +12,6 @@ const storage = window.localStorage;
 var step_des = '';
 var ticketNextUserNameList = [];
 export default function JobTicketDrawer({ isAgent, visible, onClose, record, resetData }) {
-    // console.log('record:', record);
     const [stepLogVisible, setStepLogVisible] = useState(false);///展示步骤界面
     const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})///填写改动后的数值- 提交时使用
     const [currentUser] = useState(JSON.parse(storage.getItem('userinfo')))
@@ -91,28 +90,36 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                         setShowDeleteBtn(true)///展示删除按钮
                     }
                     ///措施票 状态1 待安措时 运行可以操作
-                    runUserlist(user_list, 8)///初审人名单[针对下一步2-待初审]
+                    runUserlist(user_list, isAgent ? 11 : 8)///初审人名单[针对下一步2-待初审]
                 } else if (record.status === 2) {///当前待初审时
                     setShowBackOption(true)///可以打回
                     setShowStopBtn(true)///可以作废
-                    runUserlist(user_list, 9)///复审人名单[针对下一步3-待复审]
+                    runUserlist(user_list, isAgent ? 8 : 9)///复审人名单[针对下一步3-待复审]
                 } else if (record.status === 3) {///当前待复审时
                     setShowBackOption(true)///可以打回
                     setShowStopBtn(true)///可以作废
-                    runUserlist(user_list, 10)///批准人名单[针对下一步4-待批准]
+                    runUserlist(user_list, isAgent ? 9 : 10)///批准人名单[针对下一步4-待批准]
                 } else if (record.status === 4) {///当前待批准
                     setShowBackOption(true)///可以打回
                     setShowStopBtn(true)///可以作废
-                    runUserlist(user_list, 11)///运行值长名单[针对下一步5-待完结]
-                } else if (record.status === 5 || record.status === 6) {///当前待完结和完结时
+                    runUserlist(user_list, isAgent ? 10 : 11)///运行值长名单[针对下一步5-待完结]
+                } else if (record.status === 5) {///当前待完结和完结时
                     setShowStopBtn(true)///可以作废
                     setShowPrintBtn(true)///可以打印
+                    runUserlist(user_list, 11)
+                } else if (record.status === 6) {
                     setUserSelectAble(false)///不可选择人员
                 }
             } else if (record.is_sub === 0) {///主票情况
                 console.log('1111主票');
                 if (record.status === 1) {///当前待签发
-                    runUserlist(user_list, 11)///运行值长
+                    if (isAgent) {
+                        let { majorManagerList, otherList } = await getTargetMajorManagerList({ major_id: record.major_id })
+                        setRunnerList(majorManagerList) ///当前专业专工
+                        setOtherList(otherList)
+                    } else {
+                        runUserlist(user_list, 11)///运行值长
+                    }
                     if (currentUser.id === record.user_id) {
                         setShowDeleteBtn(true)///展示删除按钮
                     }
@@ -121,16 +128,18 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                     setShowStopBtn(true)///可以作废
                     setShowBackOption(true)///可以打回
                     runUserlist(user_list, 11)///运行值长
-                } else if (record.status === 3 || record.status === 4) {///当前待完结和完结时
+                } else if (record.status === 3) {///当前待完结
                     setShowStopBtn(true)///可以作废
                     setShowPrintBtn(true)///可以打印
                     setShowBackOption(true)///可以打回
+                    runUserlist(user_list, 11)///运行值长
+                } else if (record.status === 4) {///完结时
                     setUserSelectAble(false)///不可选择人员
                 }
             }
         }
         setLoading(false)
-    }, [record, currentUser, runUserlist])
+    }, [record, currentUser, runUserlist, isAgent])
 
     const resetHandler = useCallback(() => {
         onClose()
