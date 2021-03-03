@@ -249,7 +249,7 @@ export default function JobTicketOfMy() {
                             </div> : null
                         if (props.record.sub_tickets && props.record.sub_tickets.length > 0) {
                             let tags = props.record.sub_tickets.map((item, index) => {
-                                return <Tooltip key={index} title={item.id + ' ' + item.no + ' ' + item.ticket_name} placement="left">
+                                return <Tooltip key={index} title={item.id + ' ' + item.no} placement="left">
                                     <Button icon='tag' size='small' type='link' style={{ color: 'orange' }} onClick={() => {
                                         setCurrentSelectRecord(item)
                                         setDrawer2Visible(true)
