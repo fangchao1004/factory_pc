@@ -179,7 +179,7 @@ export default function JobTicketOfMy() {
             title: '操作', dataIndex: 'action', key: 'action', align: 'center', width: 100, render: (_, record) => {
                 let is_over = false
                 if (record.is_sub !== 1 && record.status === 4) { is_over = true }
-                else if (record.is_sub === 1 && record.status === 5) { is_over = true }///是否完结
+                else if (record.is_sub === 1 && record.status === 6) { is_over = true }///是否完结
                 let inCurrentUserList = false
                 inCurrentUserList = record.current_step_user_id_list.indexOf(`,${currentUser.id},`) !== -1;///是否为当前处理人
                 return <div>
@@ -225,7 +225,7 @@ export default function JobTicketOfMy() {
                         // console.log('props.record:',props.record);
                         let is_over = false
                         if (props.record.is_sub !== 1 && props.record.status === 4) { is_over = true }
-                        else if (props.record.is_sub === 1 && props.record.status === 5) { is_over = true }///是否完结
+                        else if (props.record.is_sub === 1 && props.record.status === 6) { is_over = true }///是否完结
                         let topAdd = props.record.is_sub === 0 && !is_over && (hasFixPer || hasManagerPer) ? ///主票未完结时且有维修或专工权限
                             <div key={'x'}>
                                 <Tooltip title={'新增措施票'} placement="left">
