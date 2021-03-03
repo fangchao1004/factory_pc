@@ -126,7 +126,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                         setShowDeleteBtn(true)///展示删除按钮
                     }
                 } else if (record.status === 2) {///当前待接票
-                    if (!isAgent) setTakeTicketAndPrint(true)///可以【提交打印】
+                    // if (!isAgent && selectValue === '1') setTakeTicketAndPrint(true)///处理 下一步时 可以【提交打印】
                     setShowStopBtn(true)///可以作废
                     setShowBackOption(true)///可以打回
                     runUserlist(user_list, 11)///运行值长
@@ -143,6 +143,11 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
         }
         setLoading(false)
     }, [record, currentUser, runUserlist, isAgent])
+
+    const init2 = useCallback(() => {
+        if (!isAgent && selectValue === '1' && record && record.is_sub === 0 && record.status === 2) setTakeTicketAndPrint(true)///处理 下一步时 可以【提交打印】
+        else { setTakeTicketAndPrint(false) }
+    }, [isAgent, selectValue, record])
 
     const resetHandler = useCallback(() => {
         onClose()
@@ -204,9 +209,9 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
             init();
         }, 500);
     }, [init])
-    // useEffect(() => {
-    //     init2();
-    // }, [init2])
+    useEffect(() => {
+        init2();
+    }, [init2])
     useEffect(() => {
         if (window.electron) {
             console.log('添加监听');
@@ -225,6 +230,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
     }, [])
     return (
         <Drawer
+            maskClosable={false}
             destroyOnClose={true}
             width={1200}
             title={isAgent ? "工作票调度" : "工作票处理"}

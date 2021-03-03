@@ -1193,7 +1193,7 @@ export function changeJobTicketStatusToText(status, is_sub = 0) {
  */
 export function changeShowLabByStauts(status, is_sub) {
     let res = ''
-    if (is_sub === 1) {
+    if (is_sub !== 0) {
         switch (status) {
             case 1:
                 res = '待作业单位审核'
