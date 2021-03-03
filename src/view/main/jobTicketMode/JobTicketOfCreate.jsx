@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 // import { testData } from '../../../assets/testJson'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty, copyArrayItem, checkDataIsLostUserlist, autoCalculateFootPageValue, getPinYin } from '../../util/Tool'
+import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty, copyArrayItem, checkDataIsLostUserlist, autoCalculateFootPageValue, getPinYin, autoFillNo } from '../../util/Tool'
 import moment from 'moment'
 import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer'
 const { OptGroup, Option } = Select
@@ -410,7 +410,7 @@ export default function JobTicketOfCreate() {
                                                                     await createNewJobTicketApply(element, user_str, p_no)
                                                                     // console.log('添加措施票记录:', res);
                                                                     let res1 = await HttpApi.getLastJTApplyRecordId()
-                                                                    if (res1.data.code === 0 && res.data.data.length > 0) {
+                                                                    if (res1.data.code === 0 && res1.data.data.length > 0) {
                                                                         const jbtar_id_sub = res1.data.data[0]['id']
                                                                         let obj = {};
                                                                         obj['jbtar_id'] = jbtar_id_sub /// 添加措施票记录 的id
@@ -450,27 +450,10 @@ export default function JobTicketOfCreate() {
                     userList={userList}
                     currentUser={currentUser}
                     sbjtvalueChangeCallback={(v) => {
-                        v.pages.forEach((page) => {
-                            const cpts = page.components
-                            cpts.forEach((cpt) => {
-                                if (cpt.is_active) {
-                                    const active_value = cpt.attribute.value;
-                                    const twins_id = cpt.twins_id
-                                    cpts.forEach((cpt2) => {
-                                        if (cpt2.is_response && cpt2.twins_id === twins_id) {
-                                            if (active_value) {
-                                                cpt2.attribute.value = cpt2.default_value
-                                            } else {
-                                                cpt2.attribute.value = ''
-                                            }
-                                        }
-                                    })
-                                }
-                            })
-                        })
+                        let new_v = autoFillNo(v)
                         allSubTicketList.forEach((oneSubTicket) => {
                             if (oneSubTicket.id === currentSubJBT.id) {
-                                oneSubTicket.pages = v.pages
+                                oneSubTicket.pages = new_v.pages
                             }
                         })
                         setAllSubTicketList(allSubTicketList)

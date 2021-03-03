@@ -1,13 +1,14 @@
-import { Badge, Button, Col, DatePicker, Form, Input, Row, Select, Switch, Table, Tooltip } from 'antd';
+import { Badge, Button, Col, DatePicker, Dropdown, Form, Input, Menu, Row, Select, Switch, Table, Tooltip } from 'antd';
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
-import { changeJobTicketStatusToText } from '../../util/Tool';
+import { autoFillNo, changeJobTicketStatusToText } from '../../util/Tool';
 import JobTicketDrawer from './JobTicketDrawer';
 import JobTicketDrawerForShowEdit from './JobTicketDrawerForShowEdit';
 import JobTicketStepLogView from './JobTicketStepLogView';
 import moment from 'moment'
 import { JOB_TICKETS_STATUS, SUB_JOB_TICKETS_STATUS } from '../../util/AppData';
 import { AppDataContext } from '../../../redux/AppRedux';
+import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer';
 const FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const storage = window.localStorage;
 var searchCondition = {};
@@ -28,27 +29,67 @@ export default function JobTicketOfMy() {
     const [typeOptionList, setTypeOptionList] = useState([])
     const [onlyShow, setOnlyShow] = useState(true)
     const [isCurrentMe, setIsCurrentMe] = useState(true)
+    const [hasFixPer, setHasFixPer] = useState(false)
+    const [hasManagerPer, setHasManagerPer] = useState(false)
+    const [sbtvisible, setSbtvisible] = useState(false)
+    const [currentSubJBT, setCurrentSubJBT] = useState({})
+    const [userList, setUserList] = useState([])
     const init = useCallback(async () => {
         setLoading(true)
         const localUserInfo = storage.getItem('userinfo');
         let userinfo = JSON.parse(localUserInfo);
         setCurrentUser(userinfo)
-        let res = await HttpApi.getJobTicketsOptionList({ is_sub: [0, 1] })
-        if (res.data.code === 0) {
-            setTypeOptionList(res.data.data)
+        // console.log('userinfo:', userinfo);
+        setHasManagerPer(userinfo.permission.split(',').indexOf('0') !== -1)
+        setHasFixPer(userinfo.permission.split(',').indexOf('3') !== -1)
+        let res_user = await HttpApi.getUserInfo({ effective: 1 })
+        if (res_user.data.code === 0) {
+            var user_list = res_user.data.data.map((item) => { return { id: item.id, name: item.name } })
+            // setUserList(user_list)
+            let runnerList_res = await HttpApi.getRunnerIdList({ role_id: 11 })///运行值长
+            if (runnerList_res.data.code === 0) {
+                let runnerList = runnerList_res.data.data;
+                user_list.forEach((user) => {
+                    user.is_runner = false
+                    runnerList.forEach((runner) => {
+                        if (user.id === runner.user_id) {
+                            user.is_runner = true
+                        }
+                    })
+                })
+                setUserList(user_list)
+            }
         }
+        let res = await HttpApi.getJobTicketsOptionList({ is_sub: [0, 1] })
+        if (res.data.code === 0) { setTypeOptionList(res.data.data) }
         let conditions = { ...searchCondition, ...pageCondition, user_id: userinfo.id, is_current: isCurrentMe }
         // console.log('conditions:', conditions);
         let test_res_count = await HttpApi.getMyJTApplyRecordsCountByCondition(conditions)
-        if (test_res_count.data.code === 0) {
-            setListLength(test_res_count.data.data[0]['count'])
-        }
+        if (test_res_count.data.code === 0) { setListLength(test_res_count.data.data[0]['count']) }
         let test_res = await HttpApi.getMyJTApplyRecordsByLimit(conditions)
         var main_list = []
         if (test_res.data.code === 0) {
-            // console.log('主票:', test_res.data.data);
+            // console.log('与我相关的票:', test_res.data.data);
             main_list = test_res.data.data.map((item, index) => { item.key = index; return item })
+            let mainidlist_in_all = test_res.data.data.filter((item) => {
+                return item.is_sub === 0
+            }).map((item) => { return item.id })///其中有哪些是主票，根据主票的id，再去查询对应的措施票数据
+            // console.log('其中有哪些是主票，根据主票的id:', mainidlist_in_all);
+            if (mainidlist_in_all.length > 0) {
+                let test_sub_res = await HttpApi.getSubJTApplyRecordsByPidList({ p_id_list: mainidlist_in_all })
+                if (test_sub_res.data.code === 0) {
+                    var sub_list = test_sub_res.data.data
+                    // console.log('对应措施票:', sub_list);
+                }
+                main_list.forEach((item_m) => {
+                    if (item_m.is_sub === 0) { item_m.sub_tickets = [] }
+                    sub_list.forEach((item_s) => {
+                        if (item_m.id === item_s.p_id) { item_m.sub_tickets.push(item_s) }
+                    })
+                })
+            }
         }
+        // console.log('main_list:', main_list);
         setList(main_list)
         setLoading(false)
     }, [isCurrentMe])
@@ -88,8 +129,8 @@ export default function JobTicketOfMy() {
         {
             title: '', dataIndex: 'p_id', key: 'p_id', width: 30, render: (text, record) => {
                 return <div>{text ?
-                    <Tooltip title={'查看对应主票'} placement="topLeft">
-                        <Button size='small' icon='file-search' type='primary' onClick={async () => {
+                    <Tooltip title={'查看对应主票'} placement="left">
+                        <Button size='small' icon='file-search' type='link' onClick={async () => {
                             let res = await HttpApi.getMainJTApplyRecordsById({ id: text })
                             if (res.data.code === 0) {
                                 // console.log('res.data.data[0]:', res.data.data[0]);
@@ -104,7 +145,7 @@ export default function JobTicketOfMy() {
             }
         },
         {
-            title: '序号', dataIndex: 'id', key: 'id', width: 80, render: (text, record) => {
+            title: '序号', dataIndex: 'id', key: 'id', width: 60, render: (text, record) => {
                 return <div>{record.is_read ? null : <Badge status="processing" />}{text}</div>
             }
         },
@@ -180,6 +221,45 @@ export default function JobTicketOfMy() {
                     size='small'
                     columns={columns}
                     dataSource={list}
+                    expandIcon={(props) => {
+                        // console.log('props.record:',props.record);
+                        let is_over = false
+                        if (props.record.is_sub !== 1 && props.record.status === 4) { is_over = true }
+                        else if (props.record.is_sub === 1 && props.record.status === 5) { is_over = true }///是否完结
+                        let topAdd = props.record.is_sub === 0 && !is_over && (hasFixPer || hasManagerPer) ? ///主票未完结时且有维修或专工权限
+                            <div key={'x'}>
+                                <Tooltip title={'新增措施票'} placement="left">
+                                    <Dropdown size='small' overlay={() => {
+                                        return <Menu onClick={(e) => {
+                                            let tempSubJBTObj = JSON.parse(JSON.stringify(e.item.props.record))
+                                            let tempPageList = JSON.parse(tempSubJBTObj.pages)
+                                            tempSubJBTObj.pages = tempPageList
+                                            setCurrentSubJBT(tempSubJBTObj)
+                                            setSbtvisible(true)
+                                            setCurrentSelectRecord(props.record)
+                                        }}>
+                                            {typeOptionList.filter((item) => { return item.is_sub !== 0 }).map((item, index) => {
+                                                return <Menu.Item key={index} record={item}><div>{item.ticket_name}</div></Menu.Item>
+                                            })}
+                                        </Menu>
+                                    }} trigger={['click']}>
+                                        <Button size='small' type='link' icon='plus' onClick={e => e.preventDefault()}></Button>
+                                    </Dropdown>
+                                </Tooltip>
+                            </div> : null
+                        if (props.record.sub_tickets && props.record.sub_tickets.length > 0) {
+                            let tags = props.record.sub_tickets.map((item, index) => {
+                                return <Tooltip key={index} title={item.id + ' ' + item.no + ' ' + item.ticket_name} placement="left">
+                                    <Button icon='tag' size='small' type='link' style={{ color: 'orange' }} onClick={() => {
+                                        setCurrentSelectRecord(item)
+                                        setDrawer2Visible(true)
+                                        setOnlyShow(true)
+                                    }} />
+                                </Tooltip>
+                            })
+                            return [topAdd, ...tags]
+                        } else { return null }
+                    }}
                     pagination={{
                         total: listLength,
                         showTotal: () => {
@@ -205,6 +285,21 @@ export default function JobTicketOfMy() {
             <JobTicketDrawerForShowEdit onlyShow={onlyShow} visible={drawer2Visible} onClose={() => { setDrawer2Visible(false); }} record={currentSelectRecord} resetData={init} />
             <JobTicketDrawer isAgent={isAgent} visible={drawerVisible} onClose={() => { setDrawerVisible(false); }} record={currentSelectRecord} resetData={() => { init(); resetReduxCount() }} />
             <JobTicketStepLogView record={currentSelectRecord} visible={stepLogVisible} onCancel={() => { setStepLogVisible(false) }} />
+            <SubJobTicketOfCreateDrawer
+                pId={currentSelectRecord ? currentSelectRecord.id : null}
+                pNo={currentSelectRecord ? currentSelectRecord.no : null}
+                isExtraAdd={true}///额外添加的情况
+                resetList={() => { init() }}
+                visible={sbtvisible}
+                onClose={() => { setSbtvisible(false); }}
+                currentSubJBT={currentSubJBT}
+                userList={userList}
+                currentUser={currentUser}
+                sbjtvalueChangeCallback={(v) => {
+                    let new_v = autoFillNo(v)
+                    setCurrentSubJBT(new_v)
+                }}
+            />
         </div>
     )
 }
@@ -293,7 +388,7 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
                 <Form.Item label='编号查询' {...itemProps}>
                     {props.form.getFieldDecorator('no', {
                         rules: [{ required: false }]
-                    })(<Input placeholder='请输入编号(模糊查询)'/>)}
+                    })(<Input placeholder='请输入编号(模糊查询)' />)}
                 </Form.Item>
             </Col>
             <Col span={18}>

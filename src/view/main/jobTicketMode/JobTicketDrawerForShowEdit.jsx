@@ -1,7 +1,8 @@
-import { Alert, Drawer, Spin } from 'antd'
+import { Alert, Button, Drawer, Spin } from 'antd'
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
+import JobTicketStepLogView from './JobTicketStepLogView';
 const storage = window.localStorage;
 
 export default function JobTicketDrawerForShowEdit({ visible, onClose, record, resetData }) {
@@ -10,6 +11,7 @@ export default function JobTicketDrawerForShowEdit({ visible, onClose, record, r
     const [currentUser] = useState(JSON.parse(storage.getItem('userinfo')))
     const [userList, setUserList] = useState([])
     const [loading, setLoading] = useState(true)
+    const [stepLogVisible, setStepLogVisible] = useState(false);///展示步骤界面
 
     const runUserlist = useCallback(async (user_list, role_id) => {
         let res = await HttpApi.getRunnerIdList({ role_id })
@@ -140,7 +142,7 @@ export default function JobTicketDrawerForShowEdit({ visible, onClose, record, r
         <Drawer
             destroyOnClose={true}
             width={920}
-            title="工作票查看"
+            title={<div><span>工作票查看</span><Button type='link' size='small' onClick={() => { setStepLogVisible(true) }}>记录</Button></div>}
             placement='left'
             onClose={onClose}
             visible={visible}
@@ -159,6 +161,7 @@ export default function JobTicketDrawerForShowEdit({ visible, onClose, record, r
                     </div>
                 </div>
             }
+            <JobTicketStepLogView record={record} visible={stepLogVisible} onCancel={() => { setStepLogVisible(false) }} />
         </Drawer >
     )
 }

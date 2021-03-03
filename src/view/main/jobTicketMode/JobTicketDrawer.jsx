@@ -12,6 +12,7 @@ const storage = window.localStorage;
 var step_des = '';
 var ticketNextUserNameList = [];
 export default function JobTicketDrawer({ isAgent, visible, onClose, record, resetData }) {
+    // console.log('record:', record);
     const [stepLogVisible, setStepLogVisible] = useState(false);///展示步骤界面
     const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})///填写改动后的数值- 提交时使用
     const [currentUser] = useState(JSON.parse(storage.getItem('userinfo')))
@@ -84,7 +85,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
             setUserSelectAble(true)///人员选择项可以选
             setShowBackOption(false)///不可以打回
             if (record.is_sub === 1) {///措施票情况【一级措施票】【后续新增二级情况】
-                console.log('1111措施票');
+                // console.log('1111措施票');
                 if (record.status === 1) {///当前待安措时
                     if (currentUser.id === record.user_id) {///如果用户是创建者，那么可以删除
                         setShowDeleteBtn(true)///展示删除按钮
@@ -106,6 +107,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                 } else if (record.status === 5) {///当前待完结和完结时
                     setShowStopBtn(true)///可以作废
                     setShowPrintBtn(true)///可以打印
+                    if (!isAgent) setUserSelectAble(false)///处理情况下不可选择人员
                     runUserlist(user_list, 11)
                 } else if (record.status === 6) {
                     setUserSelectAble(false)///不可选择人员
@@ -124,7 +126,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                         setShowDeleteBtn(true)///展示删除按钮
                     }
                 } else if (record.status === 2) {///当前待接票
-                    setTakeTicketAndPrint(true)///可以【提交打印】
+                    if (!isAgent) setTakeTicketAndPrint(true)///可以【提交打印】
                     setShowStopBtn(true)///可以作废
                     setShowBackOption(true)///可以打回
                     runUserlist(user_list, 11)///运行值长
@@ -132,6 +134,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                     setShowStopBtn(true)///可以作废
                     setShowPrintBtn(true)///可以打印
                     setShowBackOption(true)///可以打回
+                    if (!isAgent) setUserSelectAble(false)///处理情况下不可选择人员
                     runUserlist(user_list, 11)///运行值长
                 } else if (record.status === 4) {///完结时
                     setUserSelectAble(false)///不可选择人员
@@ -238,7 +241,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                     />
                 </Spin> :
                 <Spin spinning={printing}>
-                    <div style={{ display: 'flex', flexDirection: 'row', backgroundColor: '#F1F2F5', padding: '10px 10px 0px 10px', }}>
+                    <div style={{ display: 'flex', flexDirection: 'row', backgroundColor: '#F1F2F5', padding: 10 }}>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                             {renderAllPage()}
                         </div>

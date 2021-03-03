@@ -1108,7 +1108,7 @@ export function getJTRecordContentAndPlanTime({ pages }) {
     let pagesList = JSON.parse(pages)
     pagesList.forEach((page) => {
         const cpts = page.components
-        console.log('cpts:', cpts)
+        // console.log('cpts:', cpts)
         cpts.forEach((cpt) => {
             if (cpt.is_time) {
                 time_list = cpt.attribute.value
@@ -1257,12 +1257,12 @@ export function checkCellWhichIsEmpty(currentJobTicketValue, currentStatus) {
         const components = page.components;
         components.forEach((cpt) => {
             const { value, no_null_status_list } = cpt.attribute
-            cpt.attribute.isempty = false
+            cpt.attribute.isempty = 0
             if (value !== 0) {
                 // console.log('value:', value, 'name:', name, 'flag:', no_null_status_list && no_null_status_list.indexOf(currentStatus) !== -1 && (!value || value.length === 0))
                 if (no_null_status_list && no_null_status_list.indexOf(currentStatus) !== -1 && (!value || value.length === 0)) {
-                    console.log('空 名称：', cpt.attribute.name)
-                    cpt.attribute.isempty = true
+                    // console.log('空 名称：', cpt.attribute.name)
+                    cpt.attribute.isempty = 1
                 }
             }
         })
@@ -1401,4 +1401,30 @@ export async function getTargetMajorManagerList({ major_id }) {
             return { majorManagerList, otherList }
         }
     }
+}
+
+/**
+ * 自动填充序号组件的值
+ * @param {*} ticketvalue 
+ */
+export function autoFillNo(ticketvalue) {
+    ticketvalue.pages.forEach((page) => {
+        const cpts = page.components
+        cpts.forEach((cpt) => {
+            if (cpt.is_active) {
+                const active_value = cpt.attribute.value;
+                const twins_id = cpt.twins_id
+                cpts.forEach((cpt2) => {
+                    if (cpt2.is_response && cpt2.twins_id === twins_id) {
+                        if (active_value) {
+                            cpt2.attribute.value = cpt2.default_value
+                        } else {
+                            cpt2.attribute.value = ''
+                        }
+                    }
+                })
+            }
+        })
+    })
+    return ticketvalue
 }

@@ -1,4 +1,4 @@
-import { Badge, Button, Col, DatePicker, Form, Icon, Input, Row, Select, Table, Tag, Tooltip } from 'antd';
+import { Badge, Button, Col, DatePicker, Form, Icon, Input, Row, Select, Table, Tooltip } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import { changeJobTicketStatusToText } from '../../util/Tool';
@@ -54,7 +54,7 @@ export default function JobTicketOfAll() {
             }
         }
         main_list.forEach((item_m) => {
-            if (item_m.is_sub !== 1) { item_m.sub_tickets = [] }
+            if (item_m.is_sub === 0) { item_m.sub_tickets = [] }
             sub_list.forEach((item_s) => {
                 if (item_m.id === item_s.p_id) { item_m.sub_tickets.push(item_s) }
             })
@@ -62,11 +62,19 @@ export default function JobTicketOfAll() {
         setList(main_list)
         setLoading(false)
     }, [])
-    const readLocalRecord = useCallback(async (record) => {
+    const readLocalRecord = useCallback(async (record, is_sub = 0) => {
         if (record.is_read) { return }
         let copy_list = JSON.parse(JSON.stringify(list))
         copy_list.forEach((item) => {
-            if (item.id === record.id) { item.is_read = 1 }
+            if (is_sub === 1) {
+                if (item.sub_tickets.length > 0) {
+                    item.sub_tickets.forEach((subItem) => {
+                        if (subItem.id === record.id) { subItem.is_read = 1 }
+                    })
+                }
+            } else {
+                if (item.id === record.id) { item.is_read = 1 }
+            }
         })
         setList(copy_list)
         await HttpApi.updateJTApplyRecord({ id: record.id, is_read: 1 })
@@ -87,7 +95,7 @@ export default function JobTicketOfAll() {
     }, [init])
     const columns = [
         {
-            title: '序号', dataIndex: 'id', key: 'id', width: 80, render: (text, record) => {
+            title: '序号', dataIndex: 'id', key: 'id', width: 80, align: 'center', render: (text, record) => {
                 return <div>{record.is_read ? null : <Badge status="processing" />}{text}</div>
             }
         },
@@ -151,47 +159,69 @@ export default function JobTicketOfAll() {
                     columns={columns}
                     dataSource={list}
                     expandIcon={(props) => {
-                        if (props.record && props.record.sub_tickets.length > 0) {
-                            return <Icon type="unordered-list" />
+                        if (props.record && props.record.sub_tickets && props.record.sub_tickets.length > 0) {
+                            return <Icon type="tags" />
                         } else { return null }
                     }}
                     expandRowByClick={true}
                     expandedRowRender={(record) => {
-                        if (record.is_sub !== 1 && record.sub_tickets.length > 0) {
-                            return record.sub_tickets.map((item, index) => {
-                                let is_over = false
-                                if (item.is_sub === 0 && item.status === 4) { is_over = true }///主票完结
-                                else if (item.is_sub === 1 && item.status === 6) { is_over = true }///措施票是否完结
-                                let inCurrentUserList = false
-                                inCurrentUserList = item.current_step_user_id_list.indexOf(`,${currentUser.id},`) !== -1///是否为当前处理人
-                                return <div key={index}>
-                                    {item.is_read ? null : <Badge status="processing" />}
-                                    <span>{item.no + "  " + item.ticket_name}</span>
-                                    <Tag color='blue' style={{ marginLeft: 10 }}>{changeJobTicketStatusToText(item.status, 1)}</Tag>
-                                    {inCurrentUserList ?
-                                        <Button disabled={!inCurrentUserList} icon='file-search' size='small' type='primary' onClick={() => {
-                                            // console.log('选择的措施票数据:', item);
-                                            setIsAgent(false);
-                                            setCurrentSelectRecord(item)
-                                            setDrawerVisible(true);
-                                            readLocalRecord(item);
-                                        }}>处理</Button> :
-                                        <Button size='small' icon='eye' onClick={() => { setDrawer2Visible(true); setCurrentSelectRecord(item) }}>查看</Button>
-                                    }
-                                    {
-                                        currentUser.isadmin === 1 ?
-                                            <Button style={{ marginLeft: 10 }} disabled={is_over} icon='audit' size="small" type="danger" onClick={(e) => { e.stopPropagation(); setIsAgent(true); setDrawerVisible(true); readLocalRecord(item); setCurrentSelectRecord(item); }}>调度</Button>
-                                            : null
-                                    }
-                                    <Button style={{ marginLeft: 10 }} icon='unordered-list' size='small' type='default' onClick={() => {
-                                        // console.log('选择的措施票数据:', item);
-                                        setCurrentSelectRecord(item);
-                                        setStepLogVisible(true);
-                                    }}>记录</Button>
-                                </div>
-                            })
+                        console.log('record.sub_tickets:', record.sub_tickets);
+                        if (record.is_sub === 0 && record.sub_tickets.length > 0) {
+                            const columns = [{
+                                title: '序号', dataIndex: 'id', key: 'id', width: 71, align: 'center', render: (text, record) => {
+                                    return <div style={{ marginLeft: -10 }}>{record.is_read ? null : <Badge status="processing" />}{text}</div>
+                                }
+                            },
+                            { title: '措施票编号', dataIndex: 'no', key: 'no', width: 170 },
+                            { title: '发起时间', dataIndex: 'time', key: 'time', width: 120 },
+                            { title: '计划开始', dataIndex: 'time_begin', key: 'time_begin', width: 120 },
+                            { title: '计划结束', dataIndex: 'time_end', key: 'time_end', width: 120 },
+                            {
+                                title: '内容', dataIndex: 'job_content', key: 'job_content', render: (text) => {
+                                    return <Tooltip title={text} placement="topLeft">
+                                        <div className='hideText lineClamp2'>{text}</div>
+                                    </Tooltip>
+                                }
+                            },
+                            { title: '申请人', dataIndex: 'user_name', key: 'user_name', width: 100 },
+                            { title: '上步处理人', dataIndex: 'user_name', key: 'per_step_user_name', width: 100 },
+                            {
+                                title: '状态', dataIndex: 'status', key: 'status', width: 80, render: (text) => {
+                                    return changeJobTicketStatusToText(text, 1)
+                                }
+                            },
+                            {
+                                title: '操作', dataIndex: 'action', key: 'action', width: 90, render: (_, record) => {
+                                    let is_over = false
+                                    // console.log('record:', record);
+                                    if (record.is_sub !== 1 && record.status === 4) { is_over = true }
+                                    else if (record.is_sub === 1 && record.status === 5) { is_over = true }///是否完结
+                                    let inCurrentUserList = false
+                                    inCurrentUserList = record.current_step_user_id_list.indexOf(`,${currentUser.id},`) !== -1;///是否为当前处理人
+                                    return <div style={{ paddingLeft: 10 }}>
+                                        {inCurrentUserList ?
+                                            <Button disabled={!inCurrentUserList} size='small' type='primary' icon='file-search' onClick={(e) => {
+                                                e.stopPropagation(); setIsAgent(false); setCurrentSelectRecord(record); setDrawerVisible(true); readLocalRecord(record, 1);
+                                            }}>处理</Button>
+                                            :
+                                            <Button size='small' icon='eye' onClick={(e) => {
+                                                e.stopPropagation(); setDrawer2Visible(true); setCurrentSelectRecord(record)
+                                            }}>查看</Button>}
+                                        {currentUser.isadmin === 1 ?
+                                            <>
+                                                <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                                                <Button disabled={is_over} icon='audit' size="small" type="danger" onClick={(e) => {
+                                                    e.stopPropagation(); setIsAgent(true); setDrawerVisible(true); readLocalRecord(record, 1); setCurrentSelectRecord(record);
+                                                }}>调度</Button>
+                                            </> : null}
+                                        <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                                        <Button icon='unordered-list' size="small" type="default" onClick={(e) => { setStepLogVisible(true); setCurrentSelectRecord(record); }}>记录</Button>
+                                    </div>
+                                }
+                            }
+                            ]
+                            return <Table showHeader={false} pagination={false} size='small' bordered dataSource={record.sub_tickets} columns={columns} />
                         }
-                        return null
                     }}
                     pagination={{
                         total: listLength,
