@@ -113,7 +113,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                     setUserSelectAble(false)///不可选择人员
                 }
             } else if (record.is_sub === 0) {///主票情况
-                console.log('1111主票');
+                // console.log('1111主票');
                 if (record.status === 1) {///当前待签发
                     if (isAgent) {
                         let { majorManagerList, otherList } = await getTargetMajorManagerList({ major_id: record.major_id })
