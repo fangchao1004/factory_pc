@@ -138,7 +138,7 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
                         </div>
                         {isExtraAdd ? <div style={{ textAlign: 'right', marginTop: 10 }}><Button type='danger' size='small' icon='upload' onClick={() => {
                             if (ticketNextUserList.toString().length === 0) { message.error('请选择好措施票处理人员，再进行提交'); return }
-                            let afterCheckObj = checkCellWhichIsEmpty(currentSubJBT, 0)
+                            var afterCheckObj = checkCellWhichIsEmpty(currentSubJBT, 0)
                             sbjtvalueChangeCallback(afterCheckObj)
                             let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
                             if (needValueButIsEmpty) {
@@ -154,7 +154,7 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
                                 onOk: async function () {
                                     console.log('pId', pId);
                                     console.log('提交:', currentSubJBT);
-                                    let element = currentSubJBT;///每个措施票
+                                    let element = afterCheckObj;///每个措施票
                                     element.p_id = pId;
                                     let user_str = ',' + element.userInfo.user_id_list.toString() + ','
                                     await createNewJobTicketApply(element, user_str, pNo)
