@@ -1189,6 +1189,7 @@ export function changeJobTicketStatusToText(status, is_sub = 0) {
 
 /**
  * 根据工作票当前的状态；显示功能上通往下一步status+1的选择的名称
+ * 通往下一步status+1的选择的名称！！！
  * @param {*} status 
  */
 export function changeShowLabByStauts(status, is_sub) {
@@ -1216,7 +1217,7 @@ export function changeShowLabByStauts(status, is_sub) {
     } else {
         switch (status) {
             case 1:
-                res = '待安措'
+                res = '待接票'
                 break;
             case 2:
                 res = '待完结'

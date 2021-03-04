@@ -235,7 +235,6 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
     }, [])
     return (
         <Drawer
-            maskClosable={false}
             destroyOnClose={true}
             width={1200}
             title={isAgent ? "工作票调度" : "工作票处理"}

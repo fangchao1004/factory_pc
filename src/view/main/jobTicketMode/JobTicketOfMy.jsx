@@ -222,7 +222,7 @@ export default function JobTicketOfMy() {
                     columns={columns}
                     dataSource={list}
                     expandIcon={(props) => {
-                        // console.log('props.record:',props.record);
+                        // console.log('props.record:', props.record);
                         let is_over = false
                         if (props.record.is_sub !== 1 && props.record.status === 4) { is_over = true }
                         else if (props.record.is_sub === 1 && props.record.status === 6) { is_over = true }///是否完结
@@ -258,7 +258,7 @@ export default function JobTicketOfMy() {
                                 </Tooltip>
                             })
                             return [topAdd, ...tags]
-                        } else { return null }
+                        } else { return topAdd }
                     }}
                     pagination={{
                         total: listLength,

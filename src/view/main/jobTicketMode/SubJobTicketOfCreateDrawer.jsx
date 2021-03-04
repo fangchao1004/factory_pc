@@ -89,7 +89,6 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
     }, [])
     return (
         <Drawer
-            maskClosable={false}
             destroyOnClose={true}
             width={1200}
             title="措施票编辑"

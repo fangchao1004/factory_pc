@@ -140,7 +140,6 @@ export default function JobTicketDrawerForShowEdit({ visible, onClose, record, r
 
     return (
         <Drawer
-            maskClosable={false}
             destroyOnClose={true}
             width={930}
             title={<div><span>工作票查看</span><Button type='link' size='small' onClick={() => { setStepLogVisible(true) }}>记录</Button></div>}
