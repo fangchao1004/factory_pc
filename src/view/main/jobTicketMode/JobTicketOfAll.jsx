@@ -160,12 +160,12 @@ export default function JobTicketOfAll() {
                     dataSource={list}
                     expandIcon={(props) => {
                         if (props.record && props.record.sub_tickets && props.record.sub_tickets.length > 0) {
-                            return <Icon type="tags" />
+                            return <Icon type="tags" style={{ color: '#1890ff' }} />
                         } else { return null }
                     }}
                     expandRowByClick={true}
                     expandedRowRender={(record) => {
-                        console.log('record.sub_tickets:', record.sub_tickets);
+                        // console.log('record.sub_tickets:', record.sub_tickets);
                         if (record.is_sub === 0 && record.sub_tickets.length > 0) {
                             const columns = [{
                                 title: '序号', dataIndex: 'id', key: 'id', width: 71, align: 'center', render: (text, record) => {

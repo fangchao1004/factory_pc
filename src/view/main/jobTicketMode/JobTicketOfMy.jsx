@@ -243,14 +243,14 @@ export default function JobTicketOfMy() {
                                             })}
                                         </Menu>
                                     }} trigger={['click']}>
-                                        <Button size='small' type='link' icon='plus' onClick={e => e.preventDefault()}></Button>
+                                        <Button size='small' type='link' icon='plus' style={{ color: '#fa541c' }} onClick={e => e.preventDefault()}></Button>
                                     </Dropdown>
                                 </Tooltip>
                             </div> : null
                         if (props.record.sub_tickets && props.record.sub_tickets.length > 0) {
                             let tags = props.record.sub_tickets.map((item, index) => {
                                 return <Tooltip key={index} title={item.id + ' ' + item.no} placement="left">
-                                    <Button icon='tag' size='small' type='link' style={{ color: 'orange' }} onClick={() => {
+                                    <Button icon='tag' size='small' type='link' onClick={() => {
                                         setCurrentSelectRecord(item)
                                         setDrawer2Visible(true)
                                         setOnlyShow(true)
