@@ -405,23 +405,25 @@ export default function JobTicketOfCreate() {
                                                                 setTicketNextUserList([])
                                                                 ticketNextUserNameList = []
                                                                 ///循环添加多个措施票记录
-                                                                for (let index = 0; index < copyAllSubTicketList.length; index++) {
-                                                                    let element = copyAllSubTicketList[index];///每个措施票
-                                                                    element.p_id = jbtar_id;
-                                                                    let user_str = ',' + element.userInfo.user_id_list.toString() + ','
-                                                                    await createNewJobTicketApply(element, user_str, p_no)
-                                                                    // console.log('添加措施票记录:', res);
-                                                                    let res1 = await HttpApi.getLastJTApplyRecordId()
-                                                                    if (res1.data.code === 0 && res1.data.data.length > 0) {
-                                                                        const jbtar_id_sub = res1.data.data[0]['id']
-                                                                        let obj = {};
-                                                                        obj['jbtar_id'] = jbtar_id_sub /// 添加措施票记录 的id
-                                                                        obj['user_id'] = currentUser.id
-                                                                        obj['user_name'] = currentUser.name
-                                                                        obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
-                                                                        obj['step_des'] = '创建措施票 提交至 ' + element.userInfo.user_name_list.join(',')
-                                                                        obj['remark'] = ''
-                                                                        await HttpApi.addJbTStepLog(obj)///添加log
+                                                                if (copyAllSubTicketList) {
+                                                                    for (let index = 0; index < copyAllSubTicketList.length; index++) {
+                                                                        let element = copyAllSubTicketList[index];///每个措施票
+                                                                        element.p_id = jbtar_id;
+                                                                        let user_str = ',' + element.userInfo.user_id_list.toString() + ','
+                                                                        await createNewJobTicketApply(element, user_str, p_no)
+                                                                        // console.log('添加措施票记录:', res);
+                                                                        let res1 = await HttpApi.getLastJTApplyRecordId()
+                                                                        if (res1.data.code === 0 && res1.data.data.length > 0) {
+                                                                            const jbtar_id_sub = res1.data.data[0]['id']
+                                                                            let obj = {};
+                                                                            obj['jbtar_id'] = jbtar_id_sub /// 添加措施票记录 的id
+                                                                            obj['user_id'] = currentUser.id
+                                                                            obj['user_name'] = currentUser.name
+                                                                            obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
+                                                                            obj['step_des'] = '创建措施票 提交至 ' + element.userInfo.user_name_list.join(',')
+                                                                            obj['remark'] = ''
+                                                                            await HttpApi.addJbTStepLog(obj)///添加log
+                                                                        }
                                                                     }
                                                                 }
                                                                 setAllSubTicketList([])
