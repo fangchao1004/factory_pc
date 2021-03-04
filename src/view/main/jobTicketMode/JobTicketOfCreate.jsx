@@ -341,6 +341,7 @@ export default function JobTicketOfCreate() {
                                             size='small'
                                             disabled={!currentJobTicketValue.pages}
                                             onClick={() => {
+                                                console.log('创建新工作票点击提交');
                                                 // console.log('allsbj:', allSubTicketList);
                                                 // return;
                                                 if (ticketNextUserList.toString().length === 0) { message.error('请选择好主工作票处理人员，再进行提交'); return }
@@ -374,6 +375,7 @@ export default function JobTicketOfCreate() {
                                                         return
                                                     }
                                                 }
+                                                console.log('弹出确认对话框');
                                                 // return;
                                                 confirm({
                                                     title: '确认提交当前的工作票吗?',
