@@ -222,7 +222,7 @@ export default function PreviewTaskView(props) {
     /**
      * 更新步骤数据 类似于修改
      * @param {Number} currentStep  当前所在步骤  0是分配完成 1是执行人的备注 
-     * @param {Number} targetStatus 任务的status目标状态 0初始化状态未完成状态(已经分配了人员)    1人员已经完成了该任务 待验收确认的状态  2任务发布者已经验收通过处理完结状态
+     * @param {Number} targetStatus 任务的status目标状态 0初始化状态未完成状态(已经分配了人员)    1人员已经完成了该任务 待验收确认的状态  2任务发布者已经验收通过处理终结状态
      * @param {String} defaultRmkTxt 默认备注
      * @param {Boolean} isOnlySendMessAgain 是否一定要再发送一次短信  这里发送的短信模版是 你有任务未完成的任务，请及时处理
      */
@@ -309,7 +309,7 @@ export default function PreviewTaskView(props) {
                                 <span>
                                     <Input style={{ width: 300, marginLeft: 30 }} placeholder="可以输入备注说明" value={remarkText} onChange={(e) => { setRemarkText(e.target.value) }} />
                                     <Popconfirm title="确定打回吗?" onConfirm={() => { updateStepRemark(2, 0, '任务未完成打回', false) }}><Button style={{ marginLeft: 10 }} type='danger'>任务未完成打回</Button></Popconfirm>
-                                    <Popconfirm title="确定完结该任务吗?" onConfirm={() => { updateStepRemark(2, 2, '任务确认已完成', false) }}><Button type='primary'>任务确认已完成</Button></Popconfirm>
+                                    <Popconfirm title="确定终结该任务吗?" onConfirm={() => { updateStepRemark(2, 2, '任务确认已完成', false) }}><Button type='primary'>任务确认已完成</Button></Popconfirm>
                                 </span>
                                 : <Button type={'danger'} onClick={() => { setIsEditeable(true); setIsExtra(true); }}>追加任务内容</Button>))}
                     {isEditable ? (isExtra ? <Button type={'primary'} onClick={handlerAdd}>确定追加</Button> : <Button type={'primary'} onClick={() => { handlerOk() }}>确定修改</Button>)
@@ -324,7 +324,7 @@ export default function PreviewTaskView(props) {
             <Step title='任务分配' description={renderStatusX(0)} />
             <Step title='正在处理' description={renderStatusX(1)} />
             <Step title='待检' description={renderStatusX(2)} />
-            <Step title='完结' />
+            <Step title='终结' />
         </Steps>
     </Modal>
 }

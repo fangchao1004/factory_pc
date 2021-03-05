@@ -1206,10 +1206,10 @@ export function changeShowLabByStauts(status, is_sub) {
                 res = '待分管副总批准'
                 break;
             case 4:
-                res = '待完结'
+                res = '等待值长打印'
                 break;
             case 5:
-                res = '完结'
+                res = '终结'
                 break;
             default:
                 break;
@@ -1220,10 +1220,10 @@ export function changeShowLabByStauts(status, is_sub) {
                 res = '待接票'
                 break;
             case 2:
-                res = '待完结'
+                res = '待终结'
                 break;
             case 3:
-                res = '完结'
+                res = '终结'
                 break;
             default:
                 break;

@@ -138,7 +138,7 @@ export default function UpdateTaskView(props) {
     /**
      * 更新步骤数据 类似于修改
      * @param {Number} currentStep  当前所在步骤  0是分配完成 1是执行人的备注
-     * @param {Number} targetStatus 任务的status目标状态 0初始化状态未完成状态(已经分配了人员)    1人员已经完成了该任务 待验收确认的状态  2任务发布者已经验收通过处理完结状态
+     * @param {Number} targetStatus 任务的status目标状态 0初始化状态未完成状态(已经分配了人员)    1人员已经完成了该任务 待验收确认的状态  2任务发布者已经验收通过处理终结状态
      * @param {String} defaultRmkTxt 默认备注
      */
     const updateStepRemark = (currentStep, targetStatus = 0, defaultRmkTxt = null) => {
@@ -202,7 +202,7 @@ export default function UpdateTaskView(props) {
             <Step title='任务分配' description={renderStatusX(0)} />
             <Step title='正在处理' description={renderStatusX(1)} />
             <Step title='待检' description={renderStatusX(2)} />
-            <Step title='完结' />
+            <Step title='终结' />
         </Steps>
     </Modal>
 }

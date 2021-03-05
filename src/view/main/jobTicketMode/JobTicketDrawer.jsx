@@ -63,6 +63,16 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
         }
     }, [])
 
+    const init2 = useCallback(() => {
+        ///处理 下一步时 可以【提交打印】
+        if (!isAgent && selectValue === '1' && record && record.is_sub === 0 && record.status === 2) {
+            setTakeTicketAndPrint(true)
+        } else { setTakeTicketAndPrint(false) }
+        if (selectValue === '1' && record && record.status >= 1) {
+            step_des = changeShowLabByStauts(record.status, record.is_sub)
+        } else if (selectValue === '-1') { step_des = '打回' }
+    }, [isAgent, selectValue, record])
+
     const init = useCallback(async () => {
         // console.log('init');
         if (record && record.job_t_r_id) {
@@ -105,8 +115,9 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                 } else if (record.status === 4) {///当前待批准
                     setShowBackOption(true)///可以打回
                     setShowStopBtn(true)///可以作废
-                    runUserlist(user_list, isAgent ? 10 : 11)///运行值长名单[针对下一步5-待完结]
-                } else if (record.status === 5) {///当前待完结
+                    runUserlist(user_list, isAgent ? 10 : 11)///运行值长名单[针对下一步5-待终结]
+                } else if (record.status === 5) {///当前待终结
+                    setShowBackOption(true)///可以打回
                     setShowStopBtn(true)///可以作废
                     setShowPrintBtn(true)///可以打印
                     if (!isAgent) setUserSelectAble(false)///处理情况下不可选择人员
@@ -132,27 +143,21 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                     setShowStopBtn(true)///可以作废
                     setShowBackOption(true)///可以打回
                     runUserlist(user_list, 11)///运行值长
-                } else if (record.status === 3) {///当前待完结
+                } else if (record.status === 3) {///当前待终结
                     setShowStopBtn(true)///可以作废
                     setShowPrintBtn(true)///可以打印
                     setShowBackOption(true)///可以打回
                     if (!isAgent) setUserSelectAble(false)///处理情况下不可选择人员
                     runUserlist(user_list, 11)///运行值长
-                } else if (record.status === 4) {///完结时
+                } else if (record.status === 4) {///终结时
                     setUserSelectAble(false)///不可选择人员
                 }
             }
         }
+        init2()
         setLoading(false)
+        // eslint-disable-next-line
     }, [record, currentUser, runUserlist, isAgent])
-
-    const init2 = useCallback(() => {
-        if (!isAgent && selectValue === '1' && record && record.is_sub === 0 && record.status === 2) setTakeTicketAndPrint(true)///处理 下一步时 可以【提交打印】
-        else { setTakeTicketAndPrint(false) }
-        if (selectValue === '1' && record && record.status >= 1) {
-            step_des = changeShowLabByStauts(record.status, record.is_sub)
-        } else if (selectValue === '-1') { step_des = '打回' }
-    }, [isAgent, selectValue, record])
 
     const resetHandler = useCallback(() => {
         onClose()
@@ -214,9 +219,11 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
             init();
         }, 500);
     }, [init])
-    useEffect(() => {
-        init2();
-    }, [init2])
+    // useEffect(() => {
+    //     setTimeout(() => {
+    //         init2();
+    //     }, 1000);
+    // }, [init2])
     useEffect(() => {
         if (window.electron) {
             console.log('添加监听');
@@ -302,7 +309,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                             onChange={(v, v2) => {
                                                 setSelectValue(v)
                                                 if (v2) { step_des = v2.props.children }
-                                                if (v === '-1' || step_des === '完结') { setTicketNextUserList([]) }
+                                                if (v === '-1' || step_des === '终结') { setTicketNextUserList([]) }
                                             }}
                                         >
                                             <Option value='1'>{record && record.status >= 1 ? changeShowLabByStauts(record.status, record.is_sub) : '通过'}</Option>
@@ -392,6 +399,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                             return
                                         }
                                     } else {///返回上一步时，重新检查一边数据。状态-1
+                                        if (!remark) { message.error('打回时，备注必填'); return }
                                         afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, record.status - 1)
                                         setCurrentJobTicketValue(afterCheckObj)
                                     }
@@ -433,9 +441,9 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                 }
                                                 let is_read = 0;
                                                 if (record.is_sub !== 0) {
-                                                    is_read = record.status === 5 ? 1 : 0 ///措施票状态5时，一下步就是6完结了 不需要在read重置
+                                                    is_read = record.status === 5 ? 1 : 0 ///措施票状态5时，一下步就是6终结了 不需要在read重置
                                                 } else {
-                                                    is_read = record.status === 3 ? 1 : 0 ///主票状态3时，一下步就是4完结了 不需要在read重置
+                                                    is_read = record.status === 3 ? 1 : 0 ///主票状态3时，一下步就是4终结了 不需要在read重置
                                                 }
                                                 ///每次处理 未读重置
                                                 let newJTAR_data = {
@@ -468,14 +476,12 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                         }
                                                     } else {///主票
                                                         if (selectValue === '1') {///下一步
-                                                            console.log('aaaapdasdasd step_desstep_desstep_des', step_des);
                                                             if (record.status === 3) {///当前是3 下一步就是4
                                                                 obj['step_des'] = step_des
                                                             } else {
                                                                 obj['step_des'] = step_des + '至 ' + ticketNextUserNameList.join(',')
                                                             }
                                                         } else {///打回
-                                                            console.log('asdasdaaaaqqq123123123s', step_des);
                                                             obj['step_des'] = step_des + '至 ' + record.per_step_user_name
                                                         }
                                                     }

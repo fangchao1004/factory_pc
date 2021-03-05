@@ -91,7 +91,7 @@ export default function JobTicketDrawerForShowEdit({ visible, onClose, record, r
                     // runUserlist(user_list)
                 }
                 if ((record.status === 2 || record.status === 3) && currentUser.major_id_all && currentUser.permission && currentUser.permission.split(',').indexOf("1") !== -1) {
-                    ///2待接票 3待完结 状态时，运行可以操作
+                    ///2待接票 3待终结 状态时，运行可以操作
                     ///2待接票 状态时 运行要有运行人员名单
                     // if (record.status === 2) {
                     //     // console.log('2待接票 状态时 运行要有运行人员名单');
