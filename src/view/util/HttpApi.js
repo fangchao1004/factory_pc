@@ -1117,7 +1117,7 @@ class HttpApi {
         return Axios.post(Testuri + 'obs', { sql })
     }
 
-    static updateJTApplyRecord = ({ id, status, is_delete, is_stop, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_read, is_agent = 0 }) => {
+    static updateJTApplyRecord = ({ id, status, is_delete, is_stop, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_read, is_agent = 0, last_back_user_id }) => {
         let id_value = id
         if (id instanceof Array) {
             id_value = id.join(',')
@@ -1155,7 +1155,11 @@ class HttpApi {
         if (job_content) {
             block_contet_time = `job_content = '${job_content}', time_begin = '${time_begin}', time_end = '${time_end}',`
         }
-        let set_sql = block_status + block_delete + block_stop + block_contet_time + block_user1 + blocl_user2 + blocl_user3 + block_read + block_agent
+        let block_last_back_user = ''
+        if (last_back_user_id >= 0) {
+            block_last_back_user = `last_back_user_id = ${last_back_user_id},`
+        }
+        let set_sql = block_status + block_delete + block_stop + block_contet_time + block_user1 + blocl_user2 + blocl_user3 + block_read + block_agent + block_last_back_user
         set_sql = set_sql.substring(0, set_sql.length - 1)
         let sql = `update job_tickets_apply_records set ${set_sql} where id in (${id_value})`
         // console.log('update job_tickets_apply_records sql:', sql)

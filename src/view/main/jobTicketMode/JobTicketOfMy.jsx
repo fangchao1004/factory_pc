@@ -223,13 +223,14 @@ export default function JobTicketOfMy() {
                     columns={columns}
                     dataSource={list}
                     expandIcon={(props) => {
-                        let per_user_is_me = props.record.per_step_user_id === currentUser.id
+                        let per_user_is_me = props.record.per_step_user_id === currentUser.id///上一次的处理人是不是我
+                        let last_back_user_is_me = props.record.last_back_user_id === currentUser.id///最近一次的撤回操作是不是我
                         let is_over = false
                         let is_start = props.record.status === 1///刚提交 状态为1
                         let is_main = props.record.is_sub === 0
                         if (props.record.is_sub !== 1 && props.record.status === 4) { is_over = true }
                         else if (props.record.is_sub === 1 && props.record.status === 6) { is_over = true }///是否终结
-                        let topBack = per_user_is_me && !is_over ?
+                        let topBack = per_user_is_me && !last_back_user_is_me && !is_over ?
                             <div key={'x'}>
                                 <Tooltip title={is_start ? '删除' : '撤回'} placement="left">
                                     <Button size='small' type='link' icon={is_start ? 'delete' : 'rollback'} style={{ color: '#722ed1' }} onClick={() => {

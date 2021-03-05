@@ -1493,6 +1493,7 @@ export async function statusReduce1JBT(JBTObj, currentUser) {
         id: JBTObj.id,
         status: reduced_status,
         current_step_user_id_list: current_step_user_id_list_temp,///当前处理人id ,0,1,
+        last_back_user_id: currentUser.id///最近一次的撤回操作人id;防止同一个人多次撤回
     }
     // console.log('newJTAR_data:', newJTAR_data)
     if (reduced_status > 0) {
