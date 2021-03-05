@@ -1118,33 +1118,47 @@ class HttpApi {
     }
 
     static updateJTApplyRecord = ({ id, status, is_delete, is_stop, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_read, is_agent = 0 }) => {
+        let id_value = id
+        if (id instanceof Array) {
+            id_value = id.join(',')
+        }
         let block_status = ''
         if (status >= 0) {
-            block_status = ` status = ${status},`
+            block_status = `status = ${status},`
         }
         let block_delete = ''
         if (is_delete >= 0) {
-            block_delete = ` is_delete = ${is_delete},`
+            block_delete = `is_delete = ${is_delete},`
         }
         let block_stop = ''
         if (is_stop >= 0) {
-            block_stop = ` is_stop = ${is_stop},`
+            block_stop = `is_stop = ${is_stop},`
         }
         let block_read = ''
         if (is_read >= 0) {
-            block_read = ` is_read = ${is_read},`
+            block_read = `is_read = ${is_read},`
         }
-        let block_user = ''
+        let block_agent = `is_agent = ${is_agent},`
+        let block_user1 = ''
         if (per_step_user_id >= 0) {
-            block_user = ` per_step_user_id = ${per_step_user_id},per_step_user_name = '${per_step_user_name}',current_step_user_id_list = '${current_step_user_id_list}',history_step_user_id_list = '${history_step_user_id_list}',is_agent = ${is_agent},`
+            block_user1 = `per_step_user_id = ${per_step_user_id},per_step_user_name = '${per_step_user_name}',`
+        }
+        let blocl_user2 = ''
+        if (current_step_user_id_list) {
+            blocl_user2 = `current_step_user_id_list = '${current_step_user_id_list}',`
+        }
+        let blocl_user3 = ''
+        if (history_step_user_id_list) {
+            blocl_user3 = `history_step_user_id_list = '${history_step_user_id_list}',`
         }
         let block_contet_time = ''
         if (job_content) {
-            block_contet_time = ` job_content = '${job_content}',time_begin = '${time_begin}',time_end = '${time_end}',`
+            block_contet_time = `job_content = '${job_content}', time_begin = '${time_begin}', time_end = '${time_end}',`
         }
-        let set_sql = block_status + block_delete + block_stop + block_contet_time + block_user + block_read
+        let set_sql = block_status + block_delete + block_stop + block_contet_time + block_user1 + blocl_user2 + blocl_user3 + block_read + block_agent
         set_sql = set_sql.substring(0, set_sql.length - 1)
-        let sql = `update job_tickets_apply_records set ${set_sql} where id = ${id}`
+        let sql = `update job_tickets_apply_records set ${set_sql} where id in (${id_value})`
+        // console.log('update job_tickets_apply_records sql:', sql)
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**
@@ -1171,7 +1185,7 @@ class HttpApi {
      * 添加工作票操作日志
      */
     static addJbTStepLog = ({ jbtar_id, user_id, user_name, time, step_des, remark, is_agent = 0 }) => {
-        let sql = `insert into job_tickets_step_log (jbtar_id, user_id, user_name, time, step_des, remark, is_agent) values (${jbtar_id},${user_id},'${user_name}','${time}','${step_des}','${remark}',${is_agent}) `
+        let sql = `insert into job_tickets_step_log (jbtar_id, user_id, user_name, time, step_des, remark, is_agent) values (${jbtar_id},${user_id},'${user_name}','${time}','${step_des}',${remark ? "'" + remark + "'" : null},${is_agent}) `
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**

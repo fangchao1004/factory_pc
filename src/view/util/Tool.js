@@ -1429,3 +1429,76 @@ export function autoFillNo(ticketvalue) {
     })
     return ticketvalue
 }
+/**
+ * 检查当前的工作票状态是否为已经发生变动【考虑本地数据status刷新不及时与服务器数据不一致的情况】
+ * @param {*} JBTObj 工作票record
+ */
+export async function checkJBTStatusIsChange(JBTObj) {
+    let res_main = await HttpApi.getMainJTApplyRecordsById({ id: JBTObj.id })
+    if (res_main.data.code === 0) {
+        const main_list = res_main.data.data
+        if (main_list.length > 0) {
+            if (main_list[0].status === JBTObj.status) {
+                return { code: 0 }
+            } else {
+                return { code: -1 }
+            }
+        } else { return { code: -1 } }
+    } else { return { code: -1 } }
+}
+
+/**
+ * 删除主或措施票
+ * 如果是主票就会删除其下的所有措施票
+ * @param {*} JBTObj 工作票record
+ * @param {Number} Delete 是否为删除 1删除 0作废
+ */
+export async function deleteMainSubJBT(JBTObj, Delete = 1) {
+    let delete_stop_obj = { is_delete: 1 }
+    if (!Delete) {
+        delete_stop_obj = { is_stop: 1 }
+    }
+    if (JBTObj.is_sub === 0) {
+        let main_id = JBTObj.id
+        let all_id_list = [main_id]
+        let res_sub_list = await HttpApi.getSubJTApplyRecordsByPidList({ p_id_list: [main_id] })
+        if (res_sub_list.data.code === 0) {
+            let sub_list = res_sub_list.data.data;
+            var sub_id_list = [];
+            if (sub_list.length > 0) { sub_id_list = sub_list.map((item) => item.id) }
+            all_id_list = all_id_list.concat(sub_id_list)
+            let delete_res = await HttpApi.updateJTApplyRecord({ id: all_id_list, ...delete_stop_obj })
+            if (delete_res.data.code === 0) {
+                return { code: 0, message: Delete ? '删除成功' : '作废成功' }
+            } else { return { code: -1, message: Delete ? '删除失败' : '作废失败' } }
+        } else { return { code: -1, message: '获取其下措施票数据失败' } }
+    } else {
+        let delete_res = await HttpApi.updateJTApplyRecord({ id: JBTObj.id, ...delete_stop_obj })
+        if (delete_res.data.code === 0) {
+            return { code: 0, message: Delete ? '删除成功' : '作废成功' }
+        } else {
+            return { code: -1, message: Delete ? '删除失败' : '作废失败' }
+        }
+    }
+}
+/**
+ * 工作票状态-1；只针对正常情况；如上一步的是
+ * @param {*} JBTObj 工作票record
+ */
+export async function statusReduce1JBT(JBTObj, currentUser) {
+    let reduced_status = JBTObj.status - 1
+    let current_step_user_id_list_temp = ',' + currentUser.id + ','
+    let newJTAR_data = {
+        is_read: 0,
+        id: JBTObj.id,
+        status: reduced_status,
+        current_step_user_id_list: current_step_user_id_list_temp,///当前处理人id ,0,1,
+    }
+    // console.log('newJTAR_data:', newJTAR_data)
+    if (reduced_status > 0) {
+        let res = await HttpApi.updateJTApplyRecord(newJTAR_data)
+        if (res.data.code === 0) {
+            return { code: 0, message: '撤回成功' }
+        } else { return { code: -1, message: '撤回失败' } }
+    } else { return { code: -1, message: '撤回失败' } }
+}

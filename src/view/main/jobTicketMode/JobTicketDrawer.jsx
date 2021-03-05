@@ -2,7 +2,7 @@ import { Button, Drawer, Select, message, Modal, Affix, Tag, Input, Spin, Alert 
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { changeShowLabByStauts, checkCellWhichIsEmpty, checkDataIsLostValue, getJTRecordContentAndPlanTime, getPinYin, getTargetMajorManagerList } from '../../util/Tool';
+import { changeShowLabByStauts, checkCellWhichIsEmpty, checkDataIsLostValue, checkJBTStatusIsChange, deleteMainSubJBT, getJTRecordContentAndPlanTime, getPinYin, getTargetMajorManagerList } from '../../util/Tool';
 import moment from 'moment'
 import JobTicketStepLogView from './JobTicketStepLogView';
 const { confirm } = Modal;
@@ -268,16 +268,20 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                     <Button type='danger' size='small' icon='stop' style={{ marginRight: 10 }} onClick={() => {
                                         confirm({
                                             title: '确认作废当前工作票吗?',
-                                            content: '请自行保证准确性',
+                                            content: record.is_sub === 0 ? '其下措施票也会一并作废' : '请自行保证准确性',
                                             okText: '确认',
                                             okType: 'danger',
                                             cancelText: '取消',
                                             onOk: async () => {
-                                                let res = await HttpApi.updateJTApplyRecord({ id: record.id, is_stop: 1 })
-                                                if (res.data.code === 0) {
-                                                    message.success('已经作废')
+                                                let res_status = await checkJBTStatusIsChange(record)
+                                                if (res_status.code !== 0) {
+                                                    message.error('当前工作票的最新状态已经发生变动；当前操作无效。已经为你刷新数据', 5)
                                                     resetHandler()
+                                                    return
                                                 }
+                                                let res_delete = await deleteMainSubJBT(record, 0)
+                                                if (res_delete.code === 0) { message.success(res_delete.message) } else { message.error(res_delete.message) }
+                                                resetHandler()
                                             }
                                         })
                                     }}>作废</Button> : null}
@@ -285,16 +289,20 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                     <Button type='danger' size='small' icon='delete' style={{ marginTop: 10, marginRight: 10 }} onClick={() => {
                                         confirm({
                                             title: '确认删除当前工作票吗?',
-                                            content: '请自行保证准确性',
+                                            content: record.is_sub === 0 ? '其下措施票也会一并删除' : '请自行保证准确性',
                                             okText: '确认',
                                             okType: 'danger',
                                             cancelText: '取消',
                                             onOk: async () => {
-                                                let res = await HttpApi.updateJTApplyRecord({ id: record.id, is_delete: 1 })
-                                                if (res.data.code === 0) {
-                                                    message.success('已经删除')
+                                                let res_status = await checkJBTStatusIsChange(record)
+                                                if (res_status.code !== 0) {
+                                                    message.error('当前工作票的最新状态已经发生变动；当前操作无效。已经为你刷新数据', 5)
                                                     resetHandler()
+                                                    return
                                                 }
+                                                let res_delete = await deleteMainSubJBT(record)
+                                                if (res_delete.code === 0) { message.success(res_delete.message) } else { message.error(res_delete.message) }
+                                                resetHandler()
                                             }
                                         })
                                     }}>删除</Button> : null}

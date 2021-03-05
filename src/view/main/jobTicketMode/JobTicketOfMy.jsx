@@ -1,7 +1,7 @@
-import { Badge, Button, Col, DatePicker, Dropdown, Form, Input, Menu, Row, Select, Switch, Table, Tooltip } from 'antd';
+import { Badge, Button, Col, DatePicker, Dropdown, Form, Input, Menu, Row, Select, Switch, Table, Tooltip, Modal, message } from 'antd';
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
-import { autoFillNo, changeJobTicketStatusToText } from '../../util/Tool';
+import { autoFillNo, changeJobTicketStatusToText, deleteMainSubJBT, checkJBTStatusIsChange, statusReduce1JBT } from '../../util/Tool';
 import JobTicketDrawer from './JobTicketDrawer';
 import JobTicketDrawerForShowEdit from './JobTicketDrawerForShowEdit';
 import JobTicketStepLogView from './JobTicketStepLogView';
@@ -9,6 +9,7 @@ import moment from 'moment'
 import { JOB_TICKETS_STATUS, SUB_JOB_TICKETS_STATUS } from '../../util/AppData';
 import { AppDataContext } from '../../../redux/AppRedux';
 import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer';
+const { confirm } = Modal;
 const FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const storage = window.localStorage;
 var searchCondition = {};
@@ -222,12 +223,61 @@ export default function JobTicketOfMy() {
                     columns={columns}
                     dataSource={list}
                     expandIcon={(props) => {
-                        // console.log('props.record:', props.record);
+                        let per_user_is_me = props.record.per_step_user_id === currentUser.id
                         let is_over = false
+                        let is_start = props.record.status === 1///刚提交 状态为1
+                        let is_main = props.record.is_sub === 0
                         if (props.record.is_sub !== 1 && props.record.status === 4) { is_over = true }
                         else if (props.record.is_sub === 1 && props.record.status === 6) { is_over = true }///是否终结
-                        let topAdd = props.record.is_sub === 0 && !is_over && (hasFixPer || hasManagerPer) ? ///主票未终结时且有维修或专工权限
+                        let topBack = per_user_is_me && !is_over ?
                             <div key={'x'}>
+                                <Tooltip title={is_start ? '删除' : '撤回'} placement="left">
+                                    <Button size='small' type='link' icon={is_start ? 'delete' : 'rollback'} style={{ color: '#722ed1' }} onClick={() => {
+                                        confirm({
+                                            title: is_start ? '确认删除此工作票吗?' : '确认撤回你之前的操作吗?',
+                                            content: is_start && is_main ? '其下存在的措施票也将一并删除' : '请自行保证操作的准确性',
+                                            okText: '确认',
+                                            okType: 'danger',
+                                            cancelText: '取消',
+                                            onOk: async () => {
+                                                ///先检查本地数据与服务端数据是否一致
+                                                let res_status = await checkJBTStatusIsChange(props.record)
+                                                if (res_status.code !== 0) {
+                                                    message.error('当前工作票的最新状态已经发生变动；当前操作无效。已经为你刷新数据', 5)
+                                                    init()
+                                                    return
+                                                }
+                                                if (is_start) { ///删除
+                                                    let res_delete = await deleteMainSubJBT(props.record)
+                                                    if (res_delete.code === 0) { message.success(res_delete.message) } else { message.error(res_delete.message) }
+                                                    init()
+                                                } else {///撤回
+                                                    ///撤回前要检查前一步是否不为撤回、打回、调度
+                                                    const res_log = await HttpApi.getJTStepLogs({ jbtar_id: props.record.id })
+                                                    if (res_log.data.code === 0) {
+                                                        const log_list = res_log.data.data
+                                                        if (log_list[log_list.length - 1].step_des.indexOf('撤回') !== -1) { message.error('上一步为撤回操作；无法再次撤回', 4); return }
+                                                        if (log_list[log_list.length - 1].step_des.indexOf('打回') !== -1) { message.error('上一步为打回操作；无法再次撤回', 4); return }
+                                                        if (log_list[log_list.length - 1].step_des.indexOf('调度') !== -1) { message.error('上一步为调度操作；无法再次撤回', 4); return }
+                                                    }
+                                                    let res_reduce = await statusReduce1JBT(props.record, currentUser)
+                                                    if (res_reduce.code === 0) { message.success(res_reduce.message) } else { message.error(res_reduce.message); return }
+                                                    let obj = {};
+                                                    obj['jbtar_id'] = props.record.id
+                                                    obj['user_id'] = currentUser.id
+                                                    obj['user_name'] = currentUser.name
+                                                    obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
+                                                    obj['step_des'] = '撤回'
+                                                    HttpApi.addJbTStepLog(obj)///添加log
+                                                    init()
+                                                }
+                                            }
+                                        })
+                                    }}></Button>
+                                </Tooltip>
+                            </div> : null
+                        let topAdd = props.record.is_sub === 0 && !is_over && (hasFixPer || hasManagerPer) ? ///主票未终结时且有维修或专工权限
+                            <div key={'y'}>
                                 <Tooltip title={'新增措施票'} placement="left">
                                     <Dropdown size='small' overlay={() => {
                                         return <Menu onClick={(e) => {
@@ -257,8 +307,8 @@ export default function JobTicketOfMy() {
                                     }} />
                                 </Tooltip>
                             })
-                            return [topAdd, ...tags]
-                        } else { return topAdd }
+                            return [topBack, topAdd, ...tags]
+                        } else { return [topBack, topAdd] }
                     }}
                     pagination={{
                         total: listLength,
