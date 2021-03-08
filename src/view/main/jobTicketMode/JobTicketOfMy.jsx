@@ -47,7 +47,7 @@ export default function JobTicketOfMy() {
         if (res_user.data.code === 0) {
             var user_list = res_user.data.data.map((item) => { return { id: item.id, name: item.name } })
             // setUserList(user_list)
-            let runnerList_res = await HttpApi.getRunnerIdList({ role_id: 11 })///运行值长
+            let runnerList_res = await HttpApi.getRunnerIdList({ role_id_list: [11] })///运行值长
             if (runnerList_res.data.code === 0) {
                 let runnerList = runnerList_res.data.data;
                 user_list.forEach((user) => {
@@ -180,7 +180,7 @@ export default function JobTicketOfMy() {
             title: '操作', dataIndex: 'action', key: 'action', align: 'center', width: 100, render: (_, record) => {
                 let is_over = false
                 if (record.is_sub !== 1 && record.status === 4) { is_over = true }
-                else if (record.is_sub === 1 && record.status === 6) { is_over = true }///是否终结
+                else if (record.is_sub === 1 && record.status === 7) { is_over = true }///是否终结
                 let inCurrentUserList = false
                 inCurrentUserList = record.current_step_user_id_list.indexOf(`,${currentUser.id},`) !== -1;///是否为当前处理人
                 return <div>
@@ -229,7 +229,7 @@ export default function JobTicketOfMy() {
                         let is_start = props.record.status === 1///刚提交 状态为1
                         let is_main = props.record.is_sub === 0
                         if (props.record.is_sub !== 1 && props.record.status === 4) { is_over = true }
-                        else if (props.record.is_sub === 1 && props.record.status === 6) { is_over = true }///是否终结
+                        else if (props.record.is_sub === 1 && props.record.status === 7) { is_over = true }///是否终结
                         let topBack = per_user_is_me && !last_back_user_is_me && !is_over ?
                             <div key={'x'}>
                                 <Tooltip title={is_start ? '删除' : '撤回'} placement="left">

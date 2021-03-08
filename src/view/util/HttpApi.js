@@ -1180,9 +1180,11 @@ class HttpApi {
     /**
      * 获取某个角色的人员id
      */
-    static getRunnerIdList = ({ role_id }) => {
+    static getRunnerIdList = ({ role_id_list = [0] }) => {
+        let role_id_list_str = role_id_list.join(',')
         let sql = `select user_id from role_map_user
-        where role_map_user.effective = 1 and role_id = ${role_id}`
+        where role_map_user.effective = 1 and role_id in (${role_id_list_str})`
+        // console.log('getRunnerIdList sql:', sql)
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**

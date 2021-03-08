@@ -27,6 +27,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
     const [showBackOption, setShowBackOption] = useState(false)///是否显示打回按钮
     const [takeTicketAndPrint, setTakeTicketAndPrint] = useState(false)///是否接票并且打印
     const [showPrintBtn, setShowPrintBtn] = useState(false)///是否显示打印按钮
+    const [perStepIsBack, setPerStepIsBack] = useState(false)///操作记录中上一步已经是打回操作
 
     const [runnerList, setRunnerList] = useState([])
     const [otherList, setOtherList] = useState([])
@@ -35,8 +36,8 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
     const [loading, setLoading] = useState(true)
     const [printing, setPrinting] = useState(false)
 
-    const runUserlist = useCallback(async (user_list, role_id) => {
-        let res = await HttpApi.getRunnerIdList({ role_id })
+    const runUserlist = useCallback(async (user_list, role_id_list) => {
+        let res = await HttpApi.getRunnerIdList({ role_id_list })
         if (res.data.code === 0) {
             let runner_list1 = res.data.data;
             // console.log('res:', res.data.data);
@@ -63,26 +64,8 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
         }
     }, [])
 
-    const init2 = useCallback(() => {
-        ///处理 下一步时 可以【提交打印】
-        if (!isAgent && selectValue === '1' && record && record.is_sub === 0 && record.status === 2) {
-            setTakeTicketAndPrint(true)
-        } else { setTakeTicketAndPrint(false) }
-        if (selectValue === '1' && record && record.status >= 1) {
-            step_des = changeShowLabByStauts(record.status, record.is_sub)
-        } else if (selectValue === '-1') { step_des = '打回' }
-    }, [isAgent, selectValue, record])
-
-    const init = useCallback(async () => {
-        // console.log('init');
+    const init2 = useCallback(async () => {
         if (record && record.job_t_r_id) {
-            setSelectValue('1')
-            let res = await HttpApi.getJTRecords({ id: record.job_t_r_id })
-            if (res.data.code === 0) {
-                let tempObj = JSON.parse(JSON.stringify(res.data.data[0]))
-                tempObj.pages = JSON.parse(tempObj.pages)
-                setCurrentJobTicketValue(tempObj)///票数据初始化
-            }
             let res_user = await HttpApi.getUserInfo({ effective: 1 })
             if (res_user.data.code === 0) {
                 var user_list = res_user.data.data.map((item) => { return { id: item.id, name: item.name } })
@@ -98,42 +81,55 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
             setShowBackOption(false)///不可以打回
             if (record.is_sub === 1) {///措施票情况【一级措施票】【后续新增二级情况】
                 // console.log('1111措施票');
-                if (record.status === 1) {///当前待安措时
+                if (record.status === 0) {
+                    runUserlist(user_list, [11])//////值长人名单[针对下一步1-待安措]
+                } else if (record.status === 1) {///当前待安措时
                     if (currentUser.id === record.user_id) {///如果用户是创建者，那么可以删除
                         setShowDeleteBtn(true)///展示删除按钮
                     }
+                    setShowBackOption(true)///可以打回
                     ///措施票 状态1 待安措时 运行可以操作
-                    runUserlist(user_list, isAgent ? 11 : 8)///初审人名单[针对下一步2-待初审]
+                    runUserlist(user_list, isAgent ? [11] : [8])///初审人名单[针对下一步2-待初审]
                 } else if (record.status === 2) {///当前待初审时
                     setShowBackOption(true)///可以打回
                     setShowStopBtn(true)///可以作废
-                    runUserlist(user_list, isAgent ? 8 : 9)///复审人名单[针对下一步3-待复审]
+                    runUserlist(user_list, isAgent ? [8] : [9])///复审人名单[针对下一步3-待复审]
                 } else if (record.status === 3) {///当前待复审时
                     setShowBackOption(true)///可以打回
                     setShowStopBtn(true)///可以作废
-                    runUserlist(user_list, isAgent ? 9 : 10)///批准人名单[针对下一步4-待批准]
+                    runUserlist(user_list, isAgent ? [9] : [10])///批准人名单[针对下一步4-待批准]
                 } else if (record.status === 4) {///当前待批准
                     setShowBackOption(true)///可以打回
                     setShowStopBtn(true)///可以作废
-                    runUserlist(user_list, isAgent ? 10 : 11)///运行值长名单[针对下一步5-待终结]
-                } else if (record.status === 5) {///当前待终结
+                    runUserlist(user_list, isAgent ? [10] : [11])///运行值长名单[针对下一步5-待接票打印]
+                } else if (record.status === 5) {///当前待接票打印
+                    setShowBackOption(true)///可以打回
+                    setShowStopBtn(true)///可以作废
+                    runUserlist(user_list, [11])///运行值长名单[针对下一步5-待终结]
+                }
+                else if (record.status === 6) {///当前待终结
                     setShowBackOption(true)///可以打回
                     setShowStopBtn(true)///可以作废
                     setShowPrintBtn(true)///可以打印
                     if (!isAgent) setUserSelectAble(false)///处理情况下不可选择人员
-                    runUserlist(user_list, 11)
-                } else if (record.status === 6) {
+                    runUserlist(user_list, [11])
+                } else if (record.status === 7) {
                     setUserSelectAble(false)///不可选择人员
                 }
             } else if (record.is_sub === 0) {///主票情况
                 // console.log('1111主票');
-                if (record.status === 1) {///当前待签发
+                if (record.status === 0) {
+                    let { majorManagerList, otherList } = await getTargetMajorManagerList({ major_id: record.major_id })
+                    setRunnerList(majorManagerList) ///当前专业专工
+                    setOtherList(otherList)
+                } else if (record.status === 1) {///当前待签发
                     if (isAgent) {
                         let { majorManagerList, otherList } = await getTargetMajorManagerList({ major_id: record.major_id })
                         setRunnerList(majorManagerList) ///当前专业专工
                         setOtherList(otherList)
                     } else {
-                        runUserlist(user_list, 11)///运行值长
+                        setShowBackOption(true)///可以打回
+                        runUserlist(user_list, [11])///运行值长
                     }
                     if (currentUser.id === record.user_id) {
                         setShowDeleteBtn(true)///展示删除按钮
@@ -142,22 +138,57 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                     // if (!isAgent && selectValue === '1') setTakeTicketAndPrint(true)///处理 下一步时 可以【提交打印】
                     setShowStopBtn(true)///可以作废
                     setShowBackOption(true)///可以打回
-                    runUserlist(user_list, 11)///运行值长
+                    runUserlist(user_list, [11])///运行值长
                 } else if (record.status === 3) {///当前待终结
                     setShowStopBtn(true)///可以作废
                     setShowPrintBtn(true)///可以打印
                     setShowBackOption(true)///可以打回
                     if (!isAgent) setUserSelectAble(false)///处理情况下不可选择人员
-                    runUserlist(user_list, 11)///运行值长
+                    runUserlist(user_list, [11])///运行值长
                 } else if (record.status === 4) {///终结时
                     setUserSelectAble(false)///不可选择人员
                 }
             }
+
+            ///判断上一步操作
+            let res_step = await HttpApi.getJTStepLogs({ jbtar_id: record.id })
+            if (res_step.data.code === 0) {
+                const step_list = res_step.data.data
+                const last_step_des = step_list[step_list.length - 1].step_des
+                if (last_step_des) {
+                    const last_is_back = last_step_des.indexOf('打回') !== -1 || last_step_des.indexOf('撤回') !== -1 || last_step_des.indexOf('调度') !== -1
+                    setPerStepIsBack(last_is_back)
+                }
+
+            }
+            // console.log('init2 selectValue:', selectValue);
+            ///处理 下一步时 可以【提交打印】
+            if (!isAgent && selectValue === '1') {
+                if (record.is_sub === 0 && record.status === 2) { setTakeTicketAndPrint(true) }
+                else if (record.is_sub === 1 && record.status === 5) { setTakeTicketAndPrint(true) }
+            } else { setTakeTicketAndPrint(false) }
+            if (selectValue === '1' && record && record.status >= 0) {
+                step_des = changeShowLabByStauts(record.status, record.is_sub)
+            } else if (selectValue === '-1') {
+                step_des = '打回'
+                runUserlist(user_list, [0])///所有人
+            }
         }
-        init2()
+    }, [currentUser, runUserlist, isAgent, selectValue, record])
+
+    const init = useCallback(async () => {
+        // console.log('init');
+        if (record && record.job_t_r_id) {
+            setSelectValue('1')
+            let res = await HttpApi.getJTRecords({ id: record.job_t_r_id })
+            if (res.data.code === 0) {
+                let tempObj = JSON.parse(JSON.stringify(res.data.data[0]))
+                tempObj.pages = JSON.parse(tempObj.pages)
+                setCurrentJobTicketValue(tempObj)///票数据初始化
+            }
+        }
         setLoading(false)
-        // eslint-disable-next-line
-    }, [record, currentUser, runUserlist, isAgent])
+    }, [record])
 
     const resetHandler = useCallback(() => {
         onClose()
@@ -208,22 +239,22 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
             </OptGroup>
             ]
         }
-        if (!isAgent) {
+        if (!isAgent && selectValue !== '-1') {
             return result.slice(0, 1)///非代理情况下。移除其他分组
         }
         return result
-    }, [runnerList, otherList, isAgent])
+    }, [runnerList, otherList, isAgent, selectValue])
     useEffect(() => {
         setLoading(true)
         setTimeout(() => {
             init();
-        }, 500);
+        }, 300);
     }, [init])
-    // useEffect(() => {
-    //     setTimeout(() => {
-    //         init2();
-    //     }, 1000);
-    // }, [init2])
+    useEffect(() => {
+        setTimeout(() => {
+            init2();
+        }, 500);
+    }, [init2])
     useEffect(() => {
         if (window.electron) {
             console.log('添加监听');
@@ -335,7 +366,10 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                 return false
                                             }
                                         }}
-                                        maxTagCount={5} value={ticketNextUserList} placeholder={isAgent ? '新处理人' : '下一步处理人员'} allowClear size='small' style={{ width: '100%' }} disabled={selectValue === '-1' || !userSelectAble}
+                                        maxTagCount={5}
+                                        value={ticketNextUserList}
+                                        placeholder={isAgent ? '新处理人' : '下一步处理人员'} allowClear size='small' style={{ width: '100%' }}
+                                        disabled={(selectValue === '-1' && !perStepIsBack) || !userSelectAble}
                                         onChange={(v, option) => {
                                             setTicketNextUserList(v)
                                             ticketNextUserNameList = option.map((item) => { return item.props.children })
@@ -407,6 +441,9 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                             return
                                         }
                                     } else {///返回上一步时，重新检查一边数据。状态-1
+                                        if (perStepIsBack && ticketNextUserNameList.length === 0) {
+                                            message.error('连续打回时，请选择打回处理人'); return
+                                        }
                                         if (!remark) { message.error('打回时，备注必填'); return }
                                         afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, record.status - 1)
                                         setCurrentJobTicketValue(afterCheckObj)
@@ -431,7 +468,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                 let { job_content, time_list } = getJTRecordContentAndPlanTime({ pages: JSON.stringify(currentJobTicketValue.pages) })
                                                 let current_step_user_id_list_temp = ''///下一步要给哪些人
                                                 if (selectValue === '1') {
-                                                    if (record.is_sub === 1) {///措施票情况
+                                                    if (record.is_sub !== 0) {///措施票情况
                                                         if (record.status === 5) {
                                                             current_step_user_id_list_temp = ''
                                                         } else {
@@ -446,6 +483,12 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                     }
                                                 } else {
                                                     current_step_user_id_list_temp = ',' + record.per_step_user_id + ','
+                                                    ///zzz 上一步操作已经打回过一次
+                                                    console.log('上一步操作已经打回过一次:', perStepIsBack);
+                                                    if (perStepIsBack) {
+                                                        current_step_user_id_list_temp = ',' + ticketNextUserList.join(',') + ','
+                                                    }
+                                                    console.log('current_step_user_id_list_temp:', current_step_user_id_list_temp);
                                                 }
                                                 let is_read = 0;
                                                 if (record.is_sub !== 0) {
@@ -459,7 +502,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                     id: record.id,
                                                     status: new_status,
                                                     job_content, time_begin: time_list[0], time_end: time_list[1],
-                                                    per_step_user_id: currentUser.id, per_step_user_name: currentUser.name,
+                                                    per_step_user_id: currentUser.id, per_step_user_name: currentUser.name,///下一步 还是打回 上一步处理人都是当前的操作人
                                                     current_step_user_id_list: current_step_user_id_list_temp,///当前处理人id ,0,1,
                                                     history_step_user_id_list: record.history_step_user_id_list + (current_step_user_id_list_temp.length > 1 ? current_step_user_id_list_temp.substring(1) : ''),
                                                     is_agent: 0
@@ -481,6 +524,9 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                             }
                                                         } else {///打回
                                                             obj['step_des'] = step_des + '至 ' + record.per_step_user_name
+                                                            if (perStepIsBack) {
+                                                                obj['step_des'] = step_des + '至 ' + ticketNextUserNameList.join(',')
+                                                            }
                                                         }
                                                     } else {///主票
                                                         if (selectValue === '1') {///下一步
@@ -491,6 +537,9 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                             }
                                                         } else {///打回
                                                             obj['step_des'] = step_des + '至 ' + record.per_step_user_name
+                                                            if (perStepIsBack) {
+                                                                obj['step_des'] = step_des + '至 ' + ticketNextUserNameList.join(',')
+                                                            }
                                                         }
                                                     }
                                                     obj['remark'] = remark

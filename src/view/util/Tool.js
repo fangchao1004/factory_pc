@@ -1196,19 +1196,25 @@ export function changeShowLabByStauts(status, is_sub) {
     let res = ''
     if (is_sub !== 0) {
         switch (status) {
+            case 0:
+                res = '提交至待安措'
+                break;
             case 1:
-                res = '待作业单位审核'
+                res = '安措并提交待作业单位审核'
                 break;
             case 2:
-                res = '待安全部门审核'
+                res = '审核并提交待安全部门审核'
                 break;
             case 3:
-                res = '待分管副总批准'
+                res = '审核并提交待分管副总批准'
                 break;
             case 4:
-                res = '等待值长打印'
+                res = '批准并提交待接票打印'
                 break;
             case 5:
+                res = '打印并提交待终结'
+                break;
+            case 6:
                 res = '终结'
                 break;
             default:
@@ -1216,11 +1222,14 @@ export function changeShowLabByStauts(status, is_sub) {
         }
     } else {
         switch (status) {
+            case 0:
+                res = '提交至待签发'
+                break;
             case 1:
-                res = '待接票'
+                res = '签发并提交待接票打印'
                 break;
             case 2:
-                res = '待终结'
+                res = '打印并提交待终结'
                 break;
             case 3:
                 res = '终结'
