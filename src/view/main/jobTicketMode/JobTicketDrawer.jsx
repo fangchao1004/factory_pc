@@ -21,7 +21,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
     const [selectValue, setSelectValue] = useState('1')
 
     const [actionSelectAble, setActionSelectAble] = useState(true)///处理选项是否可以操作
-    // const [userSelectAble, setUserSelectAble] = useState(true)///人员项是否可以操作
+    const [userSelectAble, setUserSelectAble] = useState(true)///人员项是否可以操作
     const [showDeleteBtn, setShowDeleteBtn] = useState(false)///是否显示删除按钮
     const [showStopBtn, setShowStopBtn] = useState(false)///是否显示终止作废按钮
     const [showBackOption, setShowBackOption] = useState(false)///是否显示打回按钮
@@ -39,6 +39,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
         if (!record || !record.job_t_r_id) { return }
         console.log('init3');
         var after_filter_current_status_data = getRecordCurrentStatusInfo(record, record.status)
+        var status_table = getRecordStatusTable(record)
         ///非调度 正常选择下一步时 如果是wait_print 就显示打印提交按钮
         if (!isAgent && selectValue === '1') {
             let { wait_print } = after_filter_current_status_data
@@ -53,10 +54,16 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
             let { target_list, other_list } = await getTargetRoleIdUser(userList, next_role_id)
             setTargetList(target_list)
             setOtherList(other_list)
+            if (status_table.wait_over_status === record.status) {
+                setUserSelectAble(false)
+            } else if (status_table.wait_over_status > record.status) {
+                setUserSelectAble(true)
+            }
         } else if (selectValue === '-1') {
             step_des = '打回'
             let last_is_back = await checkLastStepIsBack(record.id)
             setPerStepIsBack(last_is_back)
+            setUserSelectAble(last_is_back)
             if (record.status > 1) {
                 ///上一状态需要哪些候选人
                 console.log('上一状态需要哪些候选人');
@@ -73,6 +80,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                 }
             } else {
                 console.log('直接给发起人');
+                setUserSelectAble(false)
             }
         }
     }, [userList, record, isAgent, selectValue])
@@ -288,9 +296,13 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                     // console.log('选择的措施票数据:', item);
                                     setStepLogVisible(true);
                                 }}>记录</Button>
+                                <div style={{ marginTop: 10, ...styles.bar }}>
+                                    <span><Tag size='small' color='blue'>当前</Tag></span>
+                                    <Input size='small' value={record ? record.status_des : '-'} disabled />
+                                </div>
                                 {!isAgent ?
                                     <div style={{ marginTop: 10, ...styles.bar }}>
-                                        <span><Tag size='small' color='blue'>处理</Tag></span>
+                                        <span><Tag size='small' color='blue'>提交</Tag></span>
                                         <Select value={selectValue} placeholder='请选择处理项' allowClear size='small' style={{ width: '100%' }} disabled={!actionSelectAble}
                                             onChange={(v, v2) => {
                                                 setSelectValue(v)
@@ -315,7 +327,8 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                         maxTagCount={5}
                                         value={ticketNextUserList}
                                         placeholder={isAgent ? '新处理人' : '下一步处理人员'} allowClear size='small' style={{ width: '100%' }}
-                                        disabled={selectValue === '1' ? false : ((record && record.status) > 1 ? !perStepIsBack : true)}
+                                        // disabled={selectValue === '1' ? (JSON.parse(record.status_table).wait_over_status === record.status ? true : false) : ((record && record.status) > 1 ? !perStepIsBack : true)}
+                                        disabled={!userSelectAble}
                                         onChange={(v, option) => {
                                             setTicketNextUserList(v)
                                             ticketNextUserNameList = option.map((item) => { return item.props.children })
@@ -471,7 +484,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                             }
                                         },
                                     });
-                                }}>{takeTicketAndPrint ? '提交打印' : '提交'}</Button>
+                                }}>{takeTicketAndPrint ? '提交打印' : '确定提交'}</Button>
                             </div>
                         </Affix>
                     </div>
