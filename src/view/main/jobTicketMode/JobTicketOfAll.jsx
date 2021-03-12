@@ -1,12 +1,11 @@
-import { Badge, Button, Col, DatePicker, Form, Icon, Input, Row, Select, Table, Tooltip } from 'antd';
+import { Alert, Badge, Button, Col, DatePicker, Form, Icon, Input, Row, Select, Table, Tooltip } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
-import { changeJobTicketStatusToText } from '../../util/Tool';
 import JobTicketDrawer from './JobTicketDrawer';
 import JobTicketDrawerForShowEdit from './JobTicketDrawerForShowEdit';
 import JobTicketStepLogView from './JobTicketStepLogView';
 import moment from 'moment'
-import { JOB_TICKETS_STATUS } from '../../util/AppData';
+// import { JOB_TICKETS_STATUS } from '../../util/AppData';
 const FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const storage = window.localStorage;
 var searchCondition = {};
@@ -24,6 +23,7 @@ export default function JobTicketOfAll() {
     const [listLength, setListLength] = useState(0)
     const [loading, setLoading] = useState(false)
     const [typeOptionList, setTypeOptionList] = useState([])
+    const [statusDesList, setStatusDesList] = useState([])
     const init = useCallback(async () => {
         setLoading(true)
         const localUserInfo = storage.getItem('userinfo');
@@ -34,7 +34,7 @@ export default function JobTicketOfAll() {
             setTypeOptionList(res.data.data)
         }
         let conditions = { ...searchCondition, ...pageCondition }
-        console.log('conditions:', conditions);
+        // console.log('conditions:', conditions);
         let test_res_count = await HttpApi.getMainJTApplyRecordsCountByCondition(conditions)
         if (test_res_count.data.code === 0) {
             setListLength(test_res_count.data.data[0]['count'])
@@ -88,11 +88,20 @@ export default function JobTicketOfAll() {
     useEffect(() => {
         let loop = setInterval(() => {
             init();
-        }, 10000 * 1000)
+        }, 100 * 1000)
         return () => {
             clearInterval(loop)
         }
     }, [init])
+    const init2 = useCallback(async () => {
+        let res = await HttpApi.getJBTStatusDesList()
+        if (res.data.code === 0) {
+            setStatusDesList(res.data.data.map((item) => item.des))
+        }
+    }, [])
+    useEffect(() => {
+        init2()
+    }, [init2])
     const columns = [
         {
             title: '序号', dataIndex: 'id', key: 'id', width: 80, align: 'center', render: (text, record) => {
@@ -113,9 +122,7 @@ export default function JobTicketOfAll() {
         { title: '申请人', dataIndex: 'user_name', key: 'user_name', width: 100 },
         { title: '上步处理人', dataIndex: 'user_name', key: 'per_step_user_name', width: 100 },
         {
-            title: '状态', dataIndex: 'status', key: 'status', width: 80, render: (text) => {
-                return changeJobTicketStatusToText(text)
-            }
+            title: '状态', dataIndex: 'status_des', key: 'status_des', width: 80
         },
         {
             title: '操作', dataIndex: 'action', key: 'action', align: 'center', width: 100, render: (_, record) => {
@@ -145,13 +152,14 @@ export default function JobTicketOfAll() {
     ]
     return (
         <div style={styles.root}>
-            <div style={styles.header}><Searchfrom defaultTime={defaultTime} typeOptionList={typeOptionList} startSearch={async (conditionsValue) => {
+            <div style={styles.header}><Searchfrom statusDesList={statusDesList} defaultTime={defaultTime} typeOptionList={typeOptionList} startSearch={async (conditionsValue) => {
                 searchCondition = conditionsValue;
                 pageCondition = { page: 1, pageSize: 10 }
                 setCurrentPage(1)
                 init();
             }} /></div>
             <div style={styles.body}>
+                <Alert style={styles.marginbottom} type='info' showIcon message={'所有工作票数据；点击带有标签图案的数据行，可以展开查看下属措施票数据'} />
                 <Table
                     loading={loading}
                     bordered
@@ -186,9 +194,7 @@ export default function JobTicketOfAll() {
                             { title: '申请人', dataIndex: 'user_name', key: 'user_name', width: 100 },
                             { title: '上步处理人', dataIndex: 'user_name', key: 'per_step_user_name', width: 100 },
                             {
-                                title: '状态', dataIndex: 'status', key: 'status', width: 80, render: (text) => {
-                                    return changeJobTicketStatusToText(text, 1)
-                                }
+                                title: '状态', dataIndex: 'status_des', key: 'status', width: 80
                             },
                             {
                                 title: '操作', dataIndex: 'action', key: 'action', width: 90, render: (_, record) => {
@@ -298,10 +304,10 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
                 </Form.Item>
             </Col>
             <Col span={6}>
-                <Form.Item label='票类型' {...itemProps}>
+                <Form.Item label='主票类型' {...itemProps}>
                     {props.form.getFieldDecorator('type_id', {
                         rules: [{ required: false }]
-                    })(<Select allowClear placeholder="请选择票类型" >
+                    })(<Select allowClear placeholder="请选择主票类型" >
                         {props.typeOptionList.map((item, index) => {
                             return <Select.Option value={item.id} key={index} all={item}>{item.ticket_name}</Select.Option>
                         })}
@@ -310,11 +316,11 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
             </Col>
             <Col span={6}>
                 <Form.Item label='主票状态' {...itemProps}>
-                    {props.form.getFieldDecorator('status', {
+                    {props.form.getFieldDecorator('status_des', {
                         rules: [{ required: false }]
                     })(<Select allowClear placeholder="请选择主票状态" >
-                        {JOB_TICKETS_STATUS.map((item, index) => {
-                            return <Select.Option value={item.value} key={index} all={item}>{item.text}</Select.Option>
+                        {props.statusDesList.map((item, index) => {
+                            return <Select.Option value={item} key={index} >{item}</Select.Option>
                         })}
                     </Select>)}
                 </Form.Item>
@@ -323,7 +329,7 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
                 <Form.Item label='编号查询' {...itemProps}>
                     {props.form.getFieldDecorator('no', {
                         rules: [{ required: false }]
-                    })(<Input placeholder='请输入编号(模糊查询)' />)}
+                    })(<Input allowClear placeholder='请输入编号(模糊查询)' />)}
                 </Form.Item>
             </Col>
             <Col span={24}>
@@ -351,5 +357,8 @@ const styles = {
         backgroundColor: '#FFFFFF',
         padding: 10,
         marginTop: 10
+    },
+    marginbottom: {
+        marginBottom: 10
     }
 }

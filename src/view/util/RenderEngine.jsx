@@ -242,21 +242,23 @@ function changeMomentFormat(timelistOrStr) {
 function checkCellDisable(able_list, currentStatus, currentUserPermission, isAgent) {
   if (!able_list) { return true }
   if (!currentUserPermission) { return true }
-  let currentUserPermissionList = currentUserPermission.split(',')
+  // let currentUserPermissionList = currentUserPermission.split(',')
   let disabled = true;
   able_list.forEach((item) => {
     if (item.status === currentStatus) {
-      if (isAgent) {///临时代理的情况下 只需要比对组件是否和当前状态匹配
-        disabled = false
-      } else {///正常情况下；要再判断权限是否对应
-        item.per.forEach((needPer) => {
-          if (currentUserPermissionList) {
-            currentUserPermissionList.forEach((hasPer) => {
-              if (String(needPer) === String(hasPer)) { disabled = false }
-            })
-          }
-        })
-      }
+      disabled = false
+      // if (isAgent) {///临时代理的情况下 只需要比对组件是否和当前状态匹配
+      //   disabled = false
+      // } 
+      // else {///正常情况下；要再判断权限是否对应
+      //   item.per.forEach((needPer) => {
+      //     if (currentUserPermissionList) {
+      //       currentUserPermissionList.forEach((hasPer) => {
+      //         if (String(needPer) === String(hasPer)) { disabled = false }
+      //       })
+      //     }
+      //   })
+      // }
     }
   })
   return disabled

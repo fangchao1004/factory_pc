@@ -19,8 +19,8 @@ export const tableCellOptionsData = [
     { "value": "10", "text": "测温组件" }, { "value": "11", "text": "测振组件" },
     { "value": "6", "text": "图片选择器" }, { "value": "2", "text": "数字输入框" },
     { "value": "13", "text": "副标题" }];
-export const JOB_TICKETS_STATUS = [{ value: 0, text: "待提交" }, { value: 1, text: "待签发" }, { value: 2, text: "待接票打印" }, { value: 3, text: "待终结" }, { value: 4, text: "终结" }]
-export const SUB_JOB_TICKETS_STATUS = [{ value: 0, text: "待提交" }, { value: 1, text: "待安措" }, { value: 2, text: "待作业单位审核" }, { value: 3, text: "待安全部门审核" }, { value: 4, text: "待分管副总批准" }, { value: 5, text: "待接票打印" }, { value: 6, text: "待终结" }, { value: 7, text: "终结" }]
+// export const JOB_TICKETS_STATUS = [{ value: 0, text: "待提交" }, { value: 1, text: "待签发" }, { value: 2, text: "待接票打印" }, { value: 3, text: "待终结" }, { value: 4, text: "终结" }]
+// export const SUB_JOB_TICKETS_STATUS = [{ value: 0, text: "待提交" }, { value: 1, text: "待安措" }, { value: 2, text: "待作业单位审核" }, { value: 3, text: "待安全部门审核" }, { value: 4, text: "待分管副总批准" }, { value: 5, text: "待接票打印" }, { value: 6, text: "待终结" }, { value: 7, text: "终结" }]
 export const NOTIFY_MP3 = 'http://60.174.196.158:12345/assets/notice.mp3'
 export const WARN_MP3 = 'http://60.174.196.158:12345/assets/warn.mp3'
 export const BUGLOOPTIME = 1000;///毫秒，缺陷模块每隔1秒去刷新时间 不请求数据
@@ -97,4 +97,5 @@ export const VersionlistData = [
     // { title: '更新', description: '1.5.4 beta UI整体调整，hook化改造，移除原有store' }
     // { title: '更新', description: '1.5.5 beta 工作台添加相关缺陷操作列表，修复缺陷模块超时不标红的问题' }
     // { title: '更新', description: '1.5.6 功能整合' }
+    // { title: '更新', description: '1.5.7 工作票功能搭建' }
 ]

@@ -962,7 +962,7 @@ class HttpApi {
     }
     static getJobTicketsOptionList = ({ is_sub }) => {
         let is_sub_str = is_sub.join(',')
-        let sql = `select * from job_tickets where is_delete = 0 and is_sub in (${is_sub_str}) and is_extra = 0`
+        let sql = `select * from job_tickets where is_delete = 0 and is_sub in (${is_sub_str}) and is_extra = 0 order by no`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getJobTicketsList = ({ id }) => {
@@ -974,7 +974,7 @@ class HttpApi {
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getSubJobTicketsList = ({ type_name }) => {
-        let sql = `select * from job_tickets where is_delete = 0 and is_sub = 1 and type_name = '${type_name}'`
+        let sql = `select * from job_tickets where is_delete = 0 and is_sub = 1 and type_name = '${type_name}' order by no`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getJobTicketsCount = ({ type_id, timeRange }) => {
@@ -1001,8 +1001,8 @@ class HttpApi {
      * job_t_r_id 工作票记录id
      * @param {*} param0 
      */
-    static createJTApplyRecord = ({ no, job_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_sub, p_id, type_id }) => {
-        let sql = `insert into job_tickets_apply_records (no, job_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_sub,p_id,type_id) values ('${no}',${job_t_r_id},  ${user_id}, '${user_name}', '${time}', ${major_id}, '${ticket_name}', '${job_content}' ,${time_begin ? "'" + time_begin + "'" : null} ,${time_end ? "'" + time_end + "'" : null},'${per_step_user_id}', '${per_step_user_name}', '${current_step_user_id_list}', '${history_step_user_id_list}', ${is_sub}, ${p_id ? p_id : null},${type_id} )`
+    static createJTApplyRecord = ({ no, job_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_sub, p_id, type_id, status_table, status_des }) => {
+        let sql = `insert into job_tickets_apply_records (no, job_t_r_id, user_id, user_name, time, major_id, ticket_name, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_sub,p_id,type_id,status_table,status_des) values ('${no}',${job_t_r_id},  ${user_id}, '${user_name}', '${time}', ${major_id}, '${ticket_name}', '${job_content}' ,${time_begin ? "'" + time_begin + "'" : null} ,${time_end ? "'" + time_end + "'" : null},'${per_step_user_id}', '${per_step_user_name}', '${current_step_user_id_list}', '${history_step_user_id_list}', ${is_sub}, ${p_id ? p_id : null},${type_id},'${status_table}','${status_des}' )`
         return Axios.post(Testuri + 'obs', { sql })
     }
     /**
@@ -1010,12 +1010,12 @@ class HttpApi {
      * @param {*} time 创建时间
      * @param {*} type_id 对应票类型
      */
-    static getMainJTApplyRecordsCountByCondition({ time, type_id, status, no }) {
+    static getMainJTApplyRecordsCountByCondition({ time, type_id, status_des, no }) {
         let sql_time = ` time >= '${time[0]}' and time <= '${time[1]}'`
         let sql_type_id = !type_id ? `` : ` and type_id = ${type_id}`
-        let sql_status = !status ? `` : ` and status = ${status}`
+        let sql_status_des = !status_des ? `` : ` and status_des = '${status_des}'`
         let sql_no = !no ? `` : ` and no like '%${no}%'`
-        let all_sql_condtion = sql_time + sql_type_id + sql_status + sql_no
+        let all_sql_condtion = sql_time + sql_type_id + sql_status_des + sql_no
         let sql = `select count(id) as count from job_tickets_apply_records where is_delete = 0 and is_stop = 0 and p_id is null and ${all_sql_condtion}`
         // console.log('sql1:', sql)
         return Axios.post(Testuri + 'obs', { sql })
@@ -1025,13 +1025,13 @@ class HttpApi {
      * @param {*} page 当前页码
      * @param {*} pageSize 当前一页条数 
      */
-    static getMainJTApplyRecordsByLimit({ time, type_id, page = 1, pageSize = 10, status, no }) {
+    static getMainJTApplyRecordsByLimit({ time, type_id, page = 1, pageSize = 10, status_des, no }) {
         let startPage = (page - 1) * pageSize
         let sql_time = ` time >= '${time[0]}' and time <= '${time[1]}'`
         let sql_type_id = !type_id ? `` : ` and type_id = ${type_id}`
-        let sql_status = !status ? `` : ` and status = ${status}`
+        let sql_status_des = !status_des ? `` : ` and status_des = '${status_des}'`
         let sql_no = !no ? `` : ` and no like '%${no}%'`
-        let all_sql_condtion = sql_time + sql_type_id + sql_status + sql_no
+        let all_sql_condtion = sql_time + sql_type_id + sql_status_des + sql_no
         let sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = 0 and p_id is null and ${all_sql_condtion}
         order by id desc limit ${startPage},${pageSize}`
         // console.log('sql2:', sql)
@@ -1055,7 +1055,7 @@ class HttpApi {
     * @param {*} sub_status 措施票状态
     * @param {*} user_id 当前用户id
     */
-    static getMyJTApplyRecordsCountByCondition({ time, type_id, status, sub_status, user_id, is_current, no }) {
+    static getMyJTApplyRecordsCountByCondition({ time, type_id, status_des, user_id, is_current, no }) {
         let sql_time = ` time >= '${time[0]}' and time <= '${time[1]}'`
         let sql_type_id = !type_id ? `` : ` and type_id = ${type_id}`
         let sql_no = !no ? `` : ` and no like '%${no}%'`
@@ -1065,15 +1065,11 @@ class HttpApi {
         } else {
             sql_user_id = user_id >= 0 ? ` and (history_step_user_id_list like '%,${user_id},%' or user_id = ${user_id})` : ''
         }
-        let sql_status = '';
-        if (status && sub_status) {
-            sql_status = ` and (is_sub = 0 and status in (${status}) || is_sub = 1 and status in (${sub_status}))`
-        } else if (!status && sub_status) {
-            sql_status = ` and is_sub = 1 and status in (${sub_status})`
-        } else if (status && !sub_status) {
-            sql_status = ` and is_sub = 0 and status in (${status})`
+        let sql_status_des = '';
+        if (status_des) {
+            sql_status_des = ` and status_des = '${status_des}'`
         }
-        let all_sql_condtion = sql_time + sql_type_id + sql_status + sql_user_id + sql_no
+        let all_sql_condtion = sql_time + sql_type_id + sql_status_des + sql_user_id + sql_no
         let sql = `select count(id) as count from job_tickets_apply_records where is_delete = 0 and is_stop = 0  and ${all_sql_condtion}`
         // console.log('sql1:', sql)
         return Axios.post(Testuri + 'obs', { sql })
@@ -1087,7 +1083,7 @@ class HttpApi {
     * @param {*} sub_status 措施票状态
     *  @param {*} user_id 当前用户id
     */
-    static getMyJTApplyRecordsByLimit({ time, type_id, status, sub_status, page = 1, pageSize = 10, user_id, is_current, no }) {
+    static getMyJTApplyRecordsByLimit({ time, type_id, status_des, page = 1, pageSize = 10, user_id, is_current, no }) {
         let startPage = (page - 1) * pageSize
         let sql_time = ` time >= '${time[0]}' and time <= '${time[1]}'`
         let sql_type_id = !type_id ? `` : ` and type_id = ${type_id}`
@@ -1098,15 +1094,11 @@ class HttpApi {
         } else {
             sql_user_id = user_id >= 0 ? ` and (history_step_user_id_list like '%,${user_id},%' or user_id = ${user_id})` : ''
         }
-        let sql_status = '';
-        if (status && sub_status) {
-            sql_status = ` and (is_sub = 0 and status in (${status}) || is_sub = 1 and status in (${sub_status}))`
-        } else if (!status && sub_status) {
-            sql_status = ` and is_sub = 1 and status in (${sub_status})`
-        } else if (status && !sub_status) {
-            sql_status = ` and is_sub = 0 and status in (${status})`
+        let sql_status_des = '';
+        if (status_des) {
+            sql_status_des = ` and status_des = '${status_des}'`
         }
-        let all_sql_condtion = sql_time + sql_type_id + sql_status + sql_user_id + sql_no
+        let all_sql_condtion = sql_time + sql_type_id + sql_status_des + sql_user_id + sql_no
         let sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = 0 and ${all_sql_condtion}  order by id desc limit ${startPage},${pageSize}`
         // console.log('sql2:', sql)
         return Axios.post(Testuri + 'obs', { sql })
@@ -1117,7 +1109,7 @@ class HttpApi {
         return Axios.post(Testuri + 'obs', { sql })
     }
 
-    static updateJTApplyRecord = ({ id, status, is_delete, is_stop, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_read, is_agent = 0, last_back_user_id }) => {
+    static updateJTApplyRecord = ({ id, status, is_delete, is_stop, job_content, time_begin, time_end, per_step_user_id, per_step_user_name, current_step_user_id_list, history_step_user_id_list, is_read, is_agent = 0, last_back_user_id, status_des }) => {
         let id_value = id
         if (id instanceof Array) {
             id_value = id.join(',')
@@ -1159,7 +1151,11 @@ class HttpApi {
         if (last_back_user_id >= 0) {
             block_last_back_user = `last_back_user_id = ${last_back_user_id},`
         }
-        let set_sql = block_status + block_delete + block_stop + block_contet_time + block_user1 + blocl_user2 + blocl_user3 + block_read + block_agent + block_last_back_user
+        let block_status_des = ''
+        if (status_des) {
+            block_status_des = `status_des = '${status_des}',`
+        }
+        let set_sql = block_status + block_delete + block_stop + block_contet_time + block_user1 + blocl_user2 + blocl_user3 + block_read + block_agent + block_last_back_user + block_status_des
         set_sql = set_sql.substring(0, set_sql.length - 1)
         let sql = `update job_tickets_apply_records set ${set_sql} where id in (${id_value})`
         // console.log('update job_tickets_apply_records sql:', sql)
@@ -1208,6 +1204,14 @@ class HttpApi {
     static getLastJTApplyRecordId = () => {
         // let sql = `select max(id) as max_id from job_tickets_apply_records where is_delete = 0`
         let sql = `select id,no from job_tickets_apply_records order by id desc limit 1`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+    /**
+     * 获取工作票的所有状态描述
+     * @returns 
+     */
+    static getJBTStatusDesList = () => {
+        let sql = `select * from job_tickets_status_des`
         return Axios.post(Testuri + 'obs', { sql })
     }
 }

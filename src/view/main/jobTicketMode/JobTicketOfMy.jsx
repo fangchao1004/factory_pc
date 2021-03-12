@@ -1,12 +1,11 @@
-import { Badge, Button, Col, DatePicker, Dropdown, Form, Input, Menu, Row, Select, Switch, Table, Tooltip, Modal, message } from 'antd';
+import { Badge, Button, Col, DatePicker, Dropdown, Form, Input, Menu, Row, Select, Switch, Table, Tooltip, Modal, message, Alert } from 'antd';
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
-import { autoFillNo, changeJobTicketStatusToText, deleteMainSubJBT, checkJBTStatusIsChange, statusReduce1JBT } from '../../util/Tool';
+import { autoFillNo, deleteMainSubJBT, checkJBTStatusIsChange, statusReduce1JBT } from '../../util/Tool';
 import JobTicketDrawer from './JobTicketDrawer';
 import JobTicketDrawerForShowEdit from './JobTicketDrawerForShowEdit';
 import JobTicketStepLogView from './JobTicketStepLogView';
 import moment from 'moment'
-import { JOB_TICKETS_STATUS, SUB_JOB_TICKETS_STATUS } from '../../util/AppData';
 import { AppDataContext } from '../../../redux/AppRedux';
 import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer';
 const { confirm } = Modal;
@@ -35,6 +34,7 @@ export default function JobTicketOfMy() {
     const [sbtvisible, setSbtvisible] = useState(false)
     const [currentSubJBT, setCurrentSubJBT] = useState({})
     const [userList, setUserList] = useState([])
+    const [statusDesList, setStatusDesList] = useState([])
     const init = useCallback(async () => {
         setLoading(true)
         const localUserInfo = storage.getItem('userinfo');
@@ -46,20 +46,7 @@ export default function JobTicketOfMy() {
         let res_user = await HttpApi.getUserInfo({ effective: 1 })
         if (res_user.data.code === 0) {
             var user_list = res_user.data.data.map((item) => { return { id: item.id, name: item.name } })
-            // setUserList(user_list)
-            let runnerList_res = await HttpApi.getRunnerIdList({ role_id_list: [11] })///运行值长
-            if (runnerList_res.data.code === 0) {
-                let runnerList = runnerList_res.data.data;
-                user_list.forEach((user) => {
-                    user.is_runner = false
-                    runnerList.forEach((runner) => {
-                        if (user.id === runner.user_id) {
-                            user.is_runner = true
-                        }
-                    })
-                })
-                setUserList(user_list)
-            }
+            setUserList(user_list)
         }
         let res = await HttpApi.getJobTicketsOptionList({ is_sub: [0, 1] })
         if (res.data.code === 0) { setTypeOptionList(res.data.data) }
@@ -112,11 +99,21 @@ export default function JobTicketOfMy() {
     useEffect(() => {
         let loop = setInterval(() => {
             init();
-        }, 10000 * 1000)
+        }, 100 * 1000)
         return () => {
             clearInterval(loop)
         }
     }, [init])
+
+    const init2 = useCallback(async () => {
+        let res = await HttpApi.getJBTStatusDesList()
+        if (res.data.code === 0) {
+            setStatusDesList(res.data.data.map((item) => item.des))
+        }
+    }, [])
+    useEffect(() => {
+        init2()
+    }, [init2])
     const resetReduxCount = useCallback(async () => {
         const user_id = currentUser.id
         const time = [moment().add(-6, 'month').startOf('day').format('YYYY-MM-DD HH:mm:ss'), moment().endOf('day').format('YYYY-MM-DD HH:mm:ss')];
@@ -173,7 +170,7 @@ export default function JobTicketOfMy() {
         { title: '上步处理人', dataIndex: 'user_name', key: 'per_step_user_name', width: 100 },
         {
             title: '状态', dataIndex: 'status', key: 'status', width: 80, render: (text, record) => {
-                return changeJobTicketStatusToText(text, record.is_sub)
+                return record.status_des || '-'
             }
         },
         {
@@ -205,17 +202,20 @@ export default function JobTicketOfMy() {
     return (
         <div style={styles.root}>
             <div style={styles.header}>
-                <Searchfrom defaultTime={defaultTime} typeOptionList={typeOptionList} startSearch={async (conditionsValue) => {
+                <Searchfrom statusDesList={statusDesList} defaultTime={defaultTime} typeOptionList={typeOptionList} startSearch={async (conditionsValue) => {
                     searchCondition = conditionsValue;
                     pageCondition = { page: 1, pageSize: 10 }
                     setCurrentPage(1)
                     init();
                 }} />
-                <span style={styles.switch}>
-                    <span>待我处理：</span><Switch checkedChildren="是" unCheckedChildren="否" checked={isCurrentMe} onChange={(v) => { setIsCurrentMe(v) }} />
-                </span>
             </div>
             <div style={styles.body}>
+                <Alert style={styles.marginbottom} type='info' showIcon message={
+                    <>
+                        <span>当前待我处理：</span>
+                        <Switch checkedChildren="是" unCheckedChildren="否" checked={isCurrentMe} onChange={(v) => { setIsCurrentMe(v) }} />
+                    </>
+                } />
                 <Table
                     loading={loading}
                     bordered
@@ -413,7 +413,7 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
                     </Select>)}
                 </Form.Item>
             </Col>
-            <Col span={6}>
+            {/* <Col span={6}>
                 <Form.Item label='主票状态' {...itemProps}>
                     {props.form.getFieldDecorator('status', {
                         rules: [{ required: false }]
@@ -434,15 +434,26 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
                         })}
                     </Select>)}
                 </Form.Item>
+            </Col> */}
+            <Col span={6}>
+                <Form.Item label='票状态' {...itemProps}>
+                    {props.form.getFieldDecorator('status_des', {
+                        rules: [{ required: false }]
+                    })(<Select allowClear placeholder="请选择票状态" >
+                        {props.statusDesList.map((item, index) => {
+                            return <Select.Option value={item} key={index}>{item}</Select.Option>
+                        })}
+                    </Select>)}
+                </Form.Item>
             </Col>
             <Col span={6}>
                 <Form.Item label='编号查询' {...itemProps}>
                     {props.form.getFieldDecorator('no', {
                         rules: [{ required: false }]
-                    })(<Input placeholder='请输入编号(模糊查询)' />)}
+                    })(<Input allowClear placeholder='请输入编号(模糊查询)' />)}
                 </Form.Item>
             </Col>
-            <Col span={18}>
+            <Col span={24}>
                 <div style={{ textAlign: 'right', paddingTop: 3 }}>
                     <Button type="primary" htmlType="submit">查询</Button>
                     <Button style={{ marginLeft: 8 }} onClick={() => { props.form.resetFields() }}>清除</Button>
@@ -456,9 +467,6 @@ const styles = {
     root: {
         padding: 10,
     },
-    switch: {
-        marginTop: -30,
-    },
     header: {
         backgroundColor: '#FFFFFF',
         padding: '24px 24px 24px 24px',
@@ -470,5 +478,8 @@ const styles = {
         backgroundColor: '#FFFFFF',
         padding: 10,
         marginTop: 10
+    },
+    marginbottom: {
+        marginBottom: 10
     }
 }

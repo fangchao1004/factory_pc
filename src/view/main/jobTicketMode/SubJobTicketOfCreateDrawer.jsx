@@ -1,8 +1,8 @@
 import { Drawer, Select, Tag, Button, Affix, Modal, Alert, message } from 'antd'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import { RenderEngine } from '../../util/RenderEngine';
-import { checkCellWhichIsEmpty, checkDataIsLostValue, createNewJobTicketApply, getPinYin } from '../../util/Tool';
+import { checkCellWhichIsEmpty, checkDataIsLostValue, createNewJobTicketApply, getPinYin, getTargetRoleIdUser } from '../../util/Tool';
 import moment from 'moment'
 const { OptGroup, Option } = Select
 const { confirm } = Modal
@@ -12,6 +12,8 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
     const [ticketNextUserList, setTicketNextUserList] = useState([])/// allSubTicketList 内容每个措施票所对应的 某些处理人id[{1,2},{1,2},...]
     // const [currentSubJBTSelf, setCurrentSubJBTSelf] = useState(currentSubJBT)
     // console.log('新 currentSubJBT:', currentSubJBT);
+    // console.log('userList:', userList);
+    const [targetUserList, setTargetUserList] = useState([])
     const renderAllPage = useCallback((currentSubJBT) => {
         if (!currentSubJBT.pages) { return null }
         let scalObj = {}
@@ -51,37 +53,33 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
         sbjtvalueChangeCallback(new_copy_currentSubJBT)
     }, [currentSubJBT, sbjtvalueChangeCallback])
 
-    const getUserGroupList = useCallback(() => {
-        if (!userList) { return null }
-        let manager_list = [];
-        let other_list = [];
-        userList.forEach((item) => {
-            if (currentSubJBT.is_sub !== 0) {///措施票-就根据是否为运行值长人员来分组
-                if (item.is_runner) {
-                    manager_list.push(item)
-                } else { other_list.push(item) }
-            }
-            // else {///主票-就根据是否为当前专业的专工来分组
-            //     if (item.is_current_major_manager) {
-            //         manager_list.push(item)
-            //     } else { other_list.push(item) }
-            // }
-        })
-        return [<OptGroup key='a' label={<div style={{ width: '100%', justifyContent: 'space-between', display: 'flex', justifyItems: 'center' }}><span>{currentSubJBT.is_sub === 1 ? '运行值长' : '当前专业专工'}</span><Button type='link' size='small' onClick={() => {
-            setTicketNextUserList(manager_list.map((item) => item.id))
-            ticketNextUserNameList = manager_list.map((item) => item.name)
-            let id_list = manager_list.map((item) => item.id)
-            let name_list = manager_list.map((item) => item.name)
-            callbackHandler(id_list, name_list)
-        }}>全选</Button></div>}>
-            {manager_list.map((item, index) => { return <Option key={'a' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
+    const getUserGroupList = useCallback((currentSubJBT) => {
+        return <OptGroup key='a' label={<div style={{ width: '100%', justifyContent: 'space-between', display: 'flex', justifyItems: 'center' }}><span>对应处理人</span><Button type='link' size='small'
+            onClick={() => {
+                setTicketNextUserList(targetUserList.map((item) => item.id))
+                ticketNextUserNameList = targetUserList.map((item) => item.name)
+                let id_list = targetUserList.map((item) => item.id)
+                let name_list = targetUserList.map((item) => item.name)
+                callbackHandler(id_list, name_list)
+            }}>全选</Button></div>}>
+            {targetUserList.map((item, index) => { return <Option key={'a' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
         </OptGroup>
-            // ,
-            // <OptGroup key='b' label="其他">
-            //     {other_list.map((item, index) => { return <Option key={'b' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
-            // </OptGroup>
-        ]
-    }, [userList, callbackHandler, currentSubJBT.is_sub])
+    }, [targetUserList, callbackHandler])
+
+    const initTargetUserList = useCallback(async () => {
+        if (!userList) { return null }
+        if (!currentSubJBT.status_table) { return null }
+        let status_table = JSON.parse(currentSubJBT.status_table)
+        let result = status_table.status_list.filter((item) => { return item.current_status === 0 })
+        let target_role_id = result[0].next_role_id///候选人role_id数组
+        console.log('target_role_id:', target_role_id);
+        let { target_list } = await getTargetRoleIdUser(userList, target_role_id)
+        setTargetUserList(target_list)
+    }, [userList, currentSubJBT])
+
+    useEffect(() => {
+        initTargetUserList()
+    }, [initTargetUserList])
 
     const resetUserSelectValue = useCallback(() => {
         setTicketNextUserList([])

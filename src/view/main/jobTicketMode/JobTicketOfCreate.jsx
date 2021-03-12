@@ -1,5 +1,5 @@
-import { Button, Col, Empty, Row, Select, Tag, Affix, Modal, message, Table } from 'antd'
-import React, { useCallback, useEffect, useState } from 'react'
+import { Button, Col, Empty, Row, Select, Tag, Affix, Modal, message, Table, Radio } from 'antd'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 // import { testData } from '../../../assets/testJson'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
@@ -14,6 +14,7 @@ let per_list = []///上次措施票的选择项
 var currentJTExtraPageSample = []
 var per_page_value = 0///上次附页的数量
 export default function JobTicketOfCreate() {
+    const radio_group = useRef()
     const [jobTicketsOption, setJobTicketsOption] = useState([])
     const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})
     const [userList, setUserList] = useState([])
@@ -24,6 +25,8 @@ export default function JobTicketOfCreate() {
     const [allSubTicketList, setAllSubTicketList] = useState([])
     const [sbtvisible, setSbtvisible] = useState(false)
     const [currentSubJBT, setCurrentSubJBT] = useState({})
+    const [waitToSelectPanelVisible, setWaitToSelectPanelVisible] = useState(false)
+    const [waitToSelectSubJBTList, setWaitToSelectSubJBTList] = useState([])
     const getJobTicketById = useCallback(async id => {
         if (id !== null) {
             let res = await HttpApi.getJobTicketsList({ id })
@@ -45,7 +48,7 @@ export default function JobTicketOfCreate() {
                 if (!major_id) { message.error('请为当前工作票配置对应专业'); return }
                 ///首先判断出哪些人员是当前专业的专工 和 运行
                 let managerList_res = await HttpApi.getManagerIdListByMajorId({ major_id })
-                let runnerList_res = await HttpApi.getRunnerIdList({ role_id_list: [11] })///运行值长
+                // let runnerList_res = await HttpApi.getRunnerIdList({ role_id_list: [11] })///运行值长
                 if (managerList_res.data.code === 0) {
                     let copy_userList = JSON.parse(JSON.stringify(userList))
                     const managerlist = managerList_res.data.data;
@@ -57,18 +60,19 @@ export default function JobTicketOfCreate() {
                             }
                         })
                     })
-                    if (runnerList_res.data.code === 0) {
-                        const runnerList = runnerList_res.data.data;
-                        copy_userList.forEach((item) => {
-                            item.is_runner = false
-                            runnerList.forEach((manager) => {
-                                if (item.id === manager.user_id) {
-                                    item.is_runner = true
-                                }
-                            })
-                        })
-                        setUserList(copy_userList)
-                    }
+                    setUserList(copy_userList)
+                    // if (runnerList_res.data.code === 0) {
+                    //     const runnerList = runnerList_res.data.data;
+                    //     copy_userList.forEach((item) => {
+                    //         item.is_runner = false
+                    //         runnerList.forEach((manager) => {
+                    //             if (item.id === manager.user_id) {
+                    //                 item.is_runner = true
+                    //             }
+                    //         })
+                    //     })
+                    //     setUserList(copy_userList)
+                    // }
                 }
             }
         } else {
@@ -145,7 +149,7 @@ export default function JobTicketOfCreate() {
             let after_remove_sub = allSubTicketList.filter((item) => {
                 if (item.type_name !== lost_list[0]) { return true } else { return false }
             })
-            // console.log('after_remove_sub:', after_remove_sub);
+            // console.log('after_remove_sub1:', after_remove_sub);
             setAllSubTicketList(after_remove_sub.map((item, index) => { item.key = index; return item }))
             // console.log('checkgroup_list:', checkgroup_list);
         } else if (per_list.length < checkgroup_list.length) {
@@ -163,14 +167,20 @@ export default function JobTicketOfCreate() {
             // console.log('新增:', add_list)
             let res = await HttpApi.getSubJobTicketsList({ type_name: add_list[0] })
             if (res.data.code === 0) {
-                // console.log('数据库查询到:', res.data.data);
-                let parse_res = res.data.data.map((item) => { item.pages = JSON.parse(item.pages); return item })
-                let after_add_sub = [...allSubTicketList, ...parse_res]
-                // console.log('after_add_sub:', after_add_sub);
-                setAllSubTicketList(after_add_sub.map((item, index) => { item.key = index; return item }))
+                let tempList = res.data.data.map((item, index) => { item.key = index; return item });
+                // console.log('tempList:', tempList);
+                if (tempList.length > 1) {
+                    setWaitToSelectSubJBTList(tempList)
+                    setWaitToSelectPanelVisible(true)
+                } else {
+                    let parse_res = res.data.data.map((item) => { item.pages = JSON.parse(item.pages); return item })
+                    let after_add_sub = [...allSubTicketList, ...parse_res]
+                    // console.log('after_add_sub1:', after_add_sub);
+                    setAllSubTicketList(after_add_sub.map((item, index) => { item.key = index; return item }))
+                }
             }
-            // console.log('checkgroup_list:', checkgroup_list);
         }
+        // console.log('per_list:', per_list);
         per_list = JSON.parse(JSON.stringify(checkgroup_list))
     }, [allSubTicketList])
     /**
@@ -230,14 +240,17 @@ export default function JobTicketOfCreate() {
     useEffect(() => {
         init()
     }, [init])
-    const columns = [{ title: '类型', dataIndex: 'type_name', key: 'type_name' }, {
-        title: '操作', dataIndex: 'action', key: 'action', width: 90, render: (_, record) => {
-            return <Button icon='edit' size='small' type='link' onClick={() => {
-                setSbtvisible(true)
-                setCurrentSubJBT(record)
-            }}>编辑</Button>
-        }
-    }]
+    const columns = [
+        { title: '名称', dataIndex: 'ticket_name', key: 'ticket_name' },
+        {
+            title: '操作', dataIndex: 'action', key: 'action', width: 90, render: (_, record) => {
+                return <Button icon='edit' size='small' type='link' onClick={() => {
+                    // console.log('record:', record);
+                    setCurrentSubJBT(record)
+                    setSbtvisible(true)
+                }}>编辑</Button>
+            }
+        }]
     return (
         <div style={styles.root}>
             <div style={styles.head}>
@@ -342,7 +355,7 @@ export default function JobTicketOfCreate() {
                                             disabled={!currentJobTicketValue.pages}
                                             onClick={() => {
                                                 console.log('创建新工作票点击提交');
-                                                // console.log('allsbj:', allSubTicketList);
+                                                console.log('allsbj:', allSubTicketList);
                                                 // return;
                                                 if (ticketNextUserList.toString().length === 0) { message.error('请选择好主工作票处理人员，再进行提交'); return }
                                                 let user_str = ',' + ticketNextUserList.toString() + ','
@@ -463,6 +476,26 @@ export default function JobTicketOfCreate() {
                         setAllSubTicketList(allSubTicketList)
                     }}
                 />
+                <Modal
+                    title="确认措施票级别"
+                    visible={waitToSelectPanelVisible}
+                    onOk={() => {
+                        const select_sub_id = radio_group.current.state.value;
+                        let select_sub_obj = waitToSelectSubJBTList.filter((item) => { return item.id === select_sub_id })
+                        let parse_res = select_sub_obj.map((item) => { item.pages = JSON.parse(item.pages); return item })
+                        let after_add_sub = [...allSubTicketList, ...parse_res]
+                        // console.log('after_add_sub2:', after_add_sub);
+                        setAllSubTicketList(after_add_sub.map((item, index) => { item.key = index; return item }))
+                        setWaitToSelectPanelVisible(false)
+                    }}
+                    onCancel={() => { setWaitToSelectPanelVisible(false) }}
+                >
+                    <Radio.Group ref={radio_group} onChange={() => { }}>
+                        {waitToSelectSubJBTList.map((item, index) => {
+                            return <Radio key={index} value={item.id}>{item.ticket_name}</Radio>
+                        })}
+                    </Radio.Group>
+                </Modal>
             </div>
         </div>
     )

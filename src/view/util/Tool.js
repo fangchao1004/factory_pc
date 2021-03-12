@@ -2,7 +2,7 @@ import React from "react";
 import { Icon, message } from 'antd'
 import HttpApi from './HttpApi'
 import moment from 'moment';
-import { BROWERTYPE, NOTICEMUSICOPEN, MAXBUGIDMY, MAXTASKIDMY, OLDRUNBUGIDLIST, BUGIDLIST, JOB_TICKETS_STATUS, SUB_JOB_TICKETS_STATUS } from "./AppData";
+import { BROWERTYPE, NOTICEMUSICOPEN, MAXBUGIDMY, MAXTASKIDMY, OLDRUNBUGIDLIST, BUGIDLIST } from "./AppData";
 var storage = window.localStorage;
 const FORMAT = 'YYYY-MM-DD HH:mm:ss'
 /**
@@ -1159,7 +1159,9 @@ export async function createNewJobTicketApply(jobTicketValue, user_list_str, p_n
             obj['history_step_user_id_list'] = user_list_str;
             obj['is_sub'] = jobTicketValue['is_sub'];
             obj['p_id'] = jobTicketValue['p_id'];
-            obj['type_id'] = jobTicketValue['id']
+            obj['type_id'] = jobTicketValue['id'];
+            obj['status_table'] = jobTicketValue['status_table'];
+            obj['status_des'] = getStatusDesByNewStatus(jobTicketValue, 1)
             /////
             let res2 = await HttpApi.createJTApplyRecord(obj)
             if (res2.data.code === 0) {
@@ -1170,75 +1172,6 @@ export async function createNewJobTicketApply(jobTicketValue, user_list_str, p_n
         }
     }
     return false
-}
-
-export function changeJobTicketStatusToText(status, is_sub = 0) {
-    try {
-        let target_List = []
-        if (is_sub) {
-            target_List = SUB_JOB_TICKETS_STATUS
-        } else {
-            target_List = JOB_TICKETS_STATUS
-        }
-        let res = target_List.filter((item) => { return item.value === status })[0]
-        return res.text || '-'
-    } catch (error) {
-        return '/'
-    }
-}
-
-/**
- * 根据工作票当前的状态；显示功能上通往下一步status+1的选择的名称
- * 通往下一步status+1的选择的名称！！！
- * @param {*} status 
- */
-export function changeShowLabByStauts(status, is_sub) {
-    let res = ''
-    if (is_sub !== 0) {
-        switch (status) {
-            case 0:
-                res = '提交至待安措'
-                break;
-            case 1:
-                res = '安措并提交待作业单位审核'
-                break;
-            case 2:
-                res = '审核并提交待安全部门审核'
-                break;
-            case 3:
-                res = '审核并提交待分管副总批准'
-                break;
-            case 4:
-                res = '批准并提交待接票打印'
-                break;
-            case 5:
-                res = '打印并提交待终结'
-                break;
-            case 6:
-                res = '终结'
-                break;
-            default:
-                break;
-        }
-    } else {
-        switch (status) {
-            case 0:
-                res = '提交至待签发'
-                break;
-            case 1:
-                res = '签发并提交待接票打印'
-                break;
-            case 2:
-                res = '打印并提交待终结'
-                break;
-            case 3:
-                res = '终结'
-                break;
-            default:
-                break;
-        }
-    }
-    return res
 }
 
 /**
@@ -1511,4 +1444,67 @@ export async function statusReduce1JBT(JBTObj, currentUser) {
             return { code: 0, message: '撤回成功' }
         } else { return { code: -1, message: '撤回失败' } }
     } else { return { code: -1, message: '撤回失败' } }
+}
+
+export async function getTargetRoleIdUser(user_list, role_id_list) {
+    let res = await HttpApi.getRunnerIdList({ role_id_list })
+    if (res.data.code === 0) {
+        let target_list1 = res.data.data;
+        let copy_user_list = JSON.parse(JSON.stringify(user_list))
+        copy_user_list.forEach((user) => {
+            user.is_target = false
+            target_list1.forEach((runner) => {
+                if (user.id === runner.user_id) { user.is_target = true }
+            })
+        })
+        let target_list = [];
+        let other_list = [];
+        copy_user_list.forEach((item) => {
+            const { id, name } = item
+            if (item.is_target) {
+                target_list.push({ id, name })
+            } else { other_list.push({ id, name }) }
+        })
+        return { target_list, other_list }
+    }
+}
+
+export function getRecordCurrentStatusInfo(record, record_status) {
+    const status_table = JSON.parse(record.status_table)
+    var after_filter_current_status_data = status_table.status_list.filter((item) => {
+        return item.current_status === record_status
+    })
+    let result = after_filter_current_status_data[0]
+    return result
+}
+
+export function getRecordStatusTable(record) {
+    return JSON.parse(record.status_table)
+}
+
+export function getStatusDesByNewStatus(record, newstatus) {
+    let new_status_des = ''
+    JSON.parse(record.status_table).status_list.forEach((item) => {
+        if (item.current_status === newstatus) {
+            new_status_des = item.des
+        }
+    })
+    return new_status_des
+}
+
+/**
+ * 判断上一步操作 是不是 打回 撤回 调度
+ * @param {*} jbtar_id 
+ * @returns 
+ */
+export async function checkLastStepIsBack(jbtar_id) {
+    let res_step = await HttpApi.getJTStepLogs({ jbtar_id })
+    if (res_step.data.code === 0) {
+        const step_list = res_step.data.data
+        const last_step_des = step_list[step_list.length - 1].step_des
+        if (last_step_des) {
+            const last_is_back = last_step_des.indexOf('打回') !== -1 || last_step_des.indexOf('撤回') !== -1 || last_step_des.indexOf('调度') !== -1
+            return last_is_back
+        }
+    } else { return false }
 }
