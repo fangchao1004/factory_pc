@@ -1,7 +1,7 @@
 import { Badge, Button, Col, DatePicker, Dropdown, Form, Input, Menu, Row, Select, Switch, Table, Tooltip, Modal, message, Alert } from 'antd';
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
-import { autoFillNo, deleteMainSubJBT, checkJBTStatusIsChange, statusReduce1JBT } from '../../util/Tool';
+import { autoFillNo, deleteMainSubJBT, checkJBTStatusIsChange, statusReduce1JBT, getRecordStatusTable } from '../../util/Tool';
 import JobTicketDrawer from './JobTicketDrawer';
 import JobTicketDrawerForShowEdit from './JobTicketDrawerForShowEdit';
 import JobTicketStepLogView from './JobTicketStepLogView';
@@ -175,14 +175,14 @@ export default function JobTicketOfMy() {
         },
         {
             title: '操作', dataIndex: 'action', key: 'action', align: 'center', width: 100, render: (_, record) => {
+                let { over_status } = getRecordStatusTable(record)
                 let is_over = false
-                if (record.is_sub !== 1 && record.status === 4) { is_over = true }
-                else if (record.is_sub === 1 && record.status === 7) { is_over = true }///是否终结
+                if (record.status === over_status) { is_over = true }
                 let inCurrentUserList = false
                 inCurrentUserList = record.current_step_user_id_list.indexOf(`,${currentUser.id},`) !== -1;///是否为当前处理人
                 return <div>
                     {inCurrentUserList ?
-                        <Button disabled={!inCurrentUserList} size='small' type='primary' icon='file-search' onClick={(e) => { e.stopPropagation(); setIsAgent(false); setCurrentSelectRecord(record); setDrawerVisible(true); readLocalRecord(record); }}>处理</Button>
+                        <Button disabled={is_over ? true : !inCurrentUserList} size='small' type='primary' icon='file-search' onClick={(e) => { e.stopPropagation(); setIsAgent(false); setCurrentSelectRecord(record); setDrawerVisible(true); readLocalRecord(record); }}>处理</Button>
                         :
                         <Button size='small' icon='eye' onClick={(e) => { e.stopPropagation(); setDrawer2Visible(true); setCurrentSelectRecord(record); setOnlyShow(false) }}>查看</Button>
                     }

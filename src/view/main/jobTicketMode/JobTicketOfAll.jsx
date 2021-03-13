@@ -5,6 +5,7 @@ import JobTicketDrawer from './JobTicketDrawer';
 import JobTicketDrawerForShowEdit from './JobTicketDrawerForShowEdit';
 import JobTicketStepLogView from './JobTicketStepLogView';
 import moment from 'moment'
+import { getRecordStatusTable } from '../../util/Tool';
 // import { JOB_TICKETS_STATUS } from '../../util/AppData';
 const FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const storage = window.localStorage;
@@ -126,14 +127,14 @@ export default function JobTicketOfAll() {
         },
         {
             title: '操作', dataIndex: 'action', key: 'action', align: 'center', width: 100, render: (_, record) => {
+                let { over_status } = getRecordStatusTable(record)
                 let is_over = false
-                if (record.is_sub !== 1 && record.status === 4) { is_over = true }
-                else if (record.is_sub === 1 && record.status === 6) { is_over = true }///是否终结
+                if (record.status === over_status) { is_over = true }
                 let inCurrentUserList = false
                 inCurrentUserList = record.current_step_user_id_list.indexOf(`,${currentUser.id},`) !== -1;///是否为当前处理人
                 return <div>
                     {inCurrentUserList ?
-                        <Button disabled={!inCurrentUserList} size='small' type='primary' icon='file-search' onClick={(e) => { e.stopPropagation(); setIsAgent(false); setCurrentSelectRecord(record); setDrawerVisible(true); readLocalRecord(record); }}>处理</Button>
+                        <Button disabled={is_over ? true : !inCurrentUserList} size='small' type='primary' icon='file-search' onClick={(e) => { e.stopPropagation(); setIsAgent(false); setCurrentSelectRecord(record); setDrawerVisible(true); readLocalRecord(record); }}>处理</Button>
                         :
                         <Button size='small' icon='eye' onClick={(e) => { e.stopPropagation(); setDrawer2Visible(true); setCurrentSelectRecord(record) }}>查看</Button>
                     }
@@ -198,15 +199,14 @@ export default function JobTicketOfAll() {
                             },
                             {
                                 title: '操作', dataIndex: 'action', key: 'action', width: 90, render: (_, record) => {
+                                    let { over_status } = getRecordStatusTable(record)
                                     let is_over = false
-                                    // console.log('record:', record);
-                                    if (record.is_sub !== 1 && record.status === 4) { is_over = true }
-                                    else if (record.is_sub === 1 && record.status === 6) { is_over = true }///是否终结
+                                    if (record.status === over_status) { is_over = true }
                                     let inCurrentUserList = false
                                     inCurrentUserList = record.current_step_user_id_list.indexOf(`,${currentUser.id},`) !== -1;///是否为当前处理人
                                     return <div style={{ paddingLeft: 10 }}>
                                         {inCurrentUserList ?
-                                            <Button disabled={!inCurrentUserList} size='small' type='primary' icon='file-search' onClick={(e) => {
+                                            <Button disabled={is_over ? true : !inCurrentUserList} size='small' type='primary' icon='file-search' onClick={(e) => {
                                                 e.stopPropagation(); setIsAgent(false); setCurrentSelectRecord(record); setDrawerVisible(true); readLocalRecord(record, 1);
                                             }}>处理</Button>
                                             :
