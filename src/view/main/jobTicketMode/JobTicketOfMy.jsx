@@ -3,7 +3,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import { autoFillNo, deleteMainSubJBT, checkJBTStatusIsChange, statusReduce1JBT, getRecordStatusTable } from '../../util/Tool';
 import JobTicketDrawer from './JobTicketDrawer';
-import JobTicketDrawerForShowEdit from './JobTicketDrawerForShowEdit';
+import JobTicketDrawerForShow from './JobTicketDrawerForShow';
 import JobTicketStepLogView from './JobTicketStepLogView';
 import moment from 'moment'
 import { AppDataContext } from '../../../redux/AppRedux';
@@ -27,7 +27,6 @@ export default function JobTicketOfMy() {
     const [listLength, setListLength] = useState(0)
     const [loading, setLoading] = useState(false)
     const [typeOptionList, setTypeOptionList] = useState([])
-    const [onlyShow, setOnlyShow] = useState(true)
     const [isCurrentMe, setIsCurrentMe] = useState(true)
     const [hasFixPer, setHasFixPer] = useState(false)
     const [hasManagerPer, setHasManagerPer] = useState(false)
@@ -136,7 +135,6 @@ export default function JobTicketOfMy() {
                                 setCurrentSelectRecord(mainJBT)
                                 setDrawer2Visible(true)
                             }
-                            setOnlyShow(true)
                         }} />
                     </Tooltip>
                     : null}</div>
@@ -184,7 +182,7 @@ export default function JobTicketOfMy() {
                     {inCurrentUserList ?
                         <Button disabled={is_over ? true : !inCurrentUserList} size='small' type='primary' icon='file-search' onClick={(e) => { e.stopPropagation(); setIsAgent(false); setCurrentSelectRecord(record); setDrawerVisible(true); readLocalRecord(record); }}>处理</Button>
                         :
-                        <Button size='small' icon='eye' onClick={(e) => { e.stopPropagation(); setDrawer2Visible(true); setCurrentSelectRecord(record); setOnlyShow(false) }}>查看</Button>
+                        <Button size='small' icon='eye' onClick={(e) => { e.stopPropagation(); setDrawer2Visible(true); setCurrentSelectRecord(record); }}>查看</Button>
                     }
                     {
                         currentUser.isadmin === 1 ?
@@ -304,7 +302,6 @@ export default function JobTicketOfMy() {
                                     <Button icon='tag' size='small' type='link' onClick={() => {
                                         setCurrentSelectRecord(item)
                                         setDrawer2Visible(true)
-                                        setOnlyShow(true)
                                     }} />
                                 </Tooltip>
                             })
@@ -333,7 +330,7 @@ export default function JobTicketOfMy() {
                     }}
                 />
             </div>
-            <JobTicketDrawerForShowEdit onlyShow={onlyShow} visible={drawer2Visible} onClose={() => { setDrawer2Visible(false); }} record={currentSelectRecord} resetData={init} />
+            <JobTicketDrawerForShow visible={drawer2Visible} onClose={() => { setDrawer2Visible(false); }} record={currentSelectRecord} />
             <JobTicketDrawer isAgent={isAgent} visible={drawerVisible} onClose={() => { setDrawerVisible(false); }} record={currentSelectRecord} resetData={() => { init(); resetReduxCount() }} />
             <JobTicketStepLogView record={currentSelectRecord} visible={stepLogVisible} onCancel={() => { setStepLogVisible(false) }} />
             <SubJobTicketOfCreateDrawer

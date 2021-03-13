@@ -2,7 +2,7 @@ import { Alert, Badge, Button, Col, DatePicker, Form, Icon, Input, Row, Select, 
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import JobTicketDrawer from './JobTicketDrawer';
-import JobTicketDrawerForShowEdit from './JobTicketDrawerForShowEdit';
+import JobTicketDrawerForShow from './JobTicketDrawerForShow';
 import JobTicketStepLogView from './JobTicketStepLogView';
 import moment from 'moment'
 import { getRecordStatusTable } from '../../util/Tool';
@@ -251,7 +251,7 @@ export default function JobTicketOfAll() {
                     }}
                 />
             </div>
-            <JobTicketDrawerForShowEdit visible={drawer2Visible} onClose={() => { setDrawer2Visible(false); setCurrentSelectRecord(null) }} record={currentSelectRecord} resetData={init} />
+            <JobTicketDrawerForShow visible={drawer2Visible} onClose={() => { setDrawer2Visible(false); setCurrentSelectRecord(null) }} record={currentSelectRecord} />
             <JobTicketDrawer isAgent={isAgent} visible={drawerVisible} onClose={() => { setDrawerVisible(false); setCurrentSelectRecord(null) }} record={currentSelectRecord} resetData={init} />
             <JobTicketStepLogView record={currentSelectRecord} visible={stepLogVisible} onCancel={() => { setStepLogVisible(false) }} />
         </div>
