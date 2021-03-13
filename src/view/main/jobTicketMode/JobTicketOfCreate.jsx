@@ -479,16 +479,18 @@ export default function JobTicketOfCreate() {
                 <Modal
                     title="确认措施票级别"
                     visible={waitToSelectPanelVisible}
-                    onOk={() => {
-                        const select_sub_id = radio_group.current.state.value;
-                        let select_sub_obj = waitToSelectSubJBTList.filter((item) => { return item.id === select_sub_id })
-                        let parse_res = select_sub_obj.map((item) => { item.pages = JSON.parse(item.pages); return item })
-                        let after_add_sub = [...allSubTicketList, ...parse_res]
-                        // console.log('after_add_sub2:', after_add_sub);
-                        setAllSubTicketList(after_add_sub.map((item, index) => { item.key = index; return item }))
-                        setWaitToSelectPanelVisible(false)
-                    }}
                     onCancel={() => { setWaitToSelectPanelVisible(false) }}
+                    footer={[
+                        <Button type='primary' onClick={() => {
+                            const select_sub_id = radio_group.current.state.value;
+                            let select_sub_obj = waitToSelectSubJBTList.filter((item) => { return item.id === select_sub_id })
+                            let parse_res = select_sub_obj.map((item) => { item.pages = JSON.parse(item.pages); return item })
+                            let after_add_sub = [...allSubTicketList, ...parse_res]
+                            // console.log('after_add_sub2:', after_add_sub);
+                            setAllSubTicketList(after_add_sub.map((item, index) => { item.key = index; return item }))
+                            setWaitToSelectPanelVisible(false)
+                        }}>确定</Button>
+                    ]}
                 >
                     <Radio.Group ref={radio_group} onChange={() => { }}>
                         {waitToSelectSubJBTList.map((item, index) => {
