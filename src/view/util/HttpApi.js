@@ -1136,7 +1136,7 @@ class HttpApi {
             block_user1 = `per_step_user_id = ${per_step_user_id},per_step_user_name = '${per_step_user_name}',`
         }
         let blocl_user2 = ''
-        if (current_step_user_id_list.length >= 0) {
+        if (current_step_user_id_list !== undefined) {
             blocl_user2 = `current_step_user_id_list = '${current_step_user_id_list}',`
         }
         let blocl_user3 = ''
