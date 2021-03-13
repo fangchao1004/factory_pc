@@ -342,6 +342,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                     <TextArea rows={4} value={remark} onChange={(e) => { setRemark(e.target.value) }} />
                                 </div>
                                 <Button disabled={!actionSelectAble} type='primary' size='small' icon={takeTicketAndPrint ? '' : 'upload'} style={{ marginTop: 10, marginRight: 10 }} onClick={async () => {
+                                    ///调度情况下
                                     if (isAgent) {
                                         console.log('调度的情况时');
                                         if (ticketNextUserNameList.length === 0) { message.error('请选择新的处理人员'); return }
@@ -382,6 +383,8 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                         })
                                         return;
                                     }
+                                    ///以上是调度情况
+                                    ///以下是处理情况
                                     if (!selectValue) { message.error('请先选择处理项'); return }
                                     let afterCheckObj;
                                     if (selectValue === "1") {///前往下一步时，数据不全
@@ -391,14 +394,9 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                         setCurrentJobTicketValue(afterCheckObj)
                                         let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
                                         // console.log('是否数据缺少:', needValueButIsEmpty);
-                                        if (needValueButIsEmpty) {
-                                            message.error('请填写好工作票后，再进行提交')
-                                            return
-                                        }
+                                        if (needValueButIsEmpty) { message.error('请填写好工作票后，再进行提交'); return }
                                     } else {///返回上一步时，重新检查一边数据。状态-1
-                                        if (perStepIsBack && record.status > 1 && ticketNextUserNameList.length === 0) {
-                                            message.error('连续打回或上一步为调度、撤销时，请选择打回处理人'); return
-                                        }
+                                        if (perStepIsBack && record.status > 1 && ticketNextUserNameList.length === 0) { message.error('连续打回或上一步为调度、撤销时，请选择打回处理人'); return }
                                         if (!remark) { message.error('打回时，备注必填'); return }
                                         afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, record.status - 1)
                                         setCurrentJobTicketValue(afterCheckObj)
@@ -415,27 +413,25 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                             let res1 = await HttpApi.updateJTRecord({ id: currentJobTicketValue.id, pages: JSON.stringify(afterCheckObj.pages) })
                                             if (res1.data.code === 0) {
                                                 let new_status = record.status;
-                                                if (selectValue === "1") { new_status = record.status + 1 } else { new_status = record.status - 1 }
                                                 let { job_content, time_list } = getJTRecordContentAndPlanTime({ pages: JSON.stringify(currentJobTicketValue.pages) })
                                                 let current_step_user_id_list_temp = ''///下一步要给哪些人
                                                 if (selectValue === '1') {
+                                                    new_status = record.status + 1
                                                     if (record.status === getRecordStatusTable(record).wait_over_status) {
                                                         current_step_user_id_list_temp = ''
                                                     } else {
                                                         current_step_user_id_list_temp = ',' + ticketNextUserList.join(',') + ','
                                                     }
                                                 } else {
+                                                    new_status = record.status - 1
                                                     current_step_user_id_list_temp = ',' + record.per_step_user_id + ','
-                                                    ///zzz 上一步操作已经打回过一次
-                                                    console.log('上一步操作已经打回过一次:', perStepIsBack);
+                                                    ///如果 上一步操作已经打回过一次 
                                                     if (perStepIsBack && record.status > 1) {
                                                         current_step_user_id_list_temp = ',' + ticketNextUserList.join(',') + ','
                                                     }
                                                 }
-                                                let is_read = 0;
-                                                if (record.status !== getRecordStatusTable(record).wait_over_status) {
-                                                    is_read = 1
-                                                }
+                                                let is_read = 1;
+                                                if (record.status < getRecordStatusTable(record).wait_over_status) { is_read = 0 }
                                                 ///每次处理 未读重置
                                                 let newJTAR_data = {
                                                     is_read: is_read,
