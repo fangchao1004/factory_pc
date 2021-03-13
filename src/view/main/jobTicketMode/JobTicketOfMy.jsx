@@ -225,11 +225,11 @@ export default function JobTicketOfMy() {
                     expandIcon={(props) => {
                         let per_user_is_me = props.record.per_step_user_id === currentUser.id///上一次的处理人是不是我
                         let last_back_user_is_me = props.record.last_back_user_id === currentUser.id///最近一次的撤回操作是不是我
+                        let { over_status } = getRecordStatusTable(props.record)
                         let is_over = false
+                        if (props.record.status === over_status) { is_over = true }
                         let is_start = props.record.status === 1///刚提交 状态为1
                         let is_main = props.record.is_sub === 0
-                        if (props.record.is_sub !== 1 && props.record.status === 4) { is_over = true }
-                        else if (props.record.is_sub === 1 && props.record.status === 7) { is_over = true }///是否终结
                         let topBack = per_user_is_me && !last_back_user_is_me && !is_over ?
                             <div key={'x'}>
                                 <Tooltip title={is_start ? '删除' : '撤回'} placement="left">
@@ -413,28 +413,6 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
                     </Select>)}
                 </Form.Item>
             </Col>
-            {/* <Col span={6}>
-                <Form.Item label='主票状态' {...itemProps}>
-                    {props.form.getFieldDecorator('status', {
-                        rules: [{ required: false }]
-                    })(<Select allowClear placeholder="请选择主票状态" >
-                        {JOB_TICKETS_STATUS.map((item, index) => {
-                            return <Select.Option value={item.value} key={index} all={item}>{item.text}</Select.Option>
-                        })}
-                    </Select>)}
-                </Form.Item>
-            </Col>
-            <Col span={6}>
-                <Form.Item label='措施票状态' {...itemProps}>
-                    {props.form.getFieldDecorator('sub_status', {
-                        rules: [{ required: false }]
-                    })(<Select allowClear placeholder="请选择措施票状态" >
-                        {SUB_JOB_TICKETS_STATUS.map((item, index) => {
-                            return <Select.Option value={item.value} key={index} all={item}>{item.text}</Select.Option>
-                        })}
-                    </Select>)}
-                </Form.Item>
-            </Col> */}
             <Col span={6}>
                 <Form.Item label='票状态' {...itemProps}>
                     {props.form.getFieldDecorator('status_des', {

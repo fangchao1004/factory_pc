@@ -409,6 +409,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                         okType: 'danger',
                                         cancelText: '取消',
                                         onOk: async () => {
+                                            const { wait_over_status } = getRecordStatusTable(record);
                                             ///修改 job_tickets_records 中的pages 和 job_tickets_apply_records 中的status
                                             let res1 = await HttpApi.updateJTRecord({ id: currentJobTicketValue.id, pages: JSON.stringify(afterCheckObj.pages) })
                                             if (res1.data.code === 0) {
@@ -417,7 +418,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                 let current_step_user_id_list_temp = ''///下一步要给哪些人
                                                 if (selectValue === '1') {
                                                     new_status = record.status + 1
-                                                    if (record.status === getRecordStatusTable(record).wait_over_status) {
+                                                    if (record.status === wait_over_status) {
                                                         current_step_user_id_list_temp = ''
                                                     } else {
                                                         current_step_user_id_list_temp = ',' + ticketNextUserList.join(',') + ','
@@ -431,7 +432,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                     }
                                                 }
                                                 let is_read = 1;
-                                                if (record.status < getRecordStatusTable(record).wait_over_status) { is_read = 0 }
+                                                if (record.status < wait_over_status || (record.status === wait_over_status && selectValue === '-1')) { is_read = 0 }
                                                 ///每次处理 未读重置
                                                 let newJTAR_data = {
                                                     is_read: is_read,
@@ -454,7 +455,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                     obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
                                                     obj['remark'] = remark
                                                     if (selectValue === '1') {
-                                                        if (record.status !== getRecordStatusTable(record).wait_over_status) {
+                                                        if (record.status !== wait_over_status) {
                                                             obj['step_des'] = step_des + '至 ' + ticketNextUserNameList.join(',')///xx至 所选人
                                                         } else { obj['step_des'] = step_des }///终结
                                                     } else {
@@ -473,8 +474,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                                 setPrinting(false)
                                                             }, 60000);
                                                             window.electron.ipcRenderer.send('message', { content: 'printStart', id: record.job_t_r_id })
-                                                        }
-                                                        else { message.warning('请使用桌面版本进行打印操作') }
+                                                        } else { message.warning('请使用桌面版本进行打印操作') }
                                                     }
                                                 }
                                             }
