@@ -1,19 +1,19 @@
 import React, { useCallback } from 'react'
-import { Button, Col, Form, Input, message, Row } from 'antd'
-import Background1 from '../../assets/bg2.jpg'
-import svgs from '../../assets/svg'
+import { Button, Card, Form, Input, message } from 'antd'
 import HttpApi from '../util/HttpApi'
 import { USERINFO } from '../util/AppData'
 
 const storage = window.localStorage
 export default props => {
   const loginHandler = useCallback(async values => {
+    if (values.username && values.username.indexOf('=') !== -1) { message.error('包含非法字符'); return }
+    if (values.password && values.password.indexOf('=') !== -1) { message.error('包含非法字符'); return }
     // 测试时注释掉
-    // const verfiyResult = await HttpApi.verify(values)
-    // if (!verfiyResult || !verfiyResult.data || verfiyResult.data.code !== 0) {
-    //   message.error('禁止访问,请联系管理员')
-    //   return
-    // }
+    const verfiyResult = await HttpApi.verify(values)
+    if (!verfiyResult || !verfiyResult.data || verfiyResult.data.code !== 0) {
+      message.error('禁止访问,请联系管理员')
+      return
+    }
     let sql = `select users.* ,group_concat(u_m_j.mj_id) as major_id_all, group_concat(majors.name) as major_name_all,levels.name as level_name from users
         left join (select * from user_map_major where effective = 1) u_m_j on u_m_j.user_id = users.id
         left join (select * from majors  where effective = 1) majors on majors.id = u_m_j.mj_id
@@ -40,9 +40,6 @@ export default props => {
       const new_user = { ...user, ...tempObj }
       storage[USERINFO] = JSON.stringify(new_user)
       props.history.push('/mainView/home')
-      // setTimeout(() => {
-      //   window.location.reload()
-      // }, 100)
     } else {
       message.error('用户名/密码错误')
     }
@@ -50,7 +47,7 @@ export default props => {
   }, [])
   return (
     <div style={styles.root}>
-      <div style={styles.imgV}>
+      {/* <div style={styles.imgV}>
         <div style={styles.img}></div>
       </div>
       <div style={styles.panelV}>
@@ -66,45 +63,50 @@ export default props => {
           </Row>
         </div>
         <MyLoginForm loginHandler={loginHandler} />
-      </div>
+      </div> */}
+      <Card
+        title={<div style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
+          <span style={{ color: '#888' }}>登录</span>
+        </div>}
+        style={{ width: 300, height: 280, marginRight: 120 }}
+      >
+        <MyLoginForm loginHandler={loginHandler} />
+      </Card>
     </div>
   )
 }
 const styles = {
   root: {
-    width: '800px',
-    height: '400px',
-    backgroundColor: 'rgba(255,255,255,1)',
     display: 'flex',
-    direction: 'row'
+    flexDirection: 'row',
   },
-  title: {
-    color: '#3C4265',
-    fontSize: 20,
-    fontWeight: 800,
-    fontStyle: 'oblique'
-  },
-  subTitle: {
-    color: '#8FB7FF',
-    fontStyle: 'oblique'
-  },
-  titleV: {
-    height: 200,
-    padding: 20
-  },
-  panelV: {
-    width: '300px',
-    height: '100%'
-  },
-  imgV: {
-    width: '500px',
-    height: '100%'
-  },
-  img: {
-    backgroundImage: `url(${Background1})`,
-    height: '100%',
-    width: '100%'
-  }
+  // title: {
+  //   color: '#3C4265',
+  //   fontSize: 20,
+  //   fontWeight: 800,
+  //   fontStyle: 'oblique'
+  // },
+  // subTitle: {
+  //   color: '#8FB7FF',
+  //   fontStyle: 'oblique'
+  // },
+  // titleV: {
+  //   height: 200,
+  //   padding: 20
+  // },
+  // panelV: {
+  //   width: '300px',
+  //   height: '100%'
+  // },
+  // imgV: {
+  //   width: '500px',
+  //   height: '100%'
+  // },
+  // img: {
+  //   backgroundImage: `url(${Background1})`,
+  //   height: '100%',
+  //   width: '100%'
+  // }
 }
 
 function LoginForm(props) {
@@ -115,24 +117,22 @@ function LoginForm(props) {
         e.preventDefault()
         props.form.validateFields(async (err, values) => {
           if (!err) {
-            console.log('values:', values)
-            console.log('props:', props)
             props.loginHandler(values)
             return
           }
         })
       }}>
-      <Form.Item wrapperCol={{ offset: 2, span: 20 }}>
+      <Form.Item wrapperCol={{ span: 24 }}>
         {getFieldDecorator('username', {
           rules: [{ required: true, message: '请输入账号' }]
         })(<Input placeholder='请输入账号' />)}
       </Form.Item>
-      <Form.Item wrapperCol={{ offset: 2, span: 20 }}>
+      <Form.Item wrapperCol={{ span: 24 }}>
         {getFieldDecorator('password', {
           rules: [{ required: true, message: '请输入密码' }]
         })(<Input type='password' placeholder='请输入密码' />)}
       </Form.Item>
-      <Form.Item wrapperCol={{ offset: 2, span: 20 }}>
+      <Form.Item wrapperCol={{ span: 24 }}>
         <div style={{ textAlign: 'right' }}>
           <Button style={{ width: '100%' }} type='primary' htmlType='submit' icon='login'>
             登录

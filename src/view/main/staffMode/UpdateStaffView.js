@@ -108,12 +108,6 @@ function UpdateStaffForm(props) {
         valuePropName: 'checked'
       })(<Switch checkedChildren="是" unCheckedChildren="否"></Switch>)}
     </Form.Item>
-    <Form.Item label="值长" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
-      {getFieldDecorator('isGroupLeader', {
-        initialValue: props.staff.isGroupLeader === 1,
-        valuePropName: 'checked'
-      })(<Switch checkedChildren="是" unCheckedChildren="否"></Switch>)}
-    </Form.Item>
     <Form.Item label='厂外登录权限' labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
       {getFieldDecorator('use_whitelist', {
         initialValue: props.staff.use_whitelist === 0,

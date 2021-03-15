@@ -1,4 +1,4 @@
-import { Button, Divider, message, Popconfirm, Table } from 'antd';
+import { Button, Divider, message, Popconfirm, Table, Tooltip } from 'antd';
 import React, { useEffect, useState, useCallback } from 'react';
 import HttpApi from '../../util/HttpApi';
 import AddStaffView from './AddStaffView';
@@ -130,9 +130,39 @@ export default () => {
     onFilter: (value, record) => record.level_id === value,
     width: 100, dataIndex: 'level_name', key: 'level_name'
   },
-  { title: '角色', width: 200, dataIndex: 'role_des_all', key: 'role_des_all', render: (text) => { return text || '-' } },
-  { title: '专业', width: 200, dataIndex: 'major_name_all', key: 'major_name_all', render: (text) => { return text || '-' } },
-  { title: '备注', dataIndex: 'remark', key: 'remark' },
+  {
+    title: '角色', width: 200, dataIndex: 'role_des_all', key: 'role_des_all', render: (text) => {
+      if (text) {
+        return <Tooltip title={text} placement="topLeft">
+          <div className='hideText lineClamp2'>{text}</div>
+        </Tooltip>
+      } else {
+        return '-'
+      }
+    }
+  },
+  {
+    title: '专业', width: 200, dataIndex: 'major_name_all', key: 'major_name_all', render: (text) => {
+      if (text) {
+        return <Tooltip title={text} placement="topLeft">
+          <div className='hideText lineClamp2'>{text}</div>
+        </Tooltip>
+      } else {
+        return '-'
+      }
+    }
+  },
+  {
+    title: '备注', dataIndex: 'remark', key: 'remark', render: (text) => {
+      if (text) {
+        return <Tooltip title={text} placement="topLeft">
+          <div className='hideText lineClamp2'>{text}</div>
+        </Tooltip>
+      } else {
+        return '-'
+      }
+    }
+  },
   {
     title: '操作', width: 170, dataIndex: 'action', key: 'action', render: (text, record) => {
       return <div>

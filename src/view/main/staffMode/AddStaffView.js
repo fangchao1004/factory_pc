@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Form, Input, Select, Switch } from 'antd'
+import { Modal, Form, Input, Select } from 'antd'
 import HttpApi from '../../util/HttpApi'
 // import { permisstion } from '../../util/AppData'
 
@@ -90,12 +90,6 @@ function AddStaffForm(props) {
                 rules: [{ required: false, message: '请输入员工备注' }]
             })(<Input.TextArea></Input.TextArea>)}
         </Form.Item>
-        <Form.Item label="值长" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
-            {getFieldDecorator('isGroupLeader', {
-                initialValue: false,
-                valuePropName: 'checked'
-            })(<Switch checkedChildren="是" unCheckedChildren="否"></Switch>)}
-        </Form.Item>
     </Form>
 }
 
@@ -138,7 +132,7 @@ export default function AddStaffView(props) {
             }
         })
     }
-    return <Modal maskClosable={false} destroyOnClose centered onOk={handlerOk} title="添加员工"
+    return <Modal maskClosable={true} destroyOnClose centered onOk={handlerOk} title="添加员工"
         onCancel={props.onCancel}
         visible={props.visible}>
         <StaffForm ref={staffFormRef} levels={levels} nfcs={nfcs} majors={majors}></StaffForm>

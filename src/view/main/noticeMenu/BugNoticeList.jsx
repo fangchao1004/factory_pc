@@ -4,9 +4,8 @@ import { omitTextLength, removeOneBugIdFromList } from '../../util/Tool';
 import HttpApi from '../../util/HttpApi';
 import moment from 'moment'
 import { AppDataContext } from '../../../redux/AppRedux';
-const localUserInfo = window.localStorage.getItem('userinfo')
-
 export default props => {
+    var localUserInfo = window.localStorage.getItem('userinfo')
     const { appDispatch } = useContext(AppDataContext)
     const [dataSource, setDataSource] = useState([])
     const [hasP0] = useState(JSON.parse(localUserInfo).permission && JSON.parse(localUserInfo).permission.split(',').indexOf('0') !== -1)///专工权限
