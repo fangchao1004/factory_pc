@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { DatePicker, Checkbox, Select, message } from 'antd'
+import { DatePicker, Checkbox, Select, message, Radio } from 'antd'
 import moment from 'moment'
 import 'antd/dist/antd.css'
 import { getPinYin } from './Tool'
@@ -115,6 +115,29 @@ export function RenderEngine({ isAgent, jsonlist, userList, currentUser, current
         case 'checkboxgroup':
           return (
             <Checkbox.Group
+              key={index}
+              {...item.attribute}
+              style={{ ...item.attribute.style, borderStyle: item.attribute.isempty ? 'solid' : 'none', borderWidth: 1, borderColor: 'red' }}
+              onChange={checkedValues => {
+                changeComponetsValue(index, checkedValues)
+              }}
+            />
+          )
+        case 'radio':
+          return (
+            <Radio
+              key={index}
+              {...item.attribute}
+              style={{ ...item.attribute.style, borderStyle: item.attribute.isempty ? 'solid' : 'none', borderWidth: 1, borderColor: 'red' }}
+              checked={item.attribute.value ? true : false}
+              onChange={e => {
+                changeComponetsValue(index, e.target.checked)
+              }}
+            />
+          )
+        case 'radiogroup':
+          return (
+            <Radio.Group
               key={index}
               {...item.attribute}
               style={{ ...item.attribute.style, borderStyle: item.attribute.isempty ? 'solid' : 'none', borderWidth: 1, borderColor: 'red' }}

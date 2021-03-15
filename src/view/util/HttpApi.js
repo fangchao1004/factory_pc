@@ -1214,6 +1214,46 @@ class HttpApi {
         let sql = `select * from job_tickets_status_des`
         return Axios.post(Testuri + 'obs', { sql })
     }
+
+    /**
+     * 针对缺陷查询卡顿情况的修改1
+     * @param {*} param0 
+     * @returns 
+     */
+    static getBugsList = ({ status_condtion }) => {
+        let sql = `select bugs.*,des.name as device_name,urs.name as user_name,mjs.name as major_name,
+        area_1.name as area1_name,area_1.id as area1_id,
+        area_2.name as area2_name,area_2.id as area3_id,
+        area_3.name as area3_name,area_3.id as area3_id,
+        concat_ws('/',area_1.name,area_2.name,area_3.name) as area_name,
+        bsd.duration_time as bsd_duration_time,
+        bld.duration_time as bld_duration_time
+        from bugs
+        left join (select * from bug_level_duration where effective = 1) bld on bld.level_value = bugs.buglevel
+        left join (select * from bug_status_duration where effective = 1) bsd on bsd.status = bugs.status
+        left join (select * from devices where effective = 1) des on bugs.device_id = des.id
+        left join (select * from users where effective = 1) urs on bugs.user_id = urs.id
+        left join (select * from majors where effective = 1) mjs on bugs.major_id = mjs.id
+        left join (select * from area_3 where effective = 1) area_3 on des.area_id = area_3.id
+        left join (select * from area_2 where effective = 1) area_2 on area_3.area2_id = area_2.id
+        left join (select * from area_1 where effective = 1) area_1 on area_2.area1_id = area_1.id
+        where bugs.status ${status_condtion} and bugs.effective = 1 order by bugs.id desc`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+
+    /**
+     * 针对缺陷查询卡顿情况的修改2
+     * @param {*} param0 
+     * @returns 
+     */
+    static getFreezeStatusList = () => {
+        let sql = ` select t2.*,bug_tag_status.des as tag_des,bug_freeze_status.des as freeze_des 
+        from (select bug_id,max(id) as max_id from bug_step_log where effective = 1 group by bug_id) t1
+     left join (select * from bug_step_log where effective = 1) t2 on t2.id = t1.max_id
+     left join (select * from bug_tag_status where effective = 1) bug_tag_status on bug_tag_status.id = t2.tag_id
+     left join (select * from bug_freeze_status where effective = 1) bug_freeze_status on bug_freeze_status.id = t2.freeze_id`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
 }
 
 export default HttpApi

@@ -1114,7 +1114,11 @@ export function getJTRecordContentAndPlanTime({ pages }) {
                 time_list = cpt.attribute.value
             }
             if (cpt.is_content) {
-                job_content = cpt.attribute.value
+                if (Array.isArray(cpt.attribute.value) && cpt.attribute.value) {
+                    job_content = cpt.attribute.value.join(',')
+                } else if (typeof (cpt.attribute.value) == 'string' && cpt.attribute.value) {
+                    job_content = cpt.attribute.value
+                }
             }
         })
     })
