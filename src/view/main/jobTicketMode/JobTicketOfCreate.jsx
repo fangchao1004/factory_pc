@@ -481,7 +481,7 @@ export default function JobTicketOfCreate() {
                     visible={waitToSelectPanelVisible}
                     onCancel={() => { setWaitToSelectPanelVisible(false) }}
                     footer={[
-                        <Button type='primary' onClick={() => {
+                        <Button key='x' type='primary' onClick={() => {
                             const select_sub_id = radio_group.current.state.value;
                             let select_sub_obj = waitToSelectSubJBTList.filter((item) => { return item.id === select_sub_id })
                             let parse_res = select_sub_obj.map((item) => { item.pages = JSON.parse(item.pages); return item })
@@ -492,7 +492,7 @@ export default function JobTicketOfCreate() {
                         }}>确定</Button>
                     ]}
                 >
-                    <Radio.Group ref={radio_group} onChange={() => { }}>
+                    <Radio.Group key='y' ref={radio_group} onChange={() => { }}>
                         {waitToSelectSubJBTList.map((item, index) => {
                             return <Radio key={index} value={item.id}>{item.ticket_name}</Radio>
                         })}

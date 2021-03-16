@@ -26,10 +26,10 @@ export default props => {
                 <Descriptions.Item label="版本">{
                     <div style={styles.account}>
                         <Tag color='blue'>{appState.version}</Tag>
-                        <div style={{ cursor: 'pointer' }}>
+                        {/* <div style={{ cursor: 'pointer' }}>
                             <Icon type="profile" theme="twoTone" />
                             <a style={{ color: "#47A2FF", marginLeft: 10 }} rel="noopener noreferrer" href={`http://60.174.196.158:12345/update_log/update${environmentIsTest ? '_test' : ''}.html`} title="更新日志" target="_blank">更新日志</a>
-                        </div>
+                        </div> */}
                     </div>}</Descriptions.Item>
             </Descriptions>
         </div>

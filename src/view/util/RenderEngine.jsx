@@ -141,8 +141,8 @@ export function RenderEngine({ isAgent, jsonlist, userList, currentUser, current
               key={index}
               {...item.attribute}
               style={{ ...item.attribute.style, borderStyle: item.attribute.isempty ? 'solid' : 'none', borderWidth: 1, borderColor: 'red' }}
-              onChange={checkedValues => {
-                changeComponetsValue(index, checkedValues)
+              onChange={e => {
+                changeComponetsValue(index, e.target.value)
               }}
             />
           )
