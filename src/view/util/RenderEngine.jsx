@@ -113,6 +113,7 @@ export function RenderEngine({ isAgent, jsonlist, userList, currentUser, current
             />
           )
         case 'checkboxgroup':
+        case 'checkboxgroup1':
           return (
             <Checkbox.Group
               key={index}
