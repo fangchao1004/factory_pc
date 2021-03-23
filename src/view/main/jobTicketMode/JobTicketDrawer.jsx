@@ -97,7 +97,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
             setUserList(user_list)
         }
         const status_table = JSON.parse(record.status_table)
-        console.log('status_table:', status_table);
+        // console.log('status_table:', status_table);
         ///根据当前状态找到 对应的处理建议
         var after_filter_current_status_data = getRecordCurrentStatusInfo(record, record.status)
         if (record_current_is_sub === 0 && record_current_status === 0) {///主票0状态时，需要当前专业专工 0状态时不用考虑调度

@@ -72,7 +72,7 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
         let status_table = JSON.parse(currentSubJBT.status_table)
         let result = status_table.status_list.filter((item) => { return item.current_status === 0 })
         let target_role_id = result[0].next_role_id///候选人role_id数组
-        console.log('target_role_id:', target_role_id);
+        // console.log('target_role_id:', target_role_id);
         let { target_list } = await getTargetRoleIdUser(userList, target_role_id)
         setTargetUserList(target_list)
     }, [userList, currentSubJBT])

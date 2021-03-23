@@ -1512,3 +1512,31 @@ export async function checkLastStepIsBack(jbtar_id) {
         }
     } else { return false }
 }
+
+/**
+ * 措施工作票模版选项按照type_name分组
+ * @param {*} JBTList 
+ */
+export function groupJBTByTypeName(JBTList) {
+    let new_list = JBTList.filter((item) => { return item.is_sub !== 0 })
+    let tempObj = {};
+    new_list.forEach((item) => {
+        if (tempObj[item.type_name]) {
+            tempObj[item.type_name].push(item)
+        } else {
+            tempObj[item.type_name] = [item]
+        }
+    })
+    let result_list = []
+    for (const key in tempObj) {
+        if (Object.hasOwnProperty.call(tempObj, key)) {
+            const element = tempObj[key];
+            let new_obj = {}
+            new_obj['type_name'] = key
+            new_obj['list'] = element
+            result_list.push(new_obj)
+        }
+    }
+    // console.log('result_list:', result_list)
+    return result_list
+}

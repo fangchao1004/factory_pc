@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Button, Descriptions, Icon, Tag } from 'antd';
 import { AppDataContext } from '../../../redux/AppRedux';
 import { adminPermission, permisstionWithDes } from '../../util/AppData';
-import { environmentIsTest } from '../../util/HttpApi';
+// import { environmentIsTest } from '../../util/HttpApi';
 import UpdatePasswordView from './UpdatePasswordView'
 const storage = window.localStorage;
 var localUserInfo = JSON.parse(storage.getItem('userinfo'));

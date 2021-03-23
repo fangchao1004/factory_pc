@@ -962,7 +962,7 @@ class HttpApi {
     }
     static getJobTicketsOptionList = ({ is_sub }) => {
         let is_sub_str = is_sub.join(',')
-        let sql = `select * from job_tickets where is_delete = 0 and is_sub in (${is_sub_str}) and is_extra = 0 order by no`
+        let sql = `select * from job_tickets where is_delete = 0 and is_sub in (${is_sub_str}) and is_extra = 0 order by type_name,no`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getJobTicketsList = ({ id }) => {

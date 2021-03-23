@@ -1,18 +1,20 @@
-import { Badge, Button, Col, DatePicker, Dropdown, Form, Input, Menu, Row, Select, Switch, Table, Tooltip, Modal, message, Alert } from 'antd';
+import { Badge, Button, Col, DatePicker, Form, Input, Row, Select, Switch, Table, Tooltip, Modal, message, Alert, Radio, Tag } from 'antd';
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
-import { autoFillNo, deleteMainSubJBT, checkJBTStatusIsChange, statusReduce1JBT, getRecordStatusTable } from '../../util/Tool';
+import { autoFillNo, deleteMainSubJBT, checkJBTStatusIsChange, statusReduce1JBT, getRecordStatusTable, groupJBTByTypeName } from '../../util/Tool';
 import JobTicketDrawer from './JobTicketDrawer';
 import JobTicketDrawerForShow from './JobTicketDrawerForShow';
 import JobTicketStepLogView from './JobTicketStepLogView';
 import moment from 'moment'
 import { AppDataContext } from '../../../redux/AppRedux';
 import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer';
+import RadioGroup from 'antd/lib/radio/group';
 const { confirm } = Modal;
 const FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const storage = window.localStorage;
 var searchCondition = {};
 var pageCondition = {};
+var tempSubJBTObj = {}
 export default function JobTicketOfMy() {
     const { appDispatch } = useContext(AppDataContext)
     const [defaultTime] = useState([moment().add(-6, 'month').startOf('day'), moment().endOf('day')])
@@ -34,6 +36,9 @@ export default function JobTicketOfMy() {
     const [currentSubJBT, setCurrentSubJBT] = useState({})
     const [userList, setUserList] = useState([])
     const [statusDesList, setStatusDesList] = useState([])
+    const [addNewSubJBTVisible, setAddNewSubJBTVisible] = useState(false)
+    const [tempSelectAddSubJBTValue, setTempSelectAddSubJBTValue] = useState(null)
+    const [currentJBTSelectedSubIdList, setCurrentJBTSelectedSubIdList] = useState([])
     const init = useCallback(async () => {
         setLoading(true)
         const localUserInfo = storage.getItem('userinfo');
@@ -278,7 +283,7 @@ export default function JobTicketOfMy() {
                         let topAdd = props.record.is_sub === 0 && !is_over && (hasFixPer || hasManagerPer) ? ///主票未终结时且有维修或专工权限
                             <div key={'y'}>
                                 <Tooltip title={'新增措施票'} placement="left">
-                                    <Dropdown size='small' overlay={() => {
+                                    {/* <Dropdown size='small' overlay={() => {
                                         return <Menu onClick={(e) => {
                                             let tempSubJBTObj = JSON.parse(JSON.stringify(e.item.props.record))
                                             let tempPageList = JSON.parse(tempSubJBTObj.pages)
@@ -293,7 +298,13 @@ export default function JobTicketOfMy() {
                                         </Menu>
                                     }} trigger={['click']}>
                                         <Button size='small' type='link' icon='plus' style={{ color: '#fa541c' }} onClick={e => e.preventDefault()}></Button>
-                                    </Dropdown>
+                                    </Dropdown> */}
+                                    <Button size='small' type='link' icon='plus' style={{ color: '#fa541c' }} onClick={() => {
+                                        let temp = props.record.sub_tickets.map((item) => { return item.type_id })
+                                        setCurrentJBTSelectedSubIdList(temp)
+                                        setCurrentSelectRecord(props.record)
+                                        setAddNewSubJBTVisible(true)
+                                    }}></Button>
                                 </Tooltip>
                             </div> : null
                         if (props.record.sub_tickets && props.record.sub_tickets.length > 0) {
@@ -348,6 +359,38 @@ export default function JobTicketOfMy() {
                     setCurrentSubJBT(new_v)
                 }}
             />
+            <Modal
+                title='新增措施票'
+                visible={addNewSubJBTVisible}
+                onOk={() => {
+                    if (!tempSelectAddSubJBTValue) { message.error('请选择需要的措施票后再提交'); return }
+                    setCurrentSubJBT(tempSubJBTObj)
+                    setSbtvisible(true)
+                    setAddNewSubJBTVisible(false)
+                    setTempSelectAddSubJBTValue(null);
+                    tempSubJBTObj = {}
+                }}
+                onCancel={() => { tempSubJBTObj = {}; setTempSelectAddSubJBTValue(null); setAddNewSubJBTVisible(false) }}
+            >
+                <RadioGroup value={tempSelectAddSubJBTValue} onChange={(e) => {
+                    setTempSelectAddSubJBTValue(e.target.value)
+                    tempSubJBTObj = JSON.parse(JSON.stringify(e.target.record))
+                    let tempPageList = JSON.parse(tempSubJBTObj.pages)
+                    tempSubJBTObj.pages = tempPageList
+                }}>
+                    {groupJBTByTypeName(typeOptionList).map((item, index1) => {
+                        if (!item) { return null }
+                        return <div style={{ marginBottom: 15 }} key={index1}>
+                            <div><Tag color='blue'>{item.type_name}</Tag></div>
+                            <div style={{ paddingLeft: 40 }}>
+                                {item.list.map((item, index) => {
+                                    return <Radio disabled={currentJBTSelectedSubIdList.indexOf(item.id) !== -1} key={index} value={item.id} record={item}>{item.ticket_name}</Radio>
+                                })}
+                            </div>
+                        </div>
+                    })}
+                </RadioGroup>
+            </Modal>
         </div>
     )
 }
