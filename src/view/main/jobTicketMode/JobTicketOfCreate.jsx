@@ -3,9 +3,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 // import { testData } from '../../../assets/testJson'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty, copyArrayItem, checkDataIsLostUserlist, autoCalculateFootPageValue, getPinYin, autoFillNo } from '../../util/Tool'
+import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty, copyArrayItem, checkDataIsLostUserlist, autoCalculateFootPageValue, getPinYin, autoFillNo, removeDateCheckBox } from '../../util/Tool'
 import moment from 'moment'
 import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer'
+import AddSampleModal from './AddSampleModal'
+import UpdateSampleModal from './UpdateSampleModal'
 const { OptGroup, Option } = Select
 const { confirm } = Modal
 const storage = window.localStorage
@@ -27,6 +29,9 @@ export default function JobTicketOfCreate() {
     const [currentSubJBT, setCurrentSubJBT] = useState({})
     const [waitToSelectPanelVisible, setWaitToSelectPanelVisible] = useState(false)
     const [waitToSelectSubJBTList, setWaitToSelectSubJBTList] = useState([])
+    const [addJBTSampleVisible, setAddJBTSampleVisible] = useState(false)
+    const [updateJBTSampleVisible, setUpdateJBTSampleVisible] = useState(false)
+
     const getJobTicketById = useCallback(async id => {
         if (id !== null) {
             let res = await HttpApi.getJobTicketsList({ id })
@@ -84,7 +89,7 @@ export default function JobTicketOfCreate() {
         per_page_value = 0
     }, [userList])
     const init = useCallback(async () => {
-        let res = await HttpApi.getJobTicketsOptionList({ is_sub: [0] })
+        let res = await HttpApi.getJobTicketsOptionList({ is_sub: [0], user_id: currentUser.id })
         if (res.data.code === 0) {
             setJobTicketsOption(res.data.data)
         }
@@ -95,7 +100,7 @@ export default function JobTicketOfCreate() {
             })
             setUserList(user_list)
         }
-    }, [])
+    }, [currentUser.id])
     const getUserGroupList = useCallback(() => {
         if (!userList) { return null }
         let manager_list = [];
@@ -165,7 +170,7 @@ export default function JobTicketOfCreate() {
                 }
             })
             // console.log('新增:', add_list)
-            let res = await HttpApi.getSubJobTicketsList({ type_name: add_list[0] })
+            let res = await HttpApi.getSubJobTicketsList({ type_name: add_list[0], user_id: currentUser.id })
             if (res.data.code === 0) {
                 let tempList = res.data.data.map((item, index) => { item.key = index; return item });
                 // console.log('tempList:', tempList);
@@ -182,7 +187,7 @@ export default function JobTicketOfCreate() {
         }
         // console.log('per_list:', per_list);
         per_list = JSON.parse(JSON.stringify(checkgroup_list))
-    }, [allSubTicketList])
+    }, [allSubTicketList, currentUser.id])
     /**
      * 提取出附页的数值
      */
@@ -241,7 +246,11 @@ export default function JobTicketOfCreate() {
         init()
     }, [init])
     const columns = [
-        { title: '名称', dataIndex: 'ticket_name', key: 'ticket_name' },
+        {
+            title: '名称', dataIndex: 'ticket_name', key: 'ticket_name', render: (text, record) => {
+                return record.self_ticket_name || text
+            }
+        },
         {
             title: '操作', dataIndex: 'action', key: 'action', width: 90, render: (_, record) => {
                 return <Button icon='edit' size='small' type='link' onClick={() => {
@@ -287,18 +296,22 @@ export default function JobTicketOfCreate() {
                                             } else {
                                                 getJobTicketById(null)
                                             }
+                                            setTicketNextUserList([])
+                                            ticketNextUserNameList = []
+                                            setAllSubTicketList([])
                                         }}
                                         filterOption={(input, option) => {
                                             let res = option.props.short_lab.toLowerCase().indexOf(input.toLowerCase()) >= 0
                                             return res
                                         }}>
-                                        {jobTicketsOption.map((item, index) => {
+                                        {/* {jobTicketsOption.map((item, index) => {
                                             return (
                                                 <Option key={index} value={item.id} short_lab={getPinYin(item.ticket_name)[0] || ''}>
                                                     {item.ticket_name}
                                                 </Option>
                                             )
-                                        })}
+                                        })} */}
+                                        {getJBTOptionGroup(jobTicketsOption)}
                                     </Select>
                                 </div>
                                 <div style={{
@@ -349,105 +362,119 @@ export default function JobTicketOfCreate() {
                                         width: '100%',
                                         padding: 5
                                     }}>
-                                        <Button
-                                            type='danger'
-                                            size='small'
-                                            disabled={!currentJobTicketValue.pages}
-                                            onClick={() => {
-                                                console.log('创建新工作票点击提交');
-                                                console.log('allsbj:', allSubTicketList);
-                                                // return;
-                                                if (ticketNextUserList.toString().length === 0) { message.error('请选择好主工作票处理人员，再进行提交'); return }
-                                                let user_str = ',' + ticketNextUserList.toString() + ','
-                                                // console.log('user_str:', user_str);
-                                                // console.log('ticketNextUserNameList:', ticketNextUserNameList);
-                                                // return;
-                                                let afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, 0)
-                                                // console.log('afterCheckObj:', afterCheckObj);
-                                                // return;
-                                                setCurrentJobTicketValue(JSON.parse(JSON.stringify(afterCheckObj)))
-                                                let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
-                                                if (needValueButIsEmpty) {
-                                                    message.error('请填写好主工作票后，再进行提交')
-                                                    return
-                                                }
-                                                for (let index = 0; index < allSubTicketList.length; index++) {
-                                                    let element = allSubTicketList[index];///每个措施票
-                                                    let afterCheckObj_sub = checkCellWhichIsEmpty(element, 0)
-                                                    let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj_sub)
-                                                    var copyAllSubTicketList = JSON.parse(JSON.stringify(allSubTicketList))
-                                                    copyAllSubTicketList[index] = afterCheckObj_sub
-                                                    setAllSubTicketList(copyAllSubTicketList)
+                                        <div>
+                                            {currentJobTicketValue.pages && currentJobTicketValue.user_id !== null ?
+                                                <Button style={{ marginRight: 10 }} type='dashed' size='small' disabled={!currentJobTicketValue.pages}
+                                                    onClick={() => {
+                                                        setUpdateJBTSampleVisible(true)
+                                                    }}
+                                                >修改</Button> : null}
+                                            {currentJobTicketValue.pages ?
+                                                <Button style={{ marginRight: 10 }} type='primary' size='small' disabled={!currentJobTicketValue.pages}
+                                                    onClick={() => {
+                                                        setAddJBTSampleVisible(true)
+                                                    }}
+                                                >另存</Button> : null}
+                                            <Button
+                                                type='danger'
+                                                size='small'
+                                                disabled={!currentJobTicketValue.pages}
+                                                onClick={() => {
+                                                    console.log('创建新工作票点击提交');
+                                                    console.log('allsbj:', allSubTicketList);
+                                                    // return;
+                                                    if (ticketNextUserList.toString().length === 0) { message.error('请选择好主工作票处理人员，再进行提交'); return }
+                                                    let user_str = ',' + ticketNextUserList.toString() + ','
+                                                    // console.log('user_str:', user_str);
+                                                    // console.log('ticketNextUserNameList:', ticketNextUserNameList);
+                                                    // return;
+                                                    let afterCheckObj = checkCellWhichIsEmpty(currentJobTicketValue, 0)
+                                                    // console.log('afterCheckObj:', afterCheckObj);
+                                                    // return;
+                                                    setCurrentJobTicketValue(JSON.parse(JSON.stringify(afterCheckObj)))
+                                                    let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
                                                     if (needValueButIsEmpty) {
-                                                        message.error('请填写好措施票后，再进行提交')
+                                                        message.error('请填写好主工作票后，再进行提交')
                                                         return
                                                     }
-                                                    let user_id_is_lost = checkDataIsLostUserlist(element)
-                                                    if (user_id_is_lost) {
-                                                        message.error('请选择好措施票处理人后，再进行提交')
-                                                        return
-                                                    }
-                                                }
-                                                console.log('弹出确认对话框');
-                                                // return;
-                                                confirm({
-                                                    title: '确认提交当前的工作票吗?',
-                                                    content: '请确保所填信息的准确和完整',
-                                                    okText: '确认',
-                                                    okType: 'danger',
-                                                    cancelText: '取消',
-                                                    onOk: async function () {
-                                                        ///添加主票
-                                                        let res = await createNewJobTicketApply(afterCheckObj, user_str)
-                                                        if (res) {
-                                                            message.success('提交成功')
-                                                            getJobTicketById(null)
-                                                            ///获取最新提交的记录id
-                                                            let res = await HttpApi.getLastJTApplyRecordId()
-                                                            if (res.data.code === 0 && res.data.data.length > 0) {
-                                                                const jbtar_id = res.data.data[0]['id']
-                                                                const p_no = res.data.data[0]['no']///主票的编号
-                                                                let obj = {};
-                                                                obj['jbtar_id'] = jbtar_id
-                                                                obj['user_id'] = currentUser.id
-                                                                obj['user_name'] = currentUser.name
-                                                                obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
-                                                                obj['step_des'] = '创建工作票 提交至 ' + ticketNextUserNameList.join(',')
-                                                                obj['remark'] = ''
-                                                                HttpApi.addJbTStepLog(obj)///添加log
-                                                                setTicketNextUserList([])
-                                                                ticketNextUserNameList = []
-                                                                ///循环添加多个措施票记录
-                                                                if (copyAllSubTicketList) {
-                                                                    for (let index = 0; index < copyAllSubTicketList.length; index++) {
-                                                                        let element = copyAllSubTicketList[index];///每个措施票
-                                                                        element.p_id = jbtar_id;
-                                                                        let user_str = ',' + element.userInfo.user_id_list.toString() + ','
-                                                                        await createNewJobTicketApply(element, user_str, p_no)
-                                                                        // console.log('添加措施票记录:', res);
-                                                                        let res1 = await HttpApi.getLastJTApplyRecordId()
-                                                                        if (res1.data.code === 0 && res1.data.data.length > 0) {
-                                                                            const jbtar_id_sub = res1.data.data[0]['id']
-                                                                            let obj = {};
-                                                                            obj['jbtar_id'] = jbtar_id_sub /// 添加措施票记录 的id
-                                                                            obj['user_id'] = currentUser.id
-                                                                            obj['user_name'] = currentUser.name
-                                                                            obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
-                                                                            obj['step_des'] = '创建措施票 提交至 ' + element.userInfo.user_name_list.join(',')
-                                                                            obj['remark'] = ''
-                                                                            await HttpApi.addJbTStepLog(obj)///添加log
-                                                                        }
-                                                                    }
-                                                                }
-                                                                setAllSubTicketList([])
-                                                                setCurrentSubJBT({})
-                                                            }
+                                                    for (let index = 0; index < allSubTicketList.length; index++) {
+                                                        let element = allSubTicketList[index];///每个措施票
+                                                        let afterCheckObj_sub = checkCellWhichIsEmpty(element, 0)
+                                                        let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj_sub)
+                                                        var copyAllSubTicketList = JSON.parse(JSON.stringify(allSubTicketList))
+                                                        copyAllSubTicketList[index] = afterCheckObj_sub
+                                                        setAllSubTicketList(copyAllSubTicketList)
+                                                        if (needValueButIsEmpty) {
+                                                            message.error('请填写好措施票后，再进行提交')
+                                                            return
+                                                        }
+                                                        let user_id_is_lost = checkDataIsLostUserlist(element)
+                                                        if (user_id_is_lost) {
+                                                            message.error('请选择好措施票处理人后，再进行提交')
+                                                            return
                                                         }
                                                     }
-                                                })
-                                            }}>
-                                            提交
+                                                    console.log('弹出确认对话框');
+                                                    // return;
+                                                    confirm({
+                                                        title: '确认提交当前的工作票吗?',
+                                                        content: '请确保所填信息的准确和完整',
+                                                        okText: '确认',
+                                                        okType: 'danger',
+                                                        cancelText: '取消',
+                                                        onOk: async function () {
+                                                            ///添加主票
+                                                            let res = await createNewJobTicketApply(afterCheckObj, user_str)
+                                                            if (res) {
+                                                                message.success('提交成功')
+                                                                getJobTicketById(null)
+                                                                ///获取最新提交的记录id
+                                                                let res = await HttpApi.getLastJTApplyRecordId()
+                                                                if (res.data.code === 0 && res.data.data.length > 0) {
+                                                                    const jbtar_id = res.data.data[0]['id']
+                                                                    const p_no = res.data.data[0]['no']///主票的编号
+                                                                    let obj = {};
+                                                                    obj['jbtar_id'] = jbtar_id
+                                                                    obj['user_id'] = currentUser.id
+                                                                    obj['user_name'] = currentUser.name
+                                                                    obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
+                                                                    obj['step_des'] = '创建工作票 提交至 ' + ticketNextUserNameList.join(',')
+                                                                    obj['remark'] = ''
+                                                                    HttpApi.addJbTStepLog(obj)///添加log
+                                                                    setTicketNextUserList([])
+                                                                    ticketNextUserNameList = []
+                                                                    ///循环添加多个措施票记录
+                                                                    if (copyAllSubTicketList) {
+                                                                        for (let index = 0; index < copyAllSubTicketList.length; index++) {
+                                                                            let element = copyAllSubTicketList[index];///每个措施票
+                                                                            element.p_id = jbtar_id;
+                                                                            let user_str = ',' + element.userInfo.user_id_list.toString() + ','
+                                                                            await createNewJobTicketApply(element, user_str, p_no)
+                                                                            // console.log('添加措施票记录:', res);
+                                                                            let res1 = await HttpApi.getLastJTApplyRecordId()
+                                                                            if (res1.data.code === 0 && res1.data.data.length > 0) {
+                                                                                const jbtar_id_sub = res1.data.data[0]['id']
+                                                                                let obj = {};
+                                                                                obj['jbtar_id'] = jbtar_id_sub /// 添加措施票记录 的id
+                                                                                obj['user_id'] = currentUser.id
+                                                                                obj['user_name'] = currentUser.name
+                                                                                obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
+                                                                                obj['step_des'] = '创建措施票 提交至 ' + element.userInfo.user_name_list.join(',')
+                                                                                obj['remark'] = ''
+                                                                                await HttpApi.addJbTStepLog(obj)///添加log
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    setAllSubTicketList([])
+                                                                    setCurrentSubJBT({})
+                                                                }
+                                                            }
+                                                        }
+                                                    })
+                                                }}>
+                                                提交
                                         </Button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -494,13 +521,77 @@ export default function JobTicketOfCreate() {
                 >
                     <Radio.Group key='y' ref={radio_group} onChange={() => { }}>
                         {waitToSelectSubJBTList.map((item, index) => {
-                            return <Radio key={index} value={item.id}>{item.ticket_name}</Radio>
+                            return <Radio key={index} value={item.id}>{item.self_ticket_name || item.ticket_name}</Radio>
                         })}
                     </Radio.Group>
                 </Modal>
+                <AddSampleModal visible={addJBTSampleVisible} onCancel={() => { setAddJBTSampleVisible(false) }}
+                    onOk={async ({ self_ticket_name }) => {
+                        let newObj = { ...currentJobTicketValue, self_ticket_name }
+                        let afterRemoveData = removeDateCheckBox(newObj)
+                        let res = await HttpApi.creatOrUpdateNewJBTSample({ is_create: 1, JBTSampleData: afterRemoveData, user_id: currentUser.id })
+                        if (res.data.code === 0) {
+                            message.success('保存成功')
+                            getJobTicketById(null)
+                            setTicketNextUserList([])
+                            ticketNextUserNameList = []
+                            init()
+                        }
+                        setAddJBTSampleVisible(false)
+                    }}
+                />
+                <UpdateSampleModal data={currentJobTicketValue} visible={updateJBTSampleVisible} onCancel={() => { setUpdateJBTSampleVisible(false) }}
+                    onOk={async ({ self_ticket_name }) => {
+                        currentJobTicketValue['self_ticket_name'] = self_ticket_name
+                        let afterRemoveData = removeDateCheckBox(currentJobTicketValue)
+                        let res = await HttpApi.creatOrUpdateNewJBTSample({ is_create: 0, JBTSampleData: afterRemoveData })
+                        if (res.data.code === 0) {
+                            message.success('修改成功')
+                            getJobTicketById(null)
+                            setTicketNextUserList([])
+                            ticketNextUserNameList = []
+                            init()
+                        }
+                        setUpdateJBTSampleVisible(false)
+                    }}
+                />
             </div>
         </div>
     )
+}
+
+function getJBTOptionGroup(JBTlist) {
+    let self_list = []
+    let other_list = []
+    JBTlist.forEach((item) => {
+        if (item.user_id !== null) { self_list.push(item) }
+        else { other_list.push(item) }
+    })
+    let tempSelfCps = null
+    if (self_list) {
+        tempSelfCps = <OptGroup key={'y'} label={'个人'}>
+            {self_list.map((item, index) => {
+                return (
+                    <Option key={index} value={item.id} short_lab={getPinYin(item.self_ticket_name)[0] || ''}>
+                        {item.self_ticket_name}
+                    </Option>
+                )
+            })}
+        </OptGroup>
+    }
+    let tempOtherCps = null
+    if (other_list) {
+        tempOtherCps = <OptGroup key={'x'} label={'初始'}>
+            {other_list.map((item, index) => {
+                return (
+                    <Option key={index} value={item.id} short_lab={getPinYin(item.ticket_name)[0] || ''}>
+                        {item.ticket_name}
+                    </Option>
+                )
+            })}
+        </OptGroup>
+    }
+    return [tempSelfCps, tempOtherCps]
 }
 
 const styles = {

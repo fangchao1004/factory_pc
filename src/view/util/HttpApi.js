@@ -960,9 +960,9 @@ class HttpApi {
         where bug_step_log.effective = 1 and bug_step_log.bug_id = ${bugId}`
         return Axios.post(Testuri + 'obs', { sql })
     }
-    static getJobTicketsOptionList = ({ is_sub }) => {
+    static getJobTicketsOptionList = ({ is_sub, user_id }) => {
         let is_sub_str = is_sub.join(',')
-        let sql = `select * from job_tickets where is_delete = 0 and is_sub in (${is_sub_str}) and is_extra = 0 order by type_name,no`
+        let sql = `select * from job_tickets where is_delete = 0 and is_sub in (${is_sub_str}) and (user_id is null or user_id = ${user_id}) and is_extra = 0 order by type_name,no`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getJobTicketsList = ({ id }) => {
@@ -973,8 +973,8 @@ class HttpApi {
         let sql = `select * from job_tickets where is_delete = 0 and p_id = ${p_id}`
         return Axios.post(Testuri + 'obs', { sql })
     }
-    static getSubJobTicketsList = ({ type_name }) => {
-        let sql = `select * from job_tickets where is_delete = 0 and is_sub = 1 and type_name = '${type_name}' order by no`
+    static getSubJobTicketsList = ({ type_name, user_id }) => {
+        let sql = `select * from job_tickets where is_delete = 0 and is_sub = 1 and type_name = '${type_name}' and (user_id is null or user_id = ${user_id}) order by no`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getJobTicketsCount = ({ type_id, timeRange }) => {
@@ -1252,6 +1252,34 @@ class HttpApi {
      left join (select * from bug_step_log where effective = 1) t2 on t2.id = t1.max_id
      left join (select * from bug_tag_status where effective = 1) bug_tag_status on bug_tag_status.id = t2.tag_id
      left join (select * from bug_freeze_status where effective = 1) bug_freeze_status on bug_freeze_status.id = t2.freeze_id`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+
+    static creatOrUpdateNewJBTSample = ({ is_create = 1, JBTSampleData, user_id }) => {
+        let sql = ''
+        const { id, title, ticket_name, self_ticket_name, pages, major_id, is_sub, type_name, scal, is_extra, p_id, print_num, status_table, no } = JBTSampleData;
+        if (is_create) {
+            sql = `insert into job_tickets (title,ticket_name,self_ticket_name,pages,major_id,is_sub,type_name,scal,is_extra,p_id,print_num,status_table,no,user_id) values 
+             ('${title}','${ticket_name}','${self_ticket_name}','${JSON.stringify(pages)}',${major_id},${is_sub},${type_name ? "'" + type_name + "'" : null},${scal ? "'" + scal + "'" : null},
+             ${is_extra},${p_id},${print_num},${status_table ? "'" + status_table + "'" : null},${no},${user_id})`
+        } else {
+            sql = `update job_tickets set self_ticket_name='${self_ticket_name}',pages = '${JSON.stringify(pages)}' where id = ${id}  `
+        }
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+
+    static getSelfJBTList = ({ user_id }) => {
+        let sql = `select * from job_tickets where is_delete = 0 and user_id = ${user_id}`
+        return Axios.post(Testuri + 'obs', { sql })
+    }
+
+    /**
+     * 实际删除，保持模版表数量不会一直增加
+     * @param {*} param0 
+     * @returns 
+     */
+    static deleteSelfJBT = ({ id }) => {
+        let sql = `delete from job_tickets where id = ${id};`
         return Axios.post(Testuri + 'obs', { sql })
     }
 }

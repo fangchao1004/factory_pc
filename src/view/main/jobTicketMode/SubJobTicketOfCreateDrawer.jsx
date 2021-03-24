@@ -2,8 +2,10 @@ import { Drawer, Select, Tag, Button, Affix, Modal, Alert, message } from 'antd'
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import { RenderEngine } from '../../util/RenderEngine';
-import { checkCellWhichIsEmpty, checkDataIsLostValue, createNewJobTicketApply, getPinYin, getTargetRoleIdUser } from '../../util/Tool';
+import { checkCellWhichIsEmpty, checkDataIsLostValue, createNewJobTicketApply, getPinYin, getTargetRoleIdUser, removeDateCheckBox } from '../../util/Tool';
 import moment from 'moment'
+import AddSampleModal from './AddSampleModal';
+import UpdateSampleModal from './UpdateSampleModal';
 const { OptGroup, Option } = Select
 const { confirm } = Modal
 var copy_currentSubJBT = {}
@@ -14,6 +16,9 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
     // console.log('新 currentSubJBT:', currentSubJBT);
     // console.log('userList:', userList);
     const [targetUserList, setTargetUserList] = useState([])
+    const [addJBTSampleVisible, setAddJBTSampleVisible] = useState(false)
+    const [updateJBTSampleVisible, setUpdateJBTSampleVisible] = useState(false)
+
     const renderAllPage = useCallback((currentSubJBT) => {
         if (!currentSubJBT.pages) { return null }
         let scalObj = {}
@@ -72,7 +77,6 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
         let status_table = JSON.parse(currentSubJBT.status_table)
         let result = status_table.status_list.filter((item) => { return item.current_status === 0 })
         let target_role_id = result[0].next_role_id///候选人role_id数组
-        // console.log('target_role_id:', target_role_id);
         let { target_list } = await getTargetRoleIdUser(userList, target_role_id)
         setTargetUserList(target_list)
     }, [userList, currentSubJBT])
@@ -176,10 +180,62 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
 
                                 }
                             })
-                        }}>提交</Button> </div> : null}
+                        }}>提交</Button> </div> :
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                width: '100%',
+                                alignItems: 'center',
+                                marginTop: 10
+                            }}>
+                                <Tag color='blue'>操作</Tag>
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'row-reverse',
+                                    width: '100%',
+                                    padding: 5
+                                }}>
+                                    <Button type='primary' size='small' disabled={!currentSubJBT.pages}
+                                        onClick={() => {
+                                            setAddJBTSampleVisible(true)
+                                        }}
+                                    >另存</Button>
+                                    {currentSubJBT.user_id !== null ?
+                                        <Button style={{ marginRight: 10 }} type='dashed' size='small' disabled={!currentSubJBT.pages}
+                                            onClick={() => {
+                                                setUpdateJBTSampleVisible(true)
+                                            }}
+                                        >覆盖</Button> : null}
+                                </div>
+                            </div>
+                        }
                     </div>
                 </Affix>
             </div>
-        </Drawer>
+            <AddSampleModal visible={addJBTSampleVisible} onCancel={() => { setAddJBTSampleVisible(false) }}
+                onOk={async ({ self_ticket_name }) => {
+                    let newObj = { ...currentSubJBT, self_ticket_name }
+                    let afterRemoveData = removeDateCheckBox(newObj)
+                    let res = await HttpApi.creatOrUpdateNewJBTSample({ is_create: 1, JBTSampleData: afterRemoveData, user_id: currentUser.id })
+                    if (res.data.code === 0) {
+                        message.success('保存成功，重新勾选措施票会看到个人保存的措施票模版', 4)
+                        onClose()
+                    }
+                    setAddJBTSampleVisible(false)
+                }}
+            />
+            <UpdateSampleModal data={currentSubJBT} visible={updateJBTSampleVisible} onCancel={() => { setUpdateJBTSampleVisible(false) }}
+                onOk={async ({ self_ticket_name }) => {
+                    currentSubJBT['self_ticket_name'] = self_ticket_name
+                    let afterRemoveData = removeDateCheckBox(currentSubJBT)
+                    let res = await HttpApi.creatOrUpdateNewJBTSample({ is_create: 0, JBTSampleData: afterRemoveData })
+                    if (res.data.code === 0) {
+                        message.success('修改成功，重新勾选措施票会看到个人保存的措施票模版', 4)
+                        onClose()
+                    }
+                    setUpdateJBTSampleVisible(false)
+                }}
+            />
+        </Drawer >
     )
 }

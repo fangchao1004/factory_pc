@@ -1,15 +1,50 @@
-import React, { useContext, useState } from 'react';
-import { Button, Descriptions, Icon, Tag } from 'antd';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { Button, Descriptions, Icon, Table, Tag, Modal, message } from 'antd';
 import { AppDataContext } from '../../../redux/AppRedux';
 import { adminPermission, permisstionWithDes } from '../../util/AppData';
 // import { environmentIsTest } from '../../util/HttpApi';
 import UpdatePasswordView from './UpdatePasswordView'
+import HttpApi from '../../util/HttpApi';
+const { confirm } = Modal
 const storage = window.localStorage;
 var localUserInfo = JSON.parse(storage.getItem('userinfo'));
+
 export default props => {
     localUserInfo = JSON.parse(storage.getItem('userinfo'));
     const { appState } = useContext(AppDataContext)
     const [passwordVIsible, setPasswordVIsible] = useState(false)
+    const [selfJBTList, setSelfJBTList] = useState([])
+    const init = useCallback(async () => {
+        let res = await HttpApi.getSelfJBTList({ user_id: localUserInfo.id })
+        if (res.data.code === 0) {
+            let templist = res.data.data.map((item, index) => { item.key = index; return item })
+            console.log('templist:', templist)
+            setSelfJBTList(templist)
+        }
+    }, [])
+    useEffect(() => { init() }, [init])
+    const columns = [
+        { title: '模版名称', dataIndex: 'self_ticket_name', key: 'self_ticket_name' },
+        {
+            title: '操作', dataIndex: 'action', key: 'action', width: 100, render: (_, record) => {
+                return <Button icon={'delete'} type='danger' size='small' onClick={() => {
+                    confirm({
+                        title: `确认要删除吗？`,
+                        okText: '确定',
+                        okType: 'danger',
+                        onOk: async function () {
+                            console.log('record:', record)
+                            let res = await HttpApi.deleteSelfJBT({ id: record.id })
+                            if (res.data.code === 0) {
+                                message.success('模版删除成功')
+                                init()
+                            }
+                        }
+                    })
+                }}>删除</Button>
+            }
+        },
+    ]
     return <div style={styles.root}>
         <div style={styles.body}>
             <Descriptions title="个人信息" bordered size='small' column={2}>
@@ -41,6 +76,14 @@ export default props => {
                 <Descriptions.Item label="运行">{permisstionWithDes[2].des}</Descriptions.Item>
                 <Descriptions.Item label="财务">{permisstionWithDes[3].des}</Descriptions.Item>
             </Descriptions>
+        </div>
+        <div style={styles.body}>
+            <Table
+                size='small'
+                columns={columns}
+                dataSource={selfJBTList}
+                pagination={false}
+            />
         </div>
         <UpdatePasswordView visible={passwordVIsible} onCancel={() => { setPasswordVIsible(false) }} />
     </div>

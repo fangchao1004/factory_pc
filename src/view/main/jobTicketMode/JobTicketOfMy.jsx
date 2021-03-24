@@ -52,7 +52,7 @@ export default function JobTicketOfMy() {
             var user_list = res_user.data.data.map((item) => { return { id: item.id, name: item.name } })
             setUserList(user_list)
         }
-        let res = await HttpApi.getJobTicketsOptionList({ is_sub: [0, 1] })
+        let res = await HttpApi.getJobTicketsOptionList({ is_sub: [0, 1], user_id: currentUser.id })
         if (res.data.code === 0) { setTypeOptionList(res.data.data) }
         let conditions = { ...searchCondition, ...pageCondition, user_id: userinfo.id, is_current: isCurrentMe }
         // console.log('conditions:', conditions);
@@ -84,7 +84,7 @@ export default function JobTicketOfMy() {
         // console.log('main_list:', main_list);
         setList(main_list)
         setLoading(false)
-    }, [isCurrentMe])
+    }, [isCurrentMe, currentUser.id])
     const readLocalRecord = useCallback(async (record) => {
         if (record.is_read) { return }
         let copy_list = JSON.parse(JSON.stringify(list))
@@ -384,7 +384,7 @@ export default function JobTicketOfMy() {
                             <div><Tag color='blue'>{item.type_name}</Tag></div>
                             <div style={{ paddingLeft: 40 }}>
                                 {item.list.map((item, index) => {
-                                    return <Radio disabled={currentJBTSelectedSubIdList.indexOf(item.id) !== -1} key={index} value={item.id} record={item}>{item.ticket_name}</Radio>
+                                    return <Radio disabled={currentJBTSelectedSubIdList.indexOf(item.id) !== -1} key={index} value={item.id} record={item}>{item.self_ticket_name || item.ticket_name}</Radio>
                                 })}
                             </div>
                         </div>

@@ -1540,3 +1540,23 @@ export function groupJBTByTypeName(JBTList) {
     // console.log('result_list:', result_list)
     return result_list
 }
+
+/**
+ * 创建和修改模版时，移除 日期和措施票选择的相关组件值
+ * @param {*} JBTSample 
+ * @returns 
+ */
+export function removeDateCheckBox(JBTSample) {
+    let copy_JBTSample = JSON.parse(JSON.stringify(JBTSample))
+    copy_JBTSample.pages.forEach((page) => {
+        let cpts = page.components
+        cpts.forEach((cpt) => {
+            if (cpt.type === 'daterange' || cpt.type === 'daterange1' || cpt.type === 'checkboxgroup') {
+                cpt.attribute.value = []
+            } else if (cpt.type === 'datepicker' || cpt.type === 'datepicker1') {
+                cpt.attribute.value = ''
+            }
+        })
+    })
+    return copy_JBTSample
+}
