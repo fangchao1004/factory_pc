@@ -380,8 +380,8 @@ export default function JobTicketOfCreate() {
                                                 size='small'
                                                 disabled={!currentJobTicketValue.pages}
                                                 onClick={() => {
-                                                    console.log('创建新工作票点击提交');
-                                                    console.log('allsbj:', allSubTicketList);
+                                                    // console.log('创建新工作票点击提交');
+                                                    // console.log('allsbj:', allSubTicketList);
                                                     // return;
                                                     if (ticketNextUserList.toString().length === 0) { message.error('请选择好主工作票处理人员，再进行提交'); return }
                                                     let user_str = ',' + ticketNextUserList.toString() + ','
@@ -414,7 +414,6 @@ export default function JobTicketOfCreate() {
                                                             return
                                                         }
                                                     }
-                                                    console.log('弹出确认对话框');
                                                     // return;
                                                     confirm({
                                                         title: '确认提交当前的工作票吗?',
@@ -450,7 +449,6 @@ export default function JobTicketOfCreate() {
                                                                             element.p_id = jbtar_id;
                                                                             let user_str = ',' + element.userInfo.user_id_list.toString() + ','
                                                                             await createNewJobTicketApply(element, user_str, p_no)
-                                                                            // console.log('添加措施票记录:', res);
                                                                             let res1 = await HttpApi.getLastJTApplyRecordId()
                                                                             if (res1.data.code === 0 && res1.data.data.length > 0) {
                                                                                 const jbtar_id_sub = res1.data.data[0]['id']
@@ -504,6 +502,7 @@ export default function JobTicketOfCreate() {
                     }}
                 />
                 <Modal
+                    maskClosable={false}
                     title="确认措施票级别"
                     visible={waitToSelectPanelVisible}
                     onCancel={() => { setWaitToSelectPanelVisible(false) }}
