@@ -36,7 +36,7 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
                     currentStatus={0}
                     currentPageIndex={index}
                     scaleNum={scalObj.scaleNum || 1}
-                    bgscaleNum={scalObj.bgscalNum || 1}
+                    bgscaleNum={scalObj.bgscaleNum || 1}
                     callbackValue={v => {
                         sbjtvalueChangeCallback(v)
                     }}

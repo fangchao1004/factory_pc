@@ -167,7 +167,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                     currentUser={currentUser}
                     currentPageIndex={index}
                     scaleNum={scalObj.scaleNum || 1}
-                    bgscaleNum={scalObj.bgscalNum || 1}
+                    bgscaleNum={scalObj.bgscaleNum || 1}
                     callbackValue={v => {
                         setCurrentJobTicketValue(v)
                     }}
