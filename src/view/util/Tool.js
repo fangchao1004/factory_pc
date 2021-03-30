@@ -1537,6 +1537,9 @@ export function groupJBTByTypeName(JBTList) {
             result_list.push(new_obj)
         }
     }
+    result_list.forEach((item) => {
+        item.list = orderByUserIdLate(item.list)
+    })
     // console.log('result_list:', result_list)
     return result_list
 }
@@ -1559,4 +1562,30 @@ export function removeDateCheckBox(JBTSample) {
         })
     })
     return copy_JBTSample
+}
+
+export function removeCheckBoxValue(currentJobTicketValue, removeTargetStr) {
+    let copy_jbt = JSON.parse(JSON.stringify(currentJobTicketValue))
+    copy_jbt.pages.forEach((page) => {
+        const cpts = page.components
+        cpts.forEach((cpt) => {
+            if (cpt.type === 'checkboxgroup' && cpt.attribute.value) {
+                cpt.attribute.value = cpt.attribute.value.filter((item) => { return item !== removeTargetStr })
+            }
+        })
+    })
+    return copy_jbt
+}
+
+export function orderByUserIdLate(tempList) {
+    let user_list = []
+    let other_list = []
+    tempList.forEach((item) => {
+        if (item.user_id !== null) {
+            user_list.push(item)
+        } else {
+            other_list.push(item)
+        }
+    })
+    return other_list.concat(user_list)
 }

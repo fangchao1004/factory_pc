@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 // import { testData } from '../../../assets/testJson'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty, copyArrayItem, checkDataIsLostUserlist, autoCalculateFootPageValue, getPinYin, autoFillNo, removeDateCheckBox } from '../../util/Tool'
+import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty, copyArrayItem, checkDataIsLostUserlist, autoCalculateFootPageValue, getPinYin, autoFillNo, removeDateCheckBox, removeCheckBoxValue, orderByUserIdLate } from '../../util/Tool'
 import moment from 'moment'
 import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer'
 import AddSampleModal from './AddSampleModal'
@@ -15,6 +15,7 @@ var ticketNextUserNameList = [];
 let per_list = []///上次措施票的选择项
 var currentJTExtraPageSample = []
 var per_page_value = 0///上次附页的数量
+var temp_add_list = []///临时新增的措施票勾选值['xxx']
 export default function JobTicketOfCreate() {
     const radio_group = useRef()
     const [jobTicketsOption, setJobTicketsOption] = useState([])
@@ -170,12 +171,14 @@ export default function JobTicketOfCreate() {
                 }
             })
             // console.log('新增:', add_list)
+            temp_add_list = add_list
             let res = await HttpApi.getSubJobTicketsList({ type_name: add_list[0], user_id: currentUser.id })
             if (res.data.code === 0) {
                 let tempList = res.data.data.map((item, index) => { item.key = index; return item });
-                // console.log('tempList:', tempList);
                 if (tempList.length > 1) {
-                    setWaitToSelectSubJBTList(tempList)
+                    // console.log('tempList:', tempList)
+                    let after_order = orderByUserIdLate(tempList)
+                    setWaitToSelectSubJBTList(after_order)
                     setWaitToSelectPanelVisible(true)
                 } else {
                     let parse_res = res.data.data.map((item) => { item.pages = JSON.parse(item.pages); return item })
@@ -505,7 +508,14 @@ export default function JobTicketOfCreate() {
                     maskClosable={false}
                     title="确认措施票级别"
                     visible={waitToSelectPanelVisible}
-                    onCancel={() => { setWaitToSelectPanelVisible(false) }}
+                    onCancel={() => {
+                        ///移除 temp_add_list
+                        let after_remove = removeCheckBoxValue(currentJobTicketValue, temp_add_list[0])
+                        setCurrentJobTicketValue(after_remove)
+                        setWaitToSelectPanelVisible(false)
+                        per_list = per_list.filter((item) => { return item !== temp_add_list[0] })
+                        temp_add_list = []
+                    }}
                     footer={[
                         <Button key='x' type='primary' onClick={() => {
                             const select_sub_id = radio_group.current.state.value;
@@ -532,6 +542,7 @@ export default function JobTicketOfCreate() {
                         if (res.data.code === 0) {
                             message.success('保存成功')
                             getJobTicketById(null)
+                            setAllSubTicketList([])
                             setTicketNextUserList([])
                             ticketNextUserNameList = []
                             init()
@@ -547,6 +558,7 @@ export default function JobTicketOfCreate() {
                         if (res.data.code === 0) {
                             message.success('修改成功')
                             getJobTicketById(null)
+                            setAllSubTicketList([])
                             setTicketNextUserList([])
                             ticketNextUserNameList = []
                             init()
@@ -590,7 +602,7 @@ function getJBTOptionGroup(JBTlist) {
             })}
         </OptGroup>
     }
-    return [tempSelfCps, tempOtherCps]
+    return [tempOtherCps, tempSelfCps]
 }
 
 const styles = {

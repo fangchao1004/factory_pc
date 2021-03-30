@@ -205,7 +205,7 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
                                             onClick={() => {
                                                 setUpdateJBTSampleVisible(true)
                                             }}
-                                        >覆盖</Button> : null}
+                                        >修改</Button> : null}
                                 </div>
                             </div>
                         }
