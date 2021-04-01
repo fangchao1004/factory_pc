@@ -164,9 +164,11 @@ export function RenderEngine({ isAgent, jsonlist, userList, currentUser, current
               filterOption={(input, option) => {
                 if (option.props.short_lab) {
                   let res = option.props.short_lab.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  if (!res) {
+                    let res2 = option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    return res2
+                  }
                   return res
-                } else {
-                  return false
                 }
               }}
             >

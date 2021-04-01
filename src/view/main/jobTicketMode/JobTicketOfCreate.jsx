@@ -1,4 +1,4 @@
-import { Button, Col, Empty, Row, Select, Tag, Affix, Modal, message, Table, Radio } from 'antd'
+import { Button, Col, Empty, Row, Select, Tag, Affix, Modal, message, Table, Radio, Spin } from 'antd'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 // import { testData } from '../../../assets/testJson'
 import HttpApi from '../../util/HttpApi'
@@ -32,7 +32,7 @@ export default function JobTicketOfCreate() {
     const [waitToSelectSubJBTList, setWaitToSelectSubJBTList] = useState([])
     const [addJBTSampleVisible, setAddJBTSampleVisible] = useState(false)
     const [updateJBTSampleVisible, setUpdateJBTSampleVisible] = useState(false)
-
+    const [isLoading, setIsLoading] = useState(false)
     const getJobTicketById = useCallback(async id => {
         if (id !== null) {
             let res = await HttpApi.getJobTicketsList({ id })
@@ -41,6 +41,7 @@ export default function JobTicketOfCreate() {
                 tempObj.pages = JSON.parse(tempObj.pages)
                 // tempObj.pages = testData
                 setCurrentJobTicketValue(tempObj)
+                setIsLoading(false)
                 let currentJBT_id = tempObj.id;
                 let res_extra = await HttpApi.getExtraJobTicketsList({ p_id: currentJBT_id })
                 if (res_extra.data.code === 0 && res_extra.data.data.length > 0) {
@@ -48,6 +49,8 @@ export default function JobTicketOfCreate() {
                     // console.log(pages_extra);///额外的附页
                     pages_extra.forEach((page_extra) => { page_extra.is_extra = true })
                     currentJTExtraPageSample = pages_extra
+                } else {
+                    currentJTExtraPageSample = []
                 }
                 const major_id = tempObj.major_id
                 // console.log('major_id', major_id);
@@ -195,6 +198,7 @@ export default function JobTicketOfCreate() {
      * 提取出附页的数值
      */
     const pickupextrapagevalue = useCallback((ticketvalue) => {
+        if (currentJTExtraPageSample.length === 0) { message.warn('当前工作票没有尚未配置对应附页'); return }
         ticketvalue.pages.forEach((page) => {
             const cpts = page.components
             cpts.forEach((cpt) => {
@@ -269,10 +273,23 @@ export default function JobTicketOfCreate() {
                 <h2 style={styles.title}>创建工作票</h2>
             </div>
             <div style={styles.body}>
-                <Row gutter={10}>
+                <Row>
                     <Col span={18}>
                         <div style={styles.rightPart}>
-                            {!currentJobTicketValue.pages ? <Empty style={{ padding: 9, width: '100%', backgroundColor: '#FFFFFF' }} description={'请先选择需要的工作票'} /> : <div style={{ marginTop: -10 }}>{renderAllPage()}</div>}
+                            {currentJobTicketValue.pages ?
+                                <div style={{ marginTop: -10 }}>
+                                    {renderAllPage()}
+                                </div>
+                                :
+                                <div style={{ width: '100%' }}>
+                                    {isLoading ?
+                                        <Spin>
+                                            <Empty style={{ padding: 9, width: '100%', backgroundColor: '#FFFFFF' }} description={'请先选择需要的工作票'} />
+                                        </Spin> :
+                                        <Empty style={{ padding: 9, width: '100%', backgroundColor: '#FFFFFF' }} description={'请先选择需要的工作票'} />
+                                    }
+                                </div>
+                            }
                         </div>
                     </Col>
                     <Col span={6}>
@@ -296,9 +313,12 @@ export default function JobTicketOfCreate() {
                                         onChange={value => {
                                             if (value >= 0) {
                                                 getJobTicketById(value)
+                                                setIsLoading(true)
                                             } else {
                                                 getJobTicketById(null)
+                                                setIsLoading(false)
                                             }
+                                            setCurrentJobTicketValue({})
                                             setTicketNextUserList([])
                                             ticketNextUserNameList = []
                                             setAllSubTicketList([])
@@ -338,9 +358,11 @@ export default function JobTicketOfCreate() {
                                         filterOption={(input, option) => {
                                             if (option.props.short_lab) {
                                                 let res = option.props.short_lab.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                                if (!res) {
+                                                    let res2 = option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                                    return res2
+                                                }
                                                 return res
-                                            } else {
-                                                return false
                                             }
                                         }}
                                         onChange={(value, option) => {
@@ -580,11 +602,11 @@ function getJBTOptionGroup(JBTlist) {
     })
     let tempSelfCps = null
     if (self_list) {
-        tempSelfCps = <OptGroup key={'y'} label={'个人'}>
+        tempSelfCps = <OptGroup key={'y'} label={'个人典型票'}>
             {self_list.map((item, index) => {
                 return (
                     <Option key={index} value={item.id} short_lab={getPinYin(item.self_ticket_name)[0] || ''}>
-                        {item.self_ticket_name}
+                        {item.self_ticket_name + '-' + item.ticket_name}
                     </Option>
                 )
             })}

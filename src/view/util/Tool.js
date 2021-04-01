@@ -1432,12 +1432,15 @@ export async function deleteMainSubJBT(JBTObj, Delete = 1) {
  * @param {*} JBTObj 工作票record
  */
 export async function statusReduce1JBT(JBTObj, currentUser) {
+    const status_table_obj = JSON.parse(JBTObj.status_table)
     let reduced_status = JBTObj.status - 1
     let current_step_user_id_list_temp = ',' + currentUser.id + ','
+    let reduced_status_des = status_table_obj.status_list.filter((item) => { return item.current_status === reduced_status })[0].des
     let newJTAR_data = {
         is_read: 0,
         id: JBTObj.id,
         status: reduced_status,
+        status_des: reduced_status_des,
         current_step_user_id_list: current_step_user_id_list_temp,///当前处理人id ,0,1,
         last_back_user_id: currentUser.id///最近一次的撤回操作人id;防止同一个人多次撤回
     }

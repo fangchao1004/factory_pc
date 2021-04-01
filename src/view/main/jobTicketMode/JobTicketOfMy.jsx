@@ -231,7 +231,7 @@ export default function JobTicketOfMy() {
                         let { over_status } = getRecordStatusTable(props.record)
                         let is_over = false
                         if (props.record.status === over_status) { is_over = true }
-                        let is_start = props.record.status === 1///刚提交 状态为1
+                        let is_start = props.record.status === 0///创建状态时 状态为0
                         let is_main = props.record.is_sub === 0
                         let topBack = per_user_is_me && !last_back_user_is_me && !is_over ?
                             <div key={'x'}>
@@ -283,22 +283,6 @@ export default function JobTicketOfMy() {
                         let topAdd = props.record.is_sub === 0 && !is_over && (hasFixPer || hasManagerPer) ? ///主票未终结时且有维修或专工权限
                             <div key={'y'}>
                                 <Tooltip title={'新增措施票'} placement="left">
-                                    {/* <Dropdown size='small' overlay={() => {
-                                        return <Menu onClick={(e) => {
-                                            let tempSubJBTObj = JSON.parse(JSON.stringify(e.item.props.record))
-                                            let tempPageList = JSON.parse(tempSubJBTObj.pages)
-                                            tempSubJBTObj.pages = tempPageList
-                                            setCurrentSubJBT(tempSubJBTObj)
-                                            setSbtvisible(true)
-                                            setCurrentSelectRecord(props.record)
-                                        }}>
-                                            {typeOptionList.filter((item) => { return item.is_sub !== 0 }).map((item, index) => {
-                                                return <Menu.Item key={index} record={item}><div>{item.ticket_name}</div></Menu.Item>
-                                            })}
-                                        </Menu>
-                                    }} trigger={['click']}>
-                                        <Button size='small' type='link' icon='plus' style={{ color: '#fa541c' }} onClick={e => e.preventDefault()}></Button>
-                                    </Dropdown> */}
                                     <Button size='small' type='link' icon='plus' style={{ color: '#fa541c' }} onClick={() => {
                                         let temp = props.record.sub_tickets.map((item) => { return item.type_id })
                                         setCurrentJBTSelectedSubIdList(temp)
