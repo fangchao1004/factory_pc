@@ -202,7 +202,7 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
                                         onClick={() => {
                                             setAddJBTSampleVisible(true)
                                         }}
-                                    >另存</Button>
+                                    >生成典型票</Button>
                                     {currentSubJBT.user_id !== null ?
                                         <Button style={{ marginRight: 10 }} type='dashed' size='small' disabled={!currentSubJBT.pages}
                                             onClick={() => {

@@ -405,7 +405,7 @@ export default function JobTicketOfCreate() {
                                                     onClick={() => {
                                                         setAddJBTSampleVisible(true)
                                                     }}
-                                                >另存</Button> : null}
+                                                >生成典型票</Button> : null}
                                             <Button
                                                 type='danger'
                                                 size='small'
