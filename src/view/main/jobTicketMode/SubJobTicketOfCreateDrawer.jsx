@@ -27,6 +27,9 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
         }
         copy_currentSubJBT = JSON.parse(JSON.stringify(currentSubJBT))
         try {
+            if (typeof copy_currentSubJBT.pages === 'string') {
+                copy_currentSubJBT.pages = JSON.parse(copy_currentSubJBT.pages)
+            }
             return copy_currentSubJBT.pages.map((_, index) => {
                 return <RenderEngine
                     key={index}
@@ -43,7 +46,7 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
                 />
             })
         } catch (error) {
-            console.log('currentSubJBT.pages JSON解析失败');
+            console.log('currentSubJBT.pages JSON解析失败', error);
             return null
         }
     }, [currentUser, userList, sbjtvalueChangeCallback])

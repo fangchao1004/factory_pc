@@ -5,8 +5,7 @@ import JobTicketDrawer from './JobTicketDrawer';
 import JobTicketDrawerForShow from './JobTicketDrawerForShow';
 import JobTicketStepLogView from './JobTicketStepLogView';
 import moment from 'moment'
-import { getRecordStatusTable } from '../../util/Tool';
-// import { JOB_TICKETS_STATUS } from '../../util/AppData';
+import { getRecordStatusTable, orderByUserIdLate } from '../../util/Tool';
 const FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const storage = window.localStorage;
 var searchCondition = {};
@@ -30,9 +29,10 @@ export default function JobTicketOfAll() {
         const localUserInfo = storage.getItem('userinfo');
         let userinfo = JSON.parse(localUserInfo);
         setCurrentUser(userinfo)
-        let res = await HttpApi.getJobTicketsOptionList({ is_sub: [0] })
+        let res = await HttpApi.getJobTicketsOptionList({ is_sub: [0], user_id: userinfo.id })
         if (res.data.code === 0) {
-            setTypeOptionList(res.data.data)
+            let after_order = orderByUserIdLate(res.data.data)
+            setTypeOptionList(after_order)
         }
         let conditions = { ...searchCondition, ...pageCondition }
         // console.log('conditions:', conditions);
@@ -57,6 +57,7 @@ export default function JobTicketOfAll() {
         main_list.forEach((item_m) => {
             if (item_m.is_sub === 0) { item_m.sub_tickets = [] }
             sub_list.forEach((item_s) => {
+                item_s.key = item_s.id
                 if (item_m.id === item_s.p_id) { item_m.sub_tickets.push(item_s) }
             })
         })
@@ -309,7 +310,7 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
                         rules: [{ required: false }]
                     })(<Select allowClear placeholder="请选择主票类型" >
                         {props.typeOptionList.map((item, index) => {
-                            return <Select.Option value={item.id} key={index} all={item}>{item.ticket_name}</Select.Option>
+                            return <Select.Option value={item.id} key={index} all={item}>{item.self_ticket_name ? item.self_ticket_name + '-' + item.ticket_name : item.ticket_name}</Select.Option>
                         })}
                     </Select>)}
                 </Form.Item>

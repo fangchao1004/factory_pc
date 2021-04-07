@@ -1,18 +1,23 @@
-import { Button, Drawer, Select, message, Modal, Affix, Tag, Input, Spin, Alert } from 'antd'
-import React, { useCallback, useEffect, useState } from 'react'
+import { Button, Drawer, Select, message, Modal, Affix, Tag, Input, Spin, Alert, Radio } from 'antd'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { checkCellWhichIsEmpty, checkDataIsLostValue, checkJBTStatusIsChange, deleteMainSubJBT, getJTRecordContentAndPlanTime, getPinYin, getRecordCurrentStatusInfo, getTargetRoleIdUser, getTargetMajorManagerList, checkLastStepIsBack, getRecordStatusTable, getStatusDesByNewStatus } from '../../util/Tool';
+import { autoFillNo, removeCheckBoxValue, checkCellWhichIsEmpty, checkDataIsLostValue, checkJBTStatusIsChange, deleteMainSubJBT, getJTRecordContentAndPlanTime, getPinYin, getRecordCurrentStatusInfo, getTargetRoleIdUser, getTargetMajorManagerList, checkLastStepIsBack, getRecordStatusTable, getStatusDesByNewStatus, orderByUserIdLate } from '../../util/Tool';
 import moment from 'moment'
 import JobTicketStepLogView from './JobTicketStepLogView';
+import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer';
 const { confirm } = Modal;
 const { TextArea } = Input;
 const { Option, OptGroup } = Select
 const storage = window.localStorage;
 var step_des = '';
 var ticketNextUserNameList = [];
+let per_list = []///上次措施票的选择项
+var temp_add_list = []///临时新增的措施票勾选值['xxx']
+
 export default function JobTicketDrawer({ isAgent, visible, onClose, record, resetData }) {
     // console.log('record:', record);
+    const radio_group = useRef()
 
     const [stepLogVisible, setStepLogVisible] = useState(false);///展示步骤界面
     const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})///填写改动后的数值- 提交时使用
@@ -34,6 +39,11 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
     const [remark, setRemark] = useState('')
     const [loading, setLoading] = useState(true)
     const [printing, setPrinting] = useState(false)
+
+    const [waitToSelectPanelVisible, setWaitToSelectPanelVisible] = useState(false)
+    const [waitToSelectSubJBTList, setWaitToSelectSubJBTList] = useState([])
+    const [selectSubJBT, setSelectSubJBT] = useState({})///选择的措施票
+    const [sbtvisible, setSbtvisible] = useState(false)
 
     const init3 = useCallback(async () => {
         if (!record || !record.job_t_r_id) { return }
@@ -135,6 +145,16 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                 let tempObj = JSON.parse(JSON.stringify(res.data.data[0]))
                 tempObj.pages = JSON.parse(tempObj.pages)
                 setCurrentJobTicketValue(tempObj)///票数据初始化
+
+                ///提取原先措施票的勾选值
+                tempObj.pages.forEach((page) => {
+                    const cpts = page.components
+                    cpts.forEach((cpt) => {
+                        if (cpt.type === 'checkboxgroup') {
+                            per_list = cpt.attribute.value;
+                        }
+                    })
+                })
             }
         }
         setLoading(false)
@@ -149,6 +169,68 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
         step_des = '';
         ticketNextUserNameList = '';
     }, [onClose, resetData])
+
+    /**
+     * 提取出措施票的选项
+     */
+    const pickupcheckgroupvalue = useCallback(async (ticketvalue) => {
+        let checkgroup_list = []
+        ticketvalue.pages.forEach((page) => {
+            const cpts = page.components
+            cpts.forEach((cpt) => {
+                if (cpt.type === 'checkboxgroup') {
+                    checkgroup_list = cpt.attribute.value
+                }
+            })
+        })
+        let lost_list = []
+        let add_list = []
+        if (per_list.length > checkgroup_list.length) {
+            per_list.forEach(item1 => {
+                let flag = false;
+                checkgroup_list.forEach(item2 => {
+                    if (item1 === item2) {
+                        flag = true;
+                    }
+                })
+                if (!flag) {
+                    lost_list.push(item1);
+                }
+            })
+            console.log('移除:', lost_list)
+            // console.log('checkgroup_list:', checkgroup_list);
+        } else if (per_list.length < checkgroup_list.length) {
+            checkgroup_list.forEach(item1 => {
+                let flag = false;
+                per_list.forEach(item2 => {
+                    if (item1 === item2) {
+                        flag = true;
+                    }
+                })
+                if (!flag) {
+                    add_list.push(item1);
+                }
+            })
+            // console.log('新增:', add_list)
+            temp_add_list = add_list
+            let res = await HttpApi.getSubJobTicketsList({ type_name: add_list[0], user_id: currentUser.id })
+            if (res.data.code === 0) {
+                let tempList = res.data.data.map((item, index) => { item.key = index; return item });
+                if (tempList.length > 1) {///候选同类措施票大于1时，弹出选择弹窗
+                    let after_order = orderByUserIdLate(tempList)
+                    setWaitToSelectSubJBTList(after_order)
+                    setWaitToSelectPanelVisible(true)
+                } else {///同类措施票只有一种时，直接获取
+                    let parse_res = res.data.data.map((item) => { item.pages = JSON.parse(item.pages); return item })
+                    // console.log('parse_res:', parse_res)
+                    setSelectSubJBT(parse_res[0])
+                    setSbtvisible(true)
+                }
+            }
+        }
+        // console.log('per_list:', per_list);
+        per_list = JSON.parse(JSON.stringify(checkgroup_list))
+    }, [currentUser.id])
 
     const renderAllPage = useCallback(() => {
         if (record && currentJobTicketValue && currentJobTicketValue.pages) {
@@ -170,11 +252,12 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                     bgscaleNum={scalObj.bgscaleNum || 1}
                     callbackValue={v => {
                         setCurrentJobTicketValue(v)
+                        pickupcheckgroupvalue(v)
                     }}
                 />
             })
         }
-    }, [record, currentJobTicketValue, currentUser, userList])
+    }, [record, currentJobTicketValue, currentUser, userList, pickupcheckgroupvalue])
     const getUserGroupList = useCallback(() => {
         let result = []
         if (otherList.length > 0) {
@@ -487,6 +570,51 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                     <JobTicketStepLogView record={record} visible={stepLogVisible} onCancel={() => { setStepLogVisible(false) }} />
                 </Spin>
             }
+            <SubJobTicketOfCreateDrawer
+                pId={record ? record.id : null}
+                pNo={record ? record.no : null}
+                isExtraAdd={true}///额外添加的情况
+                // resetList={() => { init() }}
+                visible={sbtvisible}
+                onClose={() => { setSbtvisible(false); }}
+                currentSubJBT={selectSubJBT}
+                userList={userList}
+                currentUser={currentUser}
+                sbjtvalueChangeCallback={(v) => {
+                    let new_v = autoFillNo(v)
+                    setSelectSubJBT(new_v)
+                }}
+            />
+            <Modal
+                maskClosable={false}
+                title="确认措施票级别"
+                visible={waitToSelectPanelVisible}
+                onCancel={() => {
+                    ///移除 temp_add_list
+                    let after_remove = removeCheckBoxValue(currentJobTicketValue, temp_add_list[0])
+                    setCurrentJobTicketValue(after_remove)
+                    setWaitToSelectPanelVisible(false)
+                    per_list = per_list.filter((item) => { return item !== temp_add_list[0] })
+                    temp_add_list = []
+                }}
+                footer={[
+                    <Button key='x' type='primary' onClick={() => {
+                        const select_sub_id = radio_group.current.state.value;
+                        let select_sub_obj = waitToSelectSubJBTList.filter((item) => { return item.id === select_sub_id })
+                        let parse_res = select_sub_obj.map((item) => { item.pages = JSON.parse(item.pages); return item })
+                        // console.log('parse_res2:', parse_res);
+                        setSelectSubJBT(parse_res[0])
+                        setWaitToSelectPanelVisible(false)
+                        setSbtvisible(true)
+                    }}>确定</Button>
+                ]}
+            >
+                <Radio.Group key='y' ref={radio_group} onChange={() => { }}>
+                    {waitToSelectSubJBTList.map((item, index) => {
+                        return <Radio key={index} value={item.id}>{item.self_ticket_name || item.ticket_name}</Radio>
+                    })}
+                </Radio.Group>
+            </Modal>
         </Drawer >
     )
 }

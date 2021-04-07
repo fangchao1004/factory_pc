@@ -1580,6 +1580,11 @@ export function removeCheckBoxValue(currentJobTicketValue, removeTargetStr) {
     return copy_jbt
 }
 
+/**
+ * 候选的措施票选项；个人典型票排在后面
+ * @param {*} tempList 
+ * @returns 
+ */
 export function orderByUserIdLate(tempList) {
     let user_list = []
     let other_list = []
