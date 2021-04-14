@@ -1133,6 +1133,7 @@ export function getJTRecordContentAndPlanTime({ pages }) {
  */
 export async function createNewJobTicketApply(jobTicketValue, user_list_str, p_no = '') {
     let auto_no = await getAutoJTARecordNo(jobTicketValue)
+    console.log('auto_no:', auto_no)
     jobTicketValue.pages = changeNoInputValue({ auto_no, pages: jobTicketValue.pages })
     if (p_no) {
         jobTicketValue.pages = changePNoInputValue({ p_no, pages: jobTicketValue.pages })

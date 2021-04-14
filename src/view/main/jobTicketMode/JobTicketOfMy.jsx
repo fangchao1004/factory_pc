@@ -150,7 +150,11 @@ export default function JobTicketOfMy() {
                 return <div>{record.is_read ? null : <Badge status="processing" />}{text}</div>
             }
         },
-        { title: '编号', dataIndex: 'no', key: 'no', width: 170 },
+        {
+            title: '编号', dataIndex: 'no', key: 'no', width: 170, render: (text, record) => {
+                return <div>{text}<pr />{record.ticket_name}</div>
+            }
+        },
         { title: '发起时间', dataIndex: 'time', key: 'time', width: 120 },
         {
             title: '计划开始', dataIndex: 'time_begin', key: 'time_begin', width: 120, render: (text) => {
@@ -293,7 +297,7 @@ export default function JobTicketOfMy() {
                             </div> : null
                         if (props.record.sub_tickets && props.record.sub_tickets.length > 0) {
                             let tags = props.record.sub_tickets.map((item, index) => {
-                                return <Tooltip key={index} title={item.id + ' ' + item.no} placement="left">
+                                return <Tooltip key={index} title={<div>{item.id + ' ' + item.no}<pr />{item.ticket_name}</div>} placement="left">
                                     <Button icon='tag' size='small' type='link' onClick={() => {
                                         setCurrentSelectRecord(item)
                                         setDrawer2Visible(true)

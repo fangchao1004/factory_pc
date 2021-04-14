@@ -982,7 +982,7 @@ class HttpApi {
         return Axios.post(Testuri + 'obs', { sql })
     }
     static createJTRecord = ({ type_name, type_id, ticket_name, pages, major_id, title, time, scal, print_num, checkcard }) => {
-        let sql = `insert into job_tickets_records (${type_name ? "'" + type_name + "'" : null},type_id, ticket_name, pages, major_id, title, time, scal, print_num, checkcard) values (${type_id},'${ticket_name}','${pages}',${major_id},'${title}','${time}',${scal ? "'" + scal + "'" : null}, ${print_num ? print_num : null},${checkcard ? "'" + checkcard + "'" : null})`
+        let sql = `insert into job_tickets_records (type_name, type_id, ticket_name, pages, major_id, title, time, scal, print_num, checkcard) values (${type_name ? "'" + type_name + "'" : null},${type_id},'${ticket_name}','${pages}',${major_id},'${title}','${time}',${scal ? "'" + scal + "'" : null}, ${print_num ? print_num : null},${checkcard ? "'" + checkcard + "'" : null})`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getLastJTRecordId = () => {
