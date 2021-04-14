@@ -1046,9 +1046,9 @@ export function addCharToHead({ originString = '', targetString = '', Targetleng
  * 获取自动编号
  * @param {*} param0 
  */
-export async function getAutoJTARecordNo({ type_id, title }) {
+export async function getAutoJTARecordNo({ title }) {
     let timeRange = [moment().startOf('day').format(FORMAT), moment().endOf('day').format(FORMAT)]///今天区间
-    let res = await HttpApi.getJobTicketsCount({ type_id, timeRange })
+    let res = await HttpApi.getJobTicketsCount({ title, timeRange })
     if (res.data.code === 0) {
         let new_count = res.data.data[0].count + 1 || 1
         let no_str = addCharToHead({ originString: String(new_count), targetString: '0', Targetlength: 3 })

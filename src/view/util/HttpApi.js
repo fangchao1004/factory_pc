@@ -977,12 +977,12 @@ class HttpApi {
         let sql = `select * from job_tickets where is_delete = 0 and is_sub = 1 and type_name = '${type_name}' and (user_id is null or user_id = ${user_id}) order by no`
         return Axios.post(Testuri + 'obs', { sql })
     }
-    static getJobTicketsCount = ({ type_id, timeRange }) => {
-        let sql = `select count(id) as count from job_tickets_records where type_id = ${type_id} and time >= '${timeRange[0]}' and time <= '${timeRange[1]}' `
+    static getJobTicketsCount = ({ title, timeRange }) => {
+        let sql = `select count(id) as count from job_tickets_records where title = '${title}' and time >= '${timeRange[0]}' and time <= '${timeRange[1]}' `
         return Axios.post(Testuri + 'obs', { sql })
     }
-    static createJTRecord = ({ type_id, ticket_name, pages, major_id, title, time, scal, print_num, checkcard }) => {
-        let sql = `insert into job_tickets_records (type_id, ticket_name, pages, major_id, title, time, scal, print_num, checkcard) values (${type_id},'${ticket_name}','${pages}',${major_id},'${title}','${time}',${scal ? "'" + scal + "'" : null}, ${print_num ? print_num : null},${checkcard ? "'" + checkcard + "'" : null})`
+    static createJTRecord = ({ type_name, type_id, ticket_name, pages, major_id, title, time, scal, print_num, checkcard }) => {
+        let sql = `insert into job_tickets_records (${type_name ? "'" + type_name + "'" : null},type_id, ticket_name, pages, major_id, title, time, scal, print_num, checkcard) values (${type_id},'${ticket_name}','${pages}',${major_id},'${title}','${time}',${scal ? "'" + scal + "'" : null}, ${print_num ? print_num : null},${checkcard ? "'" + checkcard + "'" : null})`
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getLastJTRecordId = () => {
@@ -1257,10 +1257,10 @@ class HttpApi {
 
     static creatOrUpdateNewJBTSample = ({ is_create = 1, JBTSampleData, user_id }) => {
         let sql = ''
-        const { type_id, id, title, ticket_name, self_ticket_name, pages, major_id, is_sub, type_name, scal, is_extra, p_id, print_num, status_table, no } = JBTSampleData;
+        const { checkcard, type_id, id, title, ticket_name, self_ticket_name, pages, major_id, is_sub, type_name, scal, is_extra, p_id, print_num, status_table, no } = JBTSampleData;
         if (is_create) {
-            sql = `insert into job_tickets (type_id,title,ticket_name,self_ticket_name,pages,major_id,is_sub,type_name,scal,is_extra,p_id,print_num,status_table,no,user_id) values 
-             (${type_id},'${title}','${ticket_name}','${self_ticket_name}','${JSON.stringify(pages)}',${major_id},${is_sub},${type_name ? "'" + type_name + "'" : null},${scal ? "'" + scal + "'" : null},
+            sql = `insert into job_tickets (checkcard,type_id,title,ticket_name,self_ticket_name,pages,major_id,is_sub,type_name,scal,is_extra,p_id,print_num,status_table,no,user_id) values 
+             (${checkcard ? "'" + checkcard + "'" : null},${type_id},'${title}','${ticket_name}','${self_ticket_name}','${JSON.stringify(pages)}',${major_id},${is_sub},${type_name ? "'" + type_name + "'" : null},${scal ? "'" + scal + "'" : null},
              ${is_extra},${p_id},${print_num},${status_table ? "'" + status_table + "'" : null},${no},${user_id})`
         } else {
             sql = `update job_tickets set self_ticket_name='${self_ticket_name}',pages = '${JSON.stringify(pages)}' where id = ${id}  `
