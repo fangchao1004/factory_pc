@@ -61,9 +61,15 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
         if (selectValue === '1') {
             let { o_step, next_role_id } = after_filter_current_status_data
             step_des = o_step
-            let { target_list, other_list } = await getTargetRoleIdUser(userList, next_role_id)
-            setTargetList(target_list)
-            setOtherList(other_list)
+            if (!next_role_id) {
+                let { majorManagerList, otherList } = await getTargetMajorManagerList({ major_id: record.major_id })
+                setTargetList(majorManagerList) ///当前专业专工
+                setOtherList(otherList)
+            } else {
+                let { target_list, other_list } = await getTargetRoleIdUser(userList, next_role_id)
+                setTargetList(target_list)
+                setOtherList(other_list)
+            }
             if (status_table.wait_over_status === record.status) {
                 setUserSelectAble(false)
             } else if (status_table.wait_over_status > record.status) {
@@ -79,7 +85,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                 console.log('上一状态需要哪些候选人');
                 let { current_role_id } = getRecordCurrentStatusInfo(record, record.status - 1)
                 console.log('current_role_id:', current_role_id);
-                if (JSON.stringify(current_role_id) === '[0]') {
+                if (JSON.stringify(current_role_id) === '[0]' || !current_role_id) {
                     let { majorManagerList, otherList } = await getTargetMajorManagerList({ major_id: record.major_id })
                     setTargetList(majorManagerList) ///当前专业专工
                     setOtherList(otherList)
@@ -354,7 +360,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                             }
                                         })
                                     }}>作废</Button> : null}
-                                {showDeleteBtn && !isAgent ?
+                                {/* {showDeleteBtn && !isAgent ?
                                     <Button type='danger' size='small' icon='delete' style={{ marginTop: 10, marginRight: 10 }} onClick={() => {
                                         confirm({
                                             title: '确认删除当前工作票吗?',
@@ -374,7 +380,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                 resetHandler()
                                             }
                                         })
-                                    }}>删除</Button> : null}
+                                    }}>删除</Button> : null} */}
                                 <Button icon='unordered-list' size='small' type='default' onClick={() => {
                                     // console.log('选择的措施票数据:', item);
                                     setStepLogVisible(true);
@@ -526,7 +532,8 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                                     per_step_user_id: currentUser.id, per_step_user_name: currentUser.name,///下一步 还是打回 上一步处理人都是当前的操作人
                                                     current_step_user_id_list: current_step_user_id_list_temp,///当前处理人id ,0,1,
                                                     history_step_user_id_list: record.history_step_user_id_list + (current_step_user_id_list_temp.length > 1 ? current_step_user_id_list_temp.substring(1) : ''),
-                                                    is_agent: 0
+                                                    is_agent: 0,
+                                                    last_back_user_id: null,///下一步时last_back_user_id置null
                                                 }
                                                 let res2 = await HttpApi.updateJTApplyRecord(newJTAR_data)
                                                 if (res2.data.code === 0) {

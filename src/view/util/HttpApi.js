@@ -1148,7 +1148,7 @@ class HttpApi {
             block_contet_time = `job_content = '${job_content}', time_begin = '${time_begin}', time_end = '${time_end}',`
         }
         let block_last_back_user = ''
-        if (last_back_user_id >= 0) {
+        if (last_back_user_id >= 0 || last_back_user_id === null) {
             block_last_back_user = `last_back_user_id = ${last_back_user_id},`
         }
         let block_status_des = ''

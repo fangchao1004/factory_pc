@@ -1446,7 +1446,7 @@ export async function statusReduce1JBT(JBTObj, currentUser) {
         last_back_user_id: currentUser.id///最近一次的撤回操作人id;防止同一个人多次撤回
     }
     // console.log('newJTAR_data:', newJTAR_data)
-    if (reduced_status > 0) {
+    if (reduced_status >= 0) {
         let res = await HttpApi.updateJTApplyRecord(newJTAR_data)
         if (res.data.code === 0) {
             return { code: 0, message: '撤回成功' }

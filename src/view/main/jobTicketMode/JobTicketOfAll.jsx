@@ -110,7 +110,11 @@ export default function JobTicketOfAll() {
                 return <div>{record.is_read ? null : <Badge status="processing" />}{text}</div>
             }
         },
-        { title: '编号', dataIndex: 'no', key: 'no', width: 170 },
+        {
+            title: '编号', dataIndex: 'no', key: 'no', width: 170, render: (text, record) => {
+                return <div>{text}<br />{record.ticket_name}</div>
+            }
+        },
         { title: '发起时间', dataIndex: 'time', key: 'time', width: 120 },
         { title: '计划开始', dataIndex: 'time_begin', key: 'time_begin', width: 120 },
         { title: '计划结束', dataIndex: 'time_end', key: 'time_end', width: 120 },

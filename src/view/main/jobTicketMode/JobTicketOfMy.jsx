@@ -152,7 +152,7 @@ export default function JobTicketOfMy() {
         },
         {
             title: '编号', dataIndex: 'no', key: 'no', width: 170, render: (text, record) => {
-                return <div>{text}<pr />{record.ticket_name}</div>
+                return <div>{text}<br />{record.ticket_name}</div>
             }
         },
         { title: '发起时间', dataIndex: 'time', key: 'time', width: 120 },
@@ -232,58 +232,79 @@ export default function JobTicketOfMy() {
                     expandIcon={(props) => {
                         let per_user_is_me = props.record.per_step_user_id === currentUser.id///上一次的处理人是不是我
                         let last_back_user_is_me = props.record.last_back_user_id === currentUser.id///最近一次的撤回操作是不是我
+                        let create_user_is_me = props.record.user_id === currentUser.id///是否为创建者
                         let { over_status } = getRecordStatusTable(props.record)
                         let is_over = false
                         if (props.record.status === over_status) { is_over = true }
                         let is_start = props.record.status === 0///创建状态时 状态为0
                         let is_main = props.record.is_sub === 0
-                        let topBack = per_user_is_me && !last_back_user_is_me && !is_over ?
-                            <div key={'x'}>
-                                <Tooltip title={is_start ? '删除' : '撤回'} placement="left">
-                                    <Button size='small' type='link' icon={is_start ? 'delete' : 'rollback'} style={{ color: '#722ed1' }} onClick={() => {
+                        let topBackCpts = null
+                        if (is_start && create_user_is_me) {
+                            topBackCpts = <div key={'x'}>
+                                <Tooltip title={'删除'} placement="left">
+                                    <Button size='small' type='link' icon={'delete'} style={{ color: '#722ed1' }} onClick={async () => {
+                                        ///先检查本地数据与服务端数据是否一致
+                                        let res_status = await checkJBTStatusIsChange(props.record)
+                                        if (res_status.code !== 0) {
+                                            message.error('此工作票的最新状态已经发生变动；当前操作无效，即将为你刷新数据', 3, () => { init() })
+                                            return
+                                        }
                                         confirm({
-                                            title: is_start ? '确认删除此工作票吗?' : '确认撤回你之前的操作吗?',
-                                            content: is_start && is_main ? '其下存在的措施票也将一并删除' : '请自行保证操作的准确性',
+                                            title: '确认删除此工作票吗?',
+                                            content: is_main ? '其下存在的措施票也将一并删除' : '请自行保证操作的准确性',
                                             okText: '确认',
                                             okType: 'danger',
                                             cancelText: '取消',
                                             onOk: async () => {
-                                                ///先检查本地数据与服务端数据是否一致
-                                                let res_status = await checkJBTStatusIsChange(props.record)
-                                                if (res_status.code !== 0) {
-                                                    message.error('当前工作票的最新状态已经发生变动；当前操作无效。已经为你刷新数据', 5)
-                                                    init()
-                                                    return
-                                                }
-                                                if (is_start) { ///删除
-                                                    let res_delete = await deleteMainSubJBT(props.record)
-                                                    if (res_delete.code === 0) { message.success(res_delete.message) } else { message.error(res_delete.message) }
-                                                    init()
-                                                } else {///撤回
-                                                    ///撤回前要检查前一步是否不为撤回、打回、调度
-                                                    const res_log = await HttpApi.getJTStepLogs({ jbtar_id: props.record.id })
-                                                    if (res_log.data.code === 0) {
-                                                        const log_list = res_log.data.data
-                                                        if (log_list[log_list.length - 1].step_des.indexOf('撤回') !== -1) { message.error('上一步为撤回操作；无法再次撤回', 4); return }
-                                                        if (log_list[log_list.length - 1].step_des.indexOf('打回') !== -1) { message.error('上一步为打回操作；无法再次撤回', 4); return }
-                                                        if (log_list[log_list.length - 1].step_des.indexOf('调度') !== -1) { message.error('上一步为调度操作；无法再次撤回', 4); return }
-                                                    }
-                                                    let res_reduce = await statusReduce1JBT(props.record, currentUser)
-                                                    if (res_reduce.code === 0) { message.success(res_reduce.message) } else { message.error(res_reduce.message); return }
-                                                    let obj = {};
-                                                    obj['jbtar_id'] = props.record.id
-                                                    obj['user_id'] = currentUser.id
-                                                    obj['user_name'] = currentUser.name
-                                                    obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
-                                                    obj['step_des'] = '撤回'
-                                                    HttpApi.addJbTStepLog(obj)///添加log
-                                                    init()
-                                                }
+                                                let res_delete = await deleteMainSubJBT(props.record)
+                                                if (res_delete.code === 0) { message.success(res_delete.message, 3, () => { init() }) } else { message.error(res_delete.message) }
                                             }
                                         })
                                     }}></Button>
                                 </Tooltip>
-                            </div> : null
+                            </div>
+                        } else if (!is_start && !is_over && !last_back_user_is_me && per_user_is_me) {
+                            topBackCpts = <div key={'x'}>
+                                <Tooltip title={'撤回'} placement="left">
+                                    <Button size='small' type='link' icon={'rollback'} style={{ color: '#722ed1' }} onClick={async () => {
+                                        ///先检查本地数据与服务端数据是否一致
+                                        let res_status = await checkJBTStatusIsChange(props.record)
+                                        if (res_status.code !== 0) {
+                                            message.error('此工作票的最新状态已经发生变动；当前操作无效，即将为你刷新数据', 3, () => { init() })
+                                            return
+                                        }
+                                        ///撤回
+                                        ///撤回前要检查前一步是否不为撤回、打回、调度
+                                        const res_log = await HttpApi.getJTStepLogs({ jbtar_id: props.record.id })
+                                        if (res_log.data.code === 0) {
+                                            const log_list = res_log.data.data
+                                            if (log_list[log_list.length - 1].step_des.indexOf('撤回') !== -1) { message.error('上一步为撤回操作；无法再次撤回', 3); return }
+                                            if (log_list[log_list.length - 1].step_des.indexOf('打回') !== -1) { message.error('上一步为打回操作；无法再次撤回', 3); return }
+                                            if (log_list[log_list.length - 1].step_des.indexOf('调度') !== -1) { message.error('上一步为调度操作；无法再次撤回', 3); return }
+                                        }
+                                        confirm({
+                                            title: '确认撤回你之前的操作吗?',
+                                            content: '请自行保证操作的准确性',
+                                            okText: '确认',
+                                            okType: 'danger',
+                                            cancelText: '取消',
+                                            onOk: async () => {
+                                                let res_reduce = await statusReduce1JBT(props.record, currentUser)
+                                                if (res_reduce.code === 0) { message.success(res_reduce.message) } else { message.error(res_reduce.message); return }
+                                                let obj = {};
+                                                obj['jbtar_id'] = props.record.id
+                                                obj['user_id'] = currentUser.id
+                                                obj['user_name'] = currentUser.name
+                                                obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
+                                                obj['step_des'] = '撤回'
+                                                HttpApi.addJbTStepLog(obj)///添加log
+                                                init()
+                                            }
+                                        })
+                                    }}></Button>
+                                </Tooltip>
+                            </div>
+                        }
                         let topAdd = props.record.is_sub === 0 && !is_over && (hasFixPer || hasManagerPer) ? ///主票未终结时且有维修或专工权限
                             <div key={'y'}>
                                 <Tooltip title={'新增措施票'} placement="left">
@@ -297,15 +318,15 @@ export default function JobTicketOfMy() {
                             </div> : null
                         if (props.record.sub_tickets && props.record.sub_tickets.length > 0) {
                             let tags = props.record.sub_tickets.map((item, index) => {
-                                return <Tooltip key={index} title={<div>{item.id + ' ' + item.no}<pr />{item.ticket_name}</div>} placement="left">
+                                return <Tooltip key={index} title={<div>{item.id + ' ' + item.no}<br />{item.ticket_name}</div>} placement="left">
                                     <Button icon='tag' size='small' type='link' onClick={() => {
                                         setCurrentSelectRecord(item)
                                         setDrawer2Visible(true)
                                     }} />
                                 </Tooltip>
                             })
-                            return [topBack, topAdd, ...tags]
-                        } else { return [topBack, topAdd] }
+                            return [topBackCpts, topAdd, ...tags]
+                        } else { return [topBackCpts, topAdd] }
                     }}
                     pagination={{
                         total: listLength,
