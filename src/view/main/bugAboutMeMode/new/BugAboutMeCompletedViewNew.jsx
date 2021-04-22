@@ -275,7 +275,12 @@ export default class BugAboutMeCompletedViewNew extends Component {
                 filters: major_filter,
                 onFilter: (value, record) => record.major_id === value,
                 render: (text, record) => {
-                    return <div>{record.major_name}</div>
+                    // return <div dangerouslySetInnerHTML={{ __html: record.major_name }} />
+                    return <div className={'hideText lineClamp5'}>
+                        <Tooltip title={<div dangerouslySetInnerHTML={{ __html: record.major_name }} />}>
+                            <div dangerouslySetInnerHTML={{ __html: record.major_name }} />
+                        </Tooltip>
+                    </div>
                 }
             },
             {

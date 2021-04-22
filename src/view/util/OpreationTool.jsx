@@ -5,17 +5,18 @@ import HttpApi from "./HttpApi";
 import moment from 'moment'
 
 const storage = window.localStorage;
-const localUserInfo = storage.getItem('userinfo');
+var localUserInfo;
 /**
  *消缺流程代码封装
  */
 ////////////////////// 维修人员处理
 export async function exchangeBugMajorByRepair(v, currentRecord, initCallback) {
+    localUserInfo = storage.getItem('userinfo');
     let remark = v.remarkText;
     let bug_id = currentRecord.id;
     let user_id = JSON.parse(localUserInfo).id;
     let major_id = v.selectMajorId;
-    let sql_1 = `INSERT INTO bug_step_log(bug_id,tag_id,major_id,user_id,remark,createdAt) VALUES(${bug_id},1,${major_id},${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+    let sql_1 = `INSERT INTO bug_step_log(bug_id,tag_id,major_id,user_id,remark,createdAt,platform) VALUES(${bug_id},1,${major_id},${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}',1)`
     let res_1 = await HttpApi.obs({ sql: sql_1 })
     if (res_1.data.code === 0) {
         let sql_2 = `update bugs set isread = 0,status = 6,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
@@ -27,11 +28,12 @@ export async function exchangeBugMajorByRepair(v, currentRecord, initCallback) {
     } else { message.error('申请转专业失败') }
 }
 export async function freezeBugStepByRepair(v, currentRecord, initCallback) {
+    localUserInfo = storage.getItem('userinfo');
     let remark = v.remarkText;
     let freeze_id = v.selectFreezeId;
     let bug_id = currentRecord.id;
     let user_id = JSON.parse(localUserInfo).id;
-    let sql_1 = `INSERT INTO bug_step_log(freeze_id,bug_id,tag_id,user_id,remark,createdAt) VALUES(${freeze_id},${bug_id},2,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+    let sql_1 = `INSERT INTO bug_step_log(freeze_id,bug_id,tag_id,user_id,remark,createdAt,platform) VALUES(${freeze_id},${bug_id},2,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}',1)`
     let res_1 = await HttpApi.obs({ sql: sql_1 })
     if (res_1.data.code === 0) {
         let sql_2 = `update bugs set isread = 0,status = 7,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
@@ -43,10 +45,11 @@ export async function freezeBugStepByRepair(v, currentRecord, initCallback) {
     } else { message.error('申请挂起失败') }
 }
 export async function fixCompleteByRepair(v, currentRecord, initCallback) {
+    localUserInfo = storage.getItem('userinfo');
     let remark = v.remarkText;
     let bug_id = currentRecord.id;
     let user_id = JSON.parse(localUserInfo).id;
-    let sql_1 = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt) VALUES(${bug_id},4,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+    let sql_1 = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt,platform) VALUES(${bug_id},4,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}',1)`
     let res_1 = await HttpApi.obs({ sql: sql_1 })
     if (res_1.data.code === 0) {
         let sql_2 = `update bugs set isread = 0,status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
@@ -58,10 +61,11 @@ export async function fixCompleteByRepair(v, currentRecord, initCallback) {
     } else { message.error('操作失败') }
 }
 export async function dontNeedfixByRepair(v, currentRecord, initCallback) {
+    localUserInfo = storage.getItem('userinfo');
     let remark = v.remarkText;
     let bug_id = currentRecord.id;
     let user_id = JSON.parse(localUserInfo).id;
-    let sql_1 = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},16,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+    let sql_1 = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt,platform) VALUES (${bug_id},16,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}',1)`
     let res_1 = await HttpApi.obs({ sql: sql_1 })
     if (res_1.data.code === 0) {
         let sql_2 = `update bugs set isread = 0,status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
@@ -74,10 +78,11 @@ export async function dontNeedfixByRepair(v, currentRecord, initCallback) {
 }
 /////////////// 运行处理
 export async function completeByRunner(v, currentRecord, initCallback) {
+    localUserInfo = storage.getItem('userinfo');
     let remark = v.remarkText;
     let bug_id = currentRecord.id;
     let user_id = JSON.parse(localUserInfo).id;
-    let sql_1 = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt) VALUES(${bug_id},6,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+    let sql_1 = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt,platform) VALUES(${bug_id},6,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}',1)`
     let res_1 = await HttpApi.obs({ sql: sql_1 })
     if (res_1.data.code === 0) {
         let sql_2 = `update bugs set status = 4,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
@@ -89,10 +94,11 @@ export async function completeByRunner(v, currentRecord, initCallback) {
     } else { message.error('运行验收操作失败') }
 }
 export async function goBackEngineerByRunner(v, currentRecord, initCallback) {
+    localUserInfo = storage.getItem('userinfo');
     let remark = v.remarkText;
     let bug_id = currentRecord.id;
     let user_id = JSON.parse(localUserInfo).id;
-    let sql_1 = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt) VALUES(${bug_id},8,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+    let sql_1 = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt,platform) VALUES(${bug_id},8,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}',1)`
     let res_1 = await HttpApi.obs({ sql: sql_1 })
     if (res_1.data.code === 0) {
         let sql_2 = `update bugs set isread = 0,status = 2,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
@@ -103,11 +109,12 @@ export async function goBackEngineerByRunner(v, currentRecord, initCallback) {
 
 ////////////////////// 专工处理
 export async function exchangeBugMajorByEngineer(v, currentRecord, initCallback) {
+    localUserInfo = storage.getItem('userinfo');
     let remark = v.remarkText;
     let bug_id = currentRecord.id;
     let user_id = JSON.parse(localUserInfo).id;
     let major_id = v.selectMajorId;
-    let sql_1 = `INSERT INTO bug_step_log(bug_id,tag_id,major_id,user_id,remark,createdAt) VALUES(${bug_id},3,${major_id},${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+    let sql_1 = `INSERT INTO bug_step_log(bug_id,tag_id,major_id,user_id,remark,createdAt,platform) VALUES(${bug_id},3,${major_id},${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}',1)`
     let res_1 = await HttpApi.obs({ sql: sql_1 })
     if (res_1.data.code === 0) {
         let sql_2 = `update bugs set isread = 0,major_id = ${major_id},status = 0,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
@@ -116,11 +123,12 @@ export async function exchangeBugMajorByEngineer(v, currentRecord, initCallback)
     }
 }
 export async function freezeBugStepByEngineer(v, currentRecord, initCallback) {
+    localUserInfo = storage.getItem('userinfo');
     let remark = v.remarkText;
     let bug_id = currentRecord.id;
     let user_id = JSON.parse(localUserInfo).id;
     let freeze_id = v.selectFreezeId;
-    let sql_1 = `INSERT INTO bug_step_log(freeze_id,bug_id,tag_id,user_id,remark,createdAt) VALUES(${freeze_id},${bug_id},15,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+    let sql_1 = `INSERT INTO bug_step_log(freeze_id,bug_id,tag_id,user_id,remark,createdAt,platform) VALUES(${freeze_id},${bug_id},15,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}',1)`
     let res_1 = await HttpApi.obs({ sql: sql_1 })
     if (res_1.data.code === 0) {
         let sql_2 = `update bugs set isread = 0,status = 5,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
@@ -129,10 +137,11 @@ export async function freezeBugStepByEngineer(v, currentRecord, initCallback) {
     } else { message.error('挂起失败') }
 }
 export async function goBackStartByEngineer(v, currentRecord, initCallback) {
+    localUserInfo = storage.getItem('userinfo');
     let remark = v.remarkText;
     let bug_id = currentRecord.id;
     let user_id = JSON.parse(localUserInfo).id;
-    let sql_1 = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt) VALUES(${bug_id},9,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+    let sql_1 = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt,platform) VALUES(${bug_id},9,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}',1)`
     let res_1 = await HttpApi.obs({ sql: sql_1 })
     if (res_1.data.code === 0) {
         let sql_2 = `update bugs set isread = 0,status = 0,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
@@ -141,10 +150,12 @@ export async function goBackStartByEngineer(v, currentRecord, initCallback) {
     } else { message.error('恢复维修流程失败') }
 }
 export async function completeByEngineer(v, currentRecord, initCallback) {
+    localUserInfo = storage.getItem('userinfo');
     let remark = v.remarkText;
     let bug_id = currentRecord.id;
     let user_id = JSON.parse(localUserInfo).id;
-    let sql_1 = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt) VALUES(${bug_id},5,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+    let sql_1 = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt,platform) VALUES(${bug_id},5,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}',1)`
+    console.log('sql_1:', sql_1)
     let res_1 = await HttpApi.obs({ sql: sql_1 })
     if (res_1.data.code === 0) {
         let sql_2 = `update bugs set isread = 0,status = 3,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
@@ -153,10 +164,11 @@ export async function completeByEngineer(v, currentRecord, initCallback) {
     } else { message.error('专工验收操作失败') }
 }
 export async function goBackFixByEngineer(v, currentRecord, initCallback) {
+    localUserInfo = storage.getItem('userinfo');
     let remark = v.remarkText;
     let bug_id = currentRecord.id;
     let user_id = JSON.parse(localUserInfo).id;
-    let sql_1 = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt) VALUES(${bug_id},7,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+    let sql_1 = `INSERT INTO bug_step_log(bug_id,tag_id,user_id,remark,createdAt,platform) VALUES(${bug_id},7,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}',1)`
     let res_1 = await HttpApi.obs({ sql: sql_1 })
     if (res_1.data.code === 0) {
         let sql_2 = `update bugs set isread = 0,status = 1,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id} `;
@@ -165,11 +177,12 @@ export async function goBackFixByEngineer(v, currentRecord, initCallback) {
     } else { message.error('专工打回操作失败') }
 }
 export async function passByEngineer(v, currentRecord, initCallback) {
+    localUserInfo = storage.getItem('userinfo');
     let remark = v.remarkText;
     let bug_id = currentRecord.id;
     let user_id = JSON.parse(localUserInfo).id;
 
-    let sql_1 = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt) VALUES (${bug_id},17,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}')`
+    let sql_1 = `INSERT INTO bug_step_log (bug_id,tag_id,user_id,remark,createdAt,platform) VALUES (${bug_id},17,${user_id},'${remark}','${moment().format('YYYY-MM-DD HH:mm:ss')}',1)`
     let res_1 = await HttpApi.obs({ sql: sql_1 })
     if (res_1.data.code === 0) {
         let sql_2 = `update bugs set isread = 0,status = 3,last_status_time='${moment().format('YYYY-MM-DD HH:mm:ss')}' where id = ${bug_id}`;
@@ -180,6 +193,7 @@ export async function passByEngineer(v, currentRecord, initCallback) {
 
 ////改变包含了这个bug_id 的record 再数据库中的值。 isDelete 是否为 删除缺陷的操作
 export async function changeRecordData(bugId, isDelete = false) {
+    localUserInfo = storage.getItem('userinfo');
     // console.log('changeRecordData')
     // let bugId = this.state.currentRecord.id;
     ///1，要根据bug_id 去bugs表中去查询该条数据，获取其中的 device_id 字段信息
