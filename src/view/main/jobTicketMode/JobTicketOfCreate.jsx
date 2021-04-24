@@ -42,8 +42,7 @@ export default function JobTicketOfCreate() {
                 // tempObj.pages = testData
                 setCurrentJobTicketValue(tempObj)
                 setIsLoading(false)
-                let currentJBT_id = tempObj.id;
-                let res_extra = await HttpApi.getExtraJobTicketsList({ p_id: currentJBT_id })
+                let res_extra = await HttpApi.getExtraJobTicketsList({ p_id: tempObj.type_id })
                 if (res_extra.data.code === 0 && res_extra.data.data.length > 0) {
                     let pages_extra = JSON.parse(res_extra.data.data[0].pages)
                     // console.log(pages_extra);///额外的附页

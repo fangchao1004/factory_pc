@@ -77,14 +77,14 @@ export default props => {
                 <Descriptions.Item label="财务">{permisstionWithDes[3].des}</Descriptions.Item>
             </Descriptions>
         </div>
-        {/* <div style={styles.body}>
+        <div style={styles.body}>
             <Table
                 size='small'
                 columns={columns}
                 dataSource={selfJBTList}
                 pagination={false}
             />
-        </div> */}
+        </div>
         <UpdatePasswordView visible={passwordVIsible} onCancel={() => { setPasswordVIsible(false) }} />
     </div>
 }

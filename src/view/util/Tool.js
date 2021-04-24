@@ -1125,6 +1125,26 @@ export function getJTRecordContentAndPlanTime({ pages }) {
     return { job_content, time_list }
 }
 
+function mapDepartmentTeamValueToExtra(pages) {
+    let department_value = ''
+    let team_value = ''
+    pages.forEach((page) => {
+        const cpts = page.components
+        cpts.forEach((cpt) => {
+            if (cpt.is_department) {
+                department_value = cpt.attribute.value
+            } else if (cpt.is_team) {
+                team_value = cpt.attribute.value
+            } else if (cpt.is_extra_department && department_value) {
+                cpt.attribute.value = department_value
+            } else if (cpt.is_extra_team && team_value) {
+                cpt.attribute.value = team_value
+            }
+        })
+    })
+    return pages
+}
+
 /**
  * 
  * @param {*} jobTicketValue 工作票数据
@@ -1138,7 +1158,9 @@ export async function createNewJobTicketApply(jobTicketValue, user_list_str, p_n
     if (p_no) {
         jobTicketValue.pages = changePNoInputValue({ p_no, pages: jobTicketValue.pages })
     }
-    jobTicketValue.pages = JSON.stringify(jobTicketValue.pages)
+    let new_jbt_pages = mapDepartmentTeamValueToExtra(jobTicketValue.pages)
+    jobTicketValue.pages = JSON.stringify(new_jbt_pages)
+    // return
     let { job_content, time_list } = getJTRecordContentAndPlanTime({ pages: jobTicketValue.pages })
     let res = await HttpApi.createJTRecord({ ...jobTicketValue, time: moment().format(FORMAT) })
     if (res.data.code === 0) {

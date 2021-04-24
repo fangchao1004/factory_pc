@@ -1,7 +1,7 @@
 import Axios from 'axios'
 import moment from 'moment';
 
-export const Testuri = 'http://ixiaomu.cn:3008/'///小木服务器数据库 3008正式 3010测试
+export const Testuri = 'http://ixiaomu.cn:3010/'///小木服务器数据库 3008正式 3010测试
 const TesturiM = 'http://ixiaomu.cn:3099/'
 // export const Testuri = 'http://localhost:3008/' ///本地服务器测试用
 // export const Testuri = 'http://localhost:2019/'///本地服务器测试用 socket.io 服务测试
