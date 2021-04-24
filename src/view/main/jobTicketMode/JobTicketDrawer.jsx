@@ -1,4 +1,4 @@
-import { Button, Drawer, Select, message, Modal, Affix, Tag, Input, Spin, Alert, Radio } from 'antd'
+import { Button, Drawer, Select, message, Modal, Affix, Tag, Input, Spin, Alert, Radio, InputNumber } from 'antd'
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
@@ -572,7 +572,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                             },
                                         });
                                     }}>{takeTicketAndPrint ? '提交打印' : '确定提交'}</Button>
-                                    {takeTicketAndPrint ? <> <span>打印份数</span> <Input style={{ width: 85 }} ref={print_num_ref} size='small' defaultValue={defaultPrintNum} /></> : null}
+                                    {takeTicketAndPrint ? <> <span>打印份数</span> <InputNumber style={{ width: 85 }} ref={print_num_ref} size='small' defaultValue={defaultPrintNum} /></> : null}
                                 </div>
                             </div>
                         </Affix>
