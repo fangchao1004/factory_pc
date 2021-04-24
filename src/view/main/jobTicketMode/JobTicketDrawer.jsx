@@ -572,7 +572,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                             },
                                         });
                                     }}>{takeTicketAndPrint ? '提交打印' : '确定提交'}</Button>
-                                    {takeTicketAndPrint ? <> <span>打印份数</span> <InputNumber style={{ width: 85 }} ref={print_num_ref} size='small' defaultValue={defaultPrintNum} /></> : null}
+                                    {takeTicketAndPrint ? <> <span>打印份数</span> <InputNumber min={1} style={{ width: 85 }} ref={print_num_ref} size='small' defaultValue={defaultPrintNum} /></> : null}
                                 </div>
                             </div>
                         </Affix>
