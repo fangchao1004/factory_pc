@@ -4,16 +4,15 @@ import bg from '../../assets/bg_old.jpg';
 
 export default props => {
     return <div style={styles.root}>
-    <div style={styles.allcontentview}>
-        <div style={styles.bartitle}>中节能（合肥）信息综合管理平台</div>
-        <div style={styles.bgview}>
-            <div>
-                <LoginPanel {...props}/>
+        <div style={styles.allcontentview}>
+            <div style={styles.bartitle}>中节能（合肥）信息综合管理平台</div>
+            <div style={styles.bgview}>
+                <div>
+                    <LoginPanel {...props} />
+                </div>
             </div>
         </div>
     </div>
-
-</div>
 }
 const styles = {
     root: {

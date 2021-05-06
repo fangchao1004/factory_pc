@@ -24,7 +24,7 @@ export default props => {
     }, [])
     useEffect(() => { init() }, [init])
     const columns = [
-        { title: '模版名称', dataIndex: 'self_ticket_name', key: 'self_ticket_name' },
+        { title: '个人典型票', dataIndex: 'self_ticket_name', key: 'self_ticket_name' },
         {
             title: '操作', dataIndex: 'action', key: 'action', width: 100, render: (_, record) => {
                 return <Button icon={'delete'} type='danger' size='small' onClick={() => {
