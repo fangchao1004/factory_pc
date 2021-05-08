@@ -306,11 +306,18 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
     useEffect(() => {
         if (window.electron) {
             console.log('添加监听');
+            var hide;
             window.electron.ipcRenderer.on('message', (_, arg) => {
                 console.log('监听回调')
-                if (arg === 'printStart') { message.info('开始打印') }
-                else if (arg === 'printSuccess') { message.success('打印成功'); setPrinting(false) }
-                else { message.error('打印失败'); setPrinting(false) }
+                if (arg === 'printStart') {
+                    hide = message.loading('正在打印...', 0);
+                } else if (arg === 'printSuccess') {
+                    hide()
+                    message.success('打印成功', 10); setPrinting(false)
+                } else {
+                    hide()
+                    message.error('打印失败', 10); setPrinting(false)
+                }
             })
         }
         return () => {
