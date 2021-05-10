@@ -1,7 +1,7 @@
 import React, { useReducer } from 'react'
 
 const initialState = {
-    version: 'v1.5.7',
+    version: 'v1.5.7.1',
     unreadBugCount: 0,
     unreadWarnCount: 0,
     aboutMeBugCount: 0,
@@ -9,7 +9,7 @@ const initialState = {
     heightLightBugId: 0,
     aboutMeTaskList: [],
     allAboutMeBugList: [],///所有与我相关的缺陷【专业相关+运行处理(如果有运行权限的话)去重复】
-    currentJBTCount:0,
+    currentJBTCount: 0,
 }
 function reducer(state, action) {
     switch (action.type) {
