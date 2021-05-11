@@ -1153,12 +1153,13 @@ function mapDepartmentTeamValueToExtra(pages) {
  */
 export async function createNewJobTicketApply(jobTicketValue, user_list_str, p_no = '') {
     let auto_no = await getAutoJTARecordNo(jobTicketValue)
-    console.log('auto_no:', auto_no)
+    // console.log('auto_no:', auto_no)
     jobTicketValue.pages = changeNoInputValue({ auto_no, pages: jobTicketValue.pages })
     if (p_no) {
         jobTicketValue.pages = changePNoInputValue({ p_no, pages: jobTicketValue.pages })
     }
     let new_jbt_pages = mapDepartmentTeamValueToExtra(jobTicketValue.pages)
+    // console.log('new_jbt_pages:', new_jbt_pages)
     jobTicketValue.pages = JSON.stringify(new_jbt_pages)
     // return
     let { job_content, time_list } = getJTRecordContentAndPlanTime({ pages: jobTicketValue.pages })
