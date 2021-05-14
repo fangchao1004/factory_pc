@@ -960,9 +960,9 @@ class HttpApi {
         where bug_step_log.effective = 1 and bug_step_log.bug_id = ${bugId}`
         return Axios.post(Testuri + 'obs', { sql })
     }
-    static getJobTicketsOptionList = ({ is_sub, user_id }) => {
+    static getJobTicketsOptionList = ({ is_sub, user_id, is_create = false }) => {
         let is_sub_str = is_sub.join(',')
-        let sql = `select * from job_tickets where is_delete = 0 and is_sub in (${is_sub_str}) and (user_id is null or user_id = ${user_id}) and is_extra = 0 order by type_name,no`
+        let sql = `select * from job_tickets where is_delete = 0 and is_sub in (${is_sub_str}) and (user_id is null or user_id = ${user_id}) and is_extra = 0 order by ${is_create ? 'id' : 'type_name,no'} `
         return Axios.post(Testuri + 'obs', { sql })
     }
     static getJobTicketsList = ({ id }) => {
