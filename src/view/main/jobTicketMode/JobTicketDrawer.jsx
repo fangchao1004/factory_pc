@@ -30,7 +30,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
 
     const [actionSelectAble, setActionSelectAble] = useState(true)///处理选项是否可以操作
     const [userSelectAble, setUserSelectAble] = useState(true)///人员项是否可以操作
-    const [showDeleteBtn, setShowDeleteBtn] = useState(false)///是否显示删除按钮
+    // const [showDeleteBtn, setShowDeleteBtn] = useState(false)///是否显示删除按钮
     const [showStopBtn, setShowStopBtn] = useState(false)///是否显示终止作废按钮
     const [showBackOption, setShowBackOption] = useState(false)///是否显示打回按钮
     const [takeTicketAndPrint, setTakeTicketAndPrint] = useState(false)///是否接票并且打印
@@ -132,7 +132,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
         }
         if (record_current_status > 0 && record_current_status < status_table.over_status) {
             if (record_current_status === 1 && currentUser.id === record.user_id) {///如果用户是创建者，那么可以删除
-                setShowDeleteBtn(true)///展示删除按钮
+                // setShowDeleteBtn(true)///展示删除按钮
             }
             setShowBackOption(true)///是否可选打回选择项
             setShowStopBtn(true)///是否显示作废按钮
@@ -144,7 +144,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
         if (record && record.job_t_r_id) {
             ///初始化
             setTakeTicketAndPrint(false)///是否显示【提交打印】
-            setShowDeleteBtn(false)///是否展示删除按钮
+            // setShowDeleteBtn(false)///是否展示删除按钮
             setShowStopBtn(false)///是否显示作废按钮
             setShowBackOption(false)///是否可选打回选择项
             setActionSelectAble(true)///是否可选操作选择项

@@ -98,4 +98,5 @@ export const VersionlistData = [
     // { title: '更新', description: '1.5.5 beta 工作台添加相关缺陷操作列表，修复缺陷模块超时不标红的问题' }
     // { title: '更新', description: '1.5.6 功能整合' }
     // { title: '更新', description: '1.5.7 工作票功能搭建' }
+    // { title: '更新', description: 'v1.5.7.2-HF 角色管理内，人员姓名的排序，按照姓氏的拼音首字母排序,角色管理内增加快速搜索' }
 ]

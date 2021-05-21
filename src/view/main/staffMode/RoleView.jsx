@@ -1,17 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import HttpApi from '../../util/HttpApi'
-import { Row, Col, Table, List, Avatar, Tag, Alert, Switch, message } from 'antd'
+import { Row, Col, Table, List, Avatar, Tag, Alert, Switch, message, Input } from 'antd'
 
-function sortByLevel(list) {
-    let copyList = JSON.parse(JSON.stringify(list))
-    return copyList.sort((a, b) => { return a.level_id - b.level_id });
-}
-export default props => {
+// function sortByLevel(list) {
+//     let copyList = JSON.parse(JSON.stringify(list))
+//     return copyList.sort((a, b) => { return a.level_id - b.level_id });
+// }
+var originList = []
+export default (_) => {
     const [roleList, setRoleList] = useState([])
     const [userList, setUserList] = useState([])
     const [selectRoleIndex, setSelectRoleIndex] = useState(0)///默认选中的是index===0 即 专工
     const [levelOptions, setLevelOptions] = useState([])
     const [loading, setLoading] = useState(false)
+    const [searchInputValue, setSearchInputValue] = useState('')
     const getLevelList = useCallback(async () => {
         let result = await HttpApi.getUserLevel({ effective: 1 })
         if (result.data.code === 0) {
@@ -32,18 +34,19 @@ export default props => {
         }
     }, [setRoleList])
     const getUserList = useCallback(async (whoHasList) => {
+        originList.length = 0
         let sql = `select users.*,levels.name as level_name,group_concat(roles.value) as role_value_all,group_concat(roles.des) as role_des_all from users
         left join (select * from role_map_user where effective = 1) role_map_user on role_map_user.user_id = users.id
         left join roles on roles.id = role_map_user.role_id
         left join (select id,name from levels where effective = 1) levels on levels.id = users.level_id
         where users.effective = 1
-        group by users.id order by users.level_id`
+        group by users.id order by CONVERT(users.name USING gbk)`
         let result = await HttpApi.obs({ sql })
         if (result.data.code === 0) {
             let list = result.data.data;
             let tempListhasRole = [];
             let tempListWithoutRole = [];
-            list.forEach((item, index) => {
+            list.forEach((item, _) => {
                 if (whoHasList.indexOf(item.id) !== -1) {
                     item.hasCurrentRole = true;
                     tempListhasRole.push(item)
@@ -52,10 +55,10 @@ export default props => {
                     tempListWithoutRole.push(item)
                 }
             })
-            let tempListHasRole_af = sortByLevel(tempListhasRole)
-            let tempListWithoutRole_af = sortByLevel(tempListWithoutRole)
-            let tempList = [...tempListHasRole_af, ...tempListWithoutRole_af];
-            setUserList(tempList.map((item, index) => { item.key = index; return item }))
+            // let tempListHasRole_af = sortByLevel(tempListhasRole)
+            // let tempListWithoutRole_af = sortByLevel(tempListWithoutRole)
+            originList = [...tempListhasRole, ...tempListWithoutRole];
+            setUserList(originList.map((item, index) => { item.key = index; return item }))
         }
     }, [])
     ///当前选中的角色 有哪些人已经获取了
@@ -76,7 +79,7 @@ export default props => {
     const addNewRoleToMap = useCallback(async (user_id, role_id) => {
         setLoading(true)
         let sql = `insert into role_map_user (user_id,role_id) VALUES (${user_id},${role_id})`
-        console.log('sql:', sql)
+        // console.log('sql:', sql)
         let result = await HttpApi.obs({ sql })
         if (result.data.code === 0) {
             message.success('开启成功')
@@ -103,6 +106,7 @@ export default props => {
     useEffect(() => {
         getOneRoleWhoIsHas();
     }, [getOneRoleWhoIsHas])
+
     const columns = [
         {
             title: '操作', width: 100, dataIndex: 'hasCurrentRole', key: 'hasCurrentRole', render: (text, record) => {
@@ -112,6 +116,7 @@ export default props => {
                     } else {
                         closeOneUserRole(record.id, roleList[selectRoleIndex].id)
                     }
+                    setSearchInputValue('')
                 }} />
             }
         },
@@ -125,7 +130,24 @@ export default props => {
         },
         { title: '已开启角色', dataIndex: 'role_des_all', key: 'des', render: (text) => { return text || '-' } }]
     return <div style={styles.root}>
-        <Alert style={{ marginBottom: 10 }} message={'点击选择左侧角色列表项；再为人员设置开启或关闭对应属性'} />
+        <Row gutter={10}>
+            <Col span={18}><Alert showIcon type="info" style={{ marginBottom: 10 }} message={'点击选择左侧角色列表项；再为人员设置开启或关闭对应属性'} /></Col>
+            <Col span={6}><Input.Search value={searchInputValue} placeholder="姓名筛选" allowClear
+                onSearch={(value) => {
+                    if (value.length === 0) {
+                        setUserList(originList.map((item, index) => { item.key = index; return item }))
+                    } else {
+                        let result_after_filter = originList.filter((item) => { return item.name && item.name.indexOf(value) !== -1 })
+                        setUserList(result_after_filter)
+                    }
+                }}
+                onChange={(e) => {
+                    setSearchInputValue(e.target.value)
+                    if (e.target.value.length === 0) { setUserList(originList.map((item, index) => { item.key = index; return item })) }
+                }}
+                enterButton />
+            </Col>
+        </Row>
         <Row gutter={10}>
             <Col span={6}>
                 <div style={styles.list}>

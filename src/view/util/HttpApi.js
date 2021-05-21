@@ -1,21 +1,27 @@
 import Axios from 'axios'
 import moment from 'moment';
 
-export const Testuri = 'http://ixiaomu.cn:3010/'///小木服务器数据库 3008正式 3010测试
-const TesturiM = 'http://ixiaomu.cn:3099/'
-// export const Testuri = 'http://localhost:3008/' ///本地服务器测试用
-// export const Testuri = 'http://localhost:2019/'///本地服务器测试用 socket.io 服务测试
-export const environmentIsTest = Testuri === 'http://ixiaomu.cn:3010/' ///是不是测试环境
+/// 小木服务器数-小木数据库
+// export const Testuri = 'http://ixiaomu.cn:3010/'///小木服务器数据库 3008正式 3010测试
+// export const environmentIsTest = Testuri === 'http://ixiaomu.cn:3010/' ///是不是测试环境
+
+/// 60-60数据库
+export const Testuri = 'http://60.174.196.158:3008/'///小木服务器数据库 3008正式 3010测试
+export const environmentIsTest = Testuri === 'http://60.174.196.158:3010/' ///是不是测试环境
+
+// const TesturiM = 'http://ixiaomu.cn:3099/'/// 小木服务器 monitor_api 地址
+const TesturiM = 'http://60.174.196.158:3099/'///60-60数据库
 
 export const TesturiForss = 'http://ixiaomu.cn:3007/' ///小木服务器数据库 sql server 服务独立地址 消费机
-// export const TesturiForss = 'http://localhost:3007/'///本地服务器测试用 sql server 服务独立地址 消费机
-// export const TesturiForss = 'http://192.168.3.171:3007/'///本地服务器测试用 sql server 服务独立地址 消费机
+// export const TesturiForss = 'http://60.174.196.158:3007/'///60-60数据库
 
 export const TesturiForcar = 'http://ixiaomu.cn:3006/' ///小木服务器数据库 mysql server 服务独立地址 车辆信息
-// export const TesturiForcar = 'http://localhost:3006/'///本地服务器测试用
+// export const TesturiForcar = 'http://60.174.196.158:3006/'///60-60数据库
 
-export const TesturiForks = 'http://ixiaomu.cn:3005/' ///小木服务器数据库 mysql server 服务独立地址 考勤信息
-export const TesturiForAccess = 'http://60.174.196.158:3004/' ///60服务器数据库 mysql server 服务独立地址 门禁信息
+// export const TesturiForks = 'http://ixiaomu.cn:3005/' ///小木服务器数据库 mysql server 服务独立地址 考勤信息
+export const TesturiForks = 'http://60.174.196.158:3005/' ///60-60数据库
+
+export const TesturiForAccess = 'http://60.174.196.158:3004/' ///60服务器-60数据库 mysql server 服务独立地址 门禁信息
 class HttpApi {
     static verify(params) {
         return Axios.post(Testuri + 'verify', params)
