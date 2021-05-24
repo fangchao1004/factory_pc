@@ -82,10 +82,21 @@ export default props => {
         console.log('初始化')
         if (JSON.parse(localUserInfo).major_id_all) {
             let res_bug_list = await HttpApi.getBugListAboutMe(JSON.parse(localUserInfo).major_id_all)///从数据库中获取最新的bugs数据
-            if (res_bug_list.data.code === 0) {
+            let res2 = await HttpApi.getFreezeStatusList()
+            if (res_bug_list.data.code === 0 && res2.data.code === 0) {
                 let bug_list = res_bug_list.data.data
+                let bug_freeze_list = res2.data.data
+                bug_list.forEach((bugItem) => {
+                    bug_freeze_list.forEach((freezeItem) => {
+                        if (bugItem.id === freezeItem.bug_id) {
+                            bugItem.bug_freeze_id = freezeItem.freeze_id
+                            bugItem.bug_freeze_des = freezeItem.freeze_des
+                            bugItem.bug_step_major_id = freezeItem.major_id
+                            bugItem.bug_step_tag_id = freezeItem.tag_id
+                        }
+                    })
+                })
                 bug_list = bug_list.map((item) => { item.key = item.id; return item })
-                // console.log('bug_list:', bug_list)
                 originalData = bug_list;
                 autoFixHandler(bug_list);
                 setBugList(bug_list);
