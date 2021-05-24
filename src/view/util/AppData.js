@@ -100,4 +100,5 @@ export const VersionlistData = [
     // { title: '更新', description: '1.5.7 工作票功能搭建' }
     // { title: '更新', description: 'v1.5.7.2-HF 角色管理内，人员姓名的排序，按照姓氏的拼音首字母排序,角色管理内增加快速搜索' }
     // { title: '更新', description: 'v1.5.7.3-HF 与我相关缺陷模版卡顿修改' }
+    // { title: '更新', description: 'v1.5.7.4-HF 员工信息模块增加名称筛选功能；后台修改接口查询条件更新，失败的反馈信息修改' }
 ]

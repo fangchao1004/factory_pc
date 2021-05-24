@@ -132,7 +132,7 @@ export default (_) => {
     return <div style={styles.root}>
         <Row gutter={10}>
             <Col span={18}><Alert showIcon type="info" style={{ marginBottom: 10 }} message={'点击选择左侧角色列表项；再为人员设置开启或关闭对应属性'} /></Col>
-            <Col span={6}><Input.Search value={searchInputValue} placeholder="姓名筛选" allowClear
+            <Col span={6}><Input.Search size='small' style={{ marginTop: 10 }} value={searchInputValue} placeholder="姓名筛选-支持模糊查询" allowClear
                 onSearch={(value) => {
                     if (value.length === 0) {
                         setUserList(originList.map((item, index) => { item.key = index; return item }))

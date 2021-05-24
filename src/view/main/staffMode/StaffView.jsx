@@ -1,8 +1,10 @@
-import { Button, Divider, message, Popconfirm, Table, Tooltip } from 'antd';
+import { Button, Col, Divider, Input, message, Popconfirm, Row, Table, Tooltip } from 'antd';
 import React, { useEffect, useState, useCallback } from 'react';
 import HttpApi from '../../util/HttpApi';
 import AddStaffView from './AddStaffView';
 import UpdateStaffView from './UpdateStaffView';
+
+var originList = []
 export default () => {
   const [loading, setLoading] = useState(false)
   const [useList, setUserList] = useState([])
@@ -10,6 +12,7 @@ export default () => {
   const [showUpdate, setShowUpdate] = useState(false)
   const [selectUser, setSelectUser] = useState({})
   const [showAdd, setShowAdd] = useState(false)
+  const [searchInputValue, setSearchInputValue] = useState('')
 
   const getLevelList = useCallback(async () => {
     let result = await HttpApi.getUserLevel({ effective: 1 })
@@ -23,6 +26,7 @@ export default () => {
     }
   }, [])
   const getUserList = useCallback(async () => {
+    originList.length = 0
     setLoading(true)
     // let sql = `select users.*,levels.name as level_name,group_concat(roles.value) as role_value_all,group_concat(roles.des) as role_des_all from users
     // left join (select * from role_map_user where effective = 1) role_map_user on role_map_user.user_id = users.id
@@ -39,10 +43,11 @@ export default () => {
                 group by users.id order by users.level_id) temp1
                 left join (select * from user_map_major where effective = 1) u_m_j on u_m_j.user_id = temp1.id
                 left join (select * from majors  where effective = 1) majors on majors.id = u_m_j.mj_id
-                 group by temp1.id order by temp1.level_id `
+                 group by temp1.id order by CONVERT(temp1.name USING gbk)`
     let result = await HttpApi.obs({ sql })
     if (result.data.code === 0) {
       let list = result.data.data;
+      originList = list.map((item, index) => { item.key = index; return item })
       setUserList(list.map((item, index) => { item.key = index; return item }))
     }
     setLoading(false)
@@ -182,9 +187,28 @@ export default () => {
     }
   }]
   return <div style={styles.root}>
-    <Button style={styles.button} icon='plus' size='small' type='primary' onClick={() => {
-      setShowAdd(true)
-    }}>添加人员</Button>
+    <Row>
+      <Col span={18}>
+        <Button style={styles.button} icon='plus' size='small' type='primary' onClick={() => {
+          setShowAdd(true)
+        }}>添加人员</Button>
+      </Col>
+      <Col span={6}><Input.Search size='small' value={searchInputValue} placeholder="姓名筛选-支持模糊查询" allowClear
+        onSearch={(value) => {
+          if (value.length === 0) {
+            setUserList(originList.map((item, index) => { item.key = index; return item }))
+          } else {
+            let result_after_filter = originList.filter((item) => { return item.name && item.name.indexOf(value) !== -1 })
+            setUserList(result_after_filter)
+          }
+        }}
+        onChange={(e) => {
+          setSearchInputValue(e.target.value)
+          if (e.target.value.length === 0) { setUserList(originList.map((item, index) => { item.key = index; return item })) }
+        }}
+        enterButton />
+      </Col>
+    </Row>
     <Table loading={loading} bordered size='small' columns={columns} dataSource={useList} pagination={false} />
     <UpdateStaffView staff={selectUser} onOk={(params) => { setShowUpdate(false); updateStaffOnOk(params) }}
       onCancel={() => { setShowUpdate(false) }} visible={showUpdate} />
