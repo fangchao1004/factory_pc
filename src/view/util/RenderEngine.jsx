@@ -24,10 +24,18 @@ export function RenderEngine({ isAgent, jsonlist, userList, currentUser, current
       }
       switch (item.type) {
         case 'input':
+          let maxLengthStr = '10'
+          try {
+            maxLengthStr = String(parseInt(item.attribute.style.width / item.attribute.style.fontSize))
+            console.log('字符maxLength:', item.attribute.name, ':', maxLengthStr)
+          } catch (error) {
+            console.log('input error:', item.attribute.name, error)
+          }
           return (
             <input
               key={index}
               {...item.attribute}
+              maxLength={maxLengthStr}
               style={{ ...item.attribute.style, borderStyle: item.attribute.isempty ? 'solid' : 'none', borderWidth: 1, borderColor: 'red' }}
               onChange={e => {
                 changeComponetsValue(index, e.target.value)
