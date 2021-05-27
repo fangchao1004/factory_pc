@@ -26,7 +26,7 @@ export function RenderEngine({ isAgent, jsonlist, userList, currentUser, current
         case 'input':
           let maxLengthStr = '10'
           try {
-            maxLengthStr = String(parseInt(item.attribute.style.width / item.attribute.style.fontSize))
+            maxLengthStr = String(parseInt(item.attribute.style.width / item.attribute.style.fontSize) - 1)
             console.log('字符maxLength:', item.attribute.name, ':', maxLengthStr)
           } catch (error) {
             console.log('input error:', item.attribute.name, error)
