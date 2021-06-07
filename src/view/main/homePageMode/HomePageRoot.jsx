@@ -16,10 +16,12 @@ const tabListNoTitle = [
     }, {
         key: 'BugsPageView',
         tab: '缺陷统计',
-    }, {
-        key: 'MonitorView',
-        tab: '数据监控',
-    },];
+    },
+    // {
+    //     key: 'MonitorView',
+    //     tab: '数据监控',
+    // },
+];
 
 var contentListNoTitle
 
@@ -33,7 +35,7 @@ class HomePageRoot extends Component {
         contentListNoTitle = {
             HomePageView: <HomePageView {...props} />,
             BugsPageView: <BugsPageView />,
-            MonitorView: <MonitorView />,
+            // MonitorView: <MonitorView />,  
             // WorkTable: <WorkTable />
         };
     }
