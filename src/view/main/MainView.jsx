@@ -382,6 +382,15 @@ export default props => {
                 <SubMenu key="巡检点" title={<span><Icon type="scan" /> <span>巡检</span></span>}>
                     {renderByArea0()}
                 </SubMenu>
+                <SubMenu key="工作票" title={<span><Icon type="snippets" /><span>工作票</span>
+                    <Badge dot={appState.currentJBTCount > 0} style={{ marginLeft: 30 }} />
+                </span>}>
+                    <Menu.Item key="/mainView/jobticketcreate"><Icon type="form" /><span>创建工作票</span><Link to={`${props.match.url}/jobticketcreate`} /></Menu.Item>
+                    <Menu.Item key="/mainView/jobticketall"><Icon type="file" /><span>所有工作票</span><Link to={`${props.match.url}/jobticketall`} /></Menu.Item>
+                    <Menu.Item key="/mainView/jobticketmy"><Icon type="file-word" />
+                        <span>我的工作票</span>
+                        <Badge count={appState.currentJBTCount} overflowCount={99} style={{ marginLeft: 35 }} /><Link to={`${props.match.url}/jobticketmy`} /></Menu.Item>
+                </SubMenu>
                 <SubMenu key="缺陷" title={
                     <span>
                         <Icon type="reconciliation" />
@@ -460,15 +469,6 @@ export default props => {
                 <SubMenu key="通行" title={<span><Icon type="block" /><span>通行</span></span>}>
                     <Menu.Item key="/mainView/car"><Icon type="car" /><span>车辆</span><Link to={`${props.match.url}/car`} /></Menu.Item>
                     <Menu.Item key="/mainView/accesslogs"><Icon type="key" /><span>门禁</span><Link to={`${props.match.url}/accesslogs`} /></Menu.Item>
-                </SubMenu>
-                <SubMenu key="工作票" title={<span><Icon type="snippets" /><span>工作票</span>
-                    <Badge dot={appState.currentJBTCount > 0} style={{ marginLeft: 30 }} />
-                </span>}>
-                    <Menu.Item key="/mainView/jobticketcreate"><Icon type="form" /><span>创建工作票</span><Link to={`${props.match.url}/jobticketcreate`} /></Menu.Item>
-                    <Menu.Item key="/mainView/jobticketall"><Icon type="file" /><span>所有工作票</span><Link to={`${props.match.url}/jobticketall`} /></Menu.Item>
-                    <Menu.Item key="/mainView/jobticketmy"><Icon type="file-word" />
-                        <span>我的工作票</span>
-                        <Badge count={appState.currentJBTCount} overflowCount={99} style={{ marginLeft: 35 }} /><Link to={`${props.match.url}/jobticketmy`} /></Menu.Item>
                 </SubMenu>
                 <SubMenu key="设置" title={<span><Icon type="setting" /><span>设置</span></span>}>
                     <Menu.Item key="/mainView/usersetting"><Icon type="switcher" /><span>个人中心</span><Link to={`${props.match.url}/usersetting`} /></Menu.Item>

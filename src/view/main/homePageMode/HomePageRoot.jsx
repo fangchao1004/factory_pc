@@ -11,15 +11,15 @@ const tabListNoTitle = [
     //     tab: '工作台',
     // },
     {
-        key: 'MonitorView',
-        tab: '数据监控',
-    }, {
         key: 'HomePageView',
         tab: '巡检统计',
     }, {
         key: 'BugsPageView',
         tab: '缺陷统计',
-    }];
+    }, {
+        key: 'MonitorView',
+        tab: '数据监控',
+    },];
 
 var contentListNoTitle
 
@@ -27,8 +27,8 @@ class HomePageRoot extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            key: 'MonitorView',
-            noTitleKey: 'MonitorView',
+            key: 'HomePageView',
+            noTitleKey: 'HomePageView',
         }
         contentListNoTitle = {
             HomePageView: <HomePageView {...props} />,
