@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 // import { testData } from '../../../assets/testJson'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty, copyArrayItem, checkDataIsLostUserlist, autoCalculateFootPageValue, getPinYin, autoFillNo, removeDateCheckBox, removeCheckBoxValue, orderByUserIdLate } from '../../util/Tool'
+import { checkDataIsLostValue, createNewJobTicketApply, checkCellWhichIsEmpty, copyArrayItem, checkDataIsLostUserlist, autoCalculateFootPageValue, getPinYin, autoFillNo, removeDateCheckBox, removeCheckBoxValue, orderByUserIdLate, getTargetRoleIdUser } from '../../util/Tool'
 import moment from 'moment'
 import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer'
 import AddSampleModal from './AddSampleModal'
@@ -33,6 +33,7 @@ export default function JobTicketOfCreate() {
     const [addJBTSampleVisible, setAddJBTSampleVisible] = useState(false)
     const [updateJBTSampleVisible, setUpdateJBTSampleVisible] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
+    const [targetUserList, setTargetUserList] = useState([])
     const getJobTicketById = useCallback(async id => {
         if (id !== null) {
             let res = await HttpApi.getJobTicketsList({ id })
@@ -51,37 +52,45 @@ export default function JobTicketOfCreate() {
                 } else {
                     currentJTExtraPageSample = []
                 }
-                const major_id = tempObj.major_id
+                const status_table = JSON.parse(tempObj.status_table)
+                const status_0_role_info = status_table.status_list.filter((item) => item.current_status === 0)
+                const next_role_id = status_0_role_info[0].next_role_id ///下一步处理候选人
+                let { target_list, other_list } = await getTargetRoleIdUser(userList, next_role_id)
+                console.log('target_list:', target_list)
+                console.log('other_list:', other_list)
+                setTargetUserList(target_list)
+                // const major_id = tempObj.major_id
                 // console.log('major_id', major_id);
-                if (!major_id) { message.error('请为当前工作票配置对应专业'); return }
+                // if (!major_id) { message.error('请为当前工作票配置对应专业'); return }
                 ///首先判断出哪些人员是当前专业的专工 和 运行
-                let managerList_res = await HttpApi.getManagerIdListByMajorId({ major_id })
+                // let managerList_res = await HttpApi.getManagerIdListByMajorId({ major_id })
                 // let runnerList_res = await HttpApi.getRunnerIdList({ role_id_list: [11] })///运行值长
-                if (managerList_res.data.code === 0) {
-                    let copy_userList = JSON.parse(JSON.stringify(userList))
-                    const managerlist = managerList_res.data.data;
-                    copy_userList.forEach((item) => {
-                        item.is_current_major_manager = false
-                        managerlist.forEach((manager) => {
-                            if (item.id === manager.user_id) {
-                                item.is_current_major_manager = true
-                            }
-                        })
-                    })
-                    setUserList(copy_userList)
-                    // if (runnerList_res.data.code === 0) {
-                    //     const runnerList = runnerList_res.data.data;
-                    //     copy_userList.forEach((item) => {
-                    //         item.is_runner = false
-                    //         runnerList.forEach((manager) => {
-                    //             if (item.id === manager.user_id) {
-                    //                 item.is_runner = true
-                    //             }
-                    //         })
-                    //     })
-                    //     setUserList(copy_userList)
-                    // }
-                }
+                // if (managerList_res.data.code === 0) {
+                //     let copy_userList = JSON.parse(JSON.stringify(userList))
+                //     const managerlist = managerList_res.data.data;
+                //     copy_userList.forEach((item) => {
+                //         item.is_current_major_manager = false
+                //         managerlist.forEach((manager) => {
+                //             if (item.id === manager.user_id) {
+                //                 item.is_current_major_manager = true
+                //             }
+                //         })
+                //     })
+                //     console.log('copy_userList:', copy_userList)
+                //     setUserList(copy_userList)
+                //     // if (runnerList_res.data.code === 0) {
+                //     //     const runnerList = runnerList_res.data.data;
+                //     //     copy_userList.forEach((item) => {
+                //     //         item.is_runner = false
+                //     //         runnerList.forEach((manager) => {
+                //     //             if (item.id === manager.user_id) {
+                //     //                 item.is_runner = true
+                //     //             }
+                //     //         })
+                //     //     })
+                //     //     setUserList(copy_userList)
+                //     // }
+                // }
             }
         } else {
             setCurrentJobTicketValue({})
@@ -105,27 +114,20 @@ export default function JobTicketOfCreate() {
         }
     }, [currentUser.id])
     const getUserGroupList = useCallback(() => {
-        if (!userList) { return null }
-        let manager_list = [];
-        // let other_list = [];
-        userList.forEach((item) => {
-            if (item.is_current_major_manager) {
-                manager_list.push(item)
-            }
-            // else { other_list.push(item) }
-        })
+        if (!targetUserList) { return null }
+
         return [<OptGroup key='a' label={<div style={{ width: '100%', justifyContent: 'space-between', display: 'flex', justifyItems: 'center' }}><span>当前专业专工</span><Button type='link' size='small' onClick={() => {
-            setTicketNextUserList(manager_list.map((item) => item.id))
-            ticketNextUserNameList = manager_list.map((item) => item.name)
+            setTicketNextUserList(targetUserList.map((item) => item.id))
+            ticketNextUserNameList = targetUserList.map((item) => item.name)
         }}>全选</Button></div>}>
-            {manager_list.map((item, index) => { return <Option key={'a' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
+            {targetUserList.map((item, index) => { return <Option key={'a' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
         </OptGroup>
             // ,
             // <OptGroup key='b' label="其他">
             //     {other_list.map((item, index) => { return <Option key={'b' + index} value={item.id} short_lab={getPinYin(item.name)[0] || ''}>{item.name}</Option> })}
             // </OptGroup>
         ]
-    }, [userList])
+    }, [targetUserList])
     /**
      * 提取出措施票的选项
      */

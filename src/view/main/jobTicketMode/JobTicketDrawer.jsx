@@ -2,7 +2,7 @@ import { Button, Drawer, Select, message, Modal, Affix, Tag, Input, Spin, Alert,
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { autoFillNo, removeCheckBoxValue, checkCellWhichIsEmpty, checkDataIsLostValue, checkJBTStatusIsChange, deleteMainSubJBT, getJTRecordContentAndPlanTime, getPinYin, getRecordCurrentStatusInfo, getTargetRoleIdUser, getTargetMajorManagerList, checkLastStepIsBack, getRecordStatusTable, getStatusDesByNewStatus, orderByUserIdLate } from '../../util/Tool';
+import { autoFillNo, removeCheckBoxValue, checkCellWhichIsEmpty, checkDataIsLostValue, checkJBTStatusIsChange, deleteMainSubJBT, getJTRecordContentAndPlanTime, getPinYin, getRecordCurrentStatusInfo, getTargetRoleIdUser, checkLastStepIsBack, getRecordStatusTable, getStatusDesByNewStatus, orderByUserIdLate } from '../../util/Tool';
 import moment from 'moment'
 import JobTicketStepLogView from './JobTicketStepLogView';
 import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer';
@@ -65,15 +65,19 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
         if (selectValue === '1') {
             let { o_step, next_role_id } = after_filter_current_status_data
             step_des = o_step
-            if (!next_role_id) {
-                let { majorManagerList, otherList } = await getTargetMajorManagerList({ major_id: record.major_id })
-                setTargetList(majorManagerList) ///当前专业专工
-                setOtherList(otherList)
-            } else {
-                let { target_list, other_list } = await getTargetRoleIdUser(userList, next_role_id)
-                setTargetList(target_list)
-                setOtherList(other_list)
-            }
+            // if (!next_role_id) {
+            //     let { majorManagerList, otherList } = await getTargetMajorManagerList({ major_id: record.major_id })
+            //     setTargetList(majorManagerList) ///当前专业专工
+            //     setOtherList(otherList)
+            // } else {
+            //     let { target_list, other_list } = await getTargetRoleIdUser(userList, next_role_id)
+            //     setTargetList(target_list)
+            //     setOtherList(other_list)
+            // }
+            let { target_list, other_list } = await getTargetRoleIdUser(userList, next_role_id)
+            setTargetList(target_list)
+            setOtherList(other_list)
+
             if (status_table.wait_over_status === record.status) {
                 setUserSelectAble(false)
             } else if (status_table.wait_over_status > record.status) {
@@ -89,15 +93,18 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                 console.log('上一状态需要哪些候选人');
                 let { current_role_id } = getRecordCurrentStatusInfo(record, record.status - 1)
                 console.log('current_role_id:', current_role_id);
-                if (JSON.stringify(current_role_id) === '[0]' || !current_role_id) {
-                    let { majorManagerList, otherList } = await getTargetMajorManagerList({ major_id: record.major_id })
-                    setTargetList(majorManagerList) ///当前专业专工
-                    setOtherList(otherList)
-                } else {
-                    let { target_list, other_list } = await getTargetRoleIdUser(userList, current_role_id)
-                    setTargetList(target_list)
-                    setOtherList(other_list)
-                }
+                // if (JSON.stringify(current_role_id) === '[0]' || !current_role_id) {
+                //     let { majorManagerList, otherList } = await getTargetMajorManagerList({ major_id: record.major_id })
+                //     setTargetList(majorManagerList) ///当前专业专工
+                //     setOtherList(otherList)
+                // } else {
+                //     let { target_list, other_list } = await getTargetRoleIdUser(userList, current_role_id)
+                //     setTargetList(target_list)
+                //     setOtherList(other_list)
+                // }
+                let { target_list, other_list } = await getTargetRoleIdUser(userList, current_role_id)
+                setTargetList(target_list)
+                setOtherList(other_list)
             } else {
                 console.log('直接给发起人');
                 setUserSelectAble(false)
@@ -121,9 +128,14 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
         ///根据当前状态找到 对应的处理建议
         var after_filter_current_status_data = getRecordCurrentStatusInfo(record, record.status)
         if (record_current_is_sub === 0 && record_current_status === 0) {///主票0状态时，需要当前专业专工 0状态时不用考虑调度
-            let { majorManagerList, otherList } = await getTargetMajorManagerList({ major_id: record.major_id })
-            setTargetList(majorManagerList) ///当前专业专工
-            setOtherList(otherList)
+            // let { majorManagerList, otherList } = await getTargetMajorManagerList({ major_id: record.major_id })
+            // setTargetList(majorManagerList) ///当前专业专工
+            // setOtherList(otherList)
+            const status_0_role_info = status_table.status_list.filter((item) => item.current_status === 0)
+            const next_role_id = status_0_role_info[0].next_role_id ///下一步处理候选人
+            let { target_list, other_list } = await getTargetRoleIdUser(user_list, next_role_id)
+            setTargetList(target_list) ///当前专业专工
+            setOtherList(other_list)
         } else { ///主票的非0状态 和 措施票所有状态  直接根据status_table中的  next_role_id, current_role_id 
             const { next_role_id, current_role_id } = after_filter_current_status_data
             let { target_list, other_list } = await getTargetRoleIdUser(user_list, isAgent ? current_role_id : next_role_id)
