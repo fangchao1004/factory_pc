@@ -95,7 +95,7 @@ export default class UserMenuView extends Component {
         return (
             <div style={{ minWidth: 200 }}>
                 {this.state.majorName ? <Tooltip title={this.state.majorName}>
-                    <Tag color={'#FF9900'} style={{ marginBottom: 10 }}>{'所属专业: ' + omitTextLength(this.state.majorName, 12)}</Tag>
+                    <Tag color={'#FF9900'} style={{ marginBottom: 10 }}>{'专业权限: ' + omitTextLength(this.state.majorName, 12)}</Tag>
                 </Tooltip> : null}
                 {this.state.permissionList.length > 0 || this.state.isadmin ? <Card size="small" title="所有权限">{this.renderHandler()}</Card> : null}
                 {/* {this.state.isadmin ? <Button type='primary' style={{ width: "100%", marginTop: 10 }} onClick={() => { this.setState({ showModal1: true }) }}>发布通知</Button> : null} */}

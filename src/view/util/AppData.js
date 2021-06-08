@@ -7,8 +7,8 @@ export const originStatus = [{ text: '待维修', value: 0 }, { text: '维修中
 { text: '专工验收中', value: 2 }, { text: '运行验收中', value: 3 }, { text: '完毕', value: 4 }, { text: '申请转专业中', value: 6 }, { text: '申请挂起中', value: 7 }]///固定状态
 export const permisstion = [{ name: '专工权限', value: 0 }, { name: '运行权限', value: 1 }, { name: '消费审批权限', value: 2 }, { name: '维修权限', value: 3 }]
 export const permisstionWithDes = [
-    { name: '维修权限', value: 3, des: '可以申请切换缺陷专业和申请挂起缺陷;维修缺陷' },
-    { name: '专工权限', value: 0, des: '拥有修改缺陷专业和挂起缺陷的操作能力;处理维修人员的相关申请;验收维修成果' },
+    { name: '维修权限', value: 3, des: '可以申请切换专业权限和申请挂起缺陷;维修缺陷' },
+    { name: '专工权限', value: 0, des: '拥有修改专业权限和挂起缺陷的操作能力;处理维修人员的相关申请;验收维修成果' },
     { name: '运行权限', value: 1, des: '参与缺陷的最后验收步骤' },
     { name: '消费审批权限', value: 2, des: '可以处理消费申请;进行审批操作' }]
 export const adminPermission = { name: '管理员权限', des: '管理员权限;可以增减修改各个选项;查看所有信息' }

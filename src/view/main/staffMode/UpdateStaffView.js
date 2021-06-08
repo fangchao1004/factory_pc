@@ -90,7 +90,7 @@ function UpdateStaffForm(props) {
                 rules: [{ required: false, message: '请选择员工权限' }]
             })(<Select mode="multiple" showSearch={true} filterOption={(inputValue, option) => { return option.props.children.indexOf(inputValue) !== -1 }}>{permissionOptions}</Select>)}
         </Form.Item> */}
-    <Form.Item label="所属专业" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+    <Form.Item label="专业权限" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
       {getFieldDecorator('major_id', {
         initialValue: props.staff.major_id_all ? props.staff.major_id_all.split(',').map(major => parseInt(major)) : undefined,
         rules: [{ required: false, message: '请选择员工专业' }]

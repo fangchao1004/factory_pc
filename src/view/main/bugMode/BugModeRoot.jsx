@@ -20,7 +20,7 @@ const tabListNoTitle2 = [{
     tab: '缺陷类型管理',
 }, {
     key: 'BugMajorView',
-    tab: '缺陷专业管理',
+    tab: '专业权限管理',
 }, {
     key: 'BugFreezeView',
     tab: '缺陷状态管理'

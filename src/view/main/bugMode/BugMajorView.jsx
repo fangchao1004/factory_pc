@@ -3,7 +3,7 @@ import HttpApi from '../../util/HttpApi';
 import { Table, Popconfirm, Divider, Button, message } from 'antd';
 import AddBugLTM from './AddBugLTM';
 import UpdateBugLTM from './UpdateBugLTM';
-/// 缺陷专业管理界面 （电气，渗滤液,.... major表）
+/// 专业权限管理界面 （电气，渗滤液,.... major表）
 export default props => {
     const [majors, setMajors] = useState([]);
     const [addModalVisible, setAddModalVisible] = useState(false);
@@ -62,12 +62,12 @@ export default props => {
             width: 150,
             render: (text, record) => (
                 <div style={{ textAlign: 'center' }}>
-                    <Popconfirm title="确定要删除该缺陷专业吗?" onConfirm={() => { deleteHandler(record) }}>
+                    <Popconfirm title="确定要删除该专业权限吗?" onConfirm={() => { deleteHandler(record) }}>
                         <Button size="small" type="danger">删除</Button>
                     </Popconfirm>
                     <Divider type="vertical" />
                     <Button size="small" type="primary" onClick={() => {
-                        setTitle('修改缺陷专业');
+                        setTitle('修改专业权限');
                         setUpdateModalVisible(true);
                         setRecord(record);
                     }}>修改</Button></div>
@@ -75,7 +75,7 @@ export default props => {
         }
     ]
     return <div style={{ padding: 10, backgroundColor: '#FFFFFF' }}>
-        <Button size="small" type={'primary'} style={{ marginBottom: 10 }} onClick={() => { setTitle('添加缺陷专业'); setAddModalVisible(true) }}>添加缺陷专业</Button>
+        <Button size="small" type={'primary'} style={{ marginBottom: 10 }} onClick={() => { setTitle('添加专业权限'); setAddModalVisible(true) }}>添加专业权限</Button>
         <Table
             size="small"
             bordered

@@ -163,10 +163,10 @@ function AddBugFrom(props) {
                 rules: [{ required: true, message: '请选择紧急类型' }]
             })(<Select style={{ width: '100%' }} placeholder="请选择在紧急类型">{bug_level_Options}</Select>)}
         </Form.Item>
-        <Form.Item label="缺陷专业:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
+        <Form.Item label="专业权限:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('major_id', {
-                rules: [{ required: true, message: '请选择缺陷专业' }]
-            })(<Select style={{ width: '100%' }} placeholder="请选择缺陷专业">{major_Options}</Select>)}
+                rules: [{ required: true, message: '请选择专业权限' }]
+            })(<Select style={{ width: '100%' }} placeholder="请选择专业权限">{major_Options}</Select>)}
         </Form.Item>
         <Form.Item label="所在范围:" labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
             {getFieldDecorator('area_remark', {

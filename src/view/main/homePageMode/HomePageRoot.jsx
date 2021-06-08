@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Card } from 'antd';
 import HomePageView from './HomePageView';
 import BugsPageView from './BugsPageView';
-import MonitorView from './MonitorView';
+// import MonitorView from './MonitorView';
 // import WorkTable from './workTable/WorkTable';
 
 const tabListNoTitle = [
