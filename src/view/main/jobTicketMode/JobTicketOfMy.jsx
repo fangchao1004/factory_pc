@@ -1,4 +1,4 @@
-import { Badge, Button, Col, DatePicker, Form, Input, Row, Select, Switch, Table, Tooltip, Modal, message, Alert, Radio, Tag } from 'antd';
+import { Badge, Button, Col, DatePicker, Form, Input, Row, Select, Switch, Table, Tooltip, Modal, message, Alert, Radio, Tag, Icon } from 'antd';
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import { autoFillNo, deleteMainSubJBT, checkJBTStatusIsChange, statusReduce1JBT, getRecordStatusTable, groupJBTByTypeName } from '../../util/Tool';
@@ -182,6 +182,7 @@ export default function JobTicketOfMy() {
         },
         {
             title: '操作', dataIndex: 'action', key: 'action', align: 'center', width: 100, render: (_, record) => {
+                if (record.is_stop) { return <Tag color='#fa541c'>已作废</Tag> }
                 let { over_status } = getRecordStatusTable(record)
                 let is_over = false
                 if (record.status === over_status) { is_over = true }
@@ -230,6 +231,7 @@ export default function JobTicketOfMy() {
                     columns={columns}
                     dataSource={list}
                     expandIcon={(props) => {
+                        if (props.record.is_stop) { return <Icon type="stop" /> }
                         let per_user_is_me = props.record.per_step_user_id === currentUser.id///上一次的处理人是不是我
                         let last_back_user_is_me = props.record.last_back_user_id === currentUser.id///最近一次的撤回操作是不是我
                         let create_user_is_me = props.record.user_id === currentUser.id///是否为创建者

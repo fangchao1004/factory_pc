@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, Col, DatePicker, Form, Icon, Input, Row, Select, Table, Tooltip } from 'antd';
+import { Alert, Badge, Button, Col, DatePicker, Form, Icon, Input, Row, Select, Table, Tag, Tooltip } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import JobTicketDrawer from './JobTicketDrawer';
@@ -132,6 +132,7 @@ export default function JobTicketOfAll() {
         },
         {
             title: '操作', dataIndex: 'action', key: 'action', align: 'center', width: 100, render: (_, record) => {
+                if (record.is_stop) { return <Tag color='#fa541c'>已作废</Tag> }
                 let { over_status } = getRecordStatusTable(record)
                 let is_over = false
                 if (record.status === over_status) { is_over = true }
@@ -173,6 +174,7 @@ export default function JobTicketOfAll() {
                     columns={columns}
                     dataSource={list}
                     expandIcon={(props) => {
+                        if (props.record.is_stop) { return <Icon type="stop" /> }
                         if (props.record && props.record.sub_tickets && props.record.sub_tickets.length > 0) {
                             return <Icon type="tags" style={{ color: '#1890ff' }} />
                         } else { return null }

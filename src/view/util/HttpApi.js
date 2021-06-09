@@ -994,7 +994,7 @@ class HttpApi {
         let sql_status_des = !status_des ? `` : ` and status_des = '${status_des}'`
         let sql_no = !no ? `` : ` and no like '%${no}%'`
         let all_sql_condtion = sql_time + sql_type_id + sql_status_des + sql_no
-        let sql = `select count(id) as count from job_tickets_apply_records where is_delete = 0 and is_stop = 0 and p_id is null and ${all_sql_condtion}`
+        let sql = `select count(id) as count from job_tickets_apply_records where is_delete = 0 and p_id is null and ${all_sql_condtion}`
         // console.log('sql1:', sql)
         return Axios.post(Testuri + 'obs', { sql })
     }
@@ -1010,7 +1010,7 @@ class HttpApi {
         let sql_status_des = !status_des ? `` : ` and status_des = '${status_des}'`
         let sql_no = !no ? `` : ` and no like '%${no}%'`
         let all_sql_condtion = sql_time + sql_type_id + sql_status_des + sql_no
-        let sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = 0 and p_id is null and ${all_sql_condtion}
+        let sql = `select * from job_tickets_apply_records where is_delete = 0 and p_id is null and ${all_sql_condtion}
         order by id desc limit ${startPage},${pageSize}`
         // console.log('sql2:', sql)
         return Axios.post(Testuri + 'obs', { sql })
@@ -1020,7 +1020,7 @@ class HttpApi {
      */
     static getSubJTApplyRecordsByPidList({ p_id_list }) {
         let p_id_str = p_id_list.join(',')
-        let sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = 0 and p_id in (${p_id_str})`
+        let sql = `select * from job_tickets_apply_records where is_delete = 0 and p_id in (${p_id_str})`
         // console.log('sql:', sql)
         return Axios.post(Testuri + 'obs', { sql })
     }
@@ -1048,7 +1048,7 @@ class HttpApi {
             sql_status_des = ` and status_des = '${status_des}'`
         }
         let all_sql_condtion = sql_time + sql_type_id + sql_status_des + sql_user_id + sql_no
-        let sql = `select count(id) as count from job_tickets_apply_records where is_delete = 0 and is_stop = 0  and ${all_sql_condtion}`
+        let sql = `select count(id) as count from job_tickets_apply_records where is_delete = 0  and ${all_sql_condtion}`
         // console.log('sql1:', sql)
         return Axios.post(Testuri + 'obs', { sql })
     }
@@ -1077,7 +1077,7 @@ class HttpApi {
             sql_status_des = ` and status_des = '${status_des}'`
         }
         let all_sql_condtion = sql_time + sql_type_id + sql_status_des + sql_user_id + sql_no
-        let sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = 0 and ${all_sql_condtion}  order by id desc limit ${startPage},${pageSize}`
+        let sql = `select * from job_tickets_apply_records where is_delete = 0 and ${all_sql_condtion} order by id desc limit ${startPage},${pageSize}`
         // console.log('sql2:', sql)
         return Axios.post(Testuri + 'obs', { sql })
     }
