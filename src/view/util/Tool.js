@@ -1428,10 +1428,10 @@ export async function deleteMainSubJBT(JBTObj, Delete = 1) {
     if (!Delete) {
         delete_stop_obj = { is_stop: 1 }
     }
-    if (JBTObj.is_sub === 0) {
+    if (JBTObj.is_sub === 0) { ///主票 - 旗下可能存在副票
         let main_id = JBTObj.id
         let all_id_list = [main_id]
-        let res_sub_list = await HttpApi.getSubJTApplyRecordsByPidList({ p_id_list: [main_id] })
+        let res_sub_list = await HttpApi.getSubJTApplyRecordsByPidList({ p_id_list: [main_id] })///获取可能存在的副票
         if (res_sub_list.data.code === 0) {
             let sub_list = res_sub_list.data.data;
             var sub_id_list = [];
@@ -1439,8 +1439,8 @@ export async function deleteMainSubJBT(JBTObj, Delete = 1) {
             all_id_list = all_id_list.concat(sub_id_list)
             let delete_res = await HttpApi.updateJTApplyRecord({ id: all_id_list, ...delete_stop_obj })
             if (delete_res.data.code === 0) {
-                return { code: 0, message: Delete ? '删除成功' : '作废成功' }
-            } else { return { code: -1, message: Delete ? '删除失败' : '作废失败' } }
+                return { code: 0, message: Delete ? '删除成功' : '作废成功', all_id_list }
+            } else { return { code: -1, message: Delete ? '删除失败' : '作废失败', all_id_list } }
         } else { return { code: -1, message: '获取其下措施票数据失败' } }
     } else {
         let delete_res = await HttpApi.updateJTApplyRecord({ id: JBTObj.id, ...delete_stop_obj })

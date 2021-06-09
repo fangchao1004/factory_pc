@@ -22,6 +22,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
     const radio_group = useRef()
     const print_num_ref = useRef()
     const print_card_ref = useRef()
+    const stop_input_ref = useRef()
     const [stepLogVisible, setStepLogVisible] = useState(false);///展示步骤界面
     const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})///填写改动后的数值- 提交时使用
     const [currentUser] = useState(JSON.parse(storage.getItem('userinfo')))
@@ -48,6 +49,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
     const [selectSubJBT, setSelectSubJBT] = useState({})///选择的措施票
     const [sbtvisible, setSbtvisible] = useState(false)
     const [visibleModal, setVisibleModal] = useState(false)///打印弹出对话框
+    const [visibleStopModal, setVisibleStopModal] = useState(false)///作废弹出对话框
 
     const init3 = useCallback(async () => {
         if (!record || !record.job_t_r_id) { return }
@@ -365,24 +367,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                             <div style={styles.panel}>
                                 {showStopBtn && !isAgent ?
                                     <Button type='danger' size='small' icon='stop' style={{ marginRight: 10 }} onClick={() => {
-                                        confirm({
-                                            title: '确认作废当前工作票吗?',
-                                            content: record.is_sub === 0 ? '其下措施票也会一并作废' : '请自行保证准确性',
-                                            okText: '确认',
-                                            okType: 'danger',
-                                            cancelText: '取消',
-                                            onOk: async () => {
-                                                let res_status = await checkJBTStatusIsChange(record)
-                                                if (res_status.code !== 0) {
-                                                    message.error('当前工作票的最新状态已经发生变动；当前操作无效。已经为你刷新数据', 5)
-                                                    resetHandler()
-                                                    return
-                                                }
-                                                let res_delete = await deleteMainSubJBT(record, 0)
-                                                if (res_delete.code === 0) { message.success(res_delete.message) } else { message.error(res_delete.message) }
-                                                resetHandler()
-                                            }
-                                        })
+                                        setVisibleStopModal(true)
                                     }}>作废</Button> : null}
                                 {/* {showDeleteBtn && !isAgent ?
                                     <Button type='danger' size='small' icon='delete' style={{ marginTop: 10, marginRight: 10 }} onClick={() => {
@@ -658,6 +643,44 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                         return <Radio key={index} value={item.id}>{item.self_ticket_name || item.ticket_name}</Radio>
                     })}
                 </Radio.Group>
+            </Modal>
+            <Modal
+                title="确认作废当前工作票吗"
+                visible={visibleStopModal}
+                onCancel={() => { setVisibleStopModal(false) }}
+                onOk={async () => {
+                    let stop_remark_des = stop_input_ref.current.state.value;
+                    if (!stop_remark_des) { message.error('请填写备注'); return }
+                    let res_status = await checkJBTStatusIsChange(record)
+                    if (res_status.code !== 0) {
+                        message.error('当前工作票的最新状态已经发生变动；当前操作无效。已经为你刷新数据', 5)
+                        resetHandler()
+                        return
+                    }
+                    let res_delete = await deleteMainSubJBT(record, 0)
+                    if (res_delete.code === 0) {
+                        const all_id_list = res_delete.all_id_list ///所有待添加日志的工作票id 包含一个主票和旗下的若干副票
+                        console.log('all_id_list:', all_id_list)
+                        for (let index = 0; index < all_id_list.length; index++) {
+                            const jbtar_id = all_id_list[index];
+                            let obj = {};
+                            obj['jbtar_id'] = jbtar_id
+                            obj['user_id'] = currentUser.id
+                            obj['user_name'] = currentUser.name
+                            obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
+                            obj['step_des'] = '作废该票'
+                            obj['remark'] = stop_remark_des
+                            obj['is_agent'] = 0
+                            HttpApi.addJbTStepLog(obj)///添加log
+                        }
+                        message.success(res_delete.message)
+                    } else { message.error(res_delete.message) }
+                    resetHandler()
+                    setVisibleStopModal(false)
+                }}
+            >
+                <div>{record && record.is_sub === 0 ? '其下措施票也会一并作废' : '请自行保证准确性'}</div>
+                <Input style={{ marginTop: 10 }} placeholder='备注必填-说明作废原因' ref={stop_input_ref} allowClear />
             </Modal>
         </Drawer >
     )

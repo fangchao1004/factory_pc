@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, Col, DatePicker, Form, Icon, Input, Row, Select, Table, Tag, Tooltip } from 'antd';
+import { Alert, Badge, Button, Col, DatePicker, Form, Icon, Input, Row, Select, Table, Tooltip } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import JobTicketDrawer from './JobTicketDrawer';
@@ -107,6 +107,7 @@ export default function JobTicketOfAll() {
     const columns = [
         {
             title: '序号', dataIndex: 'id', key: 'id', width: 80, align: 'center', render: (text, record) => {
+                if (record.is_stop) { return <Tooltip title='已作废'><div style={{ marginLeft: -10 }}><Icon type="stop" style={{ color: 'red' }} /> {text}</div></Tooltip> }
                 return <div>{record.is_read ? null : <Badge status="processing" />}{text}</div>
             }
         },
@@ -132,7 +133,13 @@ export default function JobTicketOfAll() {
         },
         {
             title: '操作', dataIndex: 'action', key: 'action', align: 'center', width: 100, render: (_, record) => {
-                if (record.is_stop) { return <Tag color='#fa541c'>已作废</Tag> }
+                if (record.is_stop) {
+                    return <div>
+                        <Button type="dashed" size='small' icon='eye' onClick={(e) => { e.stopPropagation(); setDrawer2Visible(true); setCurrentSelectRecord(record) }}>查看</Button>
+                        <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                        <Button type="dashed" icon='unordered-list' size="small" onClick={(e) => { e.stopPropagation(); setStepLogVisible(true); setCurrentSelectRecord(record); }}>记录</Button>
+                    </div>
+                }
                 let { over_status } = getRecordStatusTable(record)
                 let is_over = false
                 if (record.status === over_status) { is_over = true }
@@ -174,7 +181,6 @@ export default function JobTicketOfAll() {
                     columns={columns}
                     dataSource={list}
                     expandIcon={(props) => {
-                        if (props.record.is_stop) { return <Icon type="stop" /> }
                         if (props.record && props.record.sub_tickets && props.record.sub_tickets.length > 0) {
                             return <Icon type="tags" style={{ color: '#1890ff' }} />
                         } else { return null }
@@ -185,6 +191,7 @@ export default function JobTicketOfAll() {
                         if (record.is_sub === 0 && record.sub_tickets.length > 0) {
                             const columns = [{
                                 title: '序号', dataIndex: 'id', key: 'id', width: 71, align: 'center', render: (text, record) => {
+                                    if (record.is_stop) { return <Tooltip title='已作废'><div style={{ marginLeft: -10 }}><Icon type="stop" style={{ color: 'red' }} /> {text}</div></Tooltip> }
                                     return <div style={{ marginLeft: -10 }}>{record.is_read ? null : <Badge status="processing" />}{text}</div>
                                 }
                             },
@@ -206,6 +213,14 @@ export default function JobTicketOfAll() {
                             },
                             {
                                 title: '操作', dataIndex: 'action', key: 'action', width: 90, render: (_, record) => {
+                                    if (record.is_stop) {
+                                        return <div style={{ paddingLeft: 10 }}>
+                                            <Button type="default" size='small' icon='eye' onClick={(e) => {
+                                                e.stopPropagation(); setDrawer2Visible(true); setCurrentSelectRecord(record)
+                                            }}>查看</Button>
+                                            <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                                            <Button type="default" icon='unordered-list' size="small" onClick={(e) => { setStepLogVisible(true); setCurrentSelectRecord(record); }}>记录</Button>                                        </div>
+                                    }
                                     let { over_status } = getRecordStatusTable(record)
                                     let is_over = false
                                     if (record.status === over_status) { is_over = true }

@@ -130,6 +130,7 @@ export default function JobTicketOfMy() {
     const columns = [
         {
             title: '', dataIndex: 'p_id', key: 'p_id', width: 30, render: (text, record) => {
+                if (record.is_stop) { return null }
                 return <div>{text ?
                     <Tooltip title={'查看对应主票'} placement="left">
                         <Button size='small' icon='file-search' type='link' onClick={async () => {
@@ -147,6 +148,7 @@ export default function JobTicketOfMy() {
         },
         {
             title: '序号', dataIndex: 'id', key: 'id', width: 60, render: (text, record) => {
+                if (record.is_stop) { return <Tooltip title='已作废'><Icon type="stop" style={{ color: 'red' }} /> {text}</Tooltip> }
                 return <div>{record.is_read ? null : <Badge status="processing" />}{text}</div>
             }
         },
@@ -182,7 +184,13 @@ export default function JobTicketOfMy() {
         },
         {
             title: '操作', dataIndex: 'action', key: 'action', align: 'center', width: 100, render: (_, record) => {
-                if (record.is_stop) { return <Tag color='#fa541c'>已作废</Tag> }
+                if (record.is_stop) {
+                    return <div>
+                        <Button type="dashed" size='small' icon='eye' onClick={(e) => { e.stopPropagation(); setDrawer2Visible(true); setCurrentSelectRecord(record) }}>查看</Button>
+                        <div style={{ borderBottomStyle: 'solid', borderBottomColor: '#D0D0D0', borderBottomWidth: 1, margin: 10 }} />
+                        <Button type="dashed" icon='unordered-list' size="small" onClick={(e) => { e.stopPropagation(); setStepLogVisible(true); setCurrentSelectRecord(record); }}>记录</Button>
+                    </div>
+                }
                 let { over_status } = getRecordStatusTable(record)
                 let is_over = false
                 if (record.status === over_status) { is_over = true }
@@ -231,7 +239,7 @@ export default function JobTicketOfMy() {
                     columns={columns}
                     dataSource={list}
                     expandIcon={(props) => {
-                        if (props.record.is_stop) { return <Icon type="stop" /> }
+                        if (props.record.is_stop) { return null }
                         let per_user_is_me = props.record.per_step_user_id === currentUser.id///上一次的处理人是不是我
                         let last_back_user_is_me = props.record.last_back_user_id === currentUser.id///最近一次的撤回操作是不是我
                         let create_user_is_me = props.record.user_id === currentUser.id///是否为创建者
