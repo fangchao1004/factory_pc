@@ -988,13 +988,13 @@ class HttpApi {
      * @param {*} time 创建时间
      * @param {*} type_id 对应票类型
      */
-    static getMainJTApplyRecordsCountByCondition({ time, type_id, status_des, no }) {
+    static getMainJTApplyRecordsCountByCondition({ time, type_id, status_des, no, is_stop }) {
         let sql_time = ` time >= '${time[0]}' and time <= '${time[1]}'`
         let sql_type_id = !type_id ? `` : ` and type_id = ${type_id}`
         let sql_status_des = !status_des ? `` : ` and status_des = '${status_des}'`
         let sql_no = !no ? `` : ` and no like '%${no}%'`
         let all_sql_condtion = sql_time + sql_type_id + sql_status_des + sql_no
-        let sql = `select count(id) as count from job_tickets_apply_records where is_delete = 0 and p_id is null and ${all_sql_condtion}`
+        let sql = `select count(id) as count from job_tickets_apply_records where is_delete = 0 and is_stop = ${is_stop ? 1 : 0} and p_id is null and ${all_sql_condtion}`
         // console.log('sql1:', sql)
         return Axios.post(Testuri + 'obs', { sql })
     }
@@ -1003,14 +1003,14 @@ class HttpApi {
      * @param {*} page 当前页码
      * @param {*} pageSize 当前一页条数 
      */
-    static getMainJTApplyRecordsByLimit({ time, type_id, page = 1, pageSize = 10, status_des, no }) {
+    static getMainJTApplyRecordsByLimit({ time, type_id, page = 1, pageSize = 10, status_des, no, is_stop }) {
         let startPage = (page - 1) * pageSize
         let sql_time = ` time >= '${time[0]}' and time <= '${time[1]}'`
         let sql_type_id = !type_id ? `` : ` and type_id = ${type_id}`
         let sql_status_des = !status_des ? `` : ` and status_des = '${status_des}'`
         let sql_no = !no ? `` : ` and no like '%${no}%'`
         let all_sql_condtion = sql_time + sql_type_id + sql_status_des + sql_no
-        let sql = `select * from job_tickets_apply_records where is_delete = 0 and p_id is null and ${all_sql_condtion}
+        let sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = ${is_stop ? 1 : 0} and p_id is null and ${all_sql_condtion}
         order by id desc limit ${startPage},${pageSize}`
         // console.log('sql2:', sql)
         return Axios.post(Testuri + 'obs', { sql })
@@ -1033,7 +1033,7 @@ class HttpApi {
     * @param {*} sub_status 措施票状态
     * @param {*} user_id 当前用户id
     */
-    static getMyJTApplyRecordsCountByCondition({ time, type_id, status_des, user_id, is_current, no }) {
+    static getMyJTApplyRecordsCountByCondition({ time, type_id, status_des, user_id, is_current, no, is_stop }) {
         let sql_time = ` time >= '${time[0]}' and time <= '${time[1]}'`
         let sql_type_id = !type_id ? `` : ` and type_id = ${type_id}`
         let sql_no = !no ? `` : ` and no like '%${no}%'`
@@ -1048,7 +1048,7 @@ class HttpApi {
             sql_status_des = ` and status_des = '${status_des}'`
         }
         let all_sql_condtion = sql_time + sql_type_id + sql_status_des + sql_user_id + sql_no
-        let sql = `select count(id) as count from job_tickets_apply_records where is_delete = 0  and ${all_sql_condtion}`
+        let sql = `select count(id) as count from job_tickets_apply_records where is_delete = 0 and is_stop = ${is_stop ? 1 : 0}  and ${all_sql_condtion}`
         // console.log('sql1:', sql)
         return Axios.post(Testuri + 'obs', { sql })
     }
@@ -1061,7 +1061,7 @@ class HttpApi {
     * @param {*} sub_status 措施票状态
     *  @param {*} user_id 当前用户id
     */
-    static getMyJTApplyRecordsByLimit({ time, type_id, status_des, page = 1, pageSize = 10, user_id, is_current, no }) {
+    static getMyJTApplyRecordsByLimit({ time, type_id, status_des, page = 1, pageSize = 10, user_id, is_current, no, is_stop }) {
         let startPage = (page - 1) * pageSize
         let sql_time = ` time >= '${time[0]}' and time <= '${time[1]}'`
         let sql_type_id = !type_id ? `` : ` and type_id = ${type_id}`
@@ -1077,7 +1077,7 @@ class HttpApi {
             sql_status_des = ` and status_des = '${status_des}'`
         }
         let all_sql_condtion = sql_time + sql_type_id + sql_status_des + sql_user_id + sql_no
-        let sql = `select * from job_tickets_apply_records where is_delete = 0 and ${all_sql_condtion} order by id desc limit ${startPage},${pageSize}`
+        let sql = `select * from job_tickets_apply_records where is_delete = 0 and is_stop = ${is_stop ? 1 : 0} and ${all_sql_condtion} order by id desc limit ${startPage},${pageSize}`
         // console.log('sql2:', sql)
         return Axios.post(Testuri + 'obs', { sql })
     }

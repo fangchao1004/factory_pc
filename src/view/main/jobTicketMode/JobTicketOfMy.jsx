@@ -1,5 +1,5 @@
 import { Badge, Button, Col, DatePicker, Form, Input, Row, Select, Switch, Table, Tooltip, Modal, message, Alert, Radio, Tag, Icon } from 'antd';
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState, useRef } from 'react'
 import HttpApi from '../../util/HttpApi';
 import { autoFillNo, deleteMainSubJBT, checkJBTStatusIsChange, statusReduce1JBT, getRecordStatusTable, groupJBTByTypeName } from '../../util/Tool';
 import JobTicketDrawer from './JobTicketDrawer';
@@ -16,8 +16,10 @@ var searchCondition = {};
 var pageCondition = {};
 var tempSubJBTObj = {}
 export default function JobTicketOfMy() {
+    const searchfromRef = useRef(null)
     const { appDispatch } = useContext(AppDataContext)
     const [defaultTime] = useState([moment().add(-6, 'month').startOf('day'), moment().endOf('day')])
+    const [defaultIsStop] = useState(false)
     const [list, setList] = useState([])
     const [drawerVisible, setDrawerVisible] = useState(false)
     const [drawer2Visible, setDrawer2Visible] = useState(false)
@@ -95,11 +97,12 @@ export default function JobTicketOfMy() {
         await HttpApi.updateJTApplyRecord({ id: record.id, is_read: 1 })
     }, [list])
     useEffect(() => {
+        searchfromRef.current.resetFields()
         ///初始条件
-        searchCondition = { time: [defaultTime[0].format(FORMAT), defaultTime[1].format(FORMAT)], is_current: isCurrentMe }
+        searchCondition = { time: [defaultTime[0].format(FORMAT), defaultTime[1].format(FORMAT)], is_current: isCurrentMe, is_stop: defaultIsStop }
         pageCondition = { page: 1, pageSize: 10 }
         init();
-    }, [init, defaultTime, isCurrentMe])
+    }, [init, defaultTime, isCurrentMe, defaultIsStop])
     useEffect(() => {
         let loop = setInterval(() => {
             init();
@@ -218,7 +221,7 @@ export default function JobTicketOfMy() {
     return (
         <div style={styles.root}>
             <div style={styles.header}>
-                <Searchfrom statusDesList={statusDesList} defaultTime={defaultTime} typeOptionList={typeOptionList} startSearch={async (conditionsValue) => {
+                <Searchfrom ref={searchfromRef} statusDesList={statusDesList} defaultTime={defaultTime} defaultIsStop={defaultIsStop} typeOptionList={typeOptionList} startSearch={async (conditionsValue) => {
                     searchCondition = conditionsValue;
                     pageCondition = { page: 1, pageSize: 10 }
                     setCurrentPage(1)
@@ -230,6 +233,7 @@ export default function JobTicketOfMy() {
                     <>
                         <span>当前待我处理：</span>
                         <Switch checkedChildren="是" unCheckedChildren="否" checked={isCurrentMe} onChange={(v) => { setIsCurrentMe(v) }} />
+                        <span>【此筛选查询功能与上方条件查询相互独立】</span>
                     </>
                 } />
                 <Table
@@ -420,7 +424,7 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
     const itemProps = { labelCol: { span: 6 }, wrapperCol: { span: 18 } }
     return <Form onSubmit={(e) => {
         e.preventDefault();
-        props.form.validateFields((err, values) => {
+        props.form.validateFields((_, values) => {
             // console.log('values:', values);
             // return;
             ///values搜寻条件数据过滤
@@ -492,8 +496,20 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
                     })(<Input allowClear placeholder='请输入编号(模糊查询)' />)}
                 </Form.Item>
             </Col>
-            <Col span={24}>
-                <div style={{ textAlign: 'right', paddingTop: 3 }}>
+
+        </Row>
+        <Row>
+            <Col span={6}>
+                <Form.Item label='是否作废' {...itemProps}>
+                    {props.form.getFieldDecorator('is_stop', {
+                        valuePropName: 'checked',
+                        initialValue: props.defaultIsStop,
+                        rules: [{ required: false }]
+                    })(<Switch checkedChildren="是" unCheckedChildren="否" />)}
+                </Form.Item>
+            </Col>
+            <Col span={18}>
+                <div style={{ textAlign: 'right' }}>
                     <Button type="primary" htmlType="submit">查询</Button>
                     <Button style={{ marginLeft: 8 }} onClick={() => { props.form.resetFields() }}>清除</Button>
                 </div>

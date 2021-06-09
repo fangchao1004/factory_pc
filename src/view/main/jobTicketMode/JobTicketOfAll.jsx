@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, Col, DatePicker, Form, Icon, Input, Row, Select, Table, Tooltip } from 'antd';
+import { Alert, Badge, Button, Col, DatePicker, Form, Icon, Input, Row, Select, Switch, Table, Tooltip } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi';
 import JobTicketDrawer from './JobTicketDrawer';
@@ -12,6 +12,7 @@ var searchCondition = {};
 var pageCondition = {};
 export default function JobTicketOfAll() {
     const [defaultTime] = useState([moment().add(-6, 'month').startOf('day'), moment().endOf('day')])
+    const [defaultIsStop] = useState(false)
     const [list, setList] = useState([])
     const [drawerVisible, setDrawerVisible] = useState(false)
     const [drawer2Visible, setDrawer2Visible] = useState(false)
@@ -83,10 +84,10 @@ export default function JobTicketOfAll() {
     }, [list])
     useEffect(() => {
         ///初始条件
-        searchCondition = { time: [defaultTime[0].format(FORMAT), defaultTime[1].format(FORMAT)] }
+        searchCondition = { time: [defaultTime[0].format(FORMAT), defaultTime[1].format(FORMAT)], is_stop: defaultIsStop }
         pageCondition = { page: 1, pageSize: 10 }
         init();
-    }, [init, defaultTime])
+    }, [init, defaultTime, defaultIsStop])
     useEffect(() => {
         let loop = setInterval(() => {
             init();
@@ -166,7 +167,8 @@ export default function JobTicketOfAll() {
     ]
     return (
         <div style={styles.root}>
-            <div style={styles.header}><Searchfrom statusDesList={statusDesList} defaultTime={defaultTime} typeOptionList={typeOptionList} startSearch={async (conditionsValue) => {
+            <div style={styles.header}><Searchfrom statusDesList={statusDesList} defaultIsStop={defaultIsStop} defaultTime={defaultTime} typeOptionList={typeOptionList} startSearch={async (conditionsValue) => {
+                console.log('conditionsValue:', conditionsValue)
                 searchCondition = conditionsValue;
                 pageCondition = { page: 1, pageSize: 10 }
                 setCurrentPage(1)
@@ -284,7 +286,7 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
     const itemProps = { labelCol: { span: 6 }, wrapperCol: { span: 18 } }
     return <Form onSubmit={(e) => {
         e.preventDefault();
-        props.form.validateFields((err, values) => {
+        props.form.validateFields((_, values) => {
             ///values搜寻条件数据过滤
             let newObj = {};
             for (const key in values) {
@@ -354,8 +356,19 @@ const Searchfrom = Form.create({ name: 'form' })(props => {
                     })(<Input allowClear placeholder='请输入编号(模糊查询)' />)}
                 </Form.Item>
             </Col>
-            <Col span={24}>
-                <div style={{ textAlign: 'right', paddingTop: 3 }}>
+        </Row>
+        <Row>
+            <Col span={6}>
+                <Form.Item label='是否作废' {...itemProps}>
+                    {props.form.getFieldDecorator('is_stop', {
+                        valuePropName: 'checked',
+                        initialValue: props.defaultIsStop,
+                        rules: [{ required: false }]
+                    })(<Switch checkedChildren="是" unCheckedChildren="否" />)}
+                </Form.Item>
+            </Col>
+            <Col span={18}>
+                <div style={{ textAlign: 'right' }}>
                     <Button type="primary" htmlType="submit">查询</Button>
                     <Button style={{ marginLeft: 8 }} onClick={() => { props.form.resetFields() }}>清除</Button>
                 </div>
