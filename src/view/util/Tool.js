@@ -1442,7 +1442,7 @@ export async function deleteMainSubJBT(JBTObj, Delete = 1) {
                 return { code: 0, message: Delete ? '删除成功' : '作废成功', all_id_list }
             } else { return { code: -1, message: Delete ? '删除失败' : '作废失败', all_id_list } }
         } else { return { code: -1, message: '获取其下措施票数据失败' } }
-    } else {
+    } else {///作废副票
         let delete_res = await HttpApi.updateJTApplyRecord({ id: JBTObj.id, ...delete_stop_obj })
         if (delete_res.data.code === 0) {
             return { code: 0, message: Delete ? '删除成功' : '作废成功' }

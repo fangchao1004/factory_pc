@@ -660,11 +660,9 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                     let res_delete = await deleteMainSubJBT(record, 0)
                     if (res_delete.code === 0) {
                         const all_id_list = res_delete.all_id_list ///所有待添加日志的工作票id 包含一个主票和旗下的若干副票
-                        console.log('all_id_list:', all_id_list)
-                        for (let index = 0; index < all_id_list.length; index++) {
-                            const jbtar_id = all_id_list[index];
+                        if (record.is_sub) {///副票
                             let obj = {};
-                            obj['jbtar_id'] = jbtar_id
+                            obj['jbtar_id'] = record.id
                             obj['user_id'] = currentUser.id
                             obj['user_name'] = currentUser.name
                             obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
@@ -672,6 +670,19 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                             obj['remark'] = stop_remark_des
                             obj['is_agent'] = 0
                             HttpApi.addJbTStepLog(obj)///添加log
+                        } else {///主票-会同旗下所属的副票一起作废
+                            for (let index = 0; index < all_id_list.length; index++) {
+                                const jbtar_id = all_id_list[index];
+                                let obj = {};
+                                obj['jbtar_id'] = jbtar_id
+                                obj['user_id'] = currentUser.id
+                                obj['user_name'] = currentUser.name
+                                obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
+                                obj['step_des'] = '作废该票'
+                                obj['remark'] = stop_remark_des
+                                obj['is_agent'] = 0
+                                HttpApi.addJbTStepLog(obj)///添加log
+                            }
                         }
                         message.success(res_delete.message)
                     } else { message.error(res_delete.message) }
