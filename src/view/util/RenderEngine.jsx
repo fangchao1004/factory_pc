@@ -313,12 +313,14 @@ function disabledDateTime(date) {
   };
 }
 
-function disabledRangeTime() {
+function disabledRangeTime(_, type) {
   let current = moment()
   let hour = current.hour()///当前小时
-  return {
-    disabledHours: () => range(0, 24).splice(0, hour),
-  };
+  if (type === 'start') {
+    return {
+      disabledHours: () => range(0, 24).splice(0, hour),
+    };
+  }
 }
 
 function range(start, end) {

@@ -55,9 +55,9 @@ export default function JobTicketOfCreate() {
                 const status_table = JSON.parse(tempObj.status_table)
                 const status_0_role_info = status_table.status_list.filter((item) => item.current_status === 0)
                 const next_role_id = status_0_role_info[0].next_role_id ///下一步处理候选人
-                let { target_list, other_list } = await getTargetRoleIdUser(userList, next_role_id)
-                console.log('target_list:', target_list)
-                console.log('other_list:', other_list)
+                let { target_list } = await getTargetRoleIdUser(userList, next_role_id)
+                // console.log('target_list:', target_list)
+                // console.log('other_list:', other_list)
                 setTargetUserList(target_list)
                 // const major_id = tempObj.major_id
                 // console.log('major_id', major_id);
