@@ -103,5 +103,6 @@ export const VersionlistData = [
     // { title: '更新', description: 'v1.5.7.4-HF 员工信息模块增加名称筛选功能；后台修改接口查询条件更新，失败的反馈信息修改' }
     // { title: '更新', description: 'v1.5.7.5 工作票-60正式环境发布' }
     // { title: '更新', description: 'v1.5.7.6 工作票作废功能修改' }
-    { title: '更新', description: 'v1.5.7.7 工作票作废功能部分bug修复' }
+    // { title: '更新', description: 'v1.5.7.7 工作票作废功能部分bug修复' }
+    { title: '更新', description: 'v1.5.7.8 补开措施票时，不再限制已经开过的措施票' }
 ]

@@ -40,7 +40,7 @@ export default function JobTicketOfMy() {
     const [statusDesList, setStatusDesList] = useState([])
     const [addNewSubJBTVisible, setAddNewSubJBTVisible] = useState(false)
     const [tempSelectAddSubJBTValue, setTempSelectAddSubJBTValue] = useState(null)
-    const [currentJBTSelectedSubTitleList, setCurrentJBTSelectedSubTitleList] = useState([])///当前主票下有哪些title类的措施票
+    // const [currentJBTSelectedSubTitleList, setCurrentJBTSelectedSubTitleList] = useState([])///当前主票下有哪些title类的措施票
     const init = useCallback(async () => {
         setLoading(true)
         const localUserInfo = storage.getItem('userinfo');
@@ -325,8 +325,8 @@ export default function JobTicketOfMy() {
                             <div key={'y'}>
                                 <Tooltip title={'新增措施票'} placement="left">
                                     <Button size='small' type='link' icon='plus' style={{ color: '#fa541c' }} onClick={() => {
-                                        let temp = props.record.sub_tickets.map((item) => { return item.no.split('-')[0] })
-                                        setCurrentJBTSelectedSubTitleList(temp)
+                                        // let temp = props.record.sub_tickets.map((item) => { return item.no.split('-')[0] })
+                                        // setCurrentJBTSelectedSubTitleList(temp)
                                         setCurrentSelectRecord(props.record)
                                         setAddNewSubJBTVisible(true)
                                     }}></Button>
@@ -409,7 +409,9 @@ export default function JobTicketOfMy() {
                             <div><Tag color='blue'>{item.type_name}</Tag></div>
                             <div style={{ paddingLeft: 40 }}>
                                 {item.list.map((item, index) => {
-                                    return <Radio disabled={currentJBTSelectedSubTitleList.indexOf(item.title) !== -1} key={index} value={item.id} record={item}>{item.self_ticket_name || item.ticket_name}</Radio>
+                                    return <Radio
+                                        // disabled={currentJBTSelectedSubTitleList.indexOf(item.title) !== -1}
+                                        key={index} value={item.id} record={item}>{item.self_ticket_name || item.ticket_name}</Radio>
                                 })}
                             </div>
                         </div>
