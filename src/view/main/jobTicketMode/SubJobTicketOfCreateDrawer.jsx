@@ -165,7 +165,11 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
                                                 let element = afterCheckObj;///每个措施票
                                                 element.p_id = pId;
                                                 let user_str = ',' + element.userInfo.user_id_list.toString() + ','
-                                                await createNewJobTicketApply(element, user_str, pNo)
+                                                let res = await createNewJobTicketApply(element, user_str, pNo)
+                                                if (!res) {
+                                                    message.error('提交失败')
+                                                    return
+                                                }
                                                 // console.log('添加措施票记录:', res);
                                                 let res1 = await HttpApi.getLastJTApplyRecordId()
                                                 if (res1.data.code === 0 && res1.data.data.length > 0) {

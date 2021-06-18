@@ -507,12 +507,14 @@ export default function JobTicketOfCreate() {
                                                                     setAllSubTicketList([])
                                                                     setCurrentSubJBT({})
                                                                 }
+                                                            } else {
+                                                                message.error('提交失败')
                                                             }
                                                         }
                                                     })
                                                 }}>
                                                 提交
-                                        </Button>
+                                            </Button>
                                         </div>
                                     </div>
                                 </div>
