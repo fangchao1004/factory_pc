@@ -141,74 +141,92 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
                                 {getUserGroupList()}
                             </Select>
                         </div>
-                        {isExtraAdd ? <div style={{ textAlign: 'right', marginTop: 10 }}><Button type='danger' size='small' icon='upload' onClick={() => {
-                            if (ticketNextUserList.toString().length === 0) { message.error('请选择好措施票处理人员，再进行提交'); return }
-                            var afterCheckObj = checkCellWhichIsEmpty(currentSubJBT, 0)
-                            sbjtvalueChangeCallback(afterCheckObj)
-                            let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
-                            if (needValueButIsEmpty) {
-                                message.error('请填写好措施票后，再进行提交')
-                                return
-                            }
-                            confirm({
-                                title: '确认提交当前的措施票吗?',
-                                content: '请确保所填信息的准确和完整',
-                                okText: '确认',
-                                okType: 'danger',
-                                cancelText: '取消',
-                                onOk: async function () {
-                                    console.log('pId', pId);
-                                    console.log('提交:', currentSubJBT);
-                                    let element = afterCheckObj;///每个措施票
-                                    element.p_id = pId;
-                                    let user_str = ',' + element.userInfo.user_id_list.toString() + ','
-                                    await createNewJobTicketApply(element, user_str, pNo)
-                                    // console.log('添加措施票记录:', res);
-                                    let res1 = await HttpApi.getLastJTApplyRecordId()
-                                    if (res1.data.code === 0 && res1.data.data.length > 0) {
-                                        const jbtar_id_sub = res1.data.data[0]['id']
-                                        let obj = {};
-                                        obj['jbtar_id'] = jbtar_id_sub /// 添加措施票记录 的id
-                                        obj['user_id'] = currentUser.id
-                                        obj['user_name'] = currentUser.name
-                                        obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
-                                        obj['step_des'] = '创建措施票 提交至 ' + element.userInfo.user_name_list.join(',')
-                                        obj['remark'] = ''
-                                        await HttpApi.addJbTStepLog(obj)///添加log
-                                        message.success('添加措施票成功')
-                                        resetUserSelectValue()
-                                        onClose()
-                                        if (resetList) resetList()
-                                    }
+                        {isExtraAdd ?
+                            <div style={{ textAlign: 'right', marginTop: 10 }}>
+                                <Button type='danger' size='small' icon='upload'
+                                    onClick={() => {
+                                        if (ticketNextUserList.toString().length === 0) { message.error('请选择好措施票处理人员，再进行提交'); return }
+                                        var afterCheckObj = checkCellWhichIsEmpty(currentSubJBT, 0)
+                                        sbjtvalueChangeCallback(afterCheckObj)
+                                        let needValueButIsEmpty = checkDataIsLostValue(afterCheckObj)
+                                        if (needValueButIsEmpty) {
+                                            message.error('请填写好措施票后，再进行提交')
+                                            return
+                                        }
+                                        confirm({
+                                            title: '确认提交当前的措施票吗?',
+                                            content: '请确保所填信息的准确和完整',
+                                            okText: '确认',
+                                            okType: 'danger',
+                                            cancelText: '取消',
+                                            onOk: async function () {
+                                                console.log('pId', pId);
+                                                console.log('提交:', currentSubJBT);
+                                                let element = afterCheckObj;///每个措施票
+                                                element.p_id = pId;
+                                                let user_str = ',' + element.userInfo.user_id_list.toString() + ','
+                                                await createNewJobTicketApply(element, user_str, pNo)
+                                                // console.log('添加措施票记录:', res);
+                                                let res1 = await HttpApi.getLastJTApplyRecordId()
+                                                if (res1.data.code === 0 && res1.data.data.length > 0) {
+                                                    const jbtar_id_sub = res1.data.data[0]['id']
+                                                    let obj = {};
+                                                    obj['jbtar_id'] = jbtar_id_sub /// 添加措施票记录 的id
+                                                    obj['user_id'] = currentUser.id
+                                                    obj['user_name'] = currentUser.name
+                                                    obj['time'] = moment().format('YYYY-MM-DD HH:mm:ss')
+                                                    obj['step_des'] = '创建措施票 提交至 ' + element.userInfo.user_name_list.join(',')
+                                                    obj['remark'] = ''
+                                                    await HttpApi.addJbTStepLog(obj)///添加log
+                                                    message.success('添加措施票成功')
+                                                    resetUserSelectValue()
+                                                    onClose()
+                                                    if (resetList) resetList()
+                                                }
 
-                                }
-                            })
-                        }}>提交</Button> </div> :
-                            <div style={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                width: '100%',
-                                alignItems: 'center',
-                                marginTop: 10
-                            }}>
-                                <Tag color='blue'>操作</Tag>
+                                            }
+                                        })
+                                    }}>提交</Button>
+                            </div> :
+                            <div>
+
                                 <div style={{
                                     display: 'flex',
-                                    flexDirection: 'row-reverse',
+                                    flexDirection: 'row',
                                     width: '100%',
-                                    padding: 5
+                                    alignItems: 'center',
+                                    marginTop: 10
                                 }}>
-                                    <Button type='primary' size='small' disabled={!currentSubJBT.pages}
-                                        onClick={() => {
-                                            setAddJBTSampleVisible(true)
-                                        }}
-                                    >生成典型票</Button>
-                                    {currentSubJBT.user_id !== null ?
-                                        <Button style={{ marginRight: 10 }} type='dashed' size='small' disabled={!currentSubJBT.pages}
+                                    <Tag color='blue'>操作</Tag>
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'row-reverse',
+                                        width: '100%',
+                                        padding: 5
+                                    }}>
+                                        <Button type='primary' size='small' disabled={!currentSubJBT.pages}
                                             onClick={() => {
-                                                setUpdateJBTSampleVisible(true)
-                                            }}
-                                        >修改</Button> : null}
+                                                setAddJBTSampleVisible(true)
+                                            }}>生成典型票</Button>
+                                        {currentSubJBT.user_id !== null ?
+                                            <Button style={{ marginRight: 10 }} type='dashed' size='small' disabled={!currentSubJBT.pages}
+                                                onClick={() => {
+                                                    setUpdateJBTSampleVisible(true)
+                                                }}>修改</Button> : null}
+                                    </div>
+                                </div>
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    width: '100%',
+                                    alignItems: 'center',
+                                    marginTop: 10
+                                }}>
+
+                                    <Button style={{ marginRight: 10 }} type='dashed' size='small' disabled={!currentSubJBT.pages}
+                                        onClick={() => {
+                                            onClose()
+                                        }}>弹窗收起-返回提交</Button>
                                 </div>
                             </div>
                         }

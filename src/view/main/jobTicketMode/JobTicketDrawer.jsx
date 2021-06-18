@@ -402,7 +402,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                     <div style={{ marginTop: 10, ...styles.bar }}>
                                         <span><Tag size='small' color='blue'>提交</Tag></span>
                                         <Select value={selectValue} placeholder='请选择处理项' allowClear size='small' style={{ width: '100%' }} disabled={!actionSelectAble}
-                                            onChange={(v, v2) => {
+                                            onChange={(v) => {
                                                 setSelectValue(v)
                                                 if (v === '-1') { setTicketNextUserList([]) }
                                             }}
