@@ -24,6 +24,9 @@ export const TesturiForks = 'http://60.174.196.158:3005/' ///60-60数据库
 
 export const TesturiForAccess = 'http://60.174.196.158:3004/' ///60服务器-60数据库 mysql server 服务独立地址 门禁信息
 class HttpApi {
+    static sendErrorMessToUs(text = '') {
+        return Axios.post('http://60.174.196.158:3008/sendErrorMessToUs', { text })
+    }
     static verify(params) {
         return Axios.post(Testuri + 'verify', params)
     }

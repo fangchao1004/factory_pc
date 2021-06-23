@@ -273,7 +273,10 @@ export default function JobTicketOfMy() {
                                             cancelText: '取消',
                                             onOk: async () => {
                                                 let res_delete = await deleteMainSubJBT(props.record)
-                                                if (res_delete.code === 0) { message.success(res_delete.message, 3, () => { init() }) } else { message.error(res_delete.message) }
+                                                if (res_delete.code === 0) { message.success(res_delete.message, 3, () => { init() }) } else {
+                                                    message.error(res_delete.message);
+                                                    HttpApi.sendErrorMessToUs('res_delete.message:' + res_delete.message)
+                                                }
                                             }
                                         })
                                     }}></Button>

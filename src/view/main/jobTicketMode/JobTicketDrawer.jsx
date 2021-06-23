@@ -331,6 +331,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                 } else {
                     hide()
                     message.error('打印失败', 10); setPrinting(false)
+                    HttpApi.sendErrorMessToUs('打印失败')
                 }
             })
         }

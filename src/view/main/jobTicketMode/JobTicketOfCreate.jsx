@@ -509,6 +509,7 @@ export default function JobTicketOfCreate() {
                                                                 }
                                                             } else {
                                                                 message.error('提交失败')
+                                                                HttpApi.sendErrorMessToUs('创建工作票提交失败')
                                                             }
                                                         }
                                                     })

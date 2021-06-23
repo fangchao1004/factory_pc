@@ -168,6 +168,7 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
                                                 let res = await createNewJobTicketApply(element, user_str, pNo)
                                                 if (!res) {
                                                     message.error('提交失败')
+                                                    HttpApi.sendErrorMessToUs('工作票提交失败')
                                                     return
                                                 }
                                                 // console.log('添加措施票记录:', res);
