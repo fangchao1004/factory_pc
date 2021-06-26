@@ -9,11 +9,11 @@ export default props => {
     if (values.username && values.username.indexOf('=') !== -1) { message.error('包含非法字符'); return }
     if (values.password && values.password.indexOf('=') !== -1) { message.error('包含非法字符'); return }
     // 测试时注释掉
-    const verfiyResult = await HttpApi.verify(values)
-    if (!verfiyResult || !verfiyResult.data || verfiyResult.data.code !== 0) {
-      message.error('禁止访问,请联系管理员')
-      return
-    }
+    // const verfiyResult = await HttpApi.verify(values)
+    // if (!verfiyResult || !verfiyResult.data || verfiyResult.data.code !== 0) {
+    //   message.error('禁止访问,请联系管理员')
+    //   return
+    // }
     let sql = `select users.* ,group_concat(u_m_j.mj_id) as major_id_all, group_concat(majors.name) as major_name_all,levels.name as level_name from users
         left join (select * from user_map_major where effective = 1) u_m_j on u_m_j.user_id = users.id
         left join (select * from majors  where effective = 1) majors on majors.id = u_m_j.mj_id
