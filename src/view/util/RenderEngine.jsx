@@ -93,8 +93,8 @@ export function RenderEngine({ isAgent, jsonlist, userList, currentUser, current
           return (
             <DatePicker
               allowClear={false}
-              disabledDate={disabledDate}
-              disabledTime={disabledDateTime}
+              // disabledDate={disabledDate}
+              // disabledTime={disabledDateTime}
               placeholder=''
               size='small'
               key={index}

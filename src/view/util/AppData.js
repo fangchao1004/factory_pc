@@ -106,5 +106,6 @@ export const VersionlistData = [
     // { title: '更新', description: 'v1.5.7.7 工作票作废功能部分bug修复' }
     // { title: '更新', description: 'v1.5.7.8 补开措施票时，不再限制已经开过的措施票' }
     // { title: '更新', description: 'v1.5.7.9 增加报错转发' }
-    { title: '更新', description: 'v1.5.8 input不再加字数限制' }
+    // { title: '更新', description: 'v1.5.8 input不再加字数限制' }
+    { title: '更新', description: 'v1.5.8.1 datepicker不再加日期和时间限制' }
 ]
