@@ -1,4 +1,4 @@
-import { Button, Drawer, Select, message, Modal, Affix, Tag, Input, Spin, Alert, Radio, InputNumber, Switch, Col, Row, Icon } from 'antd'
+import { Button, Drawer, Select, message, Modal, Affix, Tag, Input, Spin, Alert, Radio, Icon } from 'antd'
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
@@ -15,14 +15,10 @@ var step_des = '';
 var ticketNextUserNameList = [];
 let per_list = []///上次措施票的选择项
 var temp_add_list = []///临时新增的措施票勾选值['xxx']
-var defaultPrintNum = 0;
-var defaultPrinCard = true;
 var afterCheckObj;
 export default function JobTicketDrawer({ isAgent, visible, onClose, record, resetData }) {
     // console.log('record:', record);
     const radio_group = useRef()
-    const print_num_ref = useRef()
-    const print_card_ref = useRef()
     const stop_input_ref = useRef()
     const [stepLogVisible, setStepLogVisible] = useState(false);///展示步骤界面
     const [currentJobTicketValue, setCurrentJobTicketValue] = useState({})///填写改动后的数值- 提交时使用
@@ -43,7 +39,6 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
     const [ticketNextUserList, setTicketNextUserList] = useState([])
     const [remark, setRemark] = useState('')
     const [loading, setLoading] = useState(true)
-    const [printing, setPrinting] = useState(false)
 
     const [waitToSelectPanelVisible, setWaitToSelectPanelVisible] = useState(false)
     const [waitToSelectSubJBTList, setWaitToSelectSubJBTList] = useState([])
@@ -170,7 +165,6 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                 let tempObj = JSON.parse(JSON.stringify(res.data.data[0]))
                 tempObj.pages = JSON.parse(tempObj.pages)
                 setCurrentJobTicketValue(tempObj)///票数据初始化
-                defaultPrintNum = tempObj.print_num
                 ///提取原先措施票的勾选值
                 tempObj.pages.forEach((page) => {
                     const cpts = page.components
@@ -302,6 +296,22 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
         }
         return result
     }, [targetList, otherList, isAgent])
+    const printHandler = useCallback(() => {
+        let timeStamp = new Date().getTime()
+        let has_extra = hasExtraPages(currentJobTicketValue)
+        const id = currentJobTicketValue.id
+        const is_sub = record.is_sub
+        const checkcard = currentJobTicketValue.checkcard ? 1 : 0
+        window.open(`${PRINT_WEB}id=${id}&is_sub=${is_sub}&time=${timeStamp}&des=打印工作票`, '_blank')
+        if (has_extra) { ///如果有附页就再开一个页面 A4 显示
+            // console.log('如果有附页就再开一个页面 A4 显示')
+            window.open(`${PRINT_WEB}id=${id}&is_extra=1&time=${timeStamp}&des=打印工作票的附页`, '_blank')
+        }
+        if (checkcard) {
+            // console.log('如果有检查卡就再开一个页面 A4 显示')
+            window.open(`${PRINT_WEB}id=${id}&is_sub=${is_sub}&is_checkcard=1&time=${timeStamp}&des=打印检查卡或登记表`, '_blank')
+        }
+    }, [currentJobTicketValue, record])
     useEffect(() => {
         setLoading(true)
         setTimeout(() => {
@@ -318,53 +328,13 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
             init3();
         }, 300);
     }, [init3])
-    useEffect(() => {
-        if (window.electron) {
-            console.log('添加监听');
-            var hide;
-            window.electron.ipcRenderer.on('message', (_, arg) => {
-                console.log('监听回调')
-                if (arg === 'printStart') {
-                    hide = message.loading('正在打印...', 0);
-                } else if (arg === 'printSuccess') {
-                    hide()
-                    message.success('打印成功', 10); setPrinting(false)
-                } else {
-                    hide()
-                    message.error('打印失败', 10); setPrinting(false)
-                    HttpApi.sendErrorMessToUs('打印失败')
-                }
-            })
-        }
-        return () => {
-            if (window.electron) {
-                console.log('移除监听');
-                window.electron.ipcRenderer.removeAllListeners('message')
-            }
-        }
-    }, [])
     return (
         <Drawer
             destroyOnClose={true}
             width={1200}
             title={isAgent ? "工作票调度" : <div>
                 <span>工作票处理</span>
-                <Button style={{ marginLeft: 10 }} size='small' onClick={() => {
-                    let timeStamp = new Date().getTime()
-                    let has_extra = hasExtraPages(currentJobTicketValue)
-                    const id = currentJobTicketValue.id
-                    const is_sub = record.is_sub
-                    const checkcard = currentJobTicketValue.checkcard ? 1 : 0
-                    window.open(`${PRINT_WEB}id=${id}&is_sub=${is_sub}&time=${timeStamp}&des=打印工作票`, '_blank')
-                    if (has_extra) { ///如果有附页就再开一个页面 A4 显示
-                        // console.log('如果有附页就再开一个页面 A4 显示')
-                        window.open(`${PRINT_WEB}id=${id}&is_extra=1&time=${timeStamp}&des=打印工作票的附页`, '_blank')
-                    }
-                    if (checkcard) {
-                        // console.log('如果有检查卡就再开一个页面 A4 显示')
-                        window.open(`${PRINT_WEB}id=${id}&is_sub=${is_sub}&is_checkcard=1&time=${timeStamp}&des=打印检查卡或登记表`, '_blank')
-                    }
-                }} ><Icon type="printer" style={{ color: '#1890ff' }} /></Button>
+                <Button style={{ marginLeft: 10 }} size='small' onClick={printHandler} ><Icon type="printer" style={{ color: '#1890ff' }} /></Button>
             </div>}
             placement='left'
             onClose={onClose}
@@ -378,7 +348,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                         type="info"
                     />
                 </Spin> :
-                <Spin spinning={printing}>
+                <div>
                     <div style={{ display: 'flex', flexDirection: 'row', backgroundColor: '#F1F2F5', padding: 10 }}>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                             {renderAllPage()}
@@ -587,16 +557,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                                 HttpApi.addJbTStepLog(obj)///添加log
                                 resetHandler()
                                 if (takeTicketAndPrint) {
-                                    console.log('window:', window)
-                                    console.log('window.electron', window.electron);
-                                    if (window.electron) {
-                                        setPrinting(true)
-                                        setTimeout(() => {
-                                            setPrinting(false)
-                                        }, 60000);
-                                        console.log('打印中')
-                                        window.electron.ipcRenderer.send('message', { content: 'printStart', id: record.job_t_r_id, print_num: print_num_ref.current.inputNumberRef.state.value, print_card: print_card_ref.current.rcSwitch.state.checked })
-                                    } else { message.warning('请使用桌面版本进行打印操作') }
+                                    printHandler()
                                 }
                             }
                         }
@@ -604,20 +565,8 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                     }}
                     >
                         <div>请自行保证所填信息的准确性</div>
-                        {takeTicketAndPrint ?
-                            <div style={{ marginTop: 20 }}>
-                                <Row>
-                                    <Col span={6}>打印份数</Col>
-                                    <Col span={18}><InputNumber size='small' min={1} style={{ width: 80 }} ref={print_num_ref} defaultValue={defaultPrintNum} /></Col>
-                                </Row>
-                                <Row>
-                                    <Col span={6}>打印检查卡</Col>
-                                    <Col span={18}><Switch ref={print_card_ref} defaultChecked={defaultPrinCard} checkedChildren={'是'} unCheckedChildren={'否'} /></Col>
-                                </Row>
-                            </div> : null
-                        }
                     </Modal>
-                </Spin>
+                </div>
             }
             <SubJobTicketOfCreateDrawer
                 pId={record ? record.id : null}
