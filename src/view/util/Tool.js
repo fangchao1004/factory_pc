@@ -1621,3 +1621,11 @@ export function orderByUserIdLate(tempList) {
     })
     return other_list.concat(user_list)
 }
+
+export function hasExtraPages(currentJobTicketValue) {
+    let hasExtra = 0
+    currentJobTicketValue.pages.forEach((page) => {
+        if (page.is_extra) { hasExtra = 1 }
+    })
+    return hasExtra
+}

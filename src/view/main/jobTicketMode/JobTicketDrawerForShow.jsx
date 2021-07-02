@@ -19,7 +19,6 @@ export default function JobTicketDrawerForShow({ visible, onClose, record }) {
             if (res.data.code === 0) {
                 try {
                     var tempObj = JSON.parse(JSON.stringify(res.data.data[0]))
-                    console.log('tempObj:', tempObj);
                     tempObj.pages = JSON.parse(tempObj.pages)
                     setCurrentJobTicketValue(tempObj)///票数据初始化
                 } catch (error) {

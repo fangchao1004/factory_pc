@@ -1,11 +1,12 @@
-import { Button, Drawer, Select, message, Modal, Affix, Tag, Input, Spin, Alert, Radio, InputNumber, Switch, Col, Row } from 'antd'
+import { Button, Drawer, Select, message, Modal, Affix, Tag, Input, Spin, Alert, Radio, InputNumber, Switch, Col, Row, Icon } from 'antd'
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { autoFillNo, removeCheckBoxValue, checkCellWhichIsEmpty, checkDataIsLostValue, checkJBTStatusIsChange, deleteMainSubJBT, getJTRecordContentAndPlanTime, getPinYin, getRecordCurrentStatusInfo, getTargetRoleIdUser, checkLastStepIsBack, getRecordStatusTable, getStatusDesByNewStatus, orderByUserIdLate } from '../../util/Tool';
+import { autoFillNo, removeCheckBoxValue, checkCellWhichIsEmpty, checkDataIsLostValue, checkJBTStatusIsChange, deleteMainSubJBT, getJTRecordContentAndPlanTime, getPinYin, getRecordCurrentStatusInfo, getTargetRoleIdUser, checkLastStepIsBack, getRecordStatusTable, getStatusDesByNewStatus, orderByUserIdLate, hasExtraPages } from '../../util/Tool';
 import moment from 'moment'
 import JobTicketStepLogView from './JobTicketStepLogView';
 import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer';
+import { PRINT_WEB } from '../../util/AppData';
 const { confirm } = Modal;
 const { TextArea } = Input;
 const { Option, OptGroup } = Select
@@ -346,7 +347,25 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
         <Drawer
             destroyOnClose={true}
             width={1200}
-            title={isAgent ? "工作票调度" : "工作票处理"}
+            title={isAgent ? "工作票调度" : <div>
+                <span>工作票处理</span>
+                <Button style={{ marginLeft: 10 }} size='small' onClick={() => {
+                    let timeStamp = new Date().getTime()
+                    let has_extra = hasExtraPages(currentJobTicketValue)
+                    const id = currentJobTicketValue.id
+                    const is_sub = record.is_sub
+                    const checkcard = currentJobTicketValue.checkcard ? 1 : 0
+                    window.open(`${PRINT_WEB}id=${id}&is_sub=${is_sub}&time=${timeStamp}&des=打印工作票`, '_blank')
+                    if (has_extra) { ///如果有附页就再开一个页面 A4 显示
+                        // console.log('如果有附页就再开一个页面 A4 显示')
+                        window.open(`${PRINT_WEB}id=${id}&is_extra=1&time=${timeStamp}&des=打印工作票的附页`, '_blank')
+                    }
+                    if (checkcard) {
+                        // console.log('如果有检查卡就再开一个页面 A4 显示')
+                        window.open(`${PRINT_WEB}id=${id}&is_sub=${is_sub}&is_checkcard=1&time=${timeStamp}&des=打印检查卡或登记表`, '_blank')
+                    }
+                }} ><Icon type="printer" style={{ color: '#1890ff' }} /></Button>
+            </div>}
             placement='left'
             onClose={onClose}
             visible={visible}

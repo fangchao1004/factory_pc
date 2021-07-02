@@ -312,16 +312,16 @@ function disabledDate(current) {
   return current < moment().startOf('day')
 }
 
-function disabledDateTime(date) {
-  let current = moment()
-  let hour = current.hour()///当前小时
-  let minute = current.minute()///当前分钟
-  let than_one_hour = date - current >= 1800000 ///大于30分钟
-  return {
-    disabledHours: () => range(0, 24).splice(0, hour),
-    disabledMinutes: () => range(0, than_one_hour ? 0 : minute)
-  };
-}
+// function disabledDateTime(date) {
+//   let current = moment()
+//   let hour = current.hour()///当前小时
+//   let minute = current.minute()///当前分钟
+//   let than_one_hour = date - current >= 1800000 ///大于30分钟
+//   return {
+//     disabledHours: () => range(0, 24).splice(0, hour),
+//     disabledMinutes: () => range(0, than_one_hour ? 0 : minute)
+//   };
+// }
 
 function disabledRangeTime(_, type) {
   let current = moment()

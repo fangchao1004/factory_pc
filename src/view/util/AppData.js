@@ -35,6 +35,7 @@ export const NOTICEMUSICOPEN = 'noticeMusicOpen';///一般情况下，所有权�
 export const NOTICEMUSICOPENFORRUN = 'noticeMusicOpenForRun';///针对运行情况，独立的一个开启提醒的开关标志位
 export const BROWERTYPE = 'browerType';
 export const BUGIDLIST = 'bugIdList'///和我相关的缺陷的id
+export const PRINT_WEB = 'http://60.174.196.158:12345/print_new/index.html?'
 // const a = <a href="https://www.jb51.net" title="脚本之家" target="_blank">Welcome</a>
 export const VersionlistData = [
     // { title: '版本号', description: `1.5.3 beta` },
