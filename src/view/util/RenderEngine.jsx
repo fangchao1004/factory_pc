@@ -38,6 +38,11 @@ export function RenderEngine({ isAgent, jsonlist, userList, currentUser, current
               // maxLength={maxLengthStr}
               style={{ ...item.attribute.style, borderStyle: item.attribute.isempty ? 'solid' : 'none', borderWidth: 1, borderColor: 'red' }}
               onChange={e => {
+                if (e.target.value[e.target.value.length - 1] === '\\') {
+                  message.error('请勿使用\\反斜杠。建议用/正斜杠代替');
+                  changeComponetsValue(index, e.target.value.substring(0, e.target.value.length - 1))
+                  return
+                }
                 changeComponetsValue(index, e.target.value)
               }}
             />
@@ -49,6 +54,11 @@ export function RenderEngine({ isAgent, jsonlist, userList, currentUser, current
               {...item.attribute}
               style={{ ...item.attribute.style, borderStyle: item.attribute.isempty ? 'solid' : 'none', borderWidth: 1, borderColor: 'red' }}
               onChange={e => {
+                if (e.target.value[e.target.value.length - 1] === '\\') {
+                  message.error('请勿使用\\反斜杠。建议用/正斜杠代替');
+                  changeComponetsValue(index, e.target.value.substring(0, e.target.value.length - 1))
+                  return
+                }
                 changeComponetsValue(index, e.target.value)
               }}
             />

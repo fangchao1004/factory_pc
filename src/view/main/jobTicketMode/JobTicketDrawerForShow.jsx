@@ -1,4 +1,4 @@
-import { Alert, Button, Drawer, Spin } from 'antd'
+import { Alert, Button, Drawer, message, Spin } from 'antd'
 import React, { useCallback, useEffect, useState } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
@@ -17,9 +17,14 @@ export default function JobTicketDrawerForShow({ visible, onClose, record }) {
         if (record && record.job_t_r_id) {
             let res = await HttpApi.getJTRecords({ id: record.job_t_r_id })
             if (res.data.code === 0) {
-                let tempObj = JSON.parse(JSON.stringify(res.data.data[0]))
-                tempObj.pages = JSON.parse(tempObj.pages)
-                setCurrentJobTicketValue(tempObj)///票数据初始化
+                try {
+                    var tempObj = JSON.parse(JSON.stringify(res.data.data[0]))
+                    console.log('tempObj:', tempObj);
+                    tempObj.pages = JSON.parse(tempObj.pages)
+                    setCurrentJobTicketValue(tempObj)///票数据初始化
+                } catch (error) {
+                    message.error('json 解析有问题')
+                }
             }
             let res_user = await HttpApi.getUserInfo({ effective: 1 })
             if (res_user.data.code === 0) {
