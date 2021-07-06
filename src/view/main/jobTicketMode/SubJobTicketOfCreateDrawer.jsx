@@ -20,7 +20,7 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
     const [updateJBTSampleVisible, setUpdateJBTSampleVisible] = useState(false)
 
     const renderAllPage = useCallback((currentSubJBT) => {
-        if (!currentSubJBT.pages) { return null }
+        if (!currentSubJBT || !currentSubJBT.pages) { return null }
         let scalObj = {}
         if (currentSubJBT.scal) {
             scalObj = JSON.parse(currentSubJBT.scal)
@@ -131,7 +131,7 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
                                         return false
                                     }
                                 }}
-                                value={ticketNextUserList.length > 0 ? ticketNextUserList : currentSubJBT.userInfo ? currentSubJBT.userInfo.user_id_list : []}
+                                value={ticketNextUserList.length > 0 ? ticketNextUserList : (currentSubJBT && currentSubJBT.userInfo ? currentSubJBT.userInfo.user_id_list : [])}
                                 onChange={(value, option) => {
                                     setTicketNextUserList(value)///当前页面先变动
                                     ticketNextUserNameList = option.map((item) => { return item.props.children })

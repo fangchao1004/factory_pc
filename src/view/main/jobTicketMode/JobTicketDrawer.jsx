@@ -232,7 +232,8 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
             })
             // console.log('新增:', add_list)
             temp_add_list = add_list
-            let res = await HttpApi.getSubJobTicketsList({ type_name: add_list[0], user_id: currentUser.id })
+            if (add_list[add_list.length - 1] === '无') { return }
+            let res = await HttpApi.getSubJobTicketsList({ type_name: add_list[add_list.length - 1], user_id: currentUser.id })
             if (res.data.code === 0) {
                 let tempList = res.data.data.map((item, index) => { item.key = index; return item });
                 if (tempList.length > 1) {///候选同类措施票大于1时，弹出选择弹窗
@@ -589,10 +590,10 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                 visible={waitToSelectPanelVisible}
                 onCancel={() => {
                     ///移除 temp_add_list
-                    let after_remove = removeCheckBoxValue(currentJobTicketValue, temp_add_list[0])
+                    let after_remove = removeCheckBoxValue(currentJobTicketValue, temp_add_list[temp_add_list.length - 1])
                     setCurrentJobTicketValue(after_remove)
                     setWaitToSelectPanelVisible(false)
-                    per_list = per_list.filter((item) => { return item !== temp_add_list[0] })
+                    per_list = per_list.filter((item) => { return item !== temp_add_list[temp_add_list.length - 1] })
                     temp_add_list = []
                 }}
                 footer={[
