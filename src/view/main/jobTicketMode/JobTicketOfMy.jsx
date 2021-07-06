@@ -324,7 +324,7 @@ export default function JobTicketOfMy() {
                                 </Tooltip>
                             </div>
                         }
-                        let topAdd = props.record.is_sub === 0 && !is_over && before_print && (hasFixPer || hasManagerPer) ? ///主票未终结时且有维修或专工权限
+                        let topAdd = props.record.is_sub === 0 && !is_over && (hasFixPer || hasManagerPer) ? ///主票未终结时且有维修或专工权限
                             <div key={'y'}>
                                 <Tooltip title={'新增措施票'} placement="left">
                                     <Button size='small' type='link' icon='plus' style={{ color: '#fa541c' }} onClick={() => {
