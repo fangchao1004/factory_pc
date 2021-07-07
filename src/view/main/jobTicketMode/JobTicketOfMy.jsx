@@ -247,11 +247,11 @@ export default function JobTicketOfMy() {
                         let per_user_is_me = props.record.per_step_user_id === currentUser.id///上一次的处理人是不是我
                         let last_back_user_is_me = props.record.last_back_user_id === currentUser.id///最近一次的撤回操作是不是我
                         let create_user_is_me = props.record.user_id === currentUser.id///是否为创建者
-                        let { over_status, wait_over_status } = getRecordStatusTable(props.record)
+                        let { over_status } = getRecordStatusTable(props.record)
                         let is_over = false
-                        let before_print = false
+                        // let before_print = false
                         if (props.record.status === over_status) { is_over = true }
-                        if (props.record.status < wait_over_status - 1) { before_print = true }///当前状态值是否小于 打印待终结
+                        // if (props.record.status < wait_over_status - 1) { before_print = true }///当前状态值是否小于 打印待终结
                         let is_start = props.record.status === 0///创建状态时 状态为0
                         let is_main = props.record.is_sub === 0
                         let topBackCpts = null

@@ -1146,6 +1146,39 @@ function mapDepartmentTeamValueToExtra(pages) {
 }
 
 /**
+ * 替换换行符号=>特殊符号
+ */
+export function replaceNChar2SpecialChar(pages) {
+    pages.forEach((page) => {
+        let cpts = page.components
+        cpts.forEach((cpt) => {
+            if (cpt.type === 'textarea' && cpt.attribute.value) {
+                let new_value = cpt.attribute.value.replaceAll(/\n/g, "#####");
+                console.log('new_value1:', new_value)
+                cpt.attribute.value = new_value
+            }
+        })
+    })
+    return pages
+}
+/**
+ * 替换特殊符号=>换行符号
+ */
+export function replaceSpecialChar2NChar(pages) {
+    pages.forEach((page) => {
+        let cpts = page.components
+        cpts.forEach((cpt) => {
+            if (cpt.type === 'textarea' && cpt.attribute.value) {
+                let new_value = cpt.attribute.value.replaceAll(/#####/g, "\n");
+                console.log('new_value2:', new_value)
+                cpt.attribute.value = new_value
+            }
+        })
+    })
+    return pages
+}
+
+/**
  * 
  * @param {*} jobTicketValue 工作票数据
  * @param {String} user_list_str 当前哪些人可以处理 ,0,1,
@@ -1159,8 +1192,8 @@ export async function createNewJobTicketApply(jobTicketValue, user_list_str, p_n
         jobTicketValue.pages = changePNoInputValue({ p_no, pages: jobTicketValue.pages })
     }
     let new_jbt_pages = mapDepartmentTeamValueToExtra(jobTicketValue.pages)
-    // console.log('new_jbt_pages:', new_jbt_pages)
-    jobTicketValue.pages = JSON.stringify(new_jbt_pages)
+    let after_replace_n = replaceNChar2SpecialChar(new_jbt_pages)///换行符替换
+    jobTicketValue.pages = JSON.stringify(after_replace_n)
     // return
     let { job_content, time_list } = getJTRecordContentAndPlanTime({ pages: jobTicketValue.pages })
     let res = await HttpApi.createJTRecord({ ...jobTicketValue, time: moment().format(FORMAT) })
@@ -1191,6 +1224,7 @@ export async function createNewJobTicketApply(jobTicketValue, user_list_str, p_n
             obj['status_table'] = jobTicketValue['status_table'];
             obj['status_des'] = getStatusDesByNewStatus(jobTicketValue, 1)
             /////
+            console.log('obj:', obj)
             let res2 = await HttpApi.createJTApplyRecord(obj)
             if (res2.data.code === 0) {
                 return true

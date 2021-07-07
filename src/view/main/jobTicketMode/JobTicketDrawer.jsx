@@ -2,7 +2,7 @@ import { Button, Drawer, Select, message, Modal, Affix, Tag, Input, Spin, Alert,
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import HttpApi from '../../util/HttpApi'
 import { RenderEngine } from '../../util/RenderEngine'
-import { autoFillNo, removeCheckBoxValue, checkCellWhichIsEmpty, checkDataIsLostValue, checkJBTStatusIsChange, deleteMainSubJBT, getJTRecordContentAndPlanTime, getPinYin, getRecordCurrentStatusInfo, getTargetRoleIdUser, checkLastStepIsBack, getRecordStatusTable, getStatusDesByNewStatus, orderByUserIdLate, hasExtraPages } from '../../util/Tool';
+import { autoFillNo, removeCheckBoxValue, checkCellWhichIsEmpty, checkDataIsLostValue, checkJBTStatusIsChange, deleteMainSubJBT, getJTRecordContentAndPlanTime, getPinYin, getRecordCurrentStatusInfo, getTargetRoleIdUser, checkLastStepIsBack, getRecordStatusTable, getStatusDesByNewStatus, orderByUserIdLate, hasExtraPages, replaceSpecialChar2NChar, replaceNChar2SpecialChar } from '../../util/Tool';
 import moment from 'moment'
 import JobTicketStepLogView from './JobTicketStepLogView';
 import SubJobTicketOfCreateDrawer from './SubJobTicketOfCreateDrawer';
@@ -163,7 +163,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
             let res = await HttpApi.getJTRecords({ id: record.job_t_r_id })
             if (res.data.code === 0) {
                 let tempObj = JSON.parse(JSON.stringify(res.data.data[0]))
-                tempObj.pages = JSON.parse(tempObj.pages)
+                tempObj.pages = replaceSpecialChar2NChar(JSON.parse(tempObj.pages))
                 setCurrentJobTicketValue(tempObj)///票数据初始化
                 ///提取原先措施票的勾选值
                 tempObj.pages.forEach((page) => {
@@ -501,7 +501,7 @@ export default function JobTicketDrawer({ isAgent, visible, onClose, record, res
                     <Modal title='确认提交吗?' visible={visibleModal} onCancel={() => { setVisibleModal(false) }} onOk={async () => {
                         const { wait_over_status } = getRecordStatusTable(record);
                         ///修改 job_tickets_records 中的pages 和 job_tickets_apply_records 中的status
-                        let res1 = await HttpApi.updateJTRecord({ id: currentJobTicketValue.id, pages: JSON.stringify(afterCheckObj.pages) })
+                        let res1 = await HttpApi.updateJTRecord({ id: currentJobTicketValue.id, pages: JSON.stringify(replaceNChar2SpecialChar(afterCheckObj.pages)) })
                         if (res1.data.code === 0) {
                             let new_status = record.status;
                             let { job_content, time_list } = getJTRecordContentAndPlanTime({ pages: JSON.stringify(currentJobTicketValue.pages) })

@@ -111,5 +111,6 @@ export const VersionlistData = [
     // { title: '更新', description: 'v1.5.8.1 datepicker不再加日期和时间限制' }
     // { title: '更新', description: 'v1.5.8.2 工作票input，textarea禁止输入反斜杠' }
     // { title: '更新', description: 'v1.5.8.3 bug修复' }
-    { title: '更新', description: 'v1.5.8.4 添加措施票时，不再判断打印前' }
+    // { title: '更新', description: 'v1.5.8.4 添加措施票时，不再判断打印前' }
+    { title: '更新', description: 'v1.5.8.5 工作票文本域组件支持输入回车换行' }
 ]
