@@ -1124,7 +1124,7 @@ export function getJTRecordContentAndPlanTime({ pages }) {
     })
     return { job_content, time_list }
 }
-
+/**将部门和班组的数据-映射道附页的对应组件中 */
 function mapDepartmentTeamValueToExtra(pages) {
     let department_value = ''
     let team_value = ''
