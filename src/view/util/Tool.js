@@ -1154,7 +1154,6 @@ export function replaceNChar2SpecialChar(pages) {
         cpts.forEach((cpt) => {
             if (cpt.type === 'textarea' && cpt.attribute.value) {
                 let new_value = cpt.attribute.value.replaceAll(/\n/g, "#####");
-                console.log('new_value1:', new_value)
                 cpt.attribute.value = new_value
             }
         })
@@ -1170,7 +1169,6 @@ export function replaceSpecialChar2NChar(pages) {
         cpts.forEach((cpt) => {
             if (cpt.type === 'textarea' && cpt.attribute.value) {
                 let new_value = cpt.attribute.value.replaceAll(/#####/g, "\n");
-                console.log('new_value2:', new_value)
                 cpt.attribute.value = new_value
             }
         })

@@ -15,11 +15,16 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
     // const [currentSubJBTSelf, setCurrentSubJBTSelf] = useState(currentSubJBT)
     // console.log('新 currentSubJBT:', currentSubJBT);
     // console.log('userList:', userList);
+    // console.log('pId:', pId);
+    // console.log('currentSubJBT:', currentSubJBT);
     const [targetUserList, setTargetUserList] = useState([])
     const [addJBTSampleVisible, setAddJBTSampleVisible] = useState(false)
     const [updateJBTSampleVisible, setUpdateJBTSampleVisible] = useState(false)
+    const [showMainJBTDrawerVisible, setShowMainJBTDrawerVisible] = useState(false)
+    const [mainJBTData, setMainJBTData] = useState(null)
 
-    const renderAllPage = useCallback((currentSubJBT) => {
+    const renderAllPage = useCallback((currentSubJBT, is_show_main) => {
+        // console.log('数据：', currentSubJBT);
         if (!currentSubJBT || !currentSubJBT.pages) { return null }
         let scalObj = {}
         if (currentSubJBT.scal) {
@@ -41,6 +46,7 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
                     scaleNum={scalObj.scaleNum || 1}
                     bgscaleNum={scalObj.bgscaleNum || 1}
                     callbackValue={v => {
+                        if (is_show_main) { return }
                         sbjtvalueChangeCallback(v)
                     }}
                 />
@@ -92,11 +98,22 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
         setTicketNextUserList([])
         ticketNextUserNameList = []
     }, [])
+    const showMainJBTHandler = useCallback(async () => {
+        if (!pId) { message.error('主票id缺失'); return }
+        let hide = message.loading('数据加载中。。。', 0)
+        let res = await HttpApi.getJTRecords({ id: pId })
+        if (res.data.code === 0 && res.data.data.length > 0) {
+            hide()
+            let jbt_data = res.data.data[0]
+            setMainJBTData(jbt_data)
+            setShowMainJBTDrawerVisible(true)
+        }
+    }, [pId])
     return (
         <Drawer
             destroyOnClose={true}
             width={1200}
-            title="措施票编辑"
+            title={<div><span>措施票编辑</span>{isExtraAdd ? <Button type='link' onClick={showMainJBTHandler}>查看主票内容</Button> : null}</ div>}
             placement='left'
             onClose={() => { resetUserSelectValue(); onClose() }}
             visible={visible}
@@ -262,6 +279,17 @@ export default function SubJobTicketOfCreateDrawer({ resetList, pId, pNo, isExtr
                     setUpdateJBTSampleVisible(false)
                 }}
             />
+            <Drawer
+                destroyOnClose={true}
+                width={880}
+                title={'主票内容展示-仅作展示勿在此操作主票'}
+                placement='left'
+                onClose={() => { setShowMainJBTDrawerVisible(false) }}
+                visible={showMainJBTDrawerVisible}
+            >
+                <Alert style={{ marginBottom: 10 }} type='info' showIcon message={'当前页面对主票的操作都无效、再次打开该页面数据重置。应对人员在填写措施票过程中想参考主票内容的情况'} />
+                {renderAllPage(mainJBTData, 1)}
+            </Drawer>
         </Drawer >
     )
 }

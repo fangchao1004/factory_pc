@@ -1,11 +1,11 @@
 import Axios from 'axios'
 import moment from 'moment';
 
-/// 小木服务器数-小木数据库
+// /// 小木服务器数-小木数据库
 // export const Testuri = 'http://ixiaomu.cn:3010/'///小木服务器数据库 3008正式 3010测试
 // export const environmentIsTest = Testuri === 'http://ixiaomu.cn:3010/' ///是不是测试环境
 
-/// 60-60数据库
+// /// 60-60数据库
 export const Testuri = 'http://60.174.196.158:3008/'///小木服务器数据库 3008正式 3010测试
 export const environmentIsTest = Testuri === 'http://60.174.196.158:3010/' ///是不是测试环境
 
